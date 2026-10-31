@@ -21,6 +21,18 @@
   const LOOP = { edge: 260, beat: 80, step: 420 };
   /* the measured replay, in ms: used bar, projection, inset fill, then after a beat the boxes */
   const MEASURED = { top: 220, proj: 440, fill: 900, flash: 980 };
+  /* the timeline replay, in ms: the line runs out through its steps, then after a beat the dimension and callout */
+  const TIMELINE = { draw: 900, flash: 980 };
+  /* timeline ruler ticks, in seconds, finest first */
+  const TIMELINE_TICKS = [1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600, 7200, 10800, 21600, 43200, 86400];
+  /* a tick in seconds as 45s, 25m, 1h30, 10h */
+  const tickLabel = (s) => {
+    if (!s) return '0';
+    if (s < 60) return s + 's';
+    if (s < 3600) return Math.round(s / 60) + 'm';
+    const h = Math.floor(s / 3600), m = Math.round((s % 3600) / 60);
+    return m ? `${h}h${String(m).padStart(2, '0')}` : h + 'h';
+  };
 
   /* polyLen · length of a polyline; polyPart · its first d px as points (null when d ≤ 0) */
   const polyLen = (pts) => pts.slice(1).reduce((a, p, i) => a + Math.hypot(p[0] - pts[i][0], p[1] - pts[i][1]), 0);
@@ -148,7 +160,7 @@
 
     /* ── merge · a branch, its commits and the commands at each node (FIG.11)
        { n, title, base:'main', branch, commits:5, baseAhead:1, files:[l1,l2],
-         verdict:[l1,l2], steps:['git switch main', 'git merge --no-ff …', 'git worktree remove …'] } */
+         verdict:[l1,l2], noun:'commits', steps:['git switch main', 'git merge --no-ff …', 'git worktree remove …'] } */
     merge(o) {
       const w = 520, h = 250, by = 170, fy = 70, steps = o.steps || [];
       const n = Math.max(1, o.commits), cx0 = 130, cx1 = 330, cs = n > 1 ? (cx1 - cx0) / (n - 1) : 0;
@@ -175,10 +187,10 @@
       /* the lamp lights the merge to come: its curve, its node, the verdict and step 2 */
       g += ff ? K.rect(396, by - 4, 8, 8, 'pn', 'lv', { w: 1.3 }) : K.path(`M400 ${by - 6}L406 ${by}L400 ${by + 6}L394 ${by}Z`, 'lv', { w: 1.3, fill: 'pn' });
       for (let i = 0; i < n; i++) { const x = n > 1 ? cx0 + i * cs : cx1; if (d >= L1 + x - 110) g += K.node(x, fy, 'done'); }
-      const label = o.label || `Merge plan. ${o.branch} has ${n} commits. ${o.base || 'main'} ${ff ? 'has not moved, so this is a fast-forward' : `moved on by ${o.baseAhead}, so this is a merge commit`}. Steps: ${steps.map((s, i) => `${i + 1} ${s}`).join(', ')}.`;
+      const label = o.label || `Merge plan. ${o.branch} has ${n} ${o.noun || 'commits'}. ${o.base || 'main'} ${ff ? 'has not moved, so this is a fast-forward' : `moved on by ${o.baseAhead}, so this is a merge commit`}. Steps: ${steps.map((s, i) => `${i + 1} ${s}`).join(', ')}.`;
       if (T < M.flash) return { w, h, markup: g, label };
       let k = K.t(110, fy - 12, o.branch, 'fg');
-      if (n > 1) k += K.dim(cx0, cx1, fy + 22, `${n} commits`);
+      if (n > 1) k += K.dim(cx0, cx1, fy + 22, `${n} ${o.noun || 'commits'}`);
       if (o.files) k += K.leader([[230, fy + 26], [230, 104]], false) + K.box(180, 104, 100, o.files[0], o.files[1], 'fg');
       const v = o.verdict || (ff ? ['fast-forward', 'no merge commit'] : ['merge commit', `${o.base || 'main'} moved on`]);
       k += K.leader([[400, by - 7], [400, 140], [410, 140]], false) + K.box(410, 124, 102, v[0], v[1], 'lv', 'lv');
@@ -228,7 +240,7 @@
     },
 
     /* ── loop · stations on a cycle, the live one lit by the lamp
-       { n, title, center:'train 4 of 9', stations:[{ name, cmd, state:'done'|'live'|'todo' }] }
+       { n, title, center:'train 4 of 9', stations:[{ name, cmd, state:'done'|'live'|'todo'|'fault' }] }
        Or step through it: give at (the live station's index) instead of states,
        lap and laps, and center as a function of the lap: (lap) => `train ${lap} of 9`.
        recipes.loop.step(data, ±1) returns the next data, to play() as a step. */
@@ -236,7 +248,7 @@
       const w = o.w || 420, h = o.h || 250, cx = w / 2, cy = 138, R = 70;
       const st = o.stations, N = st.length;
       const P = st.map((_, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / N; return [cx + R * Math.cos(a), cy + R * Math.sin(a), a]; });
-      const statesAt = (at) => st.map((s, i) => (at == null ? s.state : i < at ? 'done' : i === at ? 'live' : 'todo'));
+      const statesAt = (at) => st.map((s, i) => (at == null ? s.state : i < at && !s.skip ? 'done' : i === at ? 'live' : 'todo'));
       const centre = (lap) => (typeof o.center === 'function' ? o.center(lap) : o.center);
       const edge = (i, f, c = 'fg') => {
         const q = P[(i + 1) % N];
@@ -283,13 +295,13 @@
       st.forEach((s, i) => {
         const [x, y, a] = P[i], cos = Math.cos(a), sin = Math.sin(a), sn = states[i];
         /* done: a solid square and a green ✓ name; todo: a hollow square and a muted name */
-        g += sn === 'live' && !tip ? K.node(x, y, 'live', 9) : K.node(x, y, sn === 'done' ? 'done' : 'todo', 9);
+        g += sn === 'live' && !tip ? K.node(x, y, 'live', 9) : K.node(x, y, sn === 'done' || sn === 'fault' ? sn : 'todo', 9);
         const side = Math.abs(cos) < 0.3 ? 0 : cos > 0 ? 1 : -1;
         const tx = side === 1 ? x + 16 : side === -1 ? x - 16 : x;
         const ty = side === 0 ? (sin < 0 ? y - 26 : y + 22) : y - 4;
         const an = side === 1 ? 'start' : side === -1 ? 'end' : 'middle';
-        const ts = textStates[i], live = ts === 'live', done = ts === 'done';
-        let m = K.t(tx, ty, (done ? '\u2713 ' : '') + String(s.name).toUpperCase(), live ? 'lv' : done ? 'ok' : 'mu', an, 0.5);
+        const ts = textStates[i], live = ts === 'live', done = ts === 'done', fault = ts === 'fault';
+        let m = K.t(tx, ty, (done ? '\u2713 ' : '') + String(s.name).toUpperCase(), live ? 'lv' : done ? 'ok' : fault ? 'ft' : 'mu', an, 0.5);
         if (s.cmd) m += K.t(tx, ty + 13, (live ? '$ ' : '') + s.cmd, live ? 'fg' : 'fa', an);
         k += changed(i) ? `<g data-land="st${i}">${m}</g>` : m;
       });
@@ -346,7 +358,12 @@
       acc = 0;
       o.parts.forEach((p, i) => { if (fill >= acc + vals[i] / 2) g += K.circle(mids[i], iy - 6, 1.8, 'pn', 'fa'); acc += vals[i]; });
       let k = K.t(ix1 + 8, iy - 3, `${(o.detail ?? 'A') ? 'DETAIL ' + (o.detail ?? 'A') + '  ' : ''}${factor}:1`, 'mu');
-      let bx = 92;
+      /* the row of boxes starts at 92, or further left (to the inset's edge)
+         when the boxes and the plate wouldn't fit the width */
+      const widest = o.parts.map((p, i) => Math.max(K.boxWidth(p.label, '≈ ' + f(p.value)), changing ? K.boxWidth(p.label, '≈ ' + f(o.prev[i] ?? 0)) : 0));
+      const row = widest.reduce((a, b) => a + b, 0) + 10 * Math.max(0, o.parts.length - 1);
+      const pw = o.plate ? Math.max(94, tw(o.plate[0]) + 18, tw(o.plate[1]) + 18) : 0;
+      let bx = Math.max(ix0, Math.min(92, (o.plate ? w - pw - 18 : w - 4) - row));
       const landed = changing && T >= cms;
       acc = 0;
       o.parts.forEach((p, i) => {
@@ -358,7 +375,7 @@
         else if (reached) g += `<g data-land="part${i}">${m}</g>`;   /* entry: each box flashes in as the fill passes its part */
         bx += bw + 10;
       });
-      if (o.plate) k += K.plate(Math.max(bx + 4, w - 108), 118, 94, o.plate[0], o.plate[1]);
+      if (o.plate) k += K.plate(Math.max(bx + 4, w - pw - 14), 118, 94, o.plate[0], o.plate[1]);
       if (changing) g += k;
       else if (T >= M.flash) g += `<g data-land="parts">${k}</g>`;
       const label = o.label || `${o.title || 'Measure'}: ${f(used)} of ${f(o.max)}. ` + o.parts.map((p) => `${p.label} ${f(p.value)}`).join(', ') + '.';
@@ -366,27 +383,57 @@
     },
 
     /* ── timeline · consecutive steps with durations; the slowest called out (FIG.20)
-       { n, title, steps:[seconds], total label auto, slowest:true } */
+       { n, title, steps:[seconds], total label auto, slowest:true,
+         names:[per-step label, default 1…n], noun:'step' }
+       The ruler picks its tick (1s … 1 day) so it holds at most 40 ticks,
+       numbered every 5th, and ends at the tick after the total: a 20-minute run
+       reads in minutes, a 28-hour one in hours.
+       Step numbers that would touch their neighbour are skipped; the last always shows. */
     timeline(o) {
-      const w = o.w || 470, x0 = 14, x1 = w - 14, y = 70;
-      const total = o.steps.reduce((a, b) => a + b, 0), max = Math.ceil(total / 60 / 5) * 5 * 60 || 60;
+      const w = o.w || 470, x0 = 14, x1 = w - 14, y = 70, noun = o.noun || 'step';
+      const total = o.steps.reduce((a, b) => a + b, 0);
+      const tick = o.tick || TIMELINE_TICKS.find((s) => total / s <= 40) || TIMELINE_TICKS[TIMELINE_TICKS.length - 1];
+      const max = Math.max(Math.ceil(total / tick), 5) * tick;
       const X = K.scale(x0, x1, 0, max), slow = o.steps.indexOf(Math.max(...o.steps));
-      let g = head(o), t = 0;
+      const name = (i) => String(o.names ? o.names[i] : i + 1);
+      /* which step numbers fit: walk right to left so the last one always shows */
+      const shown = new Set();
+      let t = 0, room = Infinity;
+      const mids = o.steps.map((d) => { const m = (X(t) + X(t + d)) / 2; t += d; return m; });
+      for (let i = o.steps.length - 1; i >= 0; i--) {
+        const half = tw(name(i)) / 2;
+        if (mids[i] + half + 4 <= room) { shown.add(i); room = mids[i] - half; }
+      }
+      /* motion (see play): t is ms on the TIMELINE clock. The ruler holds
+         still. A cursor runs along the line at an even pace through the
+         total; the line trails it, each step's node latches and its number
+         appears as the cursor passes its end, and a live step's star rides
+         the tip. Then the dimension and the slowest callout appear (data-land). */
+      const T = o.t ?? Infinity, TT = o.tt ?? T, M = TIMELINE;
+      const cur = (q) => (q >= M.draw ? Infinity : total * Math.max(0, q) / M.draw);
+      const c = cur(T), ct = cur(TT);
+      let g = head(o), k = '';
+      t = 0;
       g += K.node(x0, y, 'done');
       o.steps.forEach((d, i) => {
-        const a = X(t), b = X(t + d), s = i === slow && o.slowest !== false;
-        g += K.line(a + 4, y, b - 4, y, s ? 'fg' : 'mu', { w: s ? 2 : 1.3 }) + K.node(b, y, i === o.live ? 'live' : 'done');
-        g += K.t((a + b) / 2, y - 8, String(i + 1), s ? 'fg' : 'fa', 'middle');
+        const a = X(t), b = X(t + d), s = i === slow && o.slowest !== false, live = i === o.live;
+        const lineTo = X(Math.min(t + d, ct));
+        if (ct > t && lineTo - a > 8) g += K.line(a + 4, y, Math.min(b - 4, lineTo), y, s ? 'fg' : 'mu', { w: s ? 2 : 1.3 });
+        if (c >= t + d) {
+          g += K.node(b, y, live ? 'live' : 'done');
+          if (shown.has(i)) g += K.t(mids[i], y - 8, name(i), s ? 'fg' : 'fa', 'middle');
+        } else if (c > t && live) g += K.node(X(c), y, 'live');
         if (s) {
-          const m = (a + b) / 2, l = [o.slowLabel || 'slowest', `step ${i + 1} · ${fmt.dur(d)}`], bw = K.boxWidth(...l);
+          const m = (a + b) / 2, l = [o.slowLabel || 'slowest', `${noun} ${name(i)} · ${fmt.dur(d)}`], bw = K.boxWidth(...l);
           const right = m + 14 + bw < w;
-          g += K.leader([[m, y + 6], [m, y + 28], [right ? m + 14 : m - 14, y + 28]], false) + K.box(right ? m + 14 : m - 14 - bw, y + 14, bw, l[0], l[1], 'fg');
+          k += K.leader([[m, y + 6], [m, y + 28], [right ? m + 14 : m - 14, y + 28]], false) + K.box(right ? m + 14 : m - 14 - bw, y + 14, bw, l[0], l[1], 'fg');
         }
         t += d;
       });
-      g += K.dim(x0, X(total), 36, `${o.totalLabel || 'complete'} · ${fmt.dur(total)}`, 'fg');
-      g += K.ruler(x0, x1, 128, max, 60, 5, (s) => (s ? s / 60 + 'm' : '0'));
-      const label = o.label || `${o.title || 'Timeline'}: ${o.steps.length} steps, ${fmt.dur(total)} in total; slowest is step ${slow + 1} at ${fmt.dur(o.steps[slow])}.`;
+      k += K.dim(x0, X(total), 36, `${o.totalLabel || 'complete'} · ${fmt.dur(total)}`, 'fg');
+      if (T >= M.flash) g += T >= Infinity ? k : `<g data-land="details">${k}</g>`;
+      g += K.ruler(x0, x1, 128, max, tick, 5, tickLabel);
+      const label = o.label || `${o.title || 'Timeline'}: ${o.steps.length} ${noun}s, ${fmt.dur(total)} in total; slowest is ${noun} ${name(slow)} at ${fmt.dur(o.steps[slow])}.`;
       return { w, h: 150, markup: g, label };
     },
 
@@ -466,6 +513,7 @@
   /* merge runs on its own timeline: t is ms, so extent and duration match */
   recipes.merge.extent = recipes.merge.duration = () => MERGE.flash;
   recipes.fanout.extent = recipes.fanout.duration = () => FANOUT.flash;
+  recipes.timeline.extent = recipes.timeline.duration = () => TIMELINE.flash;
   recipes.loop.extent = recipes.loop.duration = (o) => {
     if (o.from != null) return LOOP.step;
     const done = o.at != null ? o.at : o.stations.filter((s) => s.state === 'done').length;

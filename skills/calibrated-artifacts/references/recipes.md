@@ -58,7 +58,7 @@ recipes.merge({
   steps: ['git switch main', 'git merge --no-ff release/2.4', 'git tag v2.4.0'],
 })
 ```
-The merge to come is lit by the lamp: the dashed merge curve, the merge node, the verdict box and step 2's command. Step 1 hangs under the base, step 2 under the merge node and step 3 above the branch tip. The lamp-outlined verdict box says "merge commit" or "fast-forward" (override with `verdict: [l1, l2]`).
+The merge to come is lit by the lamp: the dashed merge curve, the merge node, the verdict box and step 2's command. Step 1 hangs under the base, step 2 under the merge node and step 3 above the branch tip. The lamp-outlined verdict box says "merge commit" or "fast-forward" (override with `verdict: [l1, l2]`). `noun` renames what the dimension over the commits counts (default `commits`).
 
 Moves with `Calibrated.play(svg, recipes.merge, data)`: main and its marks hold still, the branch draws in as one stroke from the fork to the merge with its commits appearing as it reaches them, then the branch name, boxes and commands appear together.
 
@@ -90,7 +90,7 @@ recipes.loop({
   ],
 })
 ```
-Takes 3–6 stations, placed clockwise from the top. A done station is a solid square with a green ✓ name, a todo station a hollow square with a muted name. An edge leaving a done station is drawn in ink. The live station is a live node, and its command gets `$ `.
+Takes 3–6 stations, placed clockwise from the top. A done station is a solid square with a green ✓ name, a todo station a hollow square with a muted name. A `fault` station (a halted run) is a red square with a red name. In the step form, a station with `skip: true` stays open when the live one is past it (a detour not taken). An edge leaving a done station is drawn in ink. The live station is a live node, and its command gets `$ `.
 
 Moves with `Calibrated.play(svg, recipes.loop, data)`: the frame and nodes hold still, the done edges trace clockwise up to the live station, then the names and commands appear.
 
@@ -110,7 +110,7 @@ recipes.measured({
   plate: ['DEDUP SAVED', '18% · 9.1 GB'],
 })
 ```
-Drawn on a raised plate. The inset is labelled `DETAIL A  20:1` (`detail` sets the name, default `'A'`; `factor` defaults to `max / zoomMax`). A part with `ink: 'lv'` is filled in lamp on the inset bar and gets a lamp value in its box. Good as a tooltip. `zoomMax` must cover the sum of the parts.
+Drawn on a raised plate. The row of part boxes starts at x 92, or as far left as the inset's edge when the boxes and the plate wouldn't fit `w`. The inset is labelled `DETAIL A  20:1` (`detail` sets the name, default `'A'`; `factor` defaults to `max / zoomMax`). A part with `ink: 'lv'` is filled in lamp on the inset bar and gets a lamp value in its box. Good as a tooltip. `zoomMax` must cover the sum of the parts.
 
 Moves with `Calibrated.play(svg, recipes.measured, data)`: the used bar fills, the projection drops to the inset, the inset fills through the parts with each part's box flashing in as the fill passes it, then the label and plate appear. When the values change, play the new data with `prev` set to the old values (`{ ...next, prev: old.parts.map((p) => p.value) }`): the bars, dots and leaders glide to the new values, the box values count, and the boxes that changed blink. The plate is your text, so update it yourself.
 
@@ -118,7 +118,9 @@ Moves with `Calibrated.play(svg, recipes.measured, data)`: the used bar fills, t
 ```js
 recipes.timeline({ n: 6, title: 'migration · orders db · 10 steps', steps: [61, 95, 120, 130, 88, 250, 140, 160, 110, 152], slowLabel: 'slowest · backfill' })
 ```
-Steps are in seconds. The ruler rounds up to the next 5 minutes. Set `live: i` (0-based) to mark a running step, `totalLabel` to rename "complete", `slowest: false` to skip the callout.
+Steps are in seconds. The ruler picks its tick (1s up to a day) so it holds at most 40 ticks, numbers every 5th and ends at the tick after the total: a 20-minute run reads in minutes, a 28-hour one in hours. Set `live: i` (0-based) to mark a running step, `totalLabel` to rename "complete", `slowest: false` to skip the callout. `names` labels each step (default 1…n) and `noun` names them in the callout and label (default `step`, e.g. `chunk`). Step numbers that would touch a neighbour are skipped; the last always shows.
+
+Moves with `Calibrated.play(svg, recipes.timeline, data)`: the ruler holds still, the line runs out through the steps at an even pace with each node and number latching as it is reached (a live step's star rides the tip), then the dimension and the slowest callout appear.
 
 ### matrix
 ```js
