@@ -175,7 +175,7 @@ pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-
 <header class="top">
   <button class="icon-btn menu-btn" id="menu" aria-label="Open navigation" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 18 18"><path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
   <a class="brand" href="#intro" aria-label="Calibrated, back to top"><svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg><span class="word">Calibrated</span></a>
-  <span class="ver">v0.3.0</span>
+  <span class="ver">v0.4.0</span>
   <span class="sp"></span>
   <a class="top-link" href="index.html">Catalog</a>
   <a class="top-link" href="#install">Install</a>
@@ -372,7 +372,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
     <!-- ── Figures -->
     <section class="group" id="figures">
       <h2>Figures</h2>
-      <p>Recipes take data and return a whole figure as an SVG string. Mount it into an empty <code>&lt;svg&gt;</code> with <code>Calibrated.mount()</code>, or use <code>Calibrated.play(svg, recipe, data)</code> to replay it when it comes into view (lanes, budget, merge, fan-out, loop and measured move). Example data on this page is illustrative.</p>
+      <p>Recipes take data and return a whole figure as an SVG string. Mount it into an empty <code>&lt;svg&gt;</code> with <code>Calibrated.mount()</code>, or use <code>Calibrated.play(svg, recipe, data)</code> to replay it when it comes into view (lanes, budget, merge, fan-out, loop, measured and timeline move). Example data on this page is illustrative.</p>
       <div class="item" id="lanes"><h3>Lanes <a class="anchor" href="#lanes" aria-label="Link to Lanes">#</a></h3><p>Runs on one time ruler; the live one is lit by the lamp.</p><div class="ex" data-recipe="lanes"><div class="ex-prev cal-theme"><svg id="r-lanes"></svg></div></div></div>
       <div class="item" id="budget"><h3>Budget <a class="anchor" href="#budget" aria-label="Link to Budget">#</a></h3><p>A limit, its alerts, and today's pace to the end of the period.</p><div class="ex" data-recipe="budget"><div class="ex-prev cal-theme"><svg id="r-budget"></svg></div></div></div>
       <div class="item" id="merge"><h3>Merge <a class="anchor" href="#merge" aria-label="Link to Merge">#</a></h3><p>A branch with the exact command at each node.</p><div class="ex" data-recipe="merge"><div class="ex-prev cal-theme"><svg id="r-merge"></svg></div></div></div>
@@ -576,6 +576,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
     <section class="group" id="changelog">
       <h2>Changelog</h2>
       <ol class="log">
+        <li><b>Rev H</b><time datetime="2026-10-31">2026-10-31</time><p>The timeline replays and its ruler fits the run, from seconds to hours. Loop stations can fault; merge and timeline take a <code>noun</code>.</p></li>
         <li><b>Rev G</b><time datetime="2026-10-31">2026-10-31</time><p>Every instrument moves like the meter. Figures replay with <code>Calibrated.play</code>; the loop steps and the measured figure glides to new values.</p></li>
         <li><b>Rev F</b><time datetime="2026-10-31">2026-10-31</time><p>The meter moves: it sweeps to its value, glides on change and blinks when it settles.</p></li>
         <li><b>Rev E</b><time datetime="2026-10-31">2026-10-31</time><p>Panel look: mono type, quiet panels, the lamp replaces the highlighter.</p></li>
