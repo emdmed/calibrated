@@ -9,3 +9,7 @@ node_modules/
 .impeccable/config.local.json
 dist/
 .vercel/
+video/
+*.mp4
+*.mov
+*.webm

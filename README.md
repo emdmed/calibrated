@@ -23,15 +23,15 @@ Each skill has a short `SKILL.md`, copy-ready files in `assets/` and the details
 
 ### As a Claude Code plugin
 ```
-/plugin marketplace add <you>/calibrated
+/plugin marketplace add emdmed/calibrated
 /plugin install calibrated@calibrated
 ```
-Replace `<you>` with the GitHub account that hosts the repo. The skills then show up as `calibrated:calibrated-tokens`, `calibrated:calibrated-figures` and so on.
+The skills then show up as `calibrated:calibrated-tokens`, `calibrated:calibrated-figures` and so on.
 
 ### By hand
 Copy any folder from `skills/` into `~/.claude/skills/` (for all projects) or into `.claude/skills/` in one project.
 ```sh
-git clone https://github.com/<you>/calibrated
+git clone https://github.com/emdmed/calibrated
 cp -r calibrated/skills/* ~/.claude/skills/
 ```
 

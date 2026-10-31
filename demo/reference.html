@@ -224,12 +224,12 @@ pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-
         <button role="tab" aria-selected="false" aria-controls="in-files" id="t-files">Use the files</button>
       </div>
       <div id="in-plugin" role="tabpanel" aria-labelledby="t-plugin">
-        <pre class="ex-code block" data-lang="sh"><code>/plugin marketplace add &lt;you&gt;/calibrated
+        <pre class="ex-code block" data-lang="sh"><code>/plugin marketplace add emdmed/calibrated
 /plugin install calibrated@calibrated</code></pre>
-        <p>Replace <code>&lt;you&gt;</code> with the GitHub account that hosts the repo. The skills show up as <code>calibrated:calibrated-tokens</code>, <code>calibrated:calibrated-figures</code> and so on.</p>
+        <p>The skills show up as <code>calibrated:calibrated-tokens</code>, <code>calibrated:calibrated-figures</code> and so on.</p>
       </div>
       <div id="in-hand" role="tabpanel" aria-labelledby="t-hand" hidden>
-        <pre class="ex-code block" data-lang="sh"><code>git clone https://github.com/&lt;you&gt;/calibrated
+        <pre class="ex-code block" data-lang="sh"><code>git clone https://github.com/emdmed/calibrated
 cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
         <p>Copy into <code>~/.claude/skills/</code> for every project, or into <code>.claude/skills/</code> for one.</p>
       </div>
