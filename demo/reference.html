@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="film">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calibrated · Reference</title>
+<meta name="description" content="Calibrated draws a count, a position, progress, a size or a duration as a small technical figure. Pure CSS and vanilla JS.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Chivo+Mono:wght@300..700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="../skills/calibrated-tokens/assets/calibrated.css">
+<link rel="stylesheet" href="../skills/calibrated-components/assets/calibrated-components.css">
+<style>
+/* ── docs chrome. The kit's own look lives only inside .ex-prev. */
+:root {
+  --d-bg: #ffffff; --d-fg: #111214; --d-muted: #5d626b; --d-faint: #8b9099;
+  --d-line: #e9e9ec; --d-line-2: #dcdde1; --d-soft: #f6f6f7; --d-code: #f7f7f8;
+  --d-top: 60px; --d-side: 264px;
+  --d-sans: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --d-mono: "Chivo Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --hl-t: #116329; --hl-a: #0550ae; --hl-s: #0a3069; --hl-k: #8250df; --hl-n: #0550ae; --hl-c: #6e7781;
+}
+html[data-theme="night"] {
+  --d-bg: #0d0d0e; --d-fg: #ececee; --d-muted: #a2a6ad; --d-faint: #73777e;
+  --d-line: #222326; --d-line-2: #2e2f33; --d-soft: #161618; --d-code: #131315;
+  --hl-t: #7ee787; --hl-a: #79c0ff; --hl-s: #a5d6ff; --hl-k: #d2a8ff; --hl-n: #79c0ff; --hl-c: #8b949e;
+}
+html, body { background: var(--d-bg); }
+body.docs { font: 400 15px/1.65 var(--d-sans); color: var(--d-fg); font-stretch: 100%; letter-spacing: 0; -webkit-font-smoothing: antialiased; }
+body.docs ::selection { background: var(--swipe); color: var(--on-swipe); }
+body.docs * { scrollbar-color: var(--d-line-2) transparent; }
+.docs a { text-decoration: none; color: inherit; }
+.docs :focus-visible { outline: 2px solid var(--d-fg); outline-offset: 2px; border-radius: 4px; }
+
+/* top bar */
+.top { position: sticky; top: 0; z-index: 30; height: var(--d-top); display: flex; align-items: center; gap: 14px; padding: 0 20px; background: var(--d-bg); border-bottom: 1px solid var(--d-line); }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--title); }
+.brand .cal-mark { width: 26px; height: 21px; }
+.brand .word { font-size: 20px; }
+.ver { font: 500 12px/1 var(--d-sans); color: var(--d-muted); border: 1px solid var(--d-line-2); border-radius: 999px; padding: 4px 8px; }
+.top .sp { flex: 1; }
+.docs .top-link { font-size: 14px; color: var(--d-muted); padding: 6px 8px; border-radius: 6px; }
+.docs .top-link:hover { color: var(--d-fg); }
+.icon-btn { width: 36px; height: 36px; display: inline-grid; place-items: center; border: 1px solid var(--d-line-2); border-radius: 8px; background: transparent; color: var(--d-fg); cursor: pointer; transition: background-color .15s ease-out; }
+.icon-btn:hover { background: var(--d-soft); }
+.icon-btn svg { width: 18px; height: 18px; }
+.menu-btn { display: none; }
+html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { display: none; }
+
+/* shell */
+.shell { display: grid; grid-template-columns: var(--d-side) minmax(0, 1fr); max-width: 1440px; margin: 0 auto; }
+.side { position: sticky; top: var(--d-top); height: calc(100vh - var(--d-top)); overflow-y: auto; padding: 28px 16px 48px 20px; border-right: 1px solid var(--d-line); }
+.side h4 { font: 600 13px/1.3 var(--d-sans); color: var(--d-fg); margin: 22px 0 6px 10px; }
+.side h4:first-child { margin-top: 0; }
+.side ul { list-style: none; display: grid; gap: 1px; }
+.side a { display: block; font-size: 14px; line-height: 1.35; color: var(--d-muted); padding: 6px 10px; border-radius: 6px; transition: color .12s ease-out, background-color .12s ease-out; }
+.side a:hover { color: var(--d-fg); background: var(--d-soft); }
+.side a.on { color: var(--d-fg); font-weight: 500; background: var(--d-soft); }
+.side a.on span { background: linear-gradient(transparent 80%, var(--swipe) 80% 100%) no-repeat; padding-bottom: 1px; }
+
+/* content */
+.content { padding: 52px clamp(20px, 5vw, 64px) 120px; max-width: 1000px; min-width: 0; }
+.content h1 { font: 700 44px/1.08 var(--d-sans); letter-spacing: -.03em; margin-bottom: 14px; }
+.lede { font-size: 19px; line-height: 1.55; color: var(--d-muted); max-width: 60ch; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0 0; }
+.facts span { font-size: 13px; color: var(--d-muted); border: 1px solid var(--d-line-2); border-radius: 999px; padding: 4px 11px; }
+.group { margin-top: 84px; scroll-margin-top: calc(var(--d-top) + 24px); }
+.group > h2 { font: 650 30px/1.15 var(--d-sans); letter-spacing: -.025em; padding-bottom: 12px; border-bottom: 1px solid var(--d-line); margin-bottom: 18px; }
+.group > p { color: var(--d-muted); max-width: 68ch; }
+.item { margin-top: 48px; scroll-margin-top: calc(var(--d-top) + 24px); }
+.item > h3 { font: 600 20px/1.3 var(--d-sans); letter-spacing: -.015em; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.item > h3 a.anchor { opacity: 0; color: var(--d-faint); font-weight: 400; transition: opacity .12s ease-out; }
+.item > h3:hover a.anchor, .item > h3 a.anchor:focus-visible { opacity: 1; }
+.item > p, .prose p { color: var(--d-muted); max-width: 68ch; margin-bottom: 16px; }
+.prose ul { margin: 0 0 16px 20px; color: var(--d-muted); max-width: 68ch; }
+.prose li { margin: 4px 0; }
+.prose strong, .item > p strong { color: var(--d-fg); font-weight: 600; }
+.docs p code, .docs li code, .props code { font: 500 .84em/1 var(--d-mono); color: var(--d-fg); background: var(--d-soft); border: 1px solid var(--d-line); border-radius: 5px; padding: 2px 5px; white-space: nowrap; }
+.docs .callout code { background: var(--d-bg); }
+
+/* example frame */
+.ex { border: 1px solid var(--d-line-2); border-radius: 10px; overflow: hidden; background: var(--d-bg); margin: 0 0 18px; }
+.ex-bar { display: flex; align-items: center; gap: 2px; padding: 0 8px 0 10px; height: 44px; border-bottom: 1px solid var(--d-line); background: var(--d-bg); }
+.ex-bar [role="tab"] { font: 500 13.5px/1 var(--d-sans); color: var(--d-muted); background: none; border: 0; padding: 0 10px; height: 100%; cursor: pointer; box-shadow: inset 0 -2px 0 transparent; transition: color .12s ease-out, box-shadow .12s ease-out; }
+.ex-bar [role="tab"]:hover { color: var(--d-fg); }
+.ex-bar [role="tab"][aria-selected="true"] { color: var(--d-fg); box-shadow: inset 0 -2px 0 var(--d-fg); }
+.ex-bar .sp { flex: 1; }
+.copy { display: inline-flex; align-items: center; gap: 6px; font: 500 13px/1 var(--d-sans); color: var(--d-muted); background: none; border: 1px solid transparent; border-radius: 6px; padding: 7px 9px; cursor: pointer; transition: color .12s ease-out, background-color .12s ease-out; }
+.copy:hover { color: var(--d-fg); background: var(--d-soft); }
+.copy svg { width: 14px; height: 14px; }
+.ex-prev { padding: 30px 28px; overflow-x: auto; }
+/* the docs column is narrower than a page: always use the card's stacked layout */
+.ex-prev .tb6 { --tb-cols: 6; }
+.ex-prev .cal-card { grid-template-columns: minmax(0, 1fr); }
+.ex-prev .cal-card > .info { border-right: 0; border-bottom: var(--line-thin) solid var(--fg); }
+.ex-code { margin: 0; padding: 18px 20px; background: var(--d-code); max-height: 460px; overflow: auto; }
+.ex-code code { font: 400 13px/1.65 var(--d-mono); color: var(--d-fg); white-space: pre; display: block; tab-size: 2; }
+.ex-code[hidden], .ex-prev[hidden] { display: none; }
+.h-t { color: var(--hl-t); } .h-a { color: var(--hl-a); } .h-s { color: var(--hl-s); } .h-k { color: var(--hl-k); } .h-n { color: var(--hl-n); } .h-c { color: var(--hl-c); font-style: italic; }
+pre.block { border: 1px solid var(--d-line-2); border-radius: 10px; margin: 0 0 16px; position: relative; padding-top: 46px; }
+pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-code); }
+
+/* attribute tables */
+.props-wrap { overflow-x: auto; margin: 0 0 8px; }
+.props { width: 100%; border-collapse: collapse; font-size: 14px; }
+.props th { text-align: left; font: 500 13px/1.3 var(--d-sans); color: var(--d-muted); padding: 10px 12px; border-bottom: 1px solid var(--d-line-2); }
+.props td { padding: 10px 12px; border-bottom: 1px solid var(--d-line); vertical-align: top; color: var(--d-muted); }
+.props td:first-child { white-space: nowrap; }
+.props td:nth-child(2) { white-space: nowrap; }
+
+/* install tabs */
+.seg { display: inline-flex; max-width: 100%; overflow-x: auto; gap: 2px; padding: 3px; background: var(--d-soft); border: 1px solid var(--d-line); border-radius: 8px; margin-bottom: 12px; }
+.seg button { white-space: nowrap; font: 500 13px/1 var(--d-sans); color: var(--d-muted); background: none; border: 0; border-radius: 6px; padding: 7px 11px; cursor: pointer; }
+.seg button[aria-selected="true"] { background: var(--d-bg); color: var(--d-fg); box-shadow: 0 1px 2px rgba(0,0,0,.08), 0 0 0 1px var(--d-line-2); }
+
+.callout { border: 1px solid var(--d-line-2); background: var(--d-soft); border-radius: 10px; padding: 14px 16px; color: var(--d-muted); font-size: 14px; margin: 0 0 18px; max-width: 72ch; }
+.callout strong { color: var(--d-fg); font-weight: 600; }
+
+/* kit layout helpers inside previews */
+.row { display: flex; gap: 32px; flex-wrap: wrap; align-items: center; }
+.stack { display: grid; gap: 16px; }
+.seeds { display: flex; gap: 22px; align-items: end; flex-wrap: wrap; }
+.seeds input[type=color] { width: 52px; height: 26px; border: var(--line-thin) solid var(--fg); background: var(--panel); padding: 2px; cursor: pointer; }
+.dens-ctl { margin-bottom: 18px; }
+
+/* changelog */
+.log { list-style: none; border-left: 1px solid var(--d-line-2); margin-left: 6px; }
+.log li { position: relative; padding: 0 0 22px 22px; }
+.log li::before { content: ""; position: absolute; left: -5px; top: 7px; width: 9px; height: 9px; border-radius: 50%; background: var(--d-bg); border: 1px solid var(--d-fg); }
+.log li:first-child::before { background: var(--d-fg); }
+.log b { font-weight: 600; }
+.log time { display: block; font-size: 13px; color: var(--d-faint); }
+.log p { color: var(--d-muted); margin: 2px 0 0; }
+
+.foot { margin-top: 96px; padding-top: 22px; border-top: 1px solid var(--d-line); font-size: 13.5px; color: var(--d-faint); display: flex; gap: 16px; flex-wrap: wrap; }
+
+@media (max-width: 960px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .menu-btn { display: inline-grid; }
+  .docs .top-link { display: none; }
+  .side { display: none; position: fixed; inset: var(--d-top) 0 0 0; height: auto; z-index: 25; background: var(--d-bg); border-right: 0; }
+  body.nav-open .side { display: block; }
+  body.nav-open { overflow: hidden; }
+  .content { padding-top: 36px; }
+  .content h1 { font-size: 36px; }
+  .ex-prev { padding: 22px 18px; }
+  .seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; }
+  .seg button { padding: 7px 6px; white-space: normal; line-height: 1.2; }
+  .ex-prev .cal-specimens { --cols: 2; }
+  .ex-prev .cal-specimens svg { max-width: 160px; }
+  .ex-prev .cal-titleblock { --tb-cols: 3; }
+}
+@media (max-width: 520px) { .ex-prev .cal-specimens { --cols: 1; } .ex-prev .cal-titleblock { --tb-cols: 2; } }
+@media (prefers-reduced-motion: reduce) { .docs * { transition: none !important; } }
+</style>
+<script>
+  /* set the theme before first paint, so a saved dark theme never flashes light */
+  (() => { let t = new URLSearchParams(location.search).get('theme');
+    if (!t) { try { t = localStorage.getItem('cal-docs-theme'); } catch {} }
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'film';
+    document.documentElement.dataset.theme = t; })();
+</script>
+</head>
+<body class="docs">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="cal-mark" viewBox="4 8 40 32">
+    <rect x="26" y="8" width="8" height="30" fill="var(--swipe, #f3dc3a)"/>
+    <path d="M4 38 H44" stroke="currentColor" stroke-width="3.2"/>
+    <path d="M5.2 38 V10 M24 38 V10 M42.8 38 V10 M30 38 V10 M11.5 38 V27 M17.75 38 V27 M36.5 38 V27" stroke="currentColor" stroke-width="2.4"/>
+  </symbol>
+  <symbol id="i-copy" viewBox="0 0 16 16"><rect x="5" y="5" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
+  <symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<header class="top">
+  <button class="icon-btn menu-btn" id="menu" aria-label="Open navigation" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 18 18"><path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
+  <a class="brand" href="#intro" aria-label="Calibrated, back to top"><svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg><span class="word">Calibrated</span></a>
+  <span class="ver">v0.1.0</span>
+  <span class="sp"></span>
+  <a class="top-link" href="index.html">Catalog</a>
+  <a class="top-link" href="#install">Install</a>
+  <a class="top-link" href="#marks">Marks</a>
+  <a class="top-link" href="#changelog">Changelog</a>
+  <button class="icon-btn" id="theme" aria-label="Switch to dark theme">
+    <svg class="i-sun" viewBox="0 0 18 18"><circle cx="9" cy="9" r="3.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 1.5v2M9 14.5v2M1.5 9h2M14.5 9h2M3.7 3.7l1.4 1.4M12.9 12.9l1.4 1.4M3.7 14.3l1.4-1.4M12.9 5.1l1.4-1.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    <svg class="i-moon" viewBox="0 0 18 18"><path d="M14.8 11.2A6.3 6.3 0 0 1 6.8 3.2a6.3 6.3 0 1 0 8 8z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+  </button>
+</header>
+
+<div class="shell">
+  <nav class="side" id="side" aria-label="Docs">
+    <h4>Getting started</h4>
+    <ul><li><a href="#intro"><span>Introduction</span></a></li><li><a href="#install"><span>Installation</span></a></li><li><a href="#rules"><span>The rules</span></a></li></ul>
+    <h4>Marks</h4>
+    <ul><li><a href="#marks"><span>The eight marks</span></a></li></ul>
+    <h4>Instruments</h4>
+    <ul><li><a href="#meter"><span>Meter</span></a></li><li><a href="#position"><span>Position</span></a></li><li><a href="#progress"><span>Progress</span></a></li><li><a href="#diff"><span>Diff</span></a></li><li><a href="#durations"><span>Durations</span></a></li><li><a href="#ruler"><span>Ruler</span></a></li></ul>
+    <h4>Figures</h4>
+    <ul><li><a href="#lanes"><span>Lanes</span></a></li><li><a href="#budget"><span>Budget</span></a></li><li><a href="#merge"><span>Merge</span></a></li><li><a href="#fanout"><span>Fan-out</span></a></li><li><a href="#loop"><span>Loop</span></a></li><li><a href="#measured"><span>Measured</span></a></li><li><a href="#timeline"><span>Timeline</span></a></li><li><a href="#matrix"><span>Matrix</span></a></li><li><a href="#section"><span>Section</span></a></li></ul>
+    <h4>Components</h4>
+    <ul><li><a href="#card"><span>Card and sign-off</span></a></li><li><a href="#counts"><span>Counts</span></a></li><li><a href="#tabs"><span>Tabs</span></a></li><li><a href="#buttons"><span>Buttons</span></a></li><li><a href="#inline"><span>Marks in text</span></a></li><li><a href="#form"><span>Form</span></a></li><li><a href="#rows"><span>Rows</span></a></li><li><a href="#table"><span>Table</span></a></li><li><a href="#titleblock"><span>Title block</span></a></li><li><a href="#revisions"><span>Revisions</span></a></li><li><a href="#tiers"><span>When to draw</span></a></li></ul>
+    <h4>Theming</h4>
+    <ul><li><a href="#seeds"><span>Seeds</span></a></li><li><a href="#density"><span>Density</span></a></li></ul>
+    <h4>Project</h4>
+    <ul><li><a href="#changelog"><span>Changelog</span></a></li></ul>
+  </nav>
+
+  <main class="content" id="content">
+
+    <!-- ── Introduction -->
+    <section class="item" id="intro" style="margin-top:0">
+      <h1>Calibrated</h1>
+      <p class="lede">Draw the number. Don't describe it. Calibrated sets a count, a position, progress, a size or a duration as a small technical figure, built from eight marks.</p>
+      <div class="facts"><span>Pure CSS + vanilla JS</span><span>No build step</span><span>Light and dark</span><span>Claude Code skills</span><span>MIT</span></div>
+    </section>
+
+    <section class="item prose" id="install">
+      <h3>Installation <a class="anchor" href="#install" aria-label="Link to Installation">#</a></h3>
+      <div class="seg" role="tablist" aria-label="Install method" data-seg>
+        <button role="tab" aria-selected="true" aria-controls="in-plugin" id="t-plugin">Claude Code plugin</button>
+        <button role="tab" aria-selected="false" aria-controls="in-hand" id="t-hand">Copy the skills</button>
+        <button role="tab" aria-selected="false" aria-controls="in-files" id="t-files">Use the files</button>
+      </div>
+      <div id="in-plugin" role="tabpanel" aria-labelledby="t-plugin">
+        <pre class="ex-code block" data-lang="sh"><code>/plugin marketplace add &lt;you&gt;/calibrated
+/plugin install calibrated@calibrated</code></pre>
+        <p>Replace <code>&lt;you&gt;</code> with the GitHub account that hosts the repo. The skills show up as <code>calibrated:calibrated-tokens</code>, <code>calibrated:calibrated-figures</code> and so on.</p>
+      </div>
+      <div id="in-hand" role="tabpanel" aria-labelledby="t-hand" hidden>
+        <pre class="ex-code block" data-lang="sh"><code>git clone https://github.com/&lt;you&gt;/calibrated
+cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
+        <p>Copy into <code>~/.claude/skills/</code> for every project, or into <code>.claude/skills/</code> for one.</p>
+      </div>
+      <div id="in-files" role="tabpanel" aria-labelledby="t-files" hidden>
+        <pre class="ex-code block" data-lang="html"><code>&lt;link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Chivo+Mono:wght@300..700&amp;display=swap"&gt;
+&lt;link rel="stylesheet" href="calibrated.css"&gt;
+&lt;link rel="stylesheet" href="calibrated-components.css"&gt;
+&lt;script src="calibrated-figures.js" defer&gt;&lt;/script&gt;
+&lt;script src="calibrated-components.js" defer&gt;&lt;/script&gt;</code></pre>
+        <p>Every file works from <code>file://</code> and inline in a single HTML page.</p>
+      </div>
+    </section>
+
+    <section class="item prose" id="rules">
+      <h3>The rules <a class="anchor" href="#rules" aria-label="Link to The rules">#</a></h3>
+      <ul>
+        <li>A figure <strong>replaces text the UI already shows</strong>, from data it already has.</li>
+        <li>Eight marks only, one scale per figure, numbers at the major ticks. Values go in boxes on leaders.</li>
+        <li>Ink in two line weights. The highlighter marks <strong>the one live thing</strong>; red marks faults and limits; green marks what passed. Hatch means you can't.</li>
+        <li>Full form prints the scale and boxes; compact keeps only the marks.</li>
+        <li>Leave terminals, prompts and menus alone.</li>
+      </ul>
+    </section>
+
+    <!-- ── Marks -->
+    <section class="group" id="marks">
+      <h2>The eight marks</h2>
+      <p>Every figure in the kit is built from these. They are plain functions on <code>Calibrated.K</code> that return SVG strings.</p>
+      <div class="item" style="margin-top:22px">
+        <div class="ex" data-code="marks">
+          <div class="ex-prev cal-theme"><div class="cal-specimens" id="specimens"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Instruments -->
+    <section class="group" id="instruments">
+      <h2>Instruments</h2>
+      <p>Custom elements. Each draws an SVG with a title and an <code>aria-label</code> that states its facts in words. All accept <code>density="full|compact"</code>, or follow the nearest <code>[data-density]</code>.</p>
+
+      <div class="item" id="meter">
+        <h3>Meter <a class="anchor" href="#meter" aria-label="Link to Meter">#</a></h3>
+        <p>A value against its limit, with a red-hatched alert zone and a boxed reading.</p>
+        <div class="ex"><template><div class="row">
+  <cal-meter value="46000" max="1000000" warn="800000" label="requests today"></cal-meter>
+  <cal-meter value="128" max="150" warn="120" label="build cache" unit=" GB" format="raw"></cal-meter>
+</div></template></div>
+        <div class="props-wrap"><table class="props"><thead><tr><th>Attribute</th><th>Default</th><th>Description</th></tr></thead><tbody>
+          <tr><td><code>value</code>, <code>max</code></td><td>0, 100</td><td>The reading and the full scale.</td></tr>
+          <tr><td><code>warn</code></td><td>0.8 × max</td><td>Start of the alert zone. The fill turns red past it.</td></tr>
+          <tr><td><code>label</code></td><td>value</td><td>Name in the box and in the spoken sentence.</td></tr>
+          <tr><td><code>format</code></td><td><code>k</code></td><td><code>k</code> (46k, 1M), <code>raw</code>, <code>pct</code> or <code>dur</code>.</td></tr>
+          <tr><td><code>unit</code></td><td>none</td><td>Appended after <code>k</code> and <code>raw</code> values.</td></tr>
+          <tr><td><code>width</code></td><td>420 / 144</td><td>Full and compact widths.</td></tr>
+        </tbody></table></div>
+      </div>
+
+      <div class="item" id="position">
+        <h3>Position <a class="anchor" href="#position" aria-label="Link to Position">#</a></h3>
+        <p>Where you are in a set. Up to 24 items get one tick each; longer sets get a scale with a marker.</p>
+        <div class="ex"><template><div class="row">
+  <cal-position index="3" count="7" label="diff · files"></cal-position>
+  <cal-position index="12" count="140" label="search · matches"></cal-position>
+</div></template></div>
+        <div class="props-wrap"><table class="props"><thead><tr><th>Attribute</th><th>Default</th><th>Description</th></tr></thead><tbody>
+          <tr><td><code>index</code></td><td>1</td><td>Current item, 1-based.</td></tr>
+          <tr><td><code>count</code></td><td>1</td><td>Number of items.</td></tr>
+          <tr><td><code>label</code></td><td>none</td><td>Shown above in full form.</td></tr>
+          <tr><td><code>width</code></td><td>auto</td><td>For long sets.</td></tr>
+        </tbody></table></div>
+      </div>
+
+      <div class="item" id="progress">
+        <h3>Progress <a class="anchor" href="#progress" aria-label="Link to Progress">#</a></h3>
+        <p>Steps as nodes: done, live, to do and failed, with the finished run dimensioned.</p>
+        <div class="ex"><template><div class="stack">
+  <cal-progress done="11" total="15" live="12" live-label="step 12 · backfill" done-label="11 done · 1h 48m"></cal-progress>
+  <cal-progress done="6" total="15" fault="7" fault-label="step 7 · needs review"></cal-progress>
+</div></template></div>
+        <div class="props-wrap"><table class="props"><thead><tr><th>Attribute</th><th>Default</th><th>Description</th></tr></thead><tbody>
+          <tr><td><code>done</code>, <code>total</code></td><td>0, 1</td><td>Finished steps and step count.</td></tr>
+          <tr><td><code>live</code>, <code>fault</code></td><td>none</td><td>1-based index of the running or failed step.</td></tr>
+          <tr><td><code>states</code></td><td>none</td><td>Or list every step: <code>done,done,live,todo,fault</code>.</td></tr>
+          <tr><td><code>live-label</code></td><td>none</td><td>Highlighted caption under the live node.</td></tr>
+          <tr><td><code>fault-label</code></td><td>needs you</td><td>Caption under the failed node.</td></tr>
+          <tr><td><code>done-label</code></td><td>none</td><td>A dimension line over the finished run.</td></tr>
+          <tr><td><code>step</code></td><td>18</td><td>Spacing between nodes.</td></tr>
+        </tbody></table></div>
+      </div>
+
+      <div class="item" id="diff">
+        <h3>Diff <a class="anchor" href="#diff" aria-label="Link to Diff">#</a></h3>
+        <p>Added lines run right in green, removed lines left in red, from a shared centre. Linear up to the knee, logarithmic past it. Stacked diffs share the centre line.</p>
+        <div class="ex"><template><div class="stack" style="gap:6px">
+  <cal-diff added="184" removed="20" label="release"></cal-diff>
+  <cal-diff added="147000" removed="3000" label="vendored"></cal-diff>
+  <cal-diff added="12" removed="3" label="config"></cal-diff>
+</div></template></div>
+        <div class="props-wrap"><table class="props"><thead><tr><th>Attribute</th><th>Default</th><th>Description</th></tr></thead><tbody>
+          <tr><td><code>added</code>, <code>removed</code></td><td>0</td><td>Line counts.</td></tr>
+          <tr><td><code>label</code></td><td>none</td><td>Name at the left.</td></tr>
+          <tr><td><code>knee</code>, <code>max</code></td><td>200, 100000</td><td>Where the scale turns logarithmic, and its end.</td></tr>
+          <tr><td><code>name-width</code></td><td>64</td><td>Room for the label.</td></tr>
+        </tbody></table></div>
+      </div>
+
+      <div class="item" id="durations">
+        <h3>Durations <a class="anchor" href="#durations" aria-label="Link to Durations">#</a></h3>
+        <p>Spans on one shared ruler. A live span with a <code>start</code> time ticks every second.</p>
+        <div class="ex"><template><cal-durations max="15" unit="m">
+  <cal-span name="lint" value="252"></cal-span>
+  <cal-span name="unit tests" value="760"></cal-span>
+  <cal-span name="e2e" live start="1793448000000"></cal-span>
+</cal-durations></template></div>
+        <div class="props-wrap"><table class="props"><thead><tr><th>Attribute</th><th>Default</th><th>Description</th></tr></thead><tbody>
+          <tr><td><code>max</code></td><td>auto</td><td>On <code>&lt;cal-durations&gt;</code>. Rounded up to 5.</td></tr>
+          <tr><td><code>unit</code></td><td><code>m</code></td><td><code>s</code>, <code>m</code> or <code>h</code>.</td></tr>
+          <tr><td><code>width</code></td><td>480</td><td>Ruler width.</td></tr>
+          <tr><td><code>name</code></td><td>none</td><td>On <code>&lt;cal-span&gt;</code>.</td></tr>
+          <tr><td><code>value</code></td><td>none</td><td>Seconds. Or give <code>start</code> and <code>end</code> in epoch ms.</td></tr>
+          <tr><td><code>live</code></td><td>off</td><td>Highlights the span and ends it in a live node.</td></tr>
+        </tbody></table></div>
+      </div>
+
+      <div class="item" id="ruler">
+        <h3>Ruler <a class="anchor" href="#ruler" aria-label="Link to Ruler">#</a></h3>
+        <p>A scale on its own, with an optional marked value.</p>
+        <div class="ex"><template><cal-ruler min="0" max="150" step="10" every="5" unit="k" value="88" width="380"></cal-ruler></template></div>
+        <div class="props-wrap"><table class="props"><thead><tr><th>Attribute</th><th>Default</th><th>Description</th></tr></thead><tbody>
+          <tr><td><code>min</code>, <code>max</code>, <code>step</code></td><td>0, 100, 10</td><td>Range and tick spacing.</td></tr>
+          <tr><td><code>every</code></td><td>5</td><td>Number every nth tick.</td></tr>
+          <tr><td><code>unit</code>, <code>width</code></td><td>none, auto</td><td>Label suffix and drawn width.</td></tr>
+          <tr><td><code>up</code></td><td>off</td><td>Labels above the line.</td></tr>
+          <tr><td><code>value</code></td><td>none</td><td>A marker on a highlight.</td></tr>
+        </tbody></table></div>
+      </div>
+    </section>
+
+    <!-- ── Figures -->
+    <section class="group" id="figures">
+      <h2>Figures</h2>
+      <p>Recipes take data and return a whole figure as an SVG string. Mount it into an empty <code>&lt;svg&gt;</code> with <code>Calibrated.mount()</code>. Example data on this page is illustrative.</p>
+      <div class="item" id="lanes"><h3>Lanes <a class="anchor" href="#lanes" aria-label="Link to Lanes">#</a></h3><p>Runs on one time ruler; the live one is highlighted.</p><div class="ex" data-recipe="lanes"><div class="ex-prev cal-theme"><svg id="r-lanes"></svg></div></div></div>
+      <div class="item" id="budget"><h3>Budget <a class="anchor" href="#budget" aria-label="Link to Budget">#</a></h3><p>A limit, its alerts, and today's pace to the end of the period.</p><div class="ex" data-recipe="budget"><div class="ex-prev cal-theme"><svg id="r-budget"></svg></div></div></div>
+      <div class="item" id="merge"><h3>Merge <a class="anchor" href="#merge" aria-label="Link to Merge">#</a></h3><p>A branch with the exact command at each node.</p><div class="ex" data-recipe="merge"><div class="ex-prev cal-theme"><svg id="r-merge"></svg></div></div></div>
+      <div class="item" id="fanout"><h3>Fan-out <a class="anchor" href="#fanout" aria-label="Link to Fan-out">#</a></h3><p>One parent; live and finished children.</p><div class="ex" data-recipe="fanout"><div class="ex-prev cal-theme"><svg id="r-fanout"></svg></div></div></div>
+      <div class="item" id="loop"><h3>Loop <a class="anchor" href="#loop" aria-label="Link to Loop">#</a></h3><p>Stations on a cycle with what each one runs.</p><div class="ex" data-recipe="loop"><div class="ex-prev cal-theme"><svg id="r-loop"></svg></div></div></div>
+      <div class="item" id="measured"><h3>Measured <a class="anchor" href="#measured" aria-label="Link to Measured">#</a></h3><p>A long scale, a detail at 20:1, and boxed parts.</p><div class="ex" data-recipe="measured"><div class="ex-prev cal-theme"><svg id="r-measured"></svg></div></div></div>
+      <div class="item" id="timeline"><h3>Timeline <a class="anchor" href="#timeline" aria-label="Link to Timeline">#</a></h3><p>Consecutive steps; the slowest is called out.</p><div class="ex" data-recipe="timeline"><div class="ex-prev cal-theme"><svg id="r-timeline"></svg></div></div></div>
+      <div class="item" id="matrix"><h3>Matrix <a class="anchor" href="#matrix" aria-label="Link to Matrix">#</a></h3><p>Which releases touch which services.</p><div class="ex" data-recipe="matrix"><div class="ex-prev cal-theme"><svg id="r-matrix"></svg></div></div></div>
+      <div class="item" id="section"><h3>Section <a class="anchor" href="#section" aria-label="Link to Section">#</a></h3><p>Nested regions: hatched is closed, clear is open.</p><div class="ex" data-recipe="section"><div class="ex-prev cal-theme"><svg id="r-section"></svg></div></div></div>
+    </section>
+
+    <!-- ── Components -->
+    <section class="group" id="components">
+      <h2>Components</h2>
+      <p>Pure CSS classes, plus a little JS for counts and sign-off. They carry the kit's drawing-sheet look into your own pages.</p>
+
+      <div class="item" id="card">
+        <h3>Card and sign-off <a class="anchor" href="#card" aria-label="Link to Card and sign-off">#</a></h3>
+        <p>A proposed figure beside the text it replaces, with keep and drop buttons. The tally counts the sign-offs and copies them.</p>
+        <div class="ex"><template><article class="cal-card">
+  <div class="info">
+    <h3>Load test as lanes on one ruler</h3>
+    <p class="why">Three regions ran the same test. Drawn on one time ruler, the slow region and the one still running read before any number does.</p>
+    <dl class="cal-kv"><dt>where</dt><dd>release checklist</dd><dt>replaces</dt><dd>three status lines</dd><dt>data</dt><dd>start, end, p99, errors</dd></dl>
+    <div class="id"><span class="no">01</span>load test · v2.4<span class="end">rev B</span></div>
+  </div>
+  <div class="cal-compare">
+    <div><div class="cal-tag">today</div><div class="stage"><div class="cal-note">
+      <div class="cal-gl">load test · 3 regions</div>
+      <div class="r"><span class="k">us-east</span><span>done · 4m 12s</span></div>
+      <div class="r"><span class="k">eu-west</span><span>done · 6m 40s</span></div>
+      <div class="r"><span class="k">ap-south</span><span>running · 8m 05s</span></div>
+    </div></div></div>
+    <div><div class="cal-tag on">drawn</div><div class="stage"><svg id="r-lanes-2"></svg></div></div>
+  </div>
+  <div class="cal-sign" role="group" aria-label="Sign off 01">
+    <button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button>
+    <button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="false">drop</button>
+  </div>
+</article>
+<div class="cal-tally"><span id="tally-n">0 of 1 signed</span><span class="sp"></span><span id="tally-msg" class="mut" role="status"></span><button class="cal-btn" id="tally-copy">copy sign-off</button></div></template></div>
+      </div>
+
+      <div class="item" id="counts">
+        <h3>Counts <a class="anchor" href="#counts" aria-label="Link to Counts">#</a></h3>
+        <p>A zero-padded number in a box with its noun. <code>Calibrated.counts()</code> fills them from <code>data-n</code>.</p>
+        <div class="ex"><template><div class="row" style="gap:18px">
+  <span class="cal-count" data-n="3" data-noun="regions"></span>
+  <span class="cal-count" data-n="2" data-noun="running"></span>
+  <span class="cal-count" data-n="73" data-noun="files"></span>
+  <span class="cal-count" data-n="1" data-noun="failing" data-ink="fault"></span>
+</div></template></div>
+      </div>
+
+      <div class="item" id="tabs">
+        <h3>Tabs <a class="anchor" href="#tabs" aria-label="Link to Tabs">#</a></h3>
+        <p>Ruled tabs with boxed counts.</p>
+        <div class="ex"><template><div class="cal-tabs" role="tablist">
+  <button role="tab" aria-selected="true">runs<span class="cal-cnt">04</span></button>
+  <button role="tab">alerts<span class="cal-cnt">01</span></button>
+  <button role="tab">history</button>
+</div></template></div>
+      </div>
+
+      <div class="item" id="buttons">
+        <h3>Buttons <a class="anchor" href="#buttons" aria-label="Link to Buttons">#</a></h3>
+        <p>Square ruled cells. Primary fills with ink; quiet is an underline.</p>
+        <div class="ex"><template><div class="row" style="gap:8px">
+  <button class="cal-btn primary">run again</button>
+  <button class="cal-btn">copy</button>
+  <button class="cal-btn" disabled>export</button>
+  <button class="cal-btn quiet">details</button>
+</div></template></div>
+      </div>
+
+      <div class="item" id="inline">
+        <h3>Marks in text <a class="anchor" href="#inline" aria-label="Link to Marks in text">#</a></h3>
+        <p>Status dots, revision triangles and the highlighter, used inside running text.</p>
+        <div class="ex"><template><div class="stack">
+  <div class="lg up" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+    <span><span class="cal-dot on"></span> live</span>
+    <span><span class="cal-dot done"></span> done</span>
+    <span><span class="cal-dot"></span> next</span>
+    <span><span class="cal-dot ok"></span> passed</span>
+    <span><span class="cal-dot fault"></span> failed</span>
+    <span><span class="cal-rev" data-rev="B"></span> revised</span>
+  </div>
+  <p>The <span class="live">e2e suite</span> is the only run still going.</p>
+</div></template></div>
+      </div>
+
+      <div class="item" id="form">
+        <h3>Form <a class="anchor" href="#form" aria-label="Link to Form">#</a></h3>
+        <p>Write-in lines with caps labels, hints and errors.</p>
+        <div class="ex"><template><div class="stack" style="max-width:360px">
+  <div class="cal-field"><label for="f1">daily limit</label><input class="cal-input" id="f1" value="150 000"></div>
+  <div class="cal-field"><label for="f2">alert at</label><input class="cal-input" id="f2" placeholder="80 %" aria-describedby="f2h"><span class="hint" id="f2h">Percent of the daily limit.</span></div>
+  <div class="cal-field"><label for="f3">owner</label><input class="cal-input" id="f3" value="#" aria-invalid="true" aria-describedby="f3e"><span class="err" id="f3e">Enter a team name, like payments.</span></div>
+  <label class="cal-check"><input type="checkbox" checked> <span>Pause new runs at the limit</span></label>
+</div></template></div>
+      </div>
+
+      <div class="item" id="rows">
+        <h3>Rows <a class="anchor" href="#rows" aria-label="Link to Rows">#</a></h3>
+        <p>A list with a selected row.</p>
+        <div class="ex"><template><div class="cal-rows" style="max-width:420px">
+  <div><div>Resize product images</div><div class="meta lg">worker 3 · 1 204 jobs · 1m 02s</div></div>
+  <div class="sel"><div>Rebuild search index</div><div class="meta lg">worker 1 · 88 jobs · 0m 41s</div></div>
+</div></template></div>
+      </div>
+
+      <div class="item" id="table">
+        <h3>Table <a class="anchor" href="#table" aria-label="Link to Table">#</a></h3>
+        <p>A parts list. Instruments fit in cells in compact form.</p>
+        <div class="ex"><template><table class="cal-table">
+  <thead><tr><th>no</th><th>figure</th><th>where</th><th>diff</th><th>effort</th><th>status</th></tr></thead>
+  <tbody>
+    <tr><td>01</td><td>Load test lanes</td><td>release checklist</td><td><cal-diff added="212" removed="38" density="compact"></cal-diff></td><td class="effort" aria-label="effort 2 of 3"><span class="cal-dot done"></span><span class="cal-dot done"></span><span class="cal-dot"></span></td><td class="st" data-ink="live"><span>in review</span></td></tr>
+    <tr><td>02</td><td>Error budget ruler</td><td>SLO panel</td><td><cal-diff added="84" removed="12" density="compact"></cal-diff></td><td class="effort" aria-label="effort 1 of 3"><span class="cal-dot done"></span><span class="cal-dot"></span><span class="cal-dot"></span></td><td class="st" data-ink="ok">shipped</td></tr>
+    <tr><td>03</td><td>Network section</td><td>security review</td><td><cal-diff added="9" removed="1460" density="compact"></cal-diff></td><td class="effort" aria-label="effort 3 of 3"><span class="cal-dot done"></span><span class="cal-dot done"></span><span class="cal-dot done"></span></td><td class="st">to do</td></tr>
+  </tbody>
+</table></template></div>
+      </div>
+
+      <div class="item" id="titleblock">
+        <h3>Title block <a class="anchor" href="#titleblock" aria-label="Link to Title block">#</a></h3>
+        <p>The ruled grid of terms and values from the corner of a drawing. Set the column count with <code>--tb-cols</code>.</p>
+        <div class="ex"><template><dl class="cal-titleblock tb6">
+  <div class="name"><dt>title</dt><dd>Checkout · deploy review</dd></div>
+  <div><dt>dwg no.</dt><dd>CHK-044</dd></div>
+  <div><dt>scale</dt><dd>1:1</dd></div>
+  <div><dt>sheet</dt><dd>1 / 3</dd></div>
+  <div><dt>rev</dt><dd>B <span class="cal-rev" data-rev="B"></span></dd></div>
+  <div><dt>units</dt><dd>ms</dd></div>
+  <div><dt>date</dt><dd>2026-10-31</dd></div>
+  <div class="wide"><dt>drawn</dt><dd>release bot</dd></div>
+  <div class="wide"><dt>checked</dt><dd>payments</dd></div>
+  <div class="wide"><dt>approved</dt><dd>pending</dd></div>
+</dl></template></div>
+      </div>
+
+      <div class="item" id="revisions">
+        <h3>Revisions <a class="anchor" href="#revisions" aria-label="Link to Revisions">#</a></h3>
+        <p>Red triangles paired with what changed.</p>
+        <div class="ex"><template><table class="cal-revs">
+  <thead><tr><th>rev</th><th>description</th><th>date</th></tr></thead>
+  <tbody>
+    <tr><td><span class="cal-rev" data-rev="A"></span></td><td>First review: three deploys.</td><td class="lg">2026-10-29</td></tr>
+    <tr><td><span class="cal-rev" data-rev="B"></span></td><td>Added the rollback for ap-south.</td><td class="lg">2026-10-31</td></tr>
+  </tbody>
+</table></template></div>
+      </div>
+
+      <div class="item" id="tiers">
+        <h3>When to draw <a class="anchor" href="#tiers" aria-label="Link to When to draw">#</a></h3>
+        <p>A two-column note for deciding what gets a figure.</p>
+        <div class="ex"><template><div class="cal-tiers">
+  <div><div class="tt">Draw next</div><p>Lists that are really quantities: queues as counts, run histories as lanes, file badges as diff pairs.</p></div>
+  <div><div class="tt">Leave alone</div><p>Terminals, prose, menus, pickers and command palettes. Drawing over them adds lines and measures nothing.</p></div>
+</div></template></div>
+      </div>
+    </section>
+
+    <!-- ── Theming -->
+    <section class="group" id="theming">
+      <h2>Theming</h2>
+      <p>Two themes, <code>film</code> and <code>night</code>, set with <code>data-theme</code>. The theme button at the top switches both the docs and every preview.</p>
+
+      <div class="item" id="seeds">
+        <h3>Seeds <a class="anchor" href="#seeds" aria-label="Link to Seeds">#</a></h3>
+        <p>Three colours; every surface, line and wash derives from them with <code>color-mix()</code>. Changing a seed here re-colours every preview on the page.</p>
+        <div class="ex" data-code="seeds"><div class="ex-prev cal-theme"><div class="stack">
+          <div class="seeds">
+            <div class="cal-field"><label for="s-bg">--bg · sheet</label><input type="color" id="s-bg" data-seed="--bg" value="#f6f7f3"></div>
+            <div class="cal-field"><label for="s-fg">--fg · ink</label><input type="color" id="s-fg" data-seed="--fg" value="#1d2126"></div>
+            <div class="cal-field"><label for="s-live">--live · highlighter</label><input type="color" id="s-live" data-seed="--live" value="#f3dc3a"></div>
+            <button class="cal-btn" id="seed-reset">reset seeds</button>
+          </div>
+          <cal-progress done="11" total="15" live="12" live-label="step 12 · backfill"></cal-progress>
+        </div></div></div>
+      </div>
+
+      <div class="item" id="density">
+        <h3>Density <a class="anchor" href="#density" aria-label="Link to Density">#</a></h3>
+        <p>Full form prints scales, boxes and labels. Compact keeps only the marks, for tables and tight rows.</p>
+        <div class="ex" data-code="density"><div class="ex-prev cal-theme">
+          <div class="cal-tabs dens-ctl" role="tablist" aria-label="Density">
+            <button role="tab" data-density-set="full" aria-selected="true">full</button>
+            <button role="tab" data-density-set="compact" aria-selected="false">compact</button>
+          </div>
+          <div class="stack" id="dens" data-density="full">
+            <cal-meter value="46000" max="1000000" warn="800000" label="requests today"></cal-meter>
+            <cal-progress done="6" total="15" fault="7" fault-label="step 7 · needs review"></cal-progress>
+            <cal-diff added="184" removed="20" label="release"></cal-diff>
+          </div>
+        </div></div>
+      </div>
+    </section>
+
+    <!-- ── Changelog -->
+    <section class="group" id="changelog">
+      <h2>Changelog</h2>
+      <ol class="log">
+        <li><b>Rev D</b><time datetime="2026-10-31">2026-10-31</time><p>Ruled mark and condensed wordmark. This demo became a docs site.</p></li>
+        <li><b>Rev C</b><time datetime="2026-10-31">2026-10-31</time><p>Own identity: drawing sheet, highlighter, projection mark.</p></li>
+        <li><b>Rev B</b><time datetime="2026-10-31">2026-10-31</time><p>Night theme; seeds recompute in themed sections.</p></li>
+        <li><b>Rev A</b><time datetime="2026-10-31">2026-10-31</time><p>First release: tokens, figure kit, components.</p></li>
+      </ol>
+    </section>
+
+    <footer class="foot"><span>Calibrated · MIT licence</span><span>Example data on this page is illustrative.</span></footer>
+  </main>
+</div>
+
+<script src="../skills/calibrated-figures/assets/calibrated-figures.js"></script>
+<script src="../skills/calibrated-figures/assets/calibrated-recipes.js"></script>
+<script src="../skills/calibrated-components/assets/calibrated-components.js"></script>
+<script>
+(() => {
+  const { K, recipes: R, mount } = Calibrated;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+
+  /* ── code: escape, highlight, serialise */
+  const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const span = (c, s) => `<span class="h-${c}">${esc(s)}</span>`;
+  function hlHTML(src) {
+    const re = /(<!--[\s\S]*?-->)|(<\/?)([a-zA-Z][\w-]*)|([\w:@-]+)(=)("[^"]*")/g;
+    let out = '', i = 0, m;
+    while ((m = re.exec(src))) {
+      out += esc(src.slice(i, m.index));
+      if (m[1]) out += span('c', m[1]);
+      else if (m[3]) out += esc(m[2]) + span('t', m[3]);
+      else out += span('a', m[4]) + '=' + span('s', m[6]);
+      i = re.lastIndex;
+    }
+    return out + esc(src.slice(i));
+  }
+  function hlJS(src) {
+    const re = /(\/\/.*$|\/\*[\s\S]*?\*\/)|('(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`|"(?:\\.|[^"\\])*")|\b(const|let|new|return|true|false|null|=>)\b|(\b\d[\d.e]*\b)|([A-Za-z_$][\w$]*)(?=\s*:(?!:))/gm;
+    let out = '', i = 0, m;
+    while ((m = re.exec(src))) {
+      out += esc(src.slice(i, m.index));
+      out += m[1] ? span('c', m[1]) : m[2] ? span('s', m[2]) : m[3] ? span('k', m[3]) : m[4] ? span('n', m[4]) : span('a', m[5]);
+      i = re.lastIndex;
+    }
+    return out + esc(src.slice(i));
+  }
+  function hlSH(src) { return src.split('\n').map((l) => (l.startsWith('/') ? span('a', l.split(' ')[0]) + esc(l.slice(l.split(' ')[0].length)) : esc(l))).join('\n'); }
+  function ser(v, d = 0) {
+    const pad = '  '.repeat(d + 1), end = '  '.repeat(d);
+    if (typeof v === 'function') return v.toString();
+    if (typeof v === 'string') return `'${v.replace(/'/g, "\\'")}'`;
+    if (Array.isArray(v)) {
+      const flat = '[' + v.map((x) => ser(x, d + 1)).join(', ') + ']';
+      return flat.length < 72 && !flat.includes('\n') ? flat : '[\n' + v.map((x) => pad + ser(x, d + 1)).join(',\n') + ',\n' + end + ']';
+    }
+    if (v && typeof v === 'object') {
+      const parts = Object.entries(v).map(([k, x]) => `${/^[A-Za-z_$][\w$]*$/.test(k) ? k : `'${k}'`}: ${ser(x, d + 1)}`);
+      const flat = '{ ' + parts.join(', ') + ' }';
+      return flat.length < 72 && !flat.includes('\n') ? flat : '{\n' + parts.map((p) => pad + p).join(',\n') + ',\n' + end + '}';
+    }
+    return String(v);
+  }
+  const dedent = (s) => {
+    const lines = s.replace(/^\n+|\s+$/g, '').split('\n');
+    const ind = Math.min(...lines.slice(1).filter((l) => l.trim()).map((l) => l.match(/^ */)[0].length), Infinity);
+    return lines.map((l, i) => (i && isFinite(ind) ? l.slice(ind) : l)).join('\n');
+  };
+
+  /* ── example frames: Preview / Code tabs and a copy button */
+  let uid = 0;
+  function frame(ex, code, lang) {
+    const n = ++uid;
+    let prev = $('.ex-prev', ex);
+    const tpl = $('template', ex);
+    if (tpl) {
+      prev = document.createElement('div');
+      prev.className = 'ex-prev cal-theme';
+      prev.append(tpl.content.cloneNode(true));
+      /* docs-only helper class shows up in the snippet as the kit's own inline column count */
+      code = code || dedent(tpl.innerHTML).replace('cal-titleblock tb6"', 'cal-titleblock" style="--tb-cols: 6"');
+      lang = lang || 'html';
+      tpl.replaceWith(prev);
+    }
+    prev.id = `p${n}`; prev.setAttribute('role', 'tabpanel'); prev.setAttribute('aria-labelledby', `tp${n}`);
+    const bar = document.createElement('div');
+    bar.className = 'ex-bar';
+    bar.innerHTML = `<span role="tablist" aria-label="Example view" style="display:flex;height:100%"><button role="tab" id="tp${n}" aria-selected="true" aria-controls="p${n}">Preview</button><button role="tab" id="tc${n}" aria-selected="false" aria-controls="c${n}" tabindex="-1">Code</button></span><span class="sp"></span><button class="copy" type="button"><svg aria-hidden="true"><use href="#i-copy"/></svg><span>Copy</span></button>`;
+    const pre = document.createElement('pre');
+    pre.className = 'ex-code'; pre.id = `c${n}`; pre.hidden = true;
+    pre.setAttribute('role', 'tabpanel'); pre.setAttribute('aria-labelledby', `tc${n}`);
+    pre.innerHTML = `<code>${lang === 'js' ? hlJS(code) : lang === 'css' ? hlJS(code) : hlHTML(code)}</code>`;
+    ex.prepend(bar); ex.append(pre);
+    const [tp, tc] = $$('[role="tab"]', bar);
+    const show = (codeOn) => {
+      tp.setAttribute('aria-selected', String(!codeOn)); tc.setAttribute('aria-selected', String(codeOn));
+      tp.tabIndex = codeOn ? -1 : 0; tc.tabIndex = codeOn ? 0 : -1;
+      prev.hidden = codeOn; pre.hidden = !codeOn;
+    };
+    tp.addEventListener('click', () => show(false));
+    tc.addEventListener('click', () => show(true));
+    bar.querySelector('[role="tablist"]').addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const on = e.target === tp; show(on); (on ? tc : tp).focus(); }
+    });
+    copyButton($('.copy', bar), () => code);
+  }
+  function copyButton(btn, text) {
+    btn.addEventListener('click', async () => {
+      const label = btn.querySelector('span'), icon = btn.querySelector('use');
+      try { await navigator.clipboard.writeText(text()); label.textContent = 'Copied'; icon.setAttribute('href', '#i-check'); }
+      catch { label.textContent = 'Select and copy'; }
+      setTimeout(() => { label.textContent = 'Copy'; icon.setAttribute('href', '#i-copy'); }, 1600);
+    });
+  }
+
+  /* ── marks */
+  const specs = [
+    ['Leader + boxed value', 'A dot on what is measured, an elbow, a box with the name over the value.', () => K.leader([[16, 52], [16, 26], [40, 26]]) + K.box(40, 10, null, 'cached', '≈ 41.4k')],
+    ['Ruler', 'Numbered at major ticks only. One scale per figure.', () => K.ruler(6, 146, 40, 50, 5, 5, (v) => (v ? v + 'k' : '0'))],
+    ['Dimension line', 'A span with its length written into the gap.', () => K.dim(8, 146, 34, '4m 12s')],
+    ['Detail inset', 'A dashed projection to a magnified part, labelled with its scale.', () => K.rect(8, 10, 10, 4, 'fg', 'none') + K.line(8, 12, 146, 12, 'ed') + K.inset(8, 22, 15, 8, 104, 42, 20) + K.rect(8, 42, 96, 10, 'none', 'ed') + K.rect(9, 43, 66, 8, 'fg', 'none')],
+    ['Hatch', 'Closed, locked, over the limit. Clear means open.', () => K.hatchRect(8, 10, 64, 38) + K.rect(82, 10, 64, 38, 'none', 'fg') + K.t(40, 62, 'closed', 'mu', 'middle') + K.t(114, 62, 'open', 'mu', 'middle')],
+    ['Nodes', 'Done is filled, next an outline, merge a diamond, live a dot on the highlighter.', () => K.node(16, 30, 'done') + K.node(52, 30, 'todo') + K.node(88, 30, 'merge') + K.node(126, 30, 'live') + K.t(16, 56, 'done', 'fa', 'middle') + K.t(52, 56, 'next', 'fa', 'middle') + K.t(88, 56, 'merge', 'fa', 'middle') + K.t(126, 56, 'live', 'lv', 'middle')],
+    ['Numbered command', 'A step number in a box and the exact command, beside the node it acts on.', () => K.node(12, 30, 'todo') + K.cmd(26, 34, '1', 'git tag v2.4')],
+    ['FIG. label', 'Top-left of every figure. The number is stable, so it can be cited.', () => `<g transform="translate(6 24)">${K.fig(7, 'network')}</g>` + K.centre(6, 46, 150, 46)],
+  ];
+  const marksCode = "const { K } = Calibrated;\n\n" + specs.map(([h, , f]) => `// ${h}\n` + f.toString().replace(/^\(\) => /, '').replace(/ \+ /g, ' +\n  ')).join('\n\n') + "\n\n// any mark string goes into an svg\nel.innerHTML = Calibrated.svg(156, 70, K.dim(8, 146, 34, '4m 12s'));";
+
+  /* ── recipe data, kept as objects so the Code tab shows exactly what draws */
+  const D = {
+    lanes: { n: 1, title: 'load test · v2.4 · 3 regions', max: 10, lanes: [
+      { name: 'us-east', end: 4.2, label: '4m 12s', box: ['p99 212 ms', '0.02% errors'] },
+      { name: 'eu-west', end: 6.67, label: '6m 40s', box: ['p99 230 ms', '0.03% errors'] },
+      { name: 'ap-south', end: 8.08, label: '8m 05s', live: true, box: ['running', '40% of traffic'] },
+    ] },
+    budget: { n: 2, title: 'error budget · checkout · 30 days', max: 1000, step: 50, every: 4, used: 612, at: 'day 19', pace: 900,
+      fmt: (v) => Math.round(v) + 'm', alerts: [{ v: 800, label: 'alert 80%' }, { v: 950, label: '95%' }], paceLabel: ['at this pace by day 30', '≈ 900m · 80% on day 25'] },
+    merge: { n: 3, title: 'merge · release/2.4 → main', branch: 'release/2.4', commits: 5, baseAhead: 1,
+      files: ['9 files', '+212 −38'], steps: ['git switch main', 'git merge --no-ff release/2.4', 'git tag v2.4.0'] },
+    fanout: { n: 4, title: 'ingest · scheduler · 4 workers', root: ['scheduler', 'queue · 12m'], folded: '+1 finished earlier', children: [
+      { task: 'resize product images', meta: 'worker 3 · 1 204 jobs', time: '1m 02s', live: true },
+      { task: 'rebuild search index', meta: 'queued · 88 jobs', time: 'next' },
+      { task: 'expire stale sessions', meta: 'done · 9 340 rows', time: '2m 10s' },
+    ] },
+    loop: { n: 5, title: 'release train · v2.4', center: 'train 4 of 9', stations: [
+      { name: 'build', cmd: 'make release', state: 'done' },
+      { name: 'test', cmd: 'make test-e2e', state: 'live' },
+      { name: 'stage', cmd: 'deploy staging' },
+      { name: 'ship', cmd: 'deploy prod --canary' },
+    ] },
+    measured: { title: 'storage · bucket assets', max: 1e12, zoomMax: 5e10, factor: 20,
+      fmt: (v) => (v >= 1e12 ? v / 1e12 + ' TB' : Math.round(v / 1e9 * 10) / 10 + ' GB'),
+      parts: [{ label: 'originals', value: 41.4e9, ink: 'fg' }, { label: 'thumbnails', value: 3.1e9, ink: 'mu' }, { label: 'uploads', value: 1.5e9, ink: 'lv' }],
+      plate: ['DEDUP SAVED', '18% · 9.1 GB'] },
+    timeline: { n: 6, title: 'migration · orders db · 10 steps', steps: [61, 95, 120, 130, 88, 250, 140, 160, 110, 152], slowLabel: 'slowest · backfill' },
+    matrix: { n: 7, title: 'services by release', cols: ['gateway', 'auth', 'checkout', 'cart', 'search', 'billing', 'notify', 'catalog', 'admin'],
+      rows: ['2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.9', '3.0'], hits: [[0], [1], [1, 2, 3], [2, 3], [2, 7], [3, 4], [0, 5], [0, 6], [7, 2], [8, 3]],
+      callout: { col: 0, l1: '3 releases touch gateway', l2: 'test 2.1, 2.7, 2.8 together' } },
+    section: { n: 8, title: 'network · prod vpc', boundary: { label: 'egress through proxy only' },
+      regions: [
+        { x: 20, y: 38, w: 360, h: 190, kind: 'hatch', label: 'restricted' },
+        { x: 40, y: 70, w: 230, h: 146, kind: 'clear', label: 'app subnet' },
+        { x: 132, y: 76, kind: 'island', label: 'secrets' }, { x: 194, y: 76, kind: 'island', label: 'kms' },
+        { x: 56, y: 132, w: 196, h: 68, kind: 'strong', label: 'api service', sub: 'read-write · port 443' },
+        { x: 290, y: 132, w: 76, h: 52, kind: 'dotted', label: 'cache', sub: 'ephemeral' },
+      ],
+      callouts: [
+        { at: [350, 56], l1: 'closed', l2: 'restricted, secrets' },
+        { at: [262, 110], l1: 'open', l2: 'app subnet, api' },
+        { l1: 'rotated', l2: 'credentials daily' },
+        { l1: 'outside', l2: 'batch jobs' },
+      ] },
+  };
+
+  /* build every frame before drawing, so instruments upgrade inside their previews */
+  const liveStart = Date.now() - 125000;
+  $$('.ex').forEach((ex) => {
+    const r = ex.dataset.recipe, c = ex.dataset.code;
+    if (r) frame(ex, `<svg id="${r}"></svg>\n\n<script>\n  Calibrated.mount('#${r}', Calibrated.recipes.${r}(${ser(D[r], 1)}));\n<\/script>`, 'html');
+    else if (c === 'marks') frame(ex, marksCode, 'js');
+    else if (c === 'seeds') frame(ex, ":root {\n  --bg: #f6f7f3;   /* sheet */\n  --fg: #1d2126;   /* ink */\n  --live: #f3dc3a; /* highlighter */\n}\n/* or scope a theme to one region */\n.cal-theme { --bg: #fffdf5; --live: #9fe3c0; }", 'css');
+    else if (c === 'density') frame(ex, '<div data-density="compact">\n  <cal-meter value="46000" max="1000000" warn="800000" label="requests today"></cal-meter>\n  <cal-progress done="6" total="15" fault="7"></cal-progress>\n  <cal-diff added="184" removed="20" label="release"></cal-diff>\n</div>\n\n<!-- or per element -->\n<cal-diff added="184" removed="20" density="compact"></cal-diff>', 'html');
+    else frame(ex);
+  });
+  $$('cal-span[live]').forEach((s) => s.setAttribute('start', liveStart));
+  $$('pre.block').forEach((pre) => {
+    const code = pre.querySelector('code'), raw = code.textContent, lang = pre.dataset.lang;
+    code.innerHTML = lang === 'html' ? hlHTML(raw) : hlSH(raw);
+    const b = document.createElement('button');
+    b.className = 'copy'; b.type = 'button'; b.innerHTML = '<svg aria-hidden="true"><use href="#i-copy"/></svg><span>Copy</span>';
+    pre.append(b); copyButton(b, () => raw);
+  });
+
+  function drawAll() {
+    $('#specimens').innerHTML = specs.map(([h, p, f]) => `<div class="cal-spec">${Calibrated.svg(156, 70, f())}<h4>${h}</h4><p>${p}</p></div>`).join('');
+    Object.keys(D).forEach((k) => mount('#r-' + k, R[k](D[k])));
+    mount('#r-lanes-2', R.lanes(D.lanes));
+    if (Calibrated.counts) Calibrated.counts();
+  }
+  Calibrated.ready(drawAll);
+
+  /* ── theme: docs and kit switch together */
+  const html = document.documentElement, themeBtn = $('#theme');
+  const setTheme = (t) => {
+    html.dataset.theme = t;
+    themeBtn.setAttribute('aria-label', t === 'night' ? 'Switch to light theme' : 'Switch to dark theme');
+    try { localStorage.setItem('cal-docs-theme', t); } catch {}
+  };
+  setTheme(html.dataset.theme);
+  themeBtn.addEventListener('click', () => setTheme(html.dataset.theme === 'night' ? 'film' : 'night'));
+
+  /* ── mobile nav */
+  const menu = $('#menu');
+  const setNav = (open) => { document.body.classList.toggle('nav-open', open); menu.setAttribute('aria-expanded', String(open)); menu.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation'); };
+  menu.addEventListener('click', () => setNav(!document.body.classList.contains('nav-open')));
+  $$('.side a').forEach((a) => a.addEventListener('click', () => setNav(false)));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setNav(false); });
+
+  /* ── sidebar follows the reader */
+  const links = new Map($$('.side a').map((a) => [a.getAttribute('href').slice(1), a]));
+  const targets = [...links.keys()].map((id) => document.getElementById(id)).filter(Boolean);
+  const mark = (id) => { links.forEach((a, k) => { const on = k === id; a.classList.toggle('on', on); if (on) a.setAttribute('aria-current', 'location'); else a.removeAttribute('aria-current'); }); };
+  const spy = () => {
+    const y = 120; let cur = targets[0].id;
+    for (const t of targets) { if (t.getBoundingClientRect().top - y <= 0) cur = t.id; else break; }
+    mark(cur);
+  };
+  addEventListener('scroll', spy, { passive: true }); spy();
+
+  /* ── install method tabs */
+  $$('[data-seg]').forEach((seg) => {
+    const tabs = $$('[role="tab"]', seg);
+    tabs.forEach((t) => t.addEventListener('click', () => tabs.forEach((x) => { const on = x === t; x.setAttribute('aria-selected', String(on)); document.getElementById(x.getAttribute('aria-controls')).hidden = !on; })));
+  });
+
+  /* ── seeds */
+  const rs = html.style;
+  $$('[data-seed]').forEach((i) => i.addEventListener('input', () => { rs.setProperty(i.dataset.seed, i.value); Calibrated.redraw && Calibrated.redraw(); }));
+  $('#seed-reset').addEventListener('click', () => { ['--bg', '--fg', '--live'].forEach((v) => rs.removeProperty(v)); Calibrated.redraw && Calibrated.redraw(); });
+
+  /* ── density */
+  $$('[data-density-set]').forEach((b) => b.addEventListener('click', () => {
+    $('#dens').dataset.density = b.dataset.densitySet;
+    $$('[data-density-set]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+  }));
+
+  /* ── sign-off */
+  const cards = $$('.cal-card'), msg = $('#tally-msg');
+  const tally = () => { $('#tally-n').textContent = `${cards.filter((c) => c.dataset.v).length} of ${cards.length} signed`; };
+  $$('.cal-sign .cal-btn').forEach((b) => b.addEventListener('click', () => {
+    const card = b.closest('.cal-card'), on = b.getAttribute('aria-pressed') !== 'true';
+    card.querySelectorAll('.cal-sign .cal-btn').forEach((x) => x.setAttribute('aria-pressed', 'false'));
+    b.setAttribute('aria-pressed', String(on));
+    if (on) { card.dataset.v = b.dataset.v; card.dataset.state = b.dataset.v === 'drop' ? 'dropped' : 'ok'; }
+    else { delete card.dataset.v; delete card.dataset.state; }
+    tally();
+  }));
+  $('#tally-copy').addEventListener('click', async () => {
+    const lines = cards.map((c) => `${c.querySelector('.no').textContent} ${c.querySelector('h3').textContent}: ${c.dataset.v || 'not signed'}`);
+    try { await navigator.clipboard.writeText(lines.join('\n')); msg.textContent = 'copied'; }
+    catch { msg.textContent = 'copy blocked: select the text and copy it by hand'; }
+  });
+  tally();
+})();
+</script>
+</body>
+</html>

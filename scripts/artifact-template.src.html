@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checkout Deploy Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Chivo+Mono:wght@300..700&display=swap">
+<style>
+/* Layout idea: a drawing sheet. One drawing per item; each figure replaces a sentence or list. */
+/* @inline-css */
+/* Viewer theme: Claude sets data-theme="light"|"dark"; with neither, follow the OS. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --bg: #18191a; --fg: #e6e6e3; --muted: #9aa3a8; --title: #f4f6f1;
+    --live: #e9d43c; --ok: #7cc493; --fault: #f0715f; --shade: #000;
+    --swipe-strength: 92%; --on-swipe: #18191a; color-scheme: dark;
+  }
+}
+/* Page seeds: override here, after the kit. Everything else derives from --bg, --fg and --live.
+:root { --live: #f3dc3a; }
+*/
+/* page-specific rules go below */
+.head { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: end; padding: clamp(24px, 3.5vw, 48px) 0 clamp(20px, 3vw, 36px); }
+.sheet-end { display: flex; justify-content: flex-end; margin-top: 32px; }
+.head h1 { font-family: var(--font-display); font-stretch: var(--stretch-title); font-weight: 650; font-size: var(--fs-h1); line-height: .93; text-transform: uppercase; color: var(--title); text-wrap: balance; }
+.head .side { display: grid; gap: 18px; }
+.head p { color: var(--legend); max-width: 54ch; }
+@media (max-width: 960px) { .head { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="cal-mark" viewBox="4 8 40 32">
+    <rect x="26" y="8" width="8" height="30" fill="var(--swipe, #f3dc3a)"/>
+    <path d="M4 38 H44" stroke="currentColor" stroke-width="3.2"/>
+    <path d="M5.2 38 V10 M24 38 V10 M42.8 38 V10 M30 38 V10 M11.5 38 V27 M17.75 38 V27 M36.5 38 V27" stroke="currentColor" stroke-width="2.4"/>
+  </symbol>
+</svg>
+
+<div class="wrap">
+<div class="cal-sheet" data-zones="8x4" data-density="full">
+
+  <header class="cal-mast">
+    <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
+    <span class="word">Checkout</span>
+    <span class="cal-caption">deploy review · week 44</span>
+  </header>
+
+  <section class="head">
+    <h1>Three deploys this week. One still rolling out.</h1>
+    <div class="side">
+      <p>Each drawing below is one deploy. The figure replaces the status lines the dashboard prints today, from the same data. Mark each one keep or roll back; the strip at the bottom collects the sign-off.</p>
+    </div>
+  </section>
+
+  <!-- 1 · a drawing per item: today / drawn -->
+  <section class="cal-sec" id="deploys">
+    <div class="cal-sec-h"><b>1 · Deploys</b><span>today · drawn</span><span>sheet 1/3</span></div>
+    <div class="cal-stack">
+
+      <article class="cal-card">
+        <div class="info">
+          <h3>Canary across three regions</h3>
+          <p class="why">Each region's rollout is a lane on one time ruler. The dimension line shows how long it took, and the box at the end gives the error rate. The region still rolling out is highlighted.</p>
+          <dl class="cal-kv"><dt>where</dt><dd>deploy dashboard</dd><dt>replaces</dt><dd>per-region status lines</dd><dt>data</dt><dd>rollout start, end, error rate</dd></dl>
+          <div class="id"><span class="no">01</span>checkout-api · canary</div>
+        </div>
+        <div class="cal-compare">
+          <div><div class="cal-tag">today</div><div class="stage"><div class="cal-note">
+            <div class="cal-gl">canary · 3 regions</div>
+            <div class="r"><span class="k">us-east</span><span>done · 4m 12s</span></div>
+            <div class="r"><span class="k">eu-west</span><span>done · 6m 40s</span></div>
+            <div class="r"><span class="k">ap-south</span><span>rolling · 8m 05s</span></div>
+          </div></div></div>
+          <div><div class="cal-tag on">drawn</div><div class="stage"><svg id="fig-1"></svg></div></div>
+        </div>
+        <div class="cal-sign" role="group" aria-label="Sign off 01"><button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button><button class="cal-btn" data-ink="fault" data-v="roll back" aria-pressed="false">roll back</button></div>
+      </article>
+
+      <article class="cal-card">
+        <div class="info">
+          <h3>Error budget with this week's pace</h3>
+          <p class="why">The ruler marks both alerts where they fall. A dashed line carries this week's burn rate to the end of the window, with a boxed note for when it crosses the first alert.</p>
+          <dl class="cal-kv"><dt>where</dt><dd>SLO panel</dd><dt>replaces</dt><dd>"alerts at 80% and 95%"</dd></dl>
+          <div class="id"><span class="no">02</span>error budget · 30 days</div>
+        </div>
+        <div class="stage"><svg id="fig-2"></svg></div>
+        <div class="cal-sign" role="group" aria-label="Sign off 02"><button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button><button class="cal-btn" data-ink="fault" data-v="roll back" aria-pressed="false">roll back</button></div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- 2 · instruments -->
+  <section class="cal-sec" id="now">
+    <div class="cal-sec-h"><b>2 · Right now</b><span>instruments</span><span>sheet 2/3</span></div>
+    <div class="cal-framed" style="display:grid;gap:18px;padding:18px 20px">
+      <cal-meter value="612" max="1000" warn="800" label="error budget used" format="raw" unit=" min"></cal-meter>
+      <cal-progress done="4" total="6" live="5" live-label="canary · ap-south" done-label="4 regions · 23m"></cal-progress>
+      <cal-durations max="15" unit="m">
+        <cal-span name="build" value="252"></cal-span>
+        <cal-span name="tests" value="400"></cal-span>
+        <cal-span name="rollout" value="485" live></cal-span>
+      </cal-durations>
+      <div style="display:flex;gap:18px;flex-wrap:wrap">
+        <span class="cal-count" data-n="3" data-noun="deploys"></span>
+        <span class="cal-count" data-n="1" data-noun="rolling"></span>
+        <span class="cal-count" data-n="0" data-noun="rolled back"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · parts list -->
+  <section class="cal-sec" id="rollup">
+    <div class="cal-sec-h"><b>3 · Roll-up</b><span>every deploy this week</span><span>sheet 3/3</span></div>
+    <table class="cal-table">
+      <thead><tr><th>no</th><th>service</th><th>change</th><th>diff</th><th>status</th></tr></thead>
+      <tbody>
+        <tr><td>01</td><td>checkout-api</td><td>rate-limit login</td><td><cal-diff added="212" removed="38" density="compact"></cal-diff></td><td class="st" data-ink="live"><span>rolling</span></td></tr>
+        <tr><td>02</td><td>payments</td><td>retry idempotency keys</td><td><cal-diff added="84" removed="12" density="compact"></cal-diff></td><td class="st" data-ink="ok">live</td></tr>
+        <tr><td>03</td><td>cart</td><td>drop legacy coupons</td><td><cal-diff added="9" removed="1460" density="compact"></cal-diff></td><td class="st" data-ink="ok">live</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <div class="sheet-end">
+    <dl class="cal-titleblock" style="--tb-cols:4">
+      <div class="name"><dt>title</dt><dd>Checkout · deploy review</dd></div>
+      <div><dt>dwg no.</dt><dd>CHK-044</dd></div>
+      <div><dt>version</dt><dd>2.14.0</dd></div>
+      <div><dt>sheet</dt><dd>1 / 3</dd></div>
+      <div><dt>rev</dt><dd>A</dd></div>
+      <div class="wide"><dt>drawn</dt><dd>checkout team · 10-31</dd></div>
+      <div class="wide"><dt>approved</dt><dd>— pending</dd></div>
+    </dl>
+  </div>
+
+  <div class="cal-tally"><span id="tally-n">0 of 2 signed</span><span class="sp"></span><span id="tally-msg" class="mut" role="status"></span><button class="cal-btn" id="tally-copy">copy sign-off</button></div>
+  <footer class="cal-foot"><span>checkout · chk-044</span><span>example data · replace it</span></footer>
+</div>
+</div>
+
+<script>
+/* @inline-js */
+</script>
+<script>
+/* ── page figures: data in, drawing out. Replace with this page's own. */
+Calibrated.ready(() => {
+  const { recipes: R, mount } = Calibrated;
+  mount('#fig-1', R.lanes({
+    n: 1, title: 'canary · checkout-api · 3 regions', max: 10,
+    lanes: [
+      { name: 'us-east', end: 4.2, label: '4m 12s', box: ['errors 0.02%', 'p99 212 ms'] },
+      { name: 'eu-west', end: 6.67, label: '6m 40s', box: ['errors 0.03%', 'p99 230 ms'] },
+      { name: 'ap-south', end: 8.08, label: '8m 05s', live: true, box: ['rolling', '40% of traffic'] },
+    ],
+  }));
+  mount('#fig-2', R.budget({
+    n: 2, title: 'error budget · checkout · 30 days', max: 1000, step: 50, every: 4, used: 612, at: 'day 19', pace: 900,
+    fmt: (v) => Math.round(v) + 'm',
+    alerts: [{ v: 800, label: 'alert 80%' }, { v: 950, label: '95%' }],
+    paceLabel: ['at this pace by day 30', '≈ 900m · 80% on day 25'],
+  }));
+});
+
+/* ── sign-off: keep / roll back per drawing, tally, copy */
+(() => {
+  const cards = [...document.querySelectorAll('.cal-card')];
+  const n = document.getElementById('tally-n'), msg = document.getElementById('tally-msg');
+  const tally = () => { n.textContent = `${cards.filter((c) => c.dataset.v).length} of ${cards.length} signed`; };
+  document.querySelectorAll('.cal-sign .cal-btn').forEach((b) => b.addEventListener('click', () => {
+    const card = b.closest('.cal-card'), on = b.getAttribute('aria-pressed') !== 'true';
+    card.querySelectorAll('.cal-sign .cal-btn').forEach((x) => x.setAttribute('aria-pressed', 'false'));
+    b.setAttribute('aria-pressed', String(on));
+    if (on) { card.dataset.v = b.dataset.v; card.dataset.state = b.dataset.ink === 'fault' ? 'dropped' : 'ok'; }
+    else { delete card.dataset.v; delete card.dataset.state; }
+    tally();
+  }));
+  document.getElementById('tally-copy').addEventListener('click', async () => {
+    const text = cards.map((c) => `${c.querySelector('.no').textContent} ${c.querySelector('h3').textContent}: ${c.dataset.v || '—'}`).join('\n');
+    try { await navigator.clipboard.writeText(text); msg.textContent = 'copied'; }
+    catch { msg.textContent = 'copy blocked: select the drawings and copy by hand'; }
+  });
+  tally();
+})();
+</script>
+</body>
+</html>

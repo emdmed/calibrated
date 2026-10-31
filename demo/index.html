@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="film" data-view="cal">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calibrated · Catalog No. 1</title>
+<meta name="description" content="Calibrated makes the reports, reviews, explainers and screens Claude builds look like precision technical documentation. Numbers become gauges, rulers and dimension lines.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Chivo+Mono:wght@300..700&display=swap">
+<link rel="stylesheet" href="../skills/calibrated-tokens/assets/calibrated.css">
+<link rel="stylesheet" href="../skills/calibrated-components/assets/calibrated-components.css">
+<style>
+/* The page is built from the kit itself: cal-mast, cal-intro, cal-sec, cal-specimens,
+   cal-tiers, cal-btn. Only the Plain / Calibrated layering is custom. */
+@property --wipe { syntax: '<percentage>'; inherits: true; initial-value: 100%; }
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+html, body { background: var(--bg); }
+.top { position: sticky; top: 0; z-index: 20; background: var(--bg); }
+.top .cal-mast { padding: 12px 0 10px; }
+.top .word.ruled { font-size: 20px; }
+.btn-pair { display: inline-flex; }
+.btn-pair .cal-btn + .cal-btn { border-left: 0; }
+.cal-btn svg { width: 13px; height: 13px; vertical-align: -2px; }
+html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { display: none; }
+#theme { padding: 5px 7px; }
+.cal-intro .switch { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 18px; }
+
+/* the example: plain layer under, calibrated layer over; the switch wipes between them */
+.ba { display: grid; position: relative; background: var(--bg); overflow: hidden; --wipe: 100%; transition: --wipe .9s cubic-bezier(.16, 1, .3, 1); }
+.ba.is-plain { --wipe: 0%; }
+/* a plain example is a button: clicking it calibrates that one example */
+.ba.is-plain > .plain { cursor: pointer; }
+.ba.is-plain > .plain:focus-visible { outline: var(--line-thick) solid var(--fg); outline-offset: 3px; }
+.ba > .hint { position: absolute; right: 14px; bottom: 14px; z-index: 2; pointer-events: none; display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px 5px; background: var(--fg); color: var(--bg); font: 600 11px/1 var(--font-display); font-stretch: 82%; letter-spacing: .07em; text-transform: uppercase; opacity: 0; transform: translateY(4px); transition: opacity .2s ease-out, transform .3s cubic-bezier(.16, 1, .3, 1); }
+.ba > .hint::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--fg); box-shadow: 0 0 0 3px var(--live); }
+.ba.is-plain > .hint { opacity: 1; transform: none; }
+.ba.is-plain:hover > .hint { background: color-mix(in srgb, var(--fg) 86%, var(--bg)); }
+.ba > .layer { grid-area: 1 / 1; min-width: 0; position: relative; }
+.ba > .art { clip-path: inset(0 calc(100% - var(--wipe)) 0 0); padding: 8px 0 4px; overflow-x: auto; }
+/* inside an example the figures stand on the sheet: no frames, no caption strips */
+.art .cal-figure { border: 0; background: none; display: block; overflow-x: auto; }
+.art .cal-figure > svg { margin: 0; max-width: 100%; }
+.art .cal-figure > figcaption { display: none; }
+.ba::after { content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--wipe) - 4px); width: 8px; background: linear-gradient(90deg, transparent 3.5px, var(--fg) 3.5px 4.5px, transparent 4.5px), var(--swipe); opacity: 0; transition: opacity .25s ease-out; pointer-events: none; z-index: 3; }
+.ba.sweep::after { opacity: 1; }
+.ba.tinted > .art { padding: 22px 26px 26px; }
+.art .cal-mast { padding: 2px 0 12px; gap: 10px; }
+.art .cal-mast .word { font-size: 19px; }
+.art h2.hd { font-family: var(--font-display); font-stretch: var(--stretch-title); font-weight: 650; text-transform: uppercase; color: var(--title); font-size: clamp(24px, 2.4vw, 34px); line-height: .98; margin: 6px 0 16px; text-wrap: balance; max-width: 24ch; }
+.art .cal-mast + h2.hd { margin-top: 18px; }
+.art h2.hd .live { background: var(--swipe); padding: 0 .12em; }
+.art .grid2 { display: flex; flex-wrap: wrap; gap: 28px 64px; }
+.art .grid2 > * { min-width: 0; max-width: 100%; overflow-x: auto; }
+.art .cell-h { font: 600 11px/1 var(--font-display); font-stretch: 82%; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.art .mt { margin-top: 34px; }
+.art .cal-card + .cal-card { margin-top: 12px; }
+.art .cal-tally { margin-top: 12px; }
+.art .row2 { display: flex; flex-wrap: wrap; gap: 28px 64px; align-items: flex-start; }
+.art .row2 > * { min-width: 0; max-width: 100%; }
+.art .row2 > dl, .art .row2 > table { flex: 1 1 320px; }
+.art .cal-revs { width: 100%; }
+.art .form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px 22px; align-items: end; }
+.art .btns { display: flex; gap: 8px; justify-content: flex-end; align-items: center; margin-top: 16px; }
+
+/* the sentence that makes it */
+.ask { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; margin-top: 14px; color: var(--legend); }
+.ask q { quotes: "“" "”"; }
+
+/* the plain layer: a page without Calibrated (deliberately generic) */
+.plain { border-radius: 4px; font: 400 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #1e293b; background: #f8fafc; padding: 20px 22px 24px; letter-spacing: 0; }
+.plain .p-head { background: #6366f1; color: #fff; border-radius: 14px; padding: 18px 20px; margin-bottom: 14px; }
+.plain .p-head b { display: block; font-size: 20px; font-weight: 700; }
+.plain .p-head span { opacity: .85; font-size: 13px; }
+.plain .p-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.plain .p-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(15, 23, 42, .1); padding: 14px 16px; }
+.plain .p-card small { display: block; color: #64748b; font-size: 12.5px; }
+.plain .p-card strong { display: block; font-size: 24px; font-weight: 700; color: #0f172a; }
+.plain .p-bar { height: 8px; border-radius: 99px; background: #e2e8f0; margin-top: 8px; overflow: hidden; }
+.plain .p-bar i { display: block; height: 100%; border-radius: inherit; background: #3b82f6; }
+.plain h4 { font-size: 15px; font-weight: 600; margin: 4px 0 6px; color: #0f172a; }
+.plain ul { padding-left: 20px; margin: 0 0 12px; }
+.plain li { margin: 3px 0; }
+.plain p { margin: 0 0 10px; }
+.plain .p-btn { display: inline-block; background: #3b82f6; color: #fff; border-radius: 8px; padding: 7px 14px; font-weight: 600; font-size: 13px; margin-right: 6px; }
+.plain .p-btn.ghost { background: #e2e8f0; color: #334155; }
+.plain table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(15, 23, 42, .1); }
+.plain td, .plain th { padding: 8px 12px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+.plain th { color: #64748b; font-weight: 600; }
+.plain .pill { display: inline-block; border-radius: 99px; padding: 1px 9px; font-size: 12px; background: #dbeafe; color: #1d4ed8; }
+.plain .pill.g { background: #dcfce7; color: #15803d; }
+
+/* parts and finishes */
+#marks .cal-spec svg { max-width: 180px; }
+/* page-level grids stand open: no cell rules, just space */
+main > .cal-sec .cal-specimens { background: none; border: 0; gap: 36px 48px; }
+main > .cal-sec .cal-spec { background: none; padding: 0; }
+.get.cal-tiers { border: 0; gap: 48px; }
+.get.cal-tiers > div { padding: 0; background: none; }
+.get.cal-tiers > div + div { border-left: 0; border-top: 0; }
+.parts .cal-spec { min-height: 0; }
+.parts .cal-spec > :first-child { min-height: 110px; display: grid; place-items: center start; overflow-x: auto; }
+.finish-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.finish-row .cal-btn { display: inline-flex; align-items: center; gap: 8px; }
+.finish-row .chip { width: 22px; height: 12px; border: var(--line-thin) solid currentColor; display: inline-grid; grid-template-columns: 1fr 1fr 1fr; }
+.get .cal-pre { margin: 8px 0 12px; }
+.get ul { list-style: none; }
+.get li { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 6px 0; border-bottom: var(--line-thin) solid var(--edge); font-size: 14px; color: var(--legend); }
+.get .acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+
+@media (max-width: 1100px) { .art .cal-card { grid-template-columns: 1fr; } .art .cal-card > .info { border-right: 0; border-bottom: var(--line-thin) solid var(--fg); } }
+@media (max-width: 640px) {
+  .top .cal-caption, .top .btn-pair { display: none; }
+  .ba > .art { padding: 4px 0; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .ba { transition: none; } }
+</style>
+<script>
+  (() => { const q = new URLSearchParams(location.search); let t = q.get('theme');
+    if (!t) { try { t = localStorage.getItem('cal-cat-theme'); } catch {} }
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'film';
+    document.documentElement.dataset.theme = t;
+    if (q.get('view') === 'plain') document.documentElement.dataset.view = 'plain'; })();
+</script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="cal-mark" viewBox="4 8 40 32">
+    <rect x="26" y="8" width="8" height="30" fill="var(--swipe, #f3dc3a)"/>
+    <path d="M4 38 H44" stroke="currentColor" stroke-width="3.2"/>
+    <path d="M5.2 38 V10 M24 38 V10 M42.8 38 V10 M30 38 V10 M11.5 38 V27 M17.75 38 V27 M36.5 38 V27" stroke="currentColor" stroke-width="2.4"/>
+  </symbol>
+</svg>
+
+<div class="top"><div class="wrap">
+  <header class="cal-mast">
+    <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
+    <span class="word ruled">Calibrated</span>
+    <span class="cal-caption lg">technical drawings for claude's pages</span>
+    <span class="sp"></span>
+    <span class="btn-pair" role="group" aria-label="Show examples as"><button class="cal-btn" type="button" data-view="plain" aria-pressed="false">plain</button><button class="cal-btn" type="button" data-view="cal" aria-pressed="true">calibrated</button></span>
+    <button class="cal-btn" type="button" id="theme" aria-label="Switch to dark theme"><svg class="i-sun" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="3.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 1.5v2M9 14.5v2M1.5 9h2M14.5 9h2M3.7 3.7l1.4 1.4M12.9 12.9l1.4 1.4M3.7 14.3l1.4-1.4M12.9 5.1l1.4-1.4" stroke="currentColor" stroke-width="1.5"/></svg><svg class="i-moon" viewBox="0 0 18 18" aria-hidden="true"><path d="M14.8 11.2A6.3 6.3 0 0 1 6.8 3.2a6.3 6.3 0 1 0 8 8z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+  </header>
+</div></div>
+
+<main class="wrap">
+  <section class="cal-intro">
+    <h1>Technical drawings for everything Claude makes</h1>
+    <div>
+      <p>Ask Claude for a report, a review or a dashboard in the Calibrated style. Numbers come back as gauges, rulers and dimension lines, and the <span class="live">one thing that needs you</span> is highlighted.</p>
+      <div class="switch"><span class="btn-pair" role="group" aria-label="Show examples as"><button class="cal-btn" type="button" data-view="plain" aria-pressed="false">plain</button><button class="cal-btn" type="button" data-view="cal" aria-pressed="true">calibrated</button></span><span class="mut" style="font-size:14px">Flip to plain, then click any example to calibrate it.</span></div>
+    </div>
+  </section>
+
+  <div class="ba">
+        <div class="layer plain" aria-label="The same page without Calibrated">
+          <div class="p-head"><b>Website Relaunch – Status Update</b><span>Week 44 · Updated Friday</span></div>
+          <div class="p-cards">
+            <div class="p-card"><small>Tasks complete</small><strong>11 / 15</strong><div class="p-bar"><i style="width:73%"></i></div></div>
+            <div class="p-card"><small>Budget spent</small><strong>€38,400</strong><small>of €52,000 (74%)</small></div>
+            <div class="p-card"><small>Markets live</small><strong>3 / 7</strong><small>On track</small></div>
+          </div>
+          <h4>Team progress</h4>
+          <ul><li>Design: complete (4 weeks)</li><li>Development: complete (5 weeks)</li><li>Content migration: in progress (6.5 weeks so far)</li></ul>
+          <p>Next up: content migration is the current focus. Budget is approaching the 80% alert level.</p>
+        </div>
+        <div class="layer art cal-theme">
+          <header class="cal-mast">
+            <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
+            <span class="word">Relaunch</span>
+            <span class="cal-caption lg">status · week 44</span>
+            <span class="sp"></span>
+            <span class="lg up fnt">updated fri 31 oct</span>
+          </header>
+          <h2 class="hd">11 of 15 tasks done. <span class="live">Content</span> is the one still running.</h2>
+          <div class="grid2">
+            <div><div class="cell-h">tasks</div><cal-progress done="11" total="15" live="12" live-label="12 · content migration" done-label="11 done · 6 weeks"></cal-progress></div>
+            <div><div class="cell-h">budget</div><cal-meter value="38400" max="52000" warn="41600" label="spent €" width="300"></cal-meter></div>
+          </div>
+          <figure class="cal-figure mt"><svg id="f-cover"></svg><figcaption><b>Teams</b>Weeks on one ruler. Content is still going.</figcaption></figure>
+        </div>
+      </div>
+  <p class="ask"><span class="cal-legend">ask claude</span><q>Make a status page for our website relaunch in the Calibrated style.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+
+  <section class="cal-sec" id="report">
+    <div class="cal-sec-h"><b>1 · Status report</b><span>limits, budgets, what is running</span><span>sheet 1/7</span></div>
+    <div class="ba">
+        <div class="layer plain" aria-label="The same page without Calibrated">
+          <div class="p-head"><b>Spring Campaign – Monthly Report</b><span>Day 19 of 30</span></div>
+          <div class="p-cards">
+            <div class="p-card"><small>Ad spend</small><strong>€612k</strong><small>of €1M budget</small><div class="p-bar"><i style="width:61%"></i></div></div>
+            <div class="p-card"><small>Projected</small><strong>€900k</strong><small>by day 30</small></div>
+          </div>
+          <table><thead><tr><th>Channel</th><th>Ran</th><th>Status</th></tr></thead><tbody>
+            <tr><td>Search</td><td>12 days</td><td><span class="pill g">Done</span></td></tr>
+            <tr><td>Social</td><td>16 days</td><td><span class="pill g">Done</span></td></tr>
+            <tr><td>Email</td><td>19 days</td><td><span class="pill">Running</span></td></tr></tbody></table>
+        </div>
+        <div class="layer art cal-theme">
+          <h2 class="hd">€612k spent. At this pace we cross the <span class="live">80% alert</span> on day 25.</h2>
+          <figure class="cal-figure"><svg id="f-budget"></svg><figcaption><b>Budget</b>Spend so far, the alert lines and where today's pace lands.</figcaption></figure>
+          <figure class="cal-figure mt"><svg id="f-lanes"></svg><figcaption><b>Channels</b>Days each channel ran, on one ruler.</figcaption></figure>
+          <table class="cal-table mt"><thead><tr><th>no</th><th>channel</th><th class="num">spend</th><th>status</th></tr></thead><tbody>
+            <tr><td>01</td><td>Search</td><td class="num">€214k</td><td class="st" data-ink="ok">done</td></tr>
+            <tr><td>02</td><td>Social</td><td class="num">€268k</td><td class="st" data-ink="ok">done</td></tr>
+            <tr><td>03</td><td>Email</td><td class="num">€130k</td><td class="st" data-ink="live"><span>running</span></td></tr></tbody></table>
+        </div>
+      </div>
+    <p class="ask"><span class="cal-legend">ask claude</span><q>Make a monthly report for our spring campaign in the Calibrated style. Here are the numbers: …</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+  </section>
+
+  <section class="cal-sec" id="review">
+    <div class="cal-sec-h"><b>2 · Review board</b><span>keep or drop, with a tally · the buttons work</span><span>sheet 2/7</span></div>
+    <div class="ba">
+        <div class="layer plain" aria-label="The same page without Calibrated">
+          <div class="p-head"><b>Homepage Redesign – Proposals</b><span>2 changes for review</span></div>
+          <div class="p-card" style="margin-bottom:12px"><h4>1. Show pricing on a scale</h4><p>Currently: “Plans: Basic €9, Team €29, Business €79.” Proposal: show the plans on a price scale with Team highlighted.</p><span class="p-btn">Approve</span><span class="p-btn ghost">Reject</span></div>
+          <div class="p-card"><h4>2. Sign-up steps as progress</h4><p>Currently: “Step 3 of 5: billing details.” Proposal: show all five steps with the current one marked.</p><span class="p-btn">Approve</span><span class="p-btn ghost">Reject</span></div>
+        </div>
+        <div class="layer art cal-theme">
+          <h2 class="hd">Two changes. Keep or drop each one.</h2>
+          <article class="cal-card">
+            <div class="info"><h3>Pricing on a scale</h3><p class="why">Plans read as positions on one price ruler, with the one most people pick highlighted.</p><div class="id"><span class="no">01</span>pricing<span class="end">rev A</span></div></div>
+            <div class="cal-compare"><div><div class="cal-tag">today</div><div class="stage"><div class="cal-note">Plans: Basic €9, Team €29, Business €79</div></div></div><div><div class="cal-tag on">drawn</div><div class="stage"><cal-ruler min="0" max="80" step="5" every="2" unit="€" value="29" width="300" up></cal-ruler></div></div></div>
+            <div class="cal-sign" role="group" aria-label="Sign off 01"><button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button><button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="false">drop</button></div>
+          </article>
+          <article class="cal-card">
+            <div class="info"><h3>Sign-up as steps</h3><p class="why">All five steps visible, the current one on the highlighter.</p><div class="id"><span class="no">02</span>sign-up<span class="end">rev A</span></div></div>
+            <div class="cal-compare"><div><div class="cal-tag">today</div><div class="stage"><div class="cal-note">Step 3 of 5: billing details</div></div></div><div><div class="cal-tag on">drawn</div><div class="stage"><cal-progress done="2" total="5" live="3" live-label="3 · billing" step="34"></cal-progress></div></div></div>
+            <div class="cal-sign" role="group" aria-label="Sign off 02"><button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button><button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="false">drop</button></div>
+          </article>
+          <div class="cal-tally"><span data-tally>0 of 2 signed</span><span class="sp"></span><span class="lg mut">try the buttons</span></div>
+        </div>
+      </div>
+    <p class="ask"><span class="cal-legend">ask claude</span><q>Make a Calibrated review board for these homepage changes, with keep / drop sign-off.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+  </section>
+
+  <section class="cal-sec" id="explainer">
+    <div class="cal-sec-h"><b>3 · Explainer</b><span>a process as a cycle, a team as a tree</span><span>sheet 3/7</span></div>
+    <div class="ba">
+        <div class="layer plain" aria-label="The same page without Calibrated">
+          <div class="p-head"><b>How Support Tickets Work</b><span>A quick overview</span></div>
+          <h4>The process</h4>
+          <ul><li><strong>Received</strong> – an automatic reply is sent</li><li><strong>Triaged</strong> – tagged and assigned</li><li><strong>Working</strong> – an agent replies (current stage)</li><li><strong>Resolved</strong> – the customer confirms</li></ul>
+          <h4>Who's on it right now</h4>
+          <ul><li>Ana – refund request (working, 12 min)</li><li>Ravi – login problem (next)</li><li>Mei – shipping question (resolved, 8 min)</li></ul>
+        </div>
+        <div class="layer art cal-theme">
+          <h2 class="hd">Every ticket goes round the same four stations.</h2>
+          <div class="row2">
+            <figure class="cal-figure"><svg id="f-loop"></svg><figcaption><b>Cycle</b>The live station is highlighted.</figcaption></figure>
+            <figure class="cal-figure"><svg id="f-fan"></svg><figcaption><b>Team</b>Who is working on what.</figcaption></figure>
+          </div>
+        </div>
+      </div>
+    <p class="ask"><span class="cal-legend">ask claude</span><q>Explain how our support tickets move, as a Calibrated explainer page.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+  </section>
+
+  <section class="cal-sec" id="spec">
+    <div class="cal-sec-h"><b>4 · Spec sheet</b><span>rules and boundaries · hatched means closed</span><span>sheet 4/7</span></div>
+    <div class="ba">
+        <div class="layer plain" aria-label="The same page without Calibrated">
+          <div class="p-head"><b>Customer Data – Access Policy</b><span>Version B · 31 Oct 2026</span></div>
+          <h4>Access rules</h4>
+          <ul><li>Restricted area: only approved staff</li><li>Staff tools can read and write customer records</li><li>Payments and passwords are locked, even for staff</li><li>Exports are temporary</li><li>Batch jobs are not covered by this policy</li></ul>
+          <h4>Changes</h4>
+          <ul><li>A – First version (12 Oct)</li><li>B – Exports made temporary (31 Oct)</li></ul>
+        </div>
+        <div class="layer art cal-theme">
+          <h2 class="hd">Who can see what. Hatched means closed.</h2>
+          <figure class="cal-figure"><svg id="f-section"></svg><figcaption><b>Section</b>Regions inside the policy, closed or open.</figcaption></figure>
+          <div class="row2 mt">
+            <dl class="cal-titleblock">
+              <div class="name"><dt>title</dt><dd>Customer data · access</dd></div>
+              <div><dt>doc no.</dt><dd>POL-012</dd></div><div><dt>sheet</dt><dd>1 / 2</dd></div>
+              <div><dt>rev</dt><dd>B</dd></div><div><dt>date</dt><dd>31 oct</dd></div>
+            </dl>
+            <table class="cal-revs"><thead><tr><th>rev</th><th>change</th></tr></thead><tbody>
+              <tr><td><span class="cal-rev" data-rev="A"></span></td><td>First version.</td></tr>
+              <tr><td><span class="cal-rev" data-rev="B"></span></td><td>Exports made temporary.</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+    <p class="ask"><span class="cal-legend">ask claude</span><q>Turn our customer data access policy into a Calibrated spec sheet.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+  </section>
+
+  <section class="cal-sec" id="screen">
+    <div class="cal-sec-h"><b>5 · App screen</b><span>the same look for the screens of a tool</span><span>sheet 5/7</span></div>
+    <div class="ba">
+        <div class="layer plain" aria-label="The same page without Calibrated">
+          <div class="p-head"><b>Plan &amp; Usage</b><span>Team plan</span></div>
+          <div class="p-cards">
+            <div class="p-card"><small>Messages this month</small><strong>46,000</strong><small>of 100,000</small><div class="p-bar"><i style="width:46%"></i></div></div>
+            <div class="p-card"><small>Storage</small><strong>128 GB</strong><small>of 150 GB</small><div class="p-bar"><i style="width:85%;background:#ef4444"></i></div></div>
+          </div>
+          <div class="p-card"><h4>Monthly limit</h4><p>150,000 messages</p><p><input type="checkbox" checked disabled> Pause at the limit</p><span class="p-btn">Save</span><span class="p-btn ghost">Cancel</span></div>
+        </div>
+        <div class="layer art cal-theme">
+          <div class="cal-tabs mt" role="tablist" aria-label="Settings"><button role="tab" aria-selected="true">usage<span class="cal-cnt">02</span></button><button role="tab" aria-selected="false">members<span class="cal-cnt">12</span></button><button role="tab" aria-selected="false">billing</button></div>
+          <div class="grid2" style="border-top:0">
+            <div><div class="cell-h">messages this month</div><cal-meter value="46000" max="100000" warn="80000" label="messages" width="300"></cal-meter></div>
+            <div><div class="cell-h">storage</div><cal-meter value="128" max="150" warn="120" label="storage" format="raw" unit=" GB" width="300"></cal-meter></div>
+          </div>
+          <div class="form mt">
+            <div class="cal-field"><label for="lim">monthly limit</label><input class="cal-input" id="lim" value="150 000"></div>
+            <label class="cal-check"><input type="checkbox" checked> <span>Pause at the limit</span></label>
+          </div>
+          <div class="btns"><button class="cal-btn quiet" type="button">cancel</button><button class="cal-btn primary" type="button">save</button></div>
+        </div>
+      </div>
+    <p class="ask"><span class="cal-legend">ask claude</span><q>Build a plan and usage screen for our app in the Calibrated style.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+  </section>
+
+  <section class="cal-sec" id="parts">
+    <div class="cal-sec-h"><b>6 · Parts</b><span>what every page above is built from</span><span>sheet 6/7</span></div>
+    <div class="cal-specimens parts" style="--cols:3">
+      <div class="cal-spec"><div><cal-meter value="46000" max="1000000" warn="800000" label="requests today" width="280"></cal-meter></div><h4>Meter</h4><p>How full something is, against its limit.</p></div>
+      <div class="cal-spec"><div><cal-progress done="6" total="10" live="7" live-label="7 · review" step="24"></cal-progress></div><h4>Progress</h4><p>How far along a list of steps, and which one is live.</p></div>
+      <div class="cal-spec"><div><cal-position index="3" count="7" label="markets"></cal-position></div><h4>Position</h4><p>Which one of a set you are looking at.</p></div>
+      <div class="cal-spec"><div><cal-durations max="15" unit="m" width="300"><cal-span name="design" value="252"></cal-span><cal-span name="build" value="400"></cal-span><cal-span name="launch" live data-live></cal-span></cal-durations></div><h4>Durations</h4><p>How long things took. The live one keeps ticking.</p></div>
+      <div class="cal-spec"><div><cal-ruler min="0" max="150" step="10" every="5" unit="k" value="94" width="280" up></cal-ruler></div><h4>Ruler</h4><p>Where one value sits on a scale.</p></div>
+      <div class="cal-spec"><div><cal-diff added="184" removed="20" label="edits"></cal-diff></div><h4>Change</h4><p>What was added and what was removed.</p></div>
+    </div>
+    <div class="cal-gl" style="margin:28px 0 12px">the eight marks</div>
+    <div class="cal-specimens" style="--cols:4" id="marks"></div>
+  </section>
+
+  <section class="cal-sec" id="finishes">
+    <div class="cal-sec-h"><b>7 · Finishes</b><span>same drawings, your colours · every example re-inks</span><span>sheet 7/7</span></div>
+    <div class="finish-row" role="group" aria-label="Finish" id="finishes-row"></div>
+    <div class="ba">
+        <div class="layer art cal-theme">
+          <header class="cal-mast"><svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg><span class="word">Launch</span><span class="cal-caption lg">today</span><span class="sp"></span><span class="cal-count" data-n="1" data-noun="running" data-ink="live"></span></header>
+          <h2 class="hd">Launch day: <span class="live">checkout</span> is rolling out now.</h2>
+          <div class="grid2">
+            <div><div class="cell-h">rollout</div><cal-progress done="4" total="6" live="5" live-label="5 · checkout" done-label="4 done · 38 min"></cal-progress></div>
+            <div><div class="cell-h">traffic</div><cal-meter value="61000" max="100000" warn="80000" label="visitors" width="280"></cal-meter></div>
+          </div>
+          <div class="mt"><cal-durations max="15" unit="m"><cal-span name="homepage" value="312"></cal-span><cal-span name="search" value="505"></cal-span><cal-span name="checkout" live data-live></cal-span></cal-durations></div>
+        </div>
+      </div>
+    <p class="ask"><span class="cal-legend">ask claude</span><q>Re-colour it with our brand: navy page, white ink, cyan highlight.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+  </section>
+
+  <section class="cal-sec" id="get">
+    <div class="cal-sec-h"><b>Get it</b><span>free and open source · mit</span><span></span></div>
+    <div class="cal-tiers get">
+      <div><div class="tt">1 · Install in Claude Code</div><p>Paste these two lines into Claude Code.</p>
+        <pre class="cal-pre" id="install">/plugin marketplace add &lt;you&gt;/calibrated
+/plugin install calibrated@calibrated</pre>
+        <div class="acts"><button class="cal-btn" type="button" data-copy-install>copy</button></div></div>
+      <div><div class="tt">2 · Ask for any page</div><p>Say “in the Calibrated style”. Claude picks the right drawing for each number.</p>
+        <div class="acts"><button class="cal-btn primary" type="button" id="share">share this page</button><a class="cal-btn" href="reference.html" style="text-decoration:none">reference for builders</a><span class="mut" id="share-msg" role="status" style="font-size:13px"></span></div></div>
+    </div>
+  </section>
+
+  <footer class="cal-foot"><span>calibrated · catalog 2026</span><span>every number on this page is example data</span></footer>
+</main>
+<script src="../skills/calibrated-figures/assets/calibrated-figures.js"></script>
+<script src="../skills/calibrated-figures/assets/calibrated-recipes.js"></script>
+<script src="../skills/calibrated-components/assets/calibrated-components.js"></script>
+<script>
+(() => {
+  const { K, recipes: R, mount } = Calibrated;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const html = document.documentElement;
+  /* ── figure data (illustrative) */
+  const D = {
+    cover: R.lanes({ n: 1, title: 'relaunch · teams · weeks', max: 8, unit: 'w', step: 1, every: 2, w: 480, labelW: 64, lanes: [
+      { name: 'design', end: 4, label: '4 wk' },
+      { name: 'build', end: 5, label: '5 wk' },
+      { name: 'content', end: 6.5, label: '6.5 wk', live: true, box: ['running', 'task 12 of 15'] },
+    ] }),
+    budget: R.budget({ n: 2, title: 'ad spend · spring campaign · 30 days', max: 1000, step: 50, every: 4, used: 612, at: 'day 19', pace: 900,
+      fmt: (v) => '€' + Math.round(v) + 'k', alerts: [{ v: 800, label: 'alert 80%' }, { v: 950, label: '95%' }], paceLabel: ['at this pace by day 30', '≈ €900k · 80% on day 25'] }),
+    lanes: R.lanes({ n: 3, title: 'channels · days running', max: 20, unit: 'd', step: 1, every: 5, w: 520, labelW: 64, lanes: [
+      { name: 'search', end: 12, label: '12 days', box: ['€214k', 'done'] },
+      { name: 'social', end: 16, label: '16 days', box: ['€268k', 'done'] },
+      { name: 'email', end: 19, label: '19 days', live: true, box: ['running', '€130k so far'] },
+    ] }),
+    loop: R.loop({ n: 4, title: 'support · ticket cycle', center: '14 open', stations: [
+      { name: 'received', cmd: 'auto-reply', state: 'done' },
+      { name: 'triaged', cmd: 'tag + assign', state: 'done' },
+      { name: 'working', cmd: 'agent replies', state: 'live' },
+      { name: 'resolved', cmd: 'customer confirms' },
+    ] }),
+    fan: R.fanout({ n: 5, title: 'support · team · now', root: ['support lead', '14 open'], folded: '+9 resolved today', children: [
+      { task: 'refund request', meta: 'Ana · order 4471', time: '12 min', live: true },
+      { task: 'login problem', meta: 'Ravi · queued', time: 'next' },
+      { task: 'shipping question', meta: 'Mei · resolved', time: '8 min' },
+    ] }),
+    section: R.section({ n: 6, title: 'customer data · access', boundary: { label: 'inside this policy' },
+      regions: [
+        { x: 20, y: 38, w: 360, h: 190, kind: 'hatch', label: 'restricted' },
+        { x: 40, y: 70, w: 230, h: 146, kind: 'clear', label: 'staff tools' },
+        { x: 132, y: 76, kind: 'island', label: 'payments' }, { x: 204, y: 76, kind: 'island', label: 'passwords' },
+        { x: 56, y: 132, w: 196, h: 68, kind: 'strong', label: 'customer records', sub: 'read and write' },
+        { x: 290, y: 132, w: 76, h: 52, kind: 'dotted', label: 'exports', sub: 'temporary' },
+      ],
+      callouts: [
+        { at: [350, 56], l1: 'closed', l2: 'restricted area' },
+        { at: [262, 110], l1: 'open', l2: 'staff tools, records' },
+        { l1: 'locked', l2: 'payments, passwords' },
+        { l1: 'outside', l2: 'batch jobs', live: true },
+      ] }),
+  };
+
+  /* ── the eight marks */
+  const marks = [
+    ['Leader + value', () => K.leader([[16, 52], [16, 26], [40, 26]]) + K.box(40, 10, null, 'cached', '≈ 41.4k')],
+    ['Ruler', () => K.ruler(6, 146, 40, 50, 5, 5, (v) => (v ? v + 'k' : '0'))],
+    ['Dimension line', () => K.dim(8, 146, 34, '4m 12s')],
+    ['Detail inset', () => K.rect(8, 10, 10, 4, 'fg', 'none') + K.line(8, 12, 146, 12, 'ed') + K.inset(8, 22, 15, 8, 104, 42, 20) + K.rect(8, 42, 96, 10, 'none', 'ed') + K.rect(9, 43, 66, 8, 'fg', 'none')],
+    ['Hatch', () => K.hatchRect(8, 10, 64, 38) + K.rect(82, 10, 64, 38, 'none', 'fg') + K.t(40, 62, 'closed', 'mu', 'middle') + K.t(114, 62, 'open', 'mu', 'middle')],
+    ['Nodes', () => K.node(16, 30, 'done') + K.node(52, 30, 'todo') + K.node(88, 30, 'merge') + K.node(126, 30, 'live') + K.t(16, 56, 'done', 'fa', 'middle') + K.t(52, 56, 'next', 'fa', 'middle') + K.t(88, 56, 'merge', 'fa', 'middle') + K.t(126, 56, 'live', 'lv', 'middle')],
+    ['Numbered step', () => K.node(12, 30, 'todo') + K.cmd(26, 34, '1', 'send invoice')],
+    ['FIG. label', () => `<g transform="translate(6 24)">${K.fig(7, 'network')}</g>` + K.centre(6, 46, 150, 46)],
+  ];
+
+  function drawAll() {
+    mount('#f-cover', D.cover); mount('#f-budget', D.budget); mount('#f-lanes', D.lanes);
+    mount('#f-loop', D.loop); mount('#f-fan', D.fan); mount('#f-section', D.section);
+    $('#marks').innerHTML = marks.map(([h, f]) => `<div class="cal-spec">${Calibrated.svg(156, 70, f(), h)}<h4>${h}</h4></div>`).join('');
+    if (Calibrated.counts) Calibrated.counts();
+  }
+  const t0 = Date.now();
+  $$('cal-span[data-live]').forEach((s, i) => s.setAttribute('start', t0 - (i ? 431000 : 278000)));
+  Calibrated.ready(drawAll);
+
+  /* ── Plain / Calibrated: the switch flips every example; clicking a plain example calibrates just that one */
+  const plates = $$('.ba').filter((ba) => ba.querySelector('.plain'));
+  plates.forEach((ba) => {
+    const plain = ba.querySelector('.plain');
+    plain.setAttribute('role', 'button');
+    plain.setAttribute('aria-label', 'Show this example in the Calibrated style');
+    const hint = document.createElement('span');
+    hint.className = 'hint'; hint.setAttribute('aria-hidden', 'true'); hint.textContent = 'click to calibrate';
+    ba.append(hint);
+    const go = () => { if (ba.classList.contains('is-plain')) { setPlate(ba, false, true); syncSwitch(); } };
+    plain.addEventListener('click', go);
+    plain.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  });
+  function setPlate(ba, isPlain, animate) {
+    const art = ba.querySelector('.art'), plain = ba.querySelector('.plain');
+    ba.classList.toggle('is-plain', isPlain);
+    art.inert = isPlain; plain.inert = !isPlain; plain.tabIndex = isPlain ? 0 : -1;
+    if (animate) { ba.classList.add('sweep'); clearTimeout(ba._t); ba._t = setTimeout(() => ba.classList.remove('sweep'), 900); }
+  }
+  function syncSwitch() {
+    const n = plates.filter((ba) => ba.classList.contains('is-plain')).length;
+    const v = n === plates.length ? 'plain' : n === 0 ? 'cal' : 'mixed';
+    html.dataset.view = v;
+    $$('button[data-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === v)));
+  }
+  const setView = (v, animate = true) => { plates.forEach((ba) => setPlate(ba, v === 'plain', animate)); syncSwitch(); };
+  $$('button[data-view]').forEach((b) => b.addEventListener('click', () => setView(b.dataset.view)));
+  setView(html.dataset.view === 'plain' ? 'plain' : 'cal', false);
+
+  /* ── finishes: re-seed every example */
+  const FIN = [
+    ['film', 'Film', 'Graphite on drafting film', null, ['#f6f7f3', '#1d2126', '#f3dc3a']],
+    ['night', 'Night', 'White ink on a graphite sheet', { '--bg': '#18191a', '--fg': '#e6e6e3', '--muted': '#9aa3a8', '--title': '#f4f6f1', '--live': '#e9d43c', '--ok': '#7cc493', '--fault': '#f0715f', '--shade': '#000', '--swipe-strength': '92%', '--on-swipe': '#18191a', 'color-scheme': 'dark' }],
+    ['harbour', 'Harbour', 'Navy, white ink, cyan highlight', { '--bg': '#10223a', '--fg': '#e9eff6', '--muted': '#9db0c6', '--title': '#ffffff', '--live': '#45d3ea', '--ok': '#6fd39a', '--fault': '#ff8070', '--shade': '#000', '--swipe-strength': '88%', '--on-swipe': '#10223a', 'color-scheme': 'dark' }],
+    ['forest', 'Forest', 'Pine ink, lime highlight', { '--bg': '#f2f5ef', '--fg': '#1d3326', '--muted': '#55685a', '--title': '#12241a', '--live': '#b9e07a', '--ok': '#2b7a46', '--fault': '#b8432f', '--shade': '#4d5a4f' }],
+    ['signal', 'Signal', 'Cool grey, orange highlight', { '--bg': '#f1f2f4', '--fg': '#1b1d22', '--muted': '#5a5f69', '--title': '#0d0e11', '--live': '#ffab6b', '--ok': '#2c7a4b', '--fault': '#c22f6b', '--shade': '#5c616b' }],
+    ['plum', 'Plum', 'Dark plum, pink highlight', { '--bg': '#1d1522', '--fg': '#f0e7f3', '--muted': '#b3a2ba', '--title': '#ffffff', '--live': '#f5a3d6', '--ok': '#86d4a2', '--fault': '#ff7f6e', '--shade': '#000', '--swipe-strength': '90%', '--on-swipe': '#1d1522', 'color-scheme': 'dark' }],
+  ];
+  FIN.forEach((f) => { if (!f[4]) f[4] = [f[3]['--bg'], f[3]['--fg'], f[3]['--live']]; });
+  const row = $('#finishes-row');
+  row.innerHTML = FIN.map(([id, name, sub, , c]) => `<button class="cal-btn" type="button" data-fin="${id}" aria-pressed="false" title="${sub}"><span class="chip" aria-hidden="true"><i style="background:${c[0]}"></i><i style="background:${c[1]}"></i><i style="background:${c[2]}"></i></span>${name}</button>`).join('');
+  let finish = null;
+  const KEYS = ['--bg', '--fg', '--muted', '--title', '--live', '--ok', '--fault', '--shade', '--swipe-strength', '--on-swipe', 'color-scheme'];
+  function applyFinish(id) {
+    finish = id;
+    const f = FIN.find((x) => x[0] === id), vars = f && f[3];
+    $$('.ba .art.cal-theme').forEach((el) => { KEYS.forEach((k) => el.style.removeProperty(k)); if (vars) Object.entries(vars).forEach(([k, v]) => el.style.setProperty(k, v)); });
+    $$('[data-fin]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.fin === id)));
+    const own = id === (html.dataset.theme === 'night' ? 'night' : 'film');
+    $$('.ba').forEach((ba) => ba.classList.toggle('tinted', !own));
+    Calibrated.redraw && Calibrated.redraw();
+  }
+  row.addEventListener('click', (e) => { const b = e.target.closest('[data-fin]'); if (b) applyFinish(b.dataset.fin); });
+
+  /* ── theme: page and the default finish switch together */
+  const themeBtn = $('#theme');
+  const setTheme = (t) => {
+    html.dataset.theme = t;
+    themeBtn.setAttribute('aria-label', t === 'night' ? 'Switch to light theme' : 'Switch to dark theme');
+    try { localStorage.setItem('cal-cat-theme', t); } catch {}
+    if (!finish || finish === 'film' || finish === 'night') applyFinish(t === 'night' ? 'night' : 'film');
+  };
+  setTheme(html.dataset.theme);
+  themeBtn.addEventListener('click', () => setTheme(html.dataset.theme === 'night' ? 'film' : 'night'));
+
+  /* ── review board sign-off */
+  const cards = $$('#review .cal-card');
+  const tally = () => { $('[data-tally]').textContent = `${cards.filter((c) => c.dataset.v).length} of ${cards.length} signed`; };
+  $$('#review .cal-sign .cal-btn').forEach((b) => b.addEventListener('click', () => {
+    const card = b.closest('.cal-card'), on = b.getAttribute('aria-pressed') !== 'true';
+    card.querySelectorAll('.cal-sign .cal-btn').forEach((x) => x.setAttribute('aria-pressed', 'false'));
+    b.setAttribute('aria-pressed', String(on));
+    if (on) { card.dataset.v = b.dataset.v; card.dataset.state = b.dataset.v === 'drop' ? 'dropped' : 'ok'; }
+    else { delete card.dataset.v; delete card.dataset.state; }
+    tally();
+  }));
+
+  /* ── copy and share */
+  const copy = async (btn, text) => {
+    try { await navigator.clipboard.writeText(text); btn.textContent = 'copied'; } catch { btn.textContent = 'select it'; }
+    setTimeout(() => { btn.textContent = 'copy'; }, 1600);
+  };
+  $$('[data-copy]').forEach((b) => b.addEventListener('click', () => copy(b, b.parentElement.querySelector('q').textContent)));
+  $('[data-copy-install]').addEventListener('click', (e) => copy(e.currentTarget, $('#install').textContent));
+  const msg = $('#share-msg');
+  $('#share').addEventListener('click', async () => {
+    const data = { title: 'Calibrated', text: 'Technical drawings for everything Claude makes.', url: location.href.split('#')[0] };
+    if (navigator.share) { try { await navigator.share(data); return; } catch (e) { if (e.name === 'AbortError') return; } }
+    try { await navigator.clipboard.writeText(data.url); msg.textContent = 'link copied'; }
+    catch { msg.textContent = 'copy the address from your browser bar'; }
+  });
+})();
+</script>
+</body>
+</html>

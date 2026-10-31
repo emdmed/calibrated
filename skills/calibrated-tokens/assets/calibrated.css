@@ -1,0 +1,200 @@
+/* Calibrated — tokens and base
+   Every page is a drawing sheet: drafting film, graphite ink, two line
+   weights. A checker's highlighter marks the one live thing; red markup marks
+   faults and revisions; a green check marks what passed.
+
+   Seeds: --bg (sheet), --fg (ink), --live (highlighter), --ok, --fault,
+   --muted, --title. Everything else is derived with color-mix(), so a new
+   theme is a handful of lines. See references/theming.md. */
+
+:root, [data-theme="film"], [data-theme="light"] {
+  /* ── seeds · "film" (light, default) */
+  --bg: #f6f7f3;            /* drafting film */
+  --fg: #1d2126;            /* graphite ink */
+  --muted: #59616a;
+  --title: #0f1216;
+  --live: #f3dc3a;          /* highlighter */
+  --ok: #2c7a4b;            /* check green */
+  --fault: #c5302a;         /* markup red */
+  --shade: #6d7368;         /* the desk under the sheet */
+  --swipe-strength: 72%;
+  --on-swipe: var(--fg);    /* ink set on a highlight */
+  color-scheme: light;
+}
+
+/* ── "night" dark theme: white ink on a graphite sheet */
+[data-theme="night"], [data-theme="dark"] {
+  --bg: #18191a;
+  --fg: #e6e6e3;
+  --muted: #9aa3a8;
+  --title: #f4f6f1;
+  --live: #e9d43c;
+  --ok: #7cc493;
+  --fault: #f0715f;
+  --shade: #000;
+  --swipe-strength: 92%;
+  --on-swipe: #18191a;      /* dark ink on the highlight, so yellow stays yellow */
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: dark) {
+  [data-theme="auto"] {
+    --bg: #18191a; --fg: #e6e6e3; --muted: #9aa3a8; --title: #f4f6f1;
+    --live: #e9d43c; --ok: #7cc493; --fault: #f0715f; --shade: #000;
+    --swipe-strength: 92%; --on-swipe: #18191a; color-scheme: dark;
+  }
+}
+
+/* Derived tokens are declared on every theme root, so a section with its own
+   data-theme (or .cal-theme plus seed overrides) recomputes them. */
+:root, [data-theme], .cal-theme {
+  /* ── type: technical lettering, condensed caps for titles, mono for measures */
+  --font-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --font-legend: "Chivo Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --fs-body: 15px;
+  --fs-small: 13px;
+  --fs-legend: 11px;        /* every SVG label, tag, table head */
+  --fs-h3: 21px;
+  --fs-h1: clamp(34px, 5vw, 64px);
+  --track-legend: .06em;
+  --stretch-title: 72%;     /* Archivo width axis for titles */
+
+  /* ── line weights (ISO 128: thick, thin) */
+  --line-thick: 1.6px;
+  --line-thin: 1px;
+
+  /* ── derived surfaces */
+  --gutter: color-mix(in srgb, var(--bg) 86%, var(--shade));   /* desk */
+  --panel: var(--bg);                                            /* sheet */
+  --well: color-mix(in srgb, var(--bg) 94%, var(--shade));
+  --raised: color-mix(in srgb, var(--bg) 96%, var(--fg));
+
+  /* ── derived lines and inks */
+  --edge: color-mix(in srgb, var(--bg) 84%, var(--fg));
+  --edge-strong: color-mix(in srgb, var(--bg) 62%, var(--fg));
+  --legend: color-mix(in srgb, var(--fg) 88%, var(--bg));
+  --faint: color-mix(in srgb, var(--fg) 52%, var(--bg));
+  --swipe: color-mix(in srgb, var(--live) var(--swipe-strength), transparent);
+  --hover: color-mix(in srgb, var(--fg) 5%, transparent);
+  --current: color-mix(in srgb, var(--fg) 8%, transparent);
+  --select-bg: var(--swipe);
+  --select-fg: var(--on-swipe);
+
+  /* ── spacing */
+  --gap: 16px;
+  --pad: 20px;
+  --wrap: 1280px;
+}
+
+/* ── a themed section inside the page paints its own sheet and ink */
+[data-theme]:not(:root), .cal-theme { background: var(--bg); color: var(--fg); }
+
+/* ── base */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { background: var(--gutter); }
+body {
+  color: var(--fg);
+  font: 400 var(--fs-body)/1.55 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection { background: var(--select-bg); color: var(--select-fg); }
+:focus-visible { outline: var(--line-thick) solid var(--fg); outline-offset: 2px; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--edge-strong); border: 3px solid var(--gutter); }
+::-webkit-scrollbar-track { background: transparent; }
+* { scrollbar-color: var(--edge-strong) transparent; scrollbar-width: thin; }
+input, textarea { caret-color: var(--fg); }
+code, kbd, samp { font-family: var(--font-legend); font-size: .82em; color: var(--fg); }
+a { color: inherit; text-decoration: underline; text-decoration-thickness: 1px; text-decoration-color: var(--edge-strong); text-underline-offset: 3px; }
+a:hover { text-decoration-color: var(--fg); }
+img, svg { display: block; max-width: 100%; }
+svg { height: auto; }
+
+/* ── type roles */
+.lg {                          /* legend: labels, tags, numbers */
+  font-family: var(--font-legend);
+  font-size: var(--fs-legend);
+  letter-spacing: var(--track-legend);
+  font-variant-numeric: tabular-nums;
+}
+.up { text-transform: uppercase; }
+.title {                       /* condensed technical caps */
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-title);
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: .01em;
+  line-height: 1;
+  color: var(--title);
+  text-wrap: balance;
+}
+.word {                        /* the wordmark, in the condensed headline caps */
+  font-family: var(--font-display);
+  font-stretch: var(--stretch-title);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: .045em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--title);
+}
+/* the ruled lockup: the word sits on a scale of ten with one live graduation at 7 */
+.word.ruled { display: inline-block; position: relative; padding-bottom: 13px; }
+.word.ruled::before,
+.word.ruled::after { content: ""; position: absolute; bottom: 0; }
+.word.ruled::before {          /* the live graduation: swipe behind a full-height tick */
+  left: calc(70% - 3.5px); width: 8px; height: calc(8px + var(--line-thick));
+  background: linear-gradient(90deg, transparent 3.5px, var(--fg) 3.5px 4.5px, transparent 4.5px), var(--swipe);
+}
+.word.ruled::after {           /* the scale: thick top rule, long ticks at 0/5/10, short ticks between */
+  left: 0; right: .045em; height: 8px;
+  border-top: var(--line-thick) solid var(--fg); border-right: var(--line-thin) solid var(--fg);
+  background:
+    repeating-linear-gradient(90deg, var(--fg) 0 1px, transparent 1px 50%) top / 100% 8px no-repeat,
+    repeating-linear-gradient(90deg, var(--fg) 0 1px, transparent 1px 10%) top / 100% 4px no-repeat;
+}
+
+/* ── ink utilities */
+.mut { color: var(--muted); }
+.fnt { color: var(--faint); }
+.okc { color: var(--ok); }
+.flt { color: var(--fault); }
+.live {                        /* the highlighter: a swipe behind ink, never coloured text */
+  color: var(--on-swipe);
+  background: linear-gradient(transparent 18%, var(--swipe) 18%, var(--swipe) 88%, transparent 88%);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding: 0 .18em;
+}
+
+/* ── layout */
+.wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 clamp(16px, 3vw, 32px); }
+
+/* ── figures: every Calibrated SVG sets its labels in legend type */
+svg[data-cal] {
+  font-family: var(--font-legend);
+  font-size: var(--fs-legend);
+  font-variant-numeric: tabular-nums;
+  overflow: visible;
+}
+
+/* ── the mark: a ruler with one live graduation (draw with <svg class="cal-mark"><use href="#cal-mark"/></svg>) */
+.cal-mark { width: 30px; height: 24px; color: var(--fg); flex: none; }
+
+/* ── status marks, same vocabulary as figure nodes */
+.cal-dot {
+  display: inline-block;
+  width: 9px; height: 9px;
+  border: var(--line-thin) solid var(--edge-strong);
+  background: var(--panel);
+  vertical-align: -1px;
+}
+.cal-dot.done { background: var(--fg); border-color: var(--fg); }
+.cal-dot.on { border-radius: 50%; border: 3px solid var(--swipe); background: var(--on-swipe); width: 13px; height: 13px; vertical-align: -3px; }
+.cal-dot.ok { background: var(--ok); border-color: var(--ok); }
+.cal-dot.fault { background: var(--fault); border-color: var(--fault); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

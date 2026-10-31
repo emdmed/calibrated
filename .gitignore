@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+*.log
+.impeccable/review/
+.impeccable/answer.txt
+.impeccable/brief-body.md
+.impeccable/direction-payload.json
+.impeccable/questions/
+.impeccable/config.local.json

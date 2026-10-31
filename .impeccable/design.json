@@ -1,0 +1,510 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-31T11:47:23.567213+00:00",
+  "title": "Design System: Calibrated",
+  "extensions": {
+    "colorMeta": {
+      "drafting-film": {
+        "role": "neutral",
+        "displayName": "Drafting Film",
+        "canonical": "#f6f7f3",
+        "tonalRamp": [
+          "#2a2e1f",
+          "#4a5136",
+          "#6a744d",
+          "#8a9765",
+          "#a5af87",
+          "#bfc6aa",
+          "#d9ddcd",
+          "#f4f5f0"
+        ]
+      },
+      "graphite-ink": {
+        "role": "primary",
+        "displayName": "Graphite Ink",
+        "canonical": "#1d2126",
+        "tonalRamp": [
+          "#21262b",
+          "#3a424c",
+          "#545f6e",
+          "#6d7c8f",
+          "#8d99a8",
+          "#aeb7c2",
+          "#cfd4db",
+          "#f1f2f4"
+        ]
+      },
+      "graphite-muted": {
+        "role": "neutral",
+        "displayName": "Graphite Muted",
+        "canonical": "#59616a",
+        "tonalRamp": [
+          "#23262a",
+          "#3e4349",
+          "#586069",
+          "#737d89",
+          "#929aa4",
+          "#b2b8be",
+          "#d1d5d9",
+          "#f1f2f3"
+        ]
+      },
+      "title-ink": {
+        "role": "primary",
+        "displayName": "Title Ink",
+        "canonical": "#0f1216",
+        "tonalRamp": [
+          "#1f252d",
+          "#374250",
+          "#4e5e73",
+          "#667a95",
+          "#8898ae",
+          "#abb6c5",
+          "#cdd4dd",
+          "#f0f2f5"
+        ]
+      },
+      "highlighter": {
+        "role": "secondary",
+        "displayName": "Checker's Highlighter",
+        "canonical": "#f3dc3a",
+        "tonalRamp": [
+          "#484004",
+          "#7f7008",
+          "#b6a10b",
+          "#edd10e",
+          "#f3dd42",
+          "#f7e779",
+          "#faf1b0",
+          "#fefbe7"
+        ]
+      },
+      "check-green": {
+        "role": "tertiary",
+        "displayName": "Check Green",
+        "canonical": "#2c7a4b",
+        "tonalRamp": [
+          "#143823",
+          "#24633d",
+          "#338e57",
+          "#43b972",
+          "#6cca91",
+          "#97d9b1",
+          "#c1e9d1",
+          "#ecf8f1"
+        ]
+      },
+      "markup-red": {
+        "role": "tertiary",
+        "displayName": "Markup Red",
+        "canonical": "#c5302a",
+        "tonalRamp": [
+          "#3f0f0d",
+          "#6f1b18",
+          "#9f2722",
+          "#cf322c",
+          "#dc5f5a",
+          "#e68d8a",
+          "#f0bcba",
+          "#fbebea"
+        ]
+      },
+      "desk-shade": {
+        "role": "neutral",
+        "displayName": "Desk Shade",
+        "canonical": "#6d7368",
+        "tonalRamp": [
+          "#262824",
+          "#434740",
+          "#60655c",
+          "#7d8477",
+          "#9aa096",
+          "#b8bcb4",
+          "#d5d7d3",
+          "#f2f3f2"
+        ]
+      },
+      "night-sheet": {
+        "role": "neutral",
+        "displayName": "Night Sheet",
+        "canonical": "#18191a",
+        "tonalRamp": [
+          "#252628",
+          "#414346",
+          "#5d6164",
+          "#797e83",
+          "#979b9f",
+          "#b5b8bb",
+          "#d3d5d7",
+          "#f2f2f3"
+        ]
+      },
+      "night-ink": {
+        "role": "primary",
+        "displayName": "Night Ink",
+        "canonical": "#e6e6e3",
+        "tonalRamp": [
+          "#282824",
+          "#474740",
+          "#66665b",
+          "#858577",
+          "#a0a095",
+          "#bcbcb4",
+          "#d7d7d3",
+          "#f3f3f2"
+        ]
+      },
+      "night-muted": {
+        "role": "neutral",
+        "displayName": "Night Muted",
+        "canonical": "#9aa3a8",
+        "tonalRamp": [
+          "#232729",
+          "#3e4548",
+          "#596368",
+          "#748087",
+          "#939da2",
+          "#b3b9bd",
+          "#d2d6d8",
+          "#f1f3f3"
+        ]
+      },
+      "night-title": {
+        "role": "primary",
+        "displayName": "Night Title",
+        "canonical": "#f4f6f1",
+        "tonalRamp": [
+          "#282f1e",
+          "#465235",
+          "#65764c",
+          "#839962",
+          "#9fb185",
+          "#bbc7a9",
+          "#d7decc",
+          "#f3f5ef"
+        ]
+      },
+      "night-highlighter": {
+        "role": "secondary",
+        "displayName": "Night Highlighter",
+        "canonical": "#e9d43c",
+        "tonalRamp": [
+          "#453d08",
+          "#796c0e",
+          "#ad9b14",
+          "#e2ca19",
+          "#ebd74b",
+          "#f1e37f",
+          "#f7eeb4",
+          "#fcfae8"
+        ]
+      },
+      "night-check": {
+        "role": "tertiary",
+        "displayName": "Night Check",
+        "canonical": "#7cc493",
+        "tonalRamp": [
+          "#183521",
+          "#2a5d3a",
+          "#3c8553",
+          "#4ead6c",
+          "#75c18d",
+          "#9dd3ae",
+          "#c5e5cf",
+          "#edf7f1"
+        ]
+      },
+      "night-markup": {
+        "role": "tertiary",
+        "displayName": "Night Markup",
+        "canonical": "#f0715f",
+        "tonalRamp": [
+          "#460e07",
+          "#7b190c",
+          "#b12411",
+          "#e62f16",
+          "#ee5c48",
+          "#f38c7d",
+          "#f8bbb2",
+          "#fdeae8"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Sheet headline, one per page; condensed caps, width 72%."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section strip titles and title-block name."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Running text, ledes ≤68ch."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Plain-word labels in condensed caps, width 82%."
+      },
+      "legend": {
+        "displayName": "Legend",
+        "purpose": "Numbers, values, code and every SVG figure label."
+      },
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "The name in condensed headline caps; Calibrated's own lockup sits it on a scale of ten with one live graduation (.word.ruled)."
+      }
+    },
+    "derivedTokens": [
+      {
+        "name": "--gutter",
+        "value": "color-mix(in srgb, var(--bg) 86%, var(--shade))",
+        "purpose": "Desk under the sheet."
+      },
+      {
+        "name": "--well",
+        "value": "color-mix(in srgb, var(--bg) 94%, var(--shade))",
+        "purpose": "Recessed printout ground."
+      },
+      {
+        "name": "--raised",
+        "value": "color-mix(in srgb, var(--bg) 96%, var(--fg))",
+        "purpose": "Slightly inked surface."
+      },
+      {
+        "name": "--edge",
+        "value": "color-mix(in srgb, var(--bg) 84%, var(--fg))",
+        "purpose": "Inner table rules."
+      },
+      {
+        "name": "--edge-strong",
+        "value": "color-mix(in srgb, var(--bg) 62%, var(--fg))",
+        "purpose": "Row dividers, dashed separators, zone ticks."
+      },
+      {
+        "name": "--legend",
+        "value": "color-mix(in srgb, var(--fg) 88%, var(--bg))",
+        "purpose": "Lede text."
+      },
+      {
+        "name": "--faint",
+        "value": "color-mix(in srgb, var(--fg) 52%, var(--bg))",
+        "purpose": "Placeholders, zone letters, inactive strokes."
+      },
+      {
+        "name": "--swipe",
+        "value": "color-mix(in srgb, var(--live) var(--swipe-strength), transparent)",
+        "purpose": "Highlighter band; strength 72% film, 92% night."
+      },
+      {
+        "name": "--hover",
+        "value": "color-mix(in srgb, var(--fg) 5%, transparent)",
+        "purpose": "Hover wash."
+      },
+      {
+        "name": "--current",
+        "value": "color-mix(in srgb, var(--fg) 8%, transparent)",
+        "purpose": "Active/selected wash."
+      }
+    ],
+    "lineWeights": [
+      {
+        "name": "line-thick",
+        "value": "1.6px",
+        "purpose": "Sheet frame, section rules, title block, table heads, tally."
+      },
+      {
+        "name": "line-thin",
+        "value": "1px",
+        "purpose": "Cells, cards, figures, fields, figure strokes."
+      },
+      {
+        "name": "centre-line",
+        "value": "stroke-dasharray: 10 3 2 3",
+        "purpose": "ISO long-dash-dot for axes and symmetry."
+      },
+      {
+        "name": "projection",
+        "value": "stroke-dasharray: 2 3",
+        "purpose": "Detail inset projection lines."
+      }
+    ],
+    "shadows": [
+      {
+        "name": "selected-rule",
+        "value": "inset 1.6px 0 var(--fg)",
+        "purpose": "Ink bar on the selected row; the only box-shadow, a rule not a lift."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-change",
+        "value": ".12s ease-out",
+        "purpose": "Button background/colour."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "animation/transition: none",
+        "purpose": "All motion removed under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "wide",
+        "value": "1100px"
+      },
+      {
+        "name": "page",
+        "value": "960px"
+      },
+      {
+        "name": "phone",
+        "value": "700px"
+      },
+      {
+        "name": "narrow",
+        "value": "520px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Button",
+      "kind": "button",
+      "refersTo": "button",
+      "description": "A ruled cell; the default action.",
+      "html": "<button class=\"ds-btn\">COPY</button>",
+      "css": ".ds-btn{font:600 12px var(--font-display);font-stretch:82%;letter-spacing:.07em;text-transform:uppercase;background:var(--panel);color:var(--fg);border:var(--line-thin) solid var(--fg);border-radius:0;padding:6px 11px 5px;cursor:pointer;transition:background-color .12s ease-out,color .12s ease-out}.ds-btn:hover{background:var(--hover)}.ds-btn:active{background:var(--current)}.ds-btn:focus-visible{outline:var(--line-thick) solid var(--fg);outline-offset:2px}"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ink-filled cell for the one main action.",
+      "html": "<button class=\"ds-btn-primary\">RUN AGAIN</button>",
+      "css": ".ds-btn-primary{font:600 12px var(--font-display);font-stretch:82%;letter-spacing:.07em;text-transform:uppercase;background:var(--fg);color:var(--panel);border:var(--line-thin) solid var(--fg);border-radius:0;padding:6px 11px 5px;cursor:pointer;transition:background-color .12s ease-out}.ds-btn-primary:hover{background:color-mix(in srgb,var(--fg) 86%,var(--bg))}.ds-btn-primary:focus-visible{outline:var(--line-thick) solid var(--fg);outline-offset:2px}"
+    },
+    {
+      "name": "Sign-off Toggle",
+      "kind": "button",
+      "refersTo": "button-pressed-ok",
+      "description": "Keep/drop pair; pressed fills with check green or markup red.",
+      "html": "<span class=\"ds-sign\"><button class=\"ds-tg ok\" aria-pressed=\"true\">KEEP</button><button class=\"ds-tg fault\" aria-pressed=\"false\">DROP</button></span>",
+      "css": ".ds-sign{display:flex;gap:8px}.ds-tg{font:600 12px var(--font-display);font-stretch:82%;letter-spacing:.07em;text-transform:uppercase;background:var(--panel);color:var(--fg);border:var(--line-thin) solid var(--fg);padding:6px 11px 5px;cursor:pointer}.ds-tg:hover{background:var(--hover)}.ds-tg.ok[aria-pressed=true]{background:var(--ok);border-color:var(--ok);color:var(--panel)}.ds-tg.fault[aria-pressed=true]{background:var(--fault);border-color:var(--fault);color:var(--panel)}.ds-tg:focus-visible{outline:var(--line-thick) solid var(--fg);outline-offset:2px}"
+    },
+    {
+      "name": "Write-in Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Label caps over a bottom-ruled mono value.",
+      "html": "<label class=\"ds-field\"><span>DAILY LIMIT</span><input class=\"ds-input\" value=\"150 000\"></label>",
+      "css": ".ds-field{display:grid;gap:4px}.ds-field>span{font:600 12px var(--font-display);font-stretch:82%;letter-spacing:.07em;color:var(--muted)}.ds-input{font:15px var(--font-legend);font-variant-numeric:tabular-nums;color:var(--fg);background:var(--panel);border:0;border-bottom:var(--line-thin) solid var(--fg);border-radius:0;padding:5px 2px 4px}.ds-input:hover{background:var(--hover)}.ds-input:focus{outline:none;border-bottom-width:2px;padding-bottom:3px;background:var(--hover)}"
+    },
+    {
+      "name": "Tabs",
+      "kind": "nav",
+      "refersTo": "tab",
+      "description": "Ruled tabs; the open one joins the sheet.",
+      "html": "<div class=\"ds-tabs\" role=\"tablist\"><button aria-selected=\"true\">FILM</button><button>NIGHT</button></div>",
+      "css": ".ds-tabs{display:flex;align-items:end}.ds-tabs>button{font:600 12px var(--font-display);font-stretch:82%;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding:6px 10px 5px;background:none;border:var(--line-thin) solid transparent;border-bottom-color:var(--fg);cursor:pointer}.ds-tabs>button:hover{color:var(--fg);background:var(--hover)}.ds-tabs>button[aria-selected=true]{color:var(--fg);border-color:var(--fg);border-bottom-color:transparent;background:var(--panel)}.ds-tabs>button:focus-visible{outline:var(--line-thick) solid var(--fg);outline-offset:2px}"
+    },
+    {
+      "name": "Count",
+      "kind": "chip",
+      "refersTo": "count-box",
+      "description": "Boxed zero-padded number with its noun; live takes the swipe.",
+      "html": "<span class=\"ds-count\"><b>03</b>REGIONS</span> <span class=\"ds-count live\"><b>01</b>RUNNING</span>",
+      "css": ".ds-count{display:inline-flex;gap:7px;align-items:center;font:600 12px var(--font-display);font-stretch:82%;letter-spacing:.07em;color:var(--muted)}.ds-count>b{font:600 11px var(--font-legend);font-variant-numeric:tabular-nums;border:var(--line-thin) solid var(--fg);padding:1px 4px;line-height:12px;color:var(--fg);background:var(--panel)}.ds-count.live>b{background:var(--swipe);color:var(--on-swipe)}"
+    },
+    {
+      "name": "Title Block",
+      "kind": "custom",
+      "refersTo": "title-block-cell",
+      "description": "Ruled cells: small caps term over a mono value; name spans the row.",
+      "html": "<dl class=\"ds-tb\"><div class=\"n\"><dt>TITLE</dt><dd>CALIBRATED · DRAWING SET</dd></div><div><dt>DWG NO.</dt><dd>CAL-001</dd></div><div><dt>SCALE</dt><dd>1:1</dd></div><div><dt>SHEET</dt><dd>1 / 6</dd></div></dl>",
+      "css": ".ds-tb{display:grid;grid-template-columns:repeat(3,auto);border:var(--line-thick) solid var(--fg);border-right:0;border-bottom:0;background:var(--panel);margin:0}.ds-tb>div{padding:5px 10px 6px;border-right:var(--line-thin) solid var(--fg);border-bottom:var(--line-thin) solid var(--fg)}.ds-tb dt{font:500 10.5px var(--font-display);font-stretch:82%;letter-spacing:.07em;color:var(--muted)}.ds-tb dd{margin:0;font-family:var(--font-legend);color:var(--fg)}.ds-tb .n{grid-column:1/-1}.ds-tb .n dd{font:700 22px/1.1 var(--font-display);font-stretch:72%;letter-spacing:.02em}"
+    },
+    {
+      "name": "Live Highlight",
+      "kind": "custom",
+      "description": "The highlighter swipe behind ink; one per view.",
+      "html": "<p class=\"ds-p\">The <span class=\"ds-live\">e2e suite</span> is the only run still going.</p>",
+      "css": ".ds-p{font:400 15px/1.55 var(--font-body);color:var(--fg)}.ds-live{color:var(--on-swipe);background:linear-gradient(transparent 18%,var(--swipe) 18%,var(--swipe) 88%,transparent 88%);padding:0 .18em;box-decoration-break:clone;-webkit-box-decoration-break:clone}"
+    },
+    {
+      "name": "Figure",
+      "kind": "card",
+      "refersTo": "figure-caption",
+      "description": "A drawing in a ruled frame with a caption strip.",
+      "html": "<figure class=\"ds-fig\"><svg viewBox=\"0 0 200 40\" width=\"200\"><line x1=\"8\" y1=\"20\" x2=\"192\" y2=\"20\" stroke=\"currentColor\"/><line x1=\"8\" y1=\"14\" x2=\"8\" y2=\"26\" stroke=\"currentColor\"/><line x1=\"192\" y1=\"14\" x2=\"192\" y2=\"26\" stroke=\"currentColor\"/><text x=\"100\" y=\"14\" text-anchor=\"middle\" fill=\"currentColor\" font-size=\"11\" font-family=\"Chivo Mono, monospace\">4m 12s</text></svg><figcaption><b>LANES</b>Runs on one time ruler.</figcaption></figure>",
+      "css": ".ds-fig{margin:0;background:var(--panel);border:var(--line-thin) solid var(--fg);color:var(--fg)}.ds-fig>svg{margin:18px 20px 16px}.ds-fig>figcaption{border-top:var(--line-thin) solid var(--fg);padding:7px 12px;font:13px var(--font-body);color:var(--muted);display:flex;gap:10px}.ds-fig>figcaption b{font:600 12px var(--font-display);font-stretch:82%;letter-spacing:.07em;color:var(--fg)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Drawing Sheet",
+    "overview": "Every Calibrated page is an engineering drawing sheet in the ISO 128 tradition. The page sits on a darker desk and is framed by a thick border with a thin outer rule 7px outside it. Lettered and numbered zone markers run along the margins, and a ruled title block carries name, drawing number, scale, sheet and revision. Content is laid out as numbered sheets inside that frame. Figures are drawn in graphite ink in two line weights, with dash-dot centre lines for axes. The sheet itself is drafting-film white by day and a neutral graphite sheet at night.\n\nColour comes from the checker, not the draftsman. A highlighter swipe sits *behind* the ink to mark the live thing. Red markup marks faults, limits and revisions, and a green check marks what passed. Everything else stays ink on film. Density is high but ruled: cells, strips and tables are separated by hairlines, never by gaps and floating cards. The identity has to survive re-seeding into another brand, so it lives in structure (frame, rules, title block, two weights, the swipe) rather than in a hue. Three seeds (`--bg`, `--fg`, `--live`) and four supporting inks derive every other surface and line through `color-mix()`.\n\nThe world refuses the dark dev-tool dashboard and the blueprint-blue cliché. It is square, flat and ruled.",
+    "keyCharacteristics": [
+      "A framed sheet with zone markers, a title block and numbered sheet strips.",
+      "Two line weights: thick 1.6px for frames and section rules, thin 1px for cells and figure strokes.",
+      "The highlighter swipe sits behind ink to mark the one live thing. Coloured text is never used for this.",
+      "Condensed technical caps (Archivo, width axis) for titles and labels. Chivo Mono for numbers, values and code.",
+      "No radius, no drop shadows, no gradients except the swipe band."
+    ],
+    "rules": [
+      {
+        "name": "The Swipe-Behind-Ink Rule",
+        "body": "The highlighter is always a band behind dark ink, cut from 18% to 88% of the line box. It is never used as a text colour and never as a container fill. If yellow appears as glyph colour, it is wrong.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Live Thing Rule",
+        "body": "Each figure, instrument and working view highlights a single live item. Every recipe takes one `live` entry. Rarity is what makes the swipe readable.",
+        "section": "colors"
+      },
+      {
+        "name": "The Seed Rule",
+        "body": "A theme is a handful of seeds. Every surface, edge and wash derives from `--bg`, `--fg`, `--live` and `--shade` through `color-mix()`, so theme work never adds a hard-coded hex.",
+        "section": "colors"
+      },
+      {
+        "name": "The Words-in-Caps, Numbers-in-Mono Rule",
+        "body": "Labels are plain words in condensed Archivo caps. Chivo Mono is reserved for numbers, measured values and code.",
+        "section": "typography"
+      },
+      {
+        "name": "The Legible Legend Rule",
+        "body": "Figure legends never render below 10px. A figure wider than 200px sets a `min-width` of 90% of its natural size, and its container scrolls on narrow screens instead of shrinking the drawing.",
+        "section": "typography"
+      },
+      {
+        "name": "The Paper-on-Desk Rule",
+        "body": "Hierarchy is drawn with line weight and tonal ground (desk → sheet → well), never with cast shadows or blur.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** frame every page as a sheet: thick border, thin outer rule at 7px, zone markers and a title block.",
+      "**Do** draw with two weights only: 1.6px for frames, section rules and table heads, and 1px for everything inside.",
+      "**Do** mark the live item with the swipe behind ink (72% on film, 92% at night) and set ink on it with `--on-swipe`.",
+      "**Do** keep red for faults, limits and revisions, and green for passed and kept.",
+      "**Do** set labels as plain words in condensed Archivo caps (12px, 600, 0.07em) and numbers in Chivo Mono with tabular figures.",
+      "**Do** let figures scroll on narrow screens rather than drawing them below 90% of natural size.",
+      "**Do** re-theme by changing seeds only, and let `color-mix()` derive the rest."
+    ],
+    "donts": [
+      "**Don't** use yellow as a text colour or a container fill. It is only ever a swipe.",
+      "**Don't** highlight more than one live item in a figure or working view.",
+      "**Don't** round containers or controls. Circles are reserved for nodes, the live dot and the mark.",
+      "**Don't** add drop shadows, blur or glows. Separate surfaces with rules and tone.",
+      "**Don't** use blueprint blue or a dark dev-dashboard palette. The night sheet is neutral graphite (#18191a), not navy.",
+      "**Don't** draw checks or stars with text glyphs. Draw the check as two strokes.",
+      "**Don't** put mono-set eyebrows or kickers above headlines. The headline sits directly under the masthead rule.",
+      "**Don't** tilt the SUPERSEDED or verdict stamp. Markup stamps sit square."
+    ]
+  }
+}

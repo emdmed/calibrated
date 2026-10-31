@@ -1,0 +1,20 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "inter",
+        "createdAt": "2026-10-31T12:31:42.006Z",
+        "reason": "docs chrome face per demo-index-html direction contract (user chose canon docs direction D, Radix/Tailwind bar)"
+      },
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-10-31T12:36:01.117Z",
+        "reason": "canon docs direction (user picked D, Radix/Tailwind bar); Inter is the category-standard chrome face recorded in the demo-index-html direction contract"
+      }
+    ]
+  }
+}
