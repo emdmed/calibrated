@@ -7,3 +7,5 @@ node_modules/
 .impeccable/direction-payload.json
 .impeccable/questions/
 .impeccable/config.local.json
+dist/
+.vercel/

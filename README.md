@@ -69,6 +69,7 @@ The style uses **Archivo** (body, and condensed titles through its width axis) a
 - Edit the sources in `skills/calibrated-tokens`, `skills/calibrated-figures` and `skills/calibrated-components`.
 - Run `node scripts/build-artifact-template.mjs` to regenerate the standalone copy in `skills/calibrated-artifacts` (template, inline kit and copied references). Commit its output.
 - Check with `claude plugin validate .` and by opening the demo.
+- The website is the demo, deployed to Vercel (`vercel.json`). `sh scripts/build-site.sh` copies `demo/*.html` and every `skills/*/assets` folder into `dist/`, so the site always serves the kit's current files. No dependencies or install step.
 
 ## License
 MIT
