@@ -124,7 +124,7 @@
       return { w, h, markup: g, label };
     },
 
-    /* ── loop · stations on a cycle, the live one highlighted
+    /* ── loop · stations on a cycle, the live one lit by the lamp
        { n, title, center:'train 4 of 9', stations:[{ name, cmd, state:'done'|'live'|'todo' }] } */
     loop(o) {
       const w = o.w || 420, h = o.h || 250, cx = w / 2, cy = 138, R = 70;
@@ -144,7 +144,7 @@
         const ty = side === 0 ? (sin < 0 ? y - 26 : y + 22) : y - 4;
         const an = side === 1 ? 'start' : side === -1 ? 'end' : 'middle';
         const live = s.state === 'live', done = s.state === 'done';
-        g += K.t(tx, ty, String(s.name).toUpperCase(), live || done ? 'fg' : 'mu', an, 0.5);
+        g += K.t(tx, ty, String(s.name).toUpperCase(), live ? 'lv' : done ? 'fg' : 'mu', an, 0.5);
         if (s.cmd) g += K.t(tx, ty + 13, (live ? '$ ' : '') + s.cmd, live ? 'fg' : 'fa', an);
       });
       const label = o.label || `${o.title || 'Loop'}: ` + st.map((s) => s.name + (s.state === 'live' ? ' (live)' : '')).join(', ') + (o.center ? `. ${o.center}` : '');
@@ -165,7 +165,7 @@
       g += K.inset(X(0), X(o.zoomMax), y + 3, ix0, ix1, iy - 13, o.factor || Math.round(o.max / o.zoomMax), o.detail || 'A');
       g += K.rect(ix0, iy - 12, ix1 - ix0, 12, 'none', 'ed');
       let acc = 0; const mids = [];
-      o.parts.forEach((p) => { g += K.rect(IX(acc), iy - 11, IX(acc + p.value) - IX(acc), 10, p.ink || 'fg', 'none'); mids.push(IX(acc + p.value / 2)); acc += p.value; });
+      o.parts.forEach((p) => { g += K.rect(IX(acc), iy - 11, IX(acc + p.value) - IX(acc), 10, p.ink === 'lv' ? 'var(--live)' : p.ink || 'fg', 'none'); mids.push(IX(acc + p.value / 2)); acc += p.value; });
       for (let i = 0; i <= 10; i++) { const xx = IX(i * o.zoomMax / 10); g += K.line(xx, iy, xx, iy + (i % 5 ? 3 : 6), 'fa'); }
       [0, 0.5, 1].forEach((r, i) => { g += K.t(IX(r * o.zoomMax), iy + 16, r ? f(r * o.zoomMax) : '0', 'fa', i ? 'middle' : 'start'); });
       let bx = 92;

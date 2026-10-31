@@ -2,47 +2,51 @@
 
 Copy-paste HTML for a Calibrated artifact. Everything here works inside `template.html`, or in any page with `calibrated-inline.css` and `calibrated-inline.js` inlined.
 
-## Sheet
+## Page
 ```html
-<div class="wrap">
-<div class="cal-sheet" data-zones="8x4" data-density="full">
-  … mast, headline, sections, tally, foot …
-</div>
+<div class="wrap" data-density="full">
+  … mast, intro, sections, tally, foot …
 </div>
 ```
-The whole page sits on one framed sheet. `data-zones` is columns × rows; the zone labels are added by `Calibrated.sheets()` on load.
+Panels sit straight on the desk inside `.wrap`. No frame is needed.
 
 ## Mast
 ```html
 <header class="cal-mast">
   <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
   <span class="word">Name</span>
-  <span class="lg up mut">deploy review · week 44</span>
+  <span class="cal-legend">deploy review · week 44</span>
   <span class="sp"></span>
-  <span class="lg up fnt">v2.14.0 · 2026-10-31</span>
+  <span class="cal-legend fnt">v2.14.0 · 2026-10-31</span>
 </header>
 ```
 `#cal-mark` is the ruled-mark `<symbol>` (Calibrated's own logo) at the top of the template's `<body>`. Replace it with the product's own mark if it has one, drawn in `currentColor`.
 
-## Headline with title block
+## Intro
 ```html
-<section class="head">
+<section class="cal-intro">
   <h1>Headline in plain words, two lines at most</h1>
-  <div class="side">
-    <p>What this page is and what the reader should do.</p>
-    <dl class="cal-titleblock" style="--tb-cols:4">
-      <div class="name"><dt>title</dt><dd>Checkout · deploy review</dd></div>
-      <div><dt>dwg no.</dt><dd>CHK-044</dd></div>
-      <div><dt>version</dt><dd>2.14.0</dd></div>
-      <div><dt>sheet</dt><dd>1 / 3</dd></div>
-      <div><dt>rev</dt><dd>A</dd></div>
-      <div class="wide"><dt>owner</dt><dd>checkout team</dd></div>
-      <div class="wide"><dt>date</dt><dd>2026-10-31</dd></div>
-    </dl>
-  </div>
+  <div><p>What this page is and what the reader should do.</p></div>
 </section>
 ```
-`.head` is styled in the template's page rules. Without them, use `<section class="cal-intro">` with the `h1` and a `div` of paragraphs.
+
+## Sheet and title block (optional)
+For a page that needs the engineering-drawing look (drawing numbers, zones, approvals), wrap everything inside `.wrap` in a sheet and put a title block at its end:
+```html
+<div class="cal-sheet" data-zones="8x4">
+  … mast, intro, sections …
+  <dl class="cal-titleblock" style="--tb-cols:4">
+    <div class="name"><dt>title</dt><dd>Checkout · deploy review</dd></div>
+    <div><dt>dwg no.</dt><dd>CHK-044</dd></div>
+    <div><dt>version</dt><dd>2.14.0</dd></div>
+    <div><dt>sheet</dt><dd>1 / 3</dd></div>
+    <div><dt>rev</dt><dd>A</dd></div>
+    <div class="wide"><dt>owner</dt><dd>checkout team</dd></div>
+    <div class="wide"><dt>date</dt><dd>2026-10-31</dd></div>
+  </dl>
+</div>
+```
+`data-zones` is columns × rows; the zone labels are added by `Calibrated.sheets()` on load.
 
 ## Section
 ```html
@@ -57,10 +61,10 @@ The whole page sits on one framed sheet. `data-zones` is columns × rows; the zo
 ```html
 <article class="cal-card">
   <div class="info">
+    <div class="id"><span class="no">03</span>where it lives<span class="end">rev A</span></div>
     <h3>What the figure is</h3>
     <p class="why">Why: what the text fails to show and what the drawing shows at a glance.</p>
     <dl class="cal-kv"><dt>where</dt><dd>…</dd><dt>replaces</dt><dd>…</dd><dt>data</dt><dd>…</dd></dl>
-    <div class="id"><span class="no">03</span>where it lives<span class="end">rev A</span></div>
   </div>
   <div class="cal-compare">
     <div><div class="cal-tag">today</div><div class="stage"><div class="cal-note">
@@ -75,7 +79,7 @@ The whole page sits on one framed sheet. `data-zones` is columns × rows; the zo
   </div>
 </article>
 ```
-The `.id` strip (drawing number) goes last in `.info`. A dropped card is struck through and stamped SUPERSEDED. For a report, drop `.cal-sign` and replace `.cal-compare` with `<div class="stage"><svg id="fig-3"></svg></div>`.
+The `.id` line opens `.info`: an outlined lamp number badge, where it lives, and a status on the right (`rev A`, or `✓ built` with `data-ink="ok"`). A kept card's badge turns green; a dropped card fades and is stamped SUPERSEDED. For a report, drop `.cal-sign` and replace `.cal-compare` with `<div class="stage"><svg id="fig-3"></svg></div>`.
 
 ## Figure with caption (explainer)
 ```html
@@ -115,7 +119,7 @@ The full set of eight is in `references/marks.md` and in the repo's `demo/index.
 
 ## Instruments panel
 ```html
-<div class="cal-framed" style="display:grid;gap:16px;padding:16px 18px" data-density="full">
+<div class="cal-panel" style="display:grid;gap:16px;padding:16px 18px" data-density="full">
   <cal-meter value="46000" max="1000000" warn="800000" label="requests today"></cal-meter>
   <cal-position index="3" count="7" label="diff · files"></cal-position>
   <cal-progress done="11" total="15" live="12" live-label="step 12 · backfill" done-label="11 done · 1h 48m"></cal-progress>
@@ -136,13 +140,13 @@ The full set of eight is in `references/marks.md` and in the repo's `demo/index.
 <table class="cal-table">
   <thead><tr><th>no</th><th>service</th><th>change</th><th>diff</th><th>status</th></tr></thead>
   <tbody>
-    <tr><td>01</td><td>checkout-api</td><td>rate-limit login</td><td><cal-diff added="212" removed="38" density="compact"></cal-diff></td><td class="st" data-ink="live"><span>rolling</span></td></tr>
-    <tr><td>02</td><td>payments</td><td>retry idempotency keys</td><td><cal-diff added="84" removed="12" density="compact"></cal-diff></td><td class="st" data-ink="ok">✓ live</td></tr>
+    <tr><td>01</td><td>checkout-api</td><td>rate-limit login</td><td><cal-diff added="212" removed="38" density="compact"></cal-diff></td><td class="st" data-ink="live">rolling</td></tr>
+    <tr><td>02</td><td>payments</td><td>retry idempotency keys</td><td><cal-diff added="84" removed="12" density="compact"></cal-diff></td><td class="st" data-ink="ok">live</td></tr>
     <tr><td>03</td><td>search</td><td>reindex on deploy</td><td><cal-diff added="40" removed="6" density="compact"></cal-diff></td><td class="st">to do</td></tr>
   </tbody>
 </table>
 ```
-A live status needs the inner `<span>`. Add `<td class="effort">■■□</td>` for an effort column.
+A live status is lamp text with a small star, and an ok status gets its check from the CSS. Add `<td class="effort">■■□</td>` for an effort column.
 
 ## Revisions
 ```html
@@ -154,7 +158,7 @@ A live status needs the inner `<span>`. Add `<td class="effort">■■□</td>` 
   </tbody>
 </table>
 ```
-Put the same `<span class="cal-rev" data-rev="B"></span>` beside whatever changed in revision B. For a verdict on the whole sheet: `<span class="cal-stamp">approved for use</span>`.
+Put the same `<span class="cal-rev" data-rev="B"></span>` beside whatever changed in revision B. For a verdict on the whole page: `<span class="cal-stamp">approved for use</span>`.
 
 ## Tiers
 ```html

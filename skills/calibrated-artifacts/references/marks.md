@@ -10,13 +10,14 @@ All calls return SVG markup strings. Coordinates are in viewBox units: 1 unit = 
 | `fa` | `--faint` | major ticks, scale numbers, leaders, FIG., centre lines |
 | `ed` | `--edge-strong` | box outlines, ruler baseline, minor ticks |
 | `e1` | `--edge` | grids, faint guide lines |
-| `lv` | `--fg` + a `--swipe` underneath | the one live thing (highlighted, not coloured) |
+| `lv` | `--live` | the one live thing: the lamp |
 | `ok` / `ft` | `--ok` / `--fault` | results, thresholds (green check, red markup) |
 | `pn` / `bg` / `well` | panel / raised / well | box fills that knock out lines beneath |
-| `swipe` | `--swipe` | the highlighter colour itself, as a fill |
+| `swipe` | `--swipe` | a faint lamp tint, as a fill for a live area |
+| `glow` | `--glow` | the halo behind the lamp star |
 | `title` | `--title` | headline text |
 
-**How `lv` works.** Pass `lv` to `K.t`, `K.line`, `K.path`, `K.rect` (as stroke) or `K.circle` (as stroke) and the kit draws a highlighter swipe first (a band behind text, a wide stroke behind lines and paths, a halo behind circles), then the shape in plain ink on top. As a fill (`K.rect(…, 'lv', …)`), it fills with the swipe.
+**How `lv` works.** Pass `lv` to `K.t`, `K.line`, `K.path`, `K.rect` (as stroke) or `K.circle` (as stroke) and the text or stroke is drawn in the lamp colour. A live node is the lamp star. As a fill (`K.rect(…, 'lv', …)`), it's the faint `--swipe` tint, not solid lamp: the lamp lights lines, words and outlines, and never fills a box. For a solid lamp segment on a bar (a measured part), pass `'var(--live)'` as the fill.
 
 Labels are 11px legend type. A label's baseline sits at `y`, and its cap height is about 8 units. `Calibrated.textWidth(s)` measures with the real font.
 
@@ -26,7 +27,8 @@ Labels are 11px legend type. A label's baseline sits at `y`, and its cap height 
 - `K.path(d, ink='ed', { w, dash, cap, opacity, fill })`
 - `K.rect(x, y, w, h, fill='none', stroke='ed', { w, dash, opacity })`
 - `K.circle(cx, cy, r, fill='pn', stroke='fg')`
-- `K.highlight(x, y, w, h)`: a highlighter swipe behind any area. Draw it before the ink it sits under.
+- `K.highlight(x, y, w, h)`: a faint lamp tint behind an area. Rarely needed: light lines, labels and outlines first. Draw it before the ink it sits under.
+- `K.star(x, y, r=7, ink='lv')`: the lamp, a four-point star with a soft glow. `K.node(…, 'live')` draws it. One per figure.
 - `K.centre(x1, y1, x2, y2, ink='fa')`: an ISO long-dash-dot centre line (`10 3 2 3`) for axes and lines of symmetry.
 
 ## FIG. label
@@ -34,10 +36,10 @@ Labels are 11px legend type. A label's baseline sits at `y`, and its cap height 
 
 ## Leader + boxed value
 - `K.leader([[x,y], [x,y2], [x2,y2]], dot=true)`: an open dot on the measured point, then an elbowed faint line. Use `dot=false` when the line starts on a node.
-- `K.box(x, y, w|null, name, value?, valueInk='fg', stroke='ed')`: 19 units tall with one line, 32 with two. The name is muted on top and the value below in `valueInk`. The width grows to fit the text. Pass `null` to size it automatically. For the live callout, use `valueInk='lv', stroke='lv'`: the box fills with the swipe and keeps an ink outline.
+- `K.box(x, y, w|null, name, value?, valueInk='fg', stroke='ed')`: 19 units tall with one line, 32 with two. The name is muted on top and the value below in `valueInk`. The width grows to fit the text. Pass `null` to size it automatically. For the live callout, use `valueInk='lv', stroke='lv'`: a lamp outline and a lamp value, the name still muted.
 - `K.boxWidth(name, value)`: the width a box will take, so you can place it.
-- `K.plate(x, y, w|null, name, value, ink='fg')`: a double-ruled 40-unit plate for the one headline result. With `ink='lv'` the plate sits on a highlight.
-- `K.count(x, y, n, ink='fg', pad=0)`: a boxed count, 16 units tall and centred on `y`. Use `pad=2` for zero-padding.
+- `K.plate(x, y, w|null, name, value, ink='fg')`: a double-ruled 40-unit plate for the one headline result. With `ink='lv'` both rules, the name and the value are in lamp.
+- `K.count(x, y, n, ink='fg', pad=0)`: a boxed count, 16 units tall and centred on `y`. Use `pad=2` for zero-padding. With `ink='lv'` the outline and number are in lamp.
 
 Place boxes in a column at the right edge, or under the drawing. Leaders should never cross each other.
 
@@ -64,7 +66,7 @@ Place boxes in a column at the right edge, or under the drawing. Leaders should 
 - `todo`: outlined square (next or pending)
 - `started`: outlined square with an ink dot (in progress, not live)
 - `merge`: outlined diamond, 1.3 stroke
-- `live`: an ink dot (radius size/2) on a highlight disc (radius size). **One per figure.**
+- `live`: the lamp star (radius 0.85 × size) with a soft glow. **One per figure.**
 - `fault`: filled fault-red square (needs attention)
 
 `K.nodes(x0, y, step, states, { size, line })` draws a row on a faint line. `K.states(n, done, liveIdx, faultIdx)` builds the array of states.

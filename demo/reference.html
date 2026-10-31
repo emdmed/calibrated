@@ -7,7 +7,7 @@
 <meta name="description" content="Calibrated draws a count, a position, progress, a size or a duration as a small technical figure. Pure CSS and vanilla JS.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Chivo+Mono:wght@300..700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="../skills/calibrated-tokens/assets/calibrated.css">
 <link rel="stylesheet" href="../skills/calibrated-components/assets/calibrated-components.css">
 <style>
@@ -27,7 +27,7 @@ html[data-theme="night"] {
 }
 html, body { background: var(--d-bg); }
 body.docs { font: 400 15px/1.65 var(--d-sans); color: var(--d-fg); font-stretch: 100%; letter-spacing: 0; -webkit-font-smoothing: antialiased; }
-body.docs ::selection { background: var(--swipe); color: var(--on-swipe); }
+body.docs ::selection { background: var(--select-bg); color: var(--select-fg); }
 body.docs * { scrollbar-color: var(--d-line-2) transparent; }
 .docs a { text-decoration: none; color: inherit; }
 .docs :focus-visible { outline: 2px solid var(--d-fg); outline-offset: 2px; border-radius: 4px; }
@@ -56,7 +56,7 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
 .side a { display: block; font-size: 14px; line-height: 1.35; color: var(--d-muted); padding: 6px 10px; border-radius: 6px; transition: color .12s ease-out, background-color .12s ease-out; }
 .side a:hover { color: var(--d-fg); background: var(--d-soft); }
 .side a.on { color: var(--d-fg); font-weight: 500; background: var(--d-soft); }
-.side a.on span { background: linear-gradient(transparent 80%, var(--swipe) 80% 100%) no-repeat; padding-bottom: 1px; }
+.side a.on span { box-shadow: inset 0 -1.5px var(--live); padding-bottom: 1px; }
 
 /* content */
 .content { padding: 52px clamp(20px, 5vw, 64px) 120px; max-width: 1000px; min-width: 0; }
@@ -120,7 +120,7 @@ pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-
 .row { display: flex; gap: 32px; flex-wrap: wrap; align-items: center; }
 .stack { display: grid; gap: 16px; }
 .seeds { display: flex; gap: 22px; align-items: end; flex-wrap: wrap; }
-.seeds input[type=color] { width: 52px; height: 26px; border: var(--line-thin) solid var(--fg); background: var(--panel); padding: 2px; cursor: pointer; }
+.seeds input[type=color] { width: 52px; height: 26px; border: var(--line-thin) solid var(--edge-strong); background: var(--panel); padding: 2px; cursor: pointer; }
 .dens-ctl { margin-bottom: 18px; }
 
 /* changelog */
@@ -164,9 +164,9 @@ pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-
 <body class="docs">
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="cal-mark" viewBox="4 8 40 32">
-    <rect x="26" y="8" width="8" height="30" fill="var(--swipe, #f3dc3a)"/>
-    <path d="M4 38 H44" stroke="currentColor" stroke-width="3.2"/>
-    <path d="M5.2 38 V10 M24 38 V10 M42.8 38 V10 M30 38 V10 M11.5 38 V27 M17.75 38 V27 M36.5 38 V27" stroke="currentColor" stroke-width="2.4"/>
+    <path d="M4 38 H44" stroke="currentColor" stroke-width="2.4"/>
+    <path d="M5.2 38 V10 M24 38 V10 M42.8 38 V10 M11.5 38 V27 M17.75 38 V27 M36.5 38 V27" stroke="currentColor" stroke-width="2"/>
+    <path d="M30 38 V8" stroke="var(--live, #dcb662)" stroke-width="3"/>
   </symbol>
   <symbol id="i-copy" viewBox="0 0 16 16"><rect x="5" y="5" width="9" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2h-6A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5" fill="none" stroke="currentColor" stroke-width="1.4"/></symbol>
   <symbol id="i-check" viewBox="0 0 16 16"><path d="M3 8.5l3.2 3L13 4.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
@@ -234,7 +234,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
         <p>Copy into <code>~/.claude/skills/</code> for every project, or into <code>.claude/skills/</code> for one.</p>
       </div>
       <div id="in-files" role="tabpanel" aria-labelledby="t-files" hidden>
-        <pre class="ex-code block" data-lang="html"><code>&lt;link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&amp;family=Chivo+Mono:wght@300..700&amp;display=swap"&gt;
+        <pre class="ex-code block" data-lang="html"><code>&lt;link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&amp;family=Chivo+Mono:wght@300..700&amp;display=swap"&gt;
 &lt;link rel="stylesheet" href="calibrated.css"&gt;
 &lt;link rel="stylesheet" href="calibrated-components.css"&gt;
 &lt;script src="calibrated-figures.js" defer&gt;&lt;/script&gt;
@@ -248,7 +248,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
       <ul>
         <li>A figure <strong>replaces text the UI already shows</strong>, from data it already has.</li>
         <li>Eight marks only, one scale per figure, numbers at the major ticks. Values go in boxes on leaders.</li>
-        <li>Ink in two line weights. The highlighter marks <strong>the one live thing</strong>; red marks faults and limits; green marks what passed. Hatch means you can't.</li>
+        <li>Ink in quiet hairlines on panels. The lamp marks <strong>the one live thing</strong> with an amber line, text or star; red marks faults and limits; green marks what passed. Hatch means you can't.</li>
         <li>Full form prints the scale and boxes; compact keeps only the marks.</li>
         <li>Leave terminals, prompts and menus alone.</li>
       </ul>
@@ -350,7 +350,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
           <tr><td><code>width</code></td><td>480</td><td>Ruler width.</td></tr>
           <tr><td><code>name</code></td><td>none</td><td>On <code>&lt;cal-span&gt;</code>.</td></tr>
           <tr><td><code>value</code></td><td>none</td><td>Seconds. Or give <code>start</code> and <code>end</code> in epoch ms.</td></tr>
-          <tr><td><code>live</code></td><td>off</td><td>Highlights the span and ends it in a live node.</td></tr>
+          <tr><td><code>live</code></td><td>off</td><td>Lights the span with the lamp and ends it in a live star.</td></tr>
         </tbody></table></div>
       </div>
 
@@ -363,7 +363,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
           <tr><td><code>every</code></td><td>5</td><td>Number every nth tick.</td></tr>
           <tr><td><code>unit</code>, <code>width</code></td><td>none, auto</td><td>Label suffix and drawn width.</td></tr>
           <tr><td><code>up</code></td><td>off</td><td>Labels above the line.</td></tr>
-          <tr><td><code>value</code></td><td>none</td><td>A marker on a highlight.</td></tr>
+          <tr><td><code>value</code></td><td>none</td><td>A lamp marker.</td></tr>
         </tbody></table></div>
       </div>
     </section>
@@ -372,7 +372,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
     <section class="group" id="figures">
       <h2>Figures</h2>
       <p>Recipes take data and return a whole figure as an SVG string. Mount it into an empty <code>&lt;svg&gt;</code> with <code>Calibrated.mount()</code>. Example data on this page is illustrative.</p>
-      <div class="item" id="lanes"><h3>Lanes <a class="anchor" href="#lanes" aria-label="Link to Lanes">#</a></h3><p>Runs on one time ruler; the live one is highlighted.</p><div class="ex" data-recipe="lanes"><div class="ex-prev cal-theme"><svg id="r-lanes"></svg></div></div></div>
+      <div class="item" id="lanes"><h3>Lanes <a class="anchor" href="#lanes" aria-label="Link to Lanes">#</a></h3><p>Runs on one time ruler; the live one is lit by the lamp.</p><div class="ex" data-recipe="lanes"><div class="ex-prev cal-theme"><svg id="r-lanes"></svg></div></div></div>
       <div class="item" id="budget"><h3>Budget <a class="anchor" href="#budget" aria-label="Link to Budget">#</a></h3><p>A limit, its alerts, and today's pace to the end of the period.</p><div class="ex" data-recipe="budget"><div class="ex-prev cal-theme"><svg id="r-budget"></svg></div></div></div>
       <div class="item" id="merge"><h3>Merge <a class="anchor" href="#merge" aria-label="Link to Merge">#</a></h3><p>A branch with the exact command at each node.</p><div class="ex" data-recipe="merge"><div class="ex-prev cal-theme"><svg id="r-merge"></svg></div></div></div>
       <div class="item" id="fanout"><h3>Fan-out <a class="anchor" href="#fanout" aria-label="Link to Fan-out">#</a></h3><p>One parent; live and finished children.</p><div class="ex" data-recipe="fanout"><div class="ex-prev cal-theme"><svg id="r-fanout"></svg></div></div></div>
@@ -449,7 +449,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
 
       <div class="item" id="inline">
         <h3>Marks in text <a class="anchor" href="#inline" aria-label="Link to Marks in text">#</a></h3>
-        <p>Status dots, revision triangles and the highlighter, used inside running text.</p>
+        <p>Status dots, revision triangles and the lamp, used inside running text.</p>
         <div class="ex"><template><div class="stack">
   <div class="lg up" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
     <span><span class="cal-dot on"></span> live</span>
@@ -545,9 +545,9 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
         <p>Three colours; every surface, line and wash derives from them with <code>color-mix()</code>. Changing a seed here re-colours every preview on the page.</p>
         <div class="ex" data-code="seeds"><div class="ex-prev cal-theme"><div class="stack">
           <div class="seeds">
-            <div class="cal-field"><label for="s-bg">--bg · sheet</label><input type="color" id="s-bg" data-seed="--bg" value="#f6f7f3"></div>
-            <div class="cal-field"><label for="s-fg">--fg · ink</label><input type="color" id="s-fg" data-seed="--fg" value="#1d2126"></div>
-            <div class="cal-field"><label for="s-live">--live · highlighter</label><input type="color" id="s-live" data-seed="--live" value="#f3dc3a"></div>
+            <div class="cal-field"><label for="s-bg">--bg · panel</label><input type="color" id="s-bg" data-seed="--bg" value="#f4f2ec"></div>
+            <div class="cal-field"><label for="s-fg">--fg · ink</label><input type="color" id="s-fg" data-seed="--fg" value="#262b2e"></div>
+            <div class="cal-field"><label for="s-live">--live · lamp</label><input type="color" id="s-live" data-seed="--live" value="#9c6a06"></div>
             <button class="cal-btn" id="seed-reset">reset seeds</button>
           </div>
           <cal-progress done="11" total="15" live="12" live-label="step 12 · backfill"></cal-progress>
@@ -575,6 +575,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
     <section class="group" id="changelog">
       <h2>Changelog</h2>
       <ol class="log">
+        <li><b>Rev E</b><time datetime="2026-10-31">2026-10-31</time><p>Panel look: mono type, quiet panels, the lamp replaces the highlighter.</p></li>
         <li><b>Rev D</b><time datetime="2026-10-31">2026-10-31</time><p>Ruled mark and condensed wordmark. This demo became a docs site.</p></li>
         <li><b>Rev C</b><time datetime="2026-10-31">2026-10-31</time><p>Own identity: drawing sheet, highlighter, projection mark.</p></li>
         <li><b>Rev B</b><time datetime="2026-10-31">2026-10-31</time><p>Night theme; seeds recompute in themed sections.</p></li>
@@ -695,7 +696,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
     ['Dimension line', 'A span with its length written into the gap.', () => K.dim(8, 146, 34, '4m 12s')],
     ['Detail inset', 'A dashed projection to a magnified part, labelled with its scale.', () => K.rect(8, 10, 10, 4, 'fg', 'none') + K.line(8, 12, 146, 12, 'ed') + K.inset(8, 22, 15, 8, 104, 42, 20) + K.rect(8, 42, 96, 10, 'none', 'ed') + K.rect(9, 43, 66, 8, 'fg', 'none')],
     ['Hatch', 'Closed, locked, over the limit. Clear means open.', () => K.hatchRect(8, 10, 64, 38) + K.rect(82, 10, 64, 38, 'none', 'fg') + K.t(40, 62, 'closed', 'mu', 'middle') + K.t(114, 62, 'open', 'mu', 'middle')],
-    ['Nodes', 'Done is filled, next an outline, merge a diamond, live a dot on the highlighter.', () => K.node(16, 30, 'done') + K.node(52, 30, 'todo') + K.node(88, 30, 'merge') + K.node(126, 30, 'live') + K.t(16, 56, 'done', 'fa', 'middle') + K.t(52, 56, 'next', 'fa', 'middle') + K.t(88, 56, 'merge', 'fa', 'middle') + K.t(126, 56, 'live', 'lv', 'middle')],
+    ['Nodes', 'Done is filled, next an outline, merge a diamond, live the lamp star.', () => K.node(16, 30, 'done') + K.node(52, 30, 'todo') + K.node(88, 30, 'merge') + K.node(126, 30, 'live') + K.t(16, 56, 'done', 'fa', 'middle') + K.t(52, 56, 'next', 'fa', 'middle') + K.t(88, 56, 'merge', 'fa', 'middle') + K.t(126, 56, 'live', 'lv', 'middle')],
     ['Numbered command', 'A step number in a box and the exact command, beside the node it acts on.', () => K.node(12, 30, 'todo') + K.cmd(26, 34, '1', 'git tag v2.4')],
     ['FIG. label', 'Top-left of every figure. The number is stable, so it can be cited.', () => `<g transform="translate(6 24)">${K.fig(7, 'network')}</g>` + K.centre(6, 46, 150, 46)],
   ];
@@ -753,7 +754,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
     const r = ex.dataset.recipe, c = ex.dataset.code;
     if (r) frame(ex, `<svg id="${r}"></svg>\n\n<script>\n  Calibrated.mount('#${r}', Calibrated.recipes.${r}(${ser(D[r], 1)}));\n<\/script>`, 'html');
     else if (c === 'marks') frame(ex, marksCode, 'js');
-    else if (c === 'seeds') frame(ex, ":root {\n  --bg: #f6f7f3;   /* sheet */\n  --fg: #1d2126;   /* ink */\n  --live: #f3dc3a; /* highlighter */\n}\n/* or scope a theme to one region */\n.cal-theme { --bg: #fffdf5; --live: #9fe3c0; }", 'css');
+    else if (c === 'seeds') frame(ex, ":root {\n  --bg: #f4f2ec;   /* panel */\n  --fg: #262b2e;   /* ink */\n  --live: #9c6a06; /* lamp */\n}\n/* or scope a theme to one region */\n.cal-theme { --bg: #1b2225; --fg: #e5e0d3; --live: #dcb662; }", 'css');
     else if (c === 'density') frame(ex, '<div data-density="compact">\n  <cal-meter value="46000" max="1000000" warn="800000" label="requests today"></cal-meter>\n  <cal-progress done="6" total="15" fault="7"></cal-progress>\n  <cal-diff added="184" removed="20" label="release"></cal-diff>\n</div>\n\n<!-- or per element -->\n<cal-diff added="184" removed="20" density="compact"></cal-diff>', 'html');
     else frame(ex);
   });

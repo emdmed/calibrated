@@ -120,7 +120,7 @@
     }
   }
 
-  /* ── cal-progress · steps as nodes: done ■, to do □, needs you ■ (fault), running ● on the highlight */
+  /* ── cal-progress · steps as nodes: done ■, to do □, needs you ■ (fault), running ✦ (the lamp star) */
   class CalProgress extends CalElement {
     static get observedAttributes() { return ['states', 'done', 'total', 'live', 'fault', 'live-label', 'fault-label', 'done-label', 'step', 'density']; }
     states() {
@@ -182,7 +182,7 @@
     }
   }
 
-  /* ── cal-durations · several runs on one shared ruler; a live run is highlighted and grows a dashed tail */
+  /* ── cal-durations · several runs on one shared ruler; a live run is lit by the lamp and grows a dashed tail */
   class CalSpan extends HTMLElement {
     static get observedAttributes() { return ['name', 'value', 'start', 'end', 'live']; }
     attributeChangedCallback() { const p = this.closest('cal-durations'); if (p && p.isConnected && p.render) p.render(); }
@@ -250,7 +250,7 @@
       const every = num(this, 'every', 5), unit = str(this, 'unit'), w = num(this, 'width', 320), up = this.hasAttribute('up');
       const y = up ? 22 : 4, f = (v) => (v === 0 ? '0' : Math.round(v * 100) / 100 + unit);
       let g = K.ruler(4, w - 16, y, max, step, every, f, up, min);
-      if (this.hasAttribute('value')) { const X = K.scale(4, w - 16, min, max), v = num(this, 'value', min); g += K.circle(X(v), up ? y + 7 : y - 7, 4.5, 'swipe', 'none') + `<path d="M${X(v).toFixed(2)} ${up ? y + 2 : y - 2}l-4 ${up ? 7 : -7}h8z" style="fill:var(--fg)"/>`; }
+      if (this.hasAttribute('value')) { const X = K.scale(4, w - 16, min, max), v = num(this, 'value', min); g += `<path d="M${X(v).toFixed(2)} ${up ? y + 2 : y - 2}l-5 ${up ? 9 : -9}h10z" style="fill:var(--live);filter:drop-shadow(0 0 2px var(--glow))"/>`; }
       return { w, h: up ? 30 : 26, markup: g, label: `Scale from ${f(min)} to ${f(max)}` + (this.hasAttribute('value') ? `, marker at ${f(num(this, 'value', min))}` : '') };
     }
   }

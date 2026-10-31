@@ -1,11 +1,11 @@
 ---
 name: calibrated-components
-description: Pure CSS and vanilla JS (custom elements, no build, no framework) UI components in the Calibrated technical-drawing style, where every page is an engineering drawing sheet. Pure CSS covers the zone-framed sheet, title block, revision table and triangle, stamp, cards with before/after stages, ruled section heads, boxed counts, counted tabs, ruled-cell buttons, parts-list tables, key/value sheets, rows, form fields and a sign-off tally. Custom elements cover instruments that draw quantities: <cal-meter>, <cal-position>, <cal-progress>, <cal-diff>, <cal-durations>, <cal-ruler>, with full and compact density. Use when building dashboards, dialogs, status pages, review boards or settings in the Calibrated style, or when asked for reusable calibrated components that drop into any stack.
+description: Pure CSS and vanilla JS (custom elements, no build, no framework) UI components in the Calibrated technical-drawing style: quiet panels on a darker desk, hairlines, monospace type and an amber lamp for the one live thing. Pure CSS covers cards with an info column and before/after stages, ruled section heads, boxed counts, counted tabs, bracketed buttons, parts-list tables, key/value sheets, rows, form fields, a sign-off tally, a revision table and triangle, a stamp, and an optional zone-framed drawing sheet and title block. Custom elements cover instruments that draw quantities: <cal-meter>, <cal-position>, <cal-progress>, <cal-diff>, <cal-durations>, <cal-ruler>, with full and compact density. Use when building dashboards, dialogs, status pages, review boards or settings in the Calibrated style, or when asked for reusable calibrated components that drop into any stack.
 ---
 
 # Calibrated · components
 
-UI parts that apply the Calibrated language to every quantity: a count, a position, progress, a size, a duration, a threshold. The page itself is a drawing sheet with a frame, zones, a title block and revisions. Change one shared part and every screen that uses it picks up the style, with no layout changes.
+UI parts that apply the Calibrated language to every quantity: a count, a position, progress, a size, a duration, a threshold. The page is a run of quiet panels on a desk, with numbered sections and drawings; a framed drawing sheet with zones and a title block is there when a page wants it. Change one shared part and every screen that uses it picks up the style, with no layout changes.
 
 **Requires** calibrated-tokens (`calibrated.css`). The custom elements also need calibrated-figures (`calibrated-figures.js`). Copy the assets into the project. Don't edit them in the skill folder.
 
@@ -34,7 +34,7 @@ UI parts that apply the Calibrated language to every quantity: a count, a positi
 | a bare scale or slider readout | `<cal-ruler>` |
 | a feature, finding or change to review | `.cal-card` with `.cal-compare` and `.cal-sign` |
 | a roll-up of items with status | `.cal-table` |
-| what this page is, its number, version, date | `.cal-titleblock` |
+| what this page is, its number, version, date | the mast, or an optional `.cal-titleblock` |
 | what changed since the last version | `.cal-revs` + `.cal-rev` triangles |
 | a structure, process or comparison | a figure from **calibrated-figures** inside `.cal-figure` |
 
@@ -46,19 +46,20 @@ Put `data-density="full"` or `"compact"` on any ancestor, or `density` on the el
 Instruments redraw by themselves when an attribute or density changes. They also redraw once fonts load.
 
 ## Rules
-- One highlighter per view. Use `data-ink="live"` on at most one count, button or status at a time. Live is a swipe behind ink, never coloured text.
-- Status words use `data-ink="live|ok|fault"` (on `.cal-count`, `.cal-btn`, `.cal-table .st`). A live table status needs an inner `<span>` for the swipe. Never colour plain text for decoration.
+- One lamp per view. Use `data-ink="live"` on at most one count or status at a time. The lamp is text, a line, an outline or a star (`.star`), never a fill.
+- Status words use `data-ink="live|ok|fault"` (on `.cal-count`, `.cal-table .st`, and `ok|fault` on pressed `.cal-btn`). Never colour plain text for decoration.
 - Counts that change are zero-padded (`data-pad="2"`), so the layout doesn't jump.
-- Buttons are ruled cells with a short word. Pressed fills with ink (or ok/fault). Use `.quiet` for a secondary, underlined action.
-- Two line weights: `--line-thick` for frames and rules under heads, `--line-thin` for cells. No shadows, no radius, no gradients.
+- Buttons are bracketed words: `[keep]`. Pressed turns ink (or ok/fault). Use `.primary` for the main action and `.quiet` for a secondary, underlined one.
+- Panels, not frames: surfaces separate by tone and gaps, lines are hairlines (`--edge`, `--edge-strong`). No shadows, no radius, no gradients.
+- A card's `.id` line (number badge, where, status) opens its info column.
 - Every instrument draws an `<svg role="img">` with a sentence label. Add `label="…"` attributes so the sentence names the thing.
 
 ## Minimal example
 ```html
-<div class="cal-sheet" data-zones="8x6" data-density="full">
+<div class="wrap" data-density="full">
   <section class="cal-sec">
     <div class="cal-sec-h"><b>1 · Deploys</b><span>last 24 hours</span><span>sheet 1/2</span></div>
-    <div class="cal-framed" style="padding:16px 18px;display:grid;gap:14px">
+    <div class="cal-panel" style="padding:16px 18px;display:grid;gap:14px">
       <cal-meter value="612" max="1000" warn="800" label="error budget used" format="raw" unit=" min"></cal-meter>
       <cal-progress done="4" total="6" live="5" live-label="canary · ap-south"></cal-progress>
       <cal-durations max="15" unit="m">

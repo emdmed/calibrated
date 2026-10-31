@@ -23,14 +23,14 @@ The viewer sets `data-theme="light"` or `"dark"` on `<html>`, or nothing. The ki
 
 To change the night seeds for your page, override them in both `[data-theme="dark"]` and that media block.
 
-The body background comes from `--gutter` (the desk around the sheet). Don't remove it, or the host's background shows through.
+The body background comes from `--gutter` (the desk under the panels). Don't remove it, or the host's background shows through.
 
 ## Fonts
-The kit uses Archivo and Chivo Mono, both OFL. The template links them from Google Fonts, which the artifact policy allows. This is the default, and it's all you need:
+The kit uses IBM Plex Mono and Chivo Mono, both OFL. The template links them from Google Fonts, which the artifact policy allows. This is the default, and it's all you need:
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Chivo+Mono:wght@300..700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&display=swap">
 ```
 If the fonts don't load, the stacks fall back to Helvetica Neue/Arial and `ui-monospace`. The figure kit measures labels with the font that actually loaded, so boxes still fit.
 
@@ -46,6 +46,6 @@ To self-host instead (for example, a page that must not call Google), publish wi
 
 ## Accessibility
 - Every figure gets `role="img"` and an `aria-label` sentence with its facts. `mount()` and the elements do this.
-- Focus is a thick ink outline (`--line-thick`). The keep/drop buttons use `aria-pressed`.
-- Live is shown by a highlighter swipe behind ink, so live text keeps full ink contrast.
+- Focus is a 1px lamp outline. The keep/drop buttons use `aria-pressed`.
+- Live is shown in the lamp colour, which is chosen for at least 4.5:1 on the panel, and the figure's `aria-label` says which item is live.
 - `prefers-reduced-motion` turns off transitions. Nothing in the kit animates except the live duration counter.

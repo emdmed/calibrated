@@ -10,7 +10,7 @@ Each recipe takes plain data and returns `{ w, h, markup, label }`.
 | `budget` | a limit, alert thresholds, current use and projected pace | "612/1000 min · alerts at 80% and 95%" |
 | `merge` | a branch, its commits, how it lands and the commands | "merge commit" + a block of commands |
 | `fanout` | one parent with children, some live | dot-and-metadata rows |
-| `loop` | a repeating cycle of stations with the current one highlighted | "build ► test ► stage ► ship" |
+| `loop` | a repeating cycle of stations with the current one lit | "build ► test ► stage ► ship" |
 | `measured` | a small amount on a huge scale, broken into parts | "46 GB of 1 TB · 18% saved" |
 | `timeline` | consecutive steps with durations, slowest called out | "10/10 steps · complete in 21m 46s" |
 | `matrix` | which items touch which things | lists of services per release |
@@ -31,7 +31,7 @@ recipes.lanes({
   w: 520, labelW: 70,
 })
 ```
-Lanes start at 0. A live lane is ink on a highlighter swipe, ends in a live node and has a dashed tail to the end of the ruler; its box is highlighted too. Height grows by 46 per lane.
+Lanes start at 0. A live lane is drawn in lamp, ends in the lamp star and has a dashed tail to the end of the ruler; its box gets a lamp outline and a lamp value. Height grows by 46 per lane.
 
 ### budget
 ```js
@@ -43,7 +43,7 @@ recipes.budget({
   paceLabel: ['at this pace by day 30', '≈ 900m · 80% on day 25'],
 })
 ```
-Everything above the first alert is hatched in fault red. Pace is a dashed, highlighted line ending in an open ink circle, with a highlighted box. Work out the pace yourself (used ÷ elapsed × period). Use `unit` instead of `fmt` for simple suffixes.
+Everything above the first alert is hatched in fault red. Pace is a dashed lamp line ending in an open ink circle, with a lamp-outlined box. Work out the pace yourself (used ÷ elapsed × period). Use `unit` instead of `fmt` for simple suffixes.
 
 ### merge
 ```js
@@ -68,7 +68,7 @@ recipes.fanout({
   folded: '+1 finished earlier',
 })
 ```
-Live branches are drawn in ink with a started node and a highlighted time. Finished ones settle to faint. The parent's node is live while any child is. Fold old ones into the count.
+Live branches are drawn in ink with a started node and a lamp time. Finished ones settle to faint. The parent's node is live while any child is. Fold old ones into the count.
 
 ### loop
 ```js
@@ -93,7 +93,7 @@ recipes.measured({
   plate: ['DEDUP SAVED', '18% · 9.1 GB'],
 })
 ```
-Drawn on a raised plate. The inset is labelled `DETAIL A  20:1` (`detail` sets the name, default `'A'`; `factor` defaults to `max / zoomMax`). A part with `ink: 'lv'` gets a highlighted box. Good as a tooltip. `zoomMax` must cover the sum of the parts.
+Drawn on a raised plate. The inset is labelled `DETAIL A  20:1` (`detail` sets the name, default `'A'`; `factor` defaults to `max / zoomMax`). A part with `ink: 'lv'` is filled in lamp on the inset bar and gets a lamp value in its box. Good as a tooltip. `zoomMax` must cover the sum of the parts.
 
 ### timeline
 ```js
@@ -109,7 +109,7 @@ recipes.matrix({
   callout: { col: 0, l1: '3 releases touch gateway', l2: 'test 2.1, 2.7, 2.8 together' },
 })
 ```
-Column heads are rotated −50°. The callout column is highlighted, never more than one.
+Column heads are rotated −50°. The callout column gets the lamp, never more than one.
 
 ### section
 ```js
@@ -125,12 +125,12 @@ recipes.section({
   callouts: [{ at: [350, 56], l1: 'closed', l2: 'restricted, secrets' }, { l1: 'outside', l2: 'batch jobs', live: true }],
 })
 ```
-You place the regions yourself. Draw outer regions first. Callouts stack in the right column, 54 units apart. Things outside the boundary are what it doesn't cover: say so in a `live: true` callout, which is highlighted.
+You place the regions yourself. Draw outer regions first. Callouts stack in the right column, 54 units apart. Things outside the boundary are what it doesn't cover: say so in a `live: true` callout, which gets the lamp.
 
 ## Designing a new figure
 1. Write the sentence the figure replaces. That sentence becomes its `aria-label`.
 2. Choose the one scale (time, size, share, count) and draw it with `K.ruler`.
 3. Place the measured things as spans, nodes or regions on that scale.
 4. Box only the values a reader needs, and lead to them.
-5. Highlight the one live thing (ink `lv`, a `live` node or `K.highlight`).
+5. Light the one live thing with the lamp (ink `lv` or a `live` node).
 6. Add the FIG. label. Then check the compact form: remove the boxes, leaders and scale numbers. Does it still read?

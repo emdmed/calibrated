@@ -7,7 +7,7 @@
 <meta name="description" content="Calibrated makes the reports, reviews, explainers and screens Claude builds look like precision technical documentation. Numbers become gauges, rulers and dimension lines.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Chivo+Mono:wght@300..700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&display=swap">
 <link rel="stylesheet" href="../skills/calibrated-tokens/assets/calibrated.css">
 <link rel="stylesheet" href="../skills/calibrated-components/assets/calibrated-components.css">
 <style>
@@ -19,11 +19,11 @@ html, body { background: var(--bg); }
 .top { position: sticky; top: 0; z-index: 20; background: var(--bg); }
 .top .cal-mast { padding: 12px 0 10px; }
 .top .word.ruled { font-size: 20px; }
-.btn-pair { display: inline-flex; }
-.btn-pair .cal-btn + .cal-btn { border-left: 0; }
+.btn-pair { display: inline-flex; gap: 6px; }
 .cal-btn svg { width: 13px; height: 13px; vertical-align: -2px; }
 html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { display: none; }
-#theme { padding: 5px 7px; }
+#theme { padding: 3px 4px; }
+#theme::before, #theme::after { content: none; }
 .cal-intro .credits { display: flex; gap: 28px; flex-wrap: wrap; }
 .cal-intro .switch { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 18px; }
 
@@ -32,30 +32,32 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
 .ba.is-plain, html.pre .ba { --wipe: 0%; }
 /* a plain example is a button: clicking it calibrates that one example */
 .ba.is-plain > .plain { cursor: pointer; }
-.ba.is-plain > .plain:focus-visible { outline: var(--line-thick) solid var(--fg); outline-offset: 3px; }
-.ba > .hint { position: absolute; right: 14px; bottom: 14px; z-index: 2; pointer-events: none; display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px 5px; background: var(--fg); color: var(--bg); font: 600 11px/1 var(--font-display); font-stretch: 82%; letter-spacing: .07em; text-transform: uppercase; opacity: 0; transform: translateY(4px); transition: opacity .2s ease-out, transform .3s cubic-bezier(.16, 1, .3, 1); }
-.ba > .hint::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--fg); box-shadow: 0 0 0 3px var(--live); }
+.ba.is-plain > .plain:focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: 3px; }
+.ba > .hint { position: absolute; right: 14px; bottom: 14px; z-index: 2; pointer-events: none; display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px 5px; background: var(--panel); color: var(--fg); border: var(--line-thin) solid var(--edge-strong); font: 11px/1 var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; opacity: 0; transform: translateY(4px); transition: opacity .2s ease-out, transform .3s cubic-bezier(.16, 1, .3, 1); }
+.ba > .hint::before { content: ""; width: 9px; height: 9px; background: var(--live); clip-path: var(--star); }
 .ba.is-plain > .hint { opacity: 1; transform: none; }
-.ba.is-plain:hover > .hint { background: color-mix(in srgb, var(--fg) 86%, var(--bg)); }
+.ba.is-plain:hover > .hint { border-color: var(--live); }
 .ba > .layer { grid-area: 1 / 1; min-width: 0; position: relative; }
 .ba > .art { clip-path: inset(0 calc(100% - var(--wipe)) 0 0); padding: 8px 0 4px; overflow-x: auto; }
 /* inside an example the figures stand on the sheet: no frames, no caption strips */
 .art .cal-figure { border: 0; background: none; display: block; overflow-x: auto; }
 .art .cal-figure > svg { margin: 0; max-width: 100%; }
 .art .cal-figure > figcaption { display: none; }
-.ba::after { content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--wipe) - 4px); width: 8px; background: linear-gradient(90deg, transparent 3.5px, var(--fg) 3.5px 4.5px, transparent 4.5px), var(--swipe); opacity: 0; transition: opacity .25s ease-out; pointer-events: none; z-index: 3; }
+.ba::after { content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--wipe) - 1px); width: 1.6px; background: var(--live); box-shadow: 0 0 6px var(--glow); opacity: 0; transition: opacity .25s ease-out; pointer-events: none; z-index: 3; }
 .ba.sweep::after { opacity: 1; }
 .ba.tinted > .art { padding: 22px 26px 26px; }
 .art .cal-mast { padding: 2px 0 12px; gap: 10px; }
 .art .cal-mast .word { font-size: 19px; }
-.art h2.hd { font-family: var(--font-display); font-stretch: var(--stretch-title); font-weight: 650; text-transform: uppercase; color: var(--title); font-size: clamp(24px, 2.4vw, 34px); line-height: .98; margin: 6px 0 16px; text-wrap: balance; max-width: 24ch; }
+.art h2.hd { font-family: var(--font-display); font-weight: 400; letter-spacing: var(--track-title); text-transform: uppercase; color: var(--title); font-size: clamp(21px, 2.1vw, 28px); line-height: 1.2; margin: 6px 0 16px; text-wrap: balance; max-width: 24ch; }
 .art .cal-mast + h2.hd { margin-top: 18px; }
-.art h2.hd .live { background: var(--swipe); padding: 0 .12em; }
+.art h2.hd .live { color: var(--live); }
 .art .grid2 { display: flex; flex-wrap: wrap; gap: 28px 64px; }
 .art .grid2 > * { min-width: 0; max-width: 100%; overflow-x: auto; }
-.art .cell-h { font: 600 11px/1 var(--font-display); font-stretch: 82%; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.art .cell-h { font: 11px/1 var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
 .art .mt { margin-top: 34px; }
+.art .cal-card { border: var(--line-thin) solid var(--edge); }
 .art .cal-card + .cal-card { margin-top: 12px; }
+.art .cal-tabs { border-bottom: var(--line-thin) solid var(--edge); margin-bottom: 18px; }
 .art .cal-tally { margin-top: 12px; }
 .art .row2 { display: flex; flex-wrap: wrap; gap: 28px 64px; align-items: flex-start; }
 .art .row2 > * { min-width: 0; max-width: 100%; }
@@ -102,14 +104,16 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
 .parts .cal-spec { min-height: 0; }
 .parts .cal-spec > :first-child { min-height: 110px; display: grid; place-items: center start; overflow-x: auto; }
 .finish-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-.finish-row .cal-btn { display: inline-flex; align-items: center; gap: 8px; }
+.finish-row { gap: 6px 14px; }
+.finish-row .cal-btn { display: inline-flex; align-items: center; }
+.finish-row .chip { margin: 0 7px 0 3px; }
 .finish-row .chip { width: 22px; height: 12px; border: var(--line-thin) solid currentColor; display: inline-grid; grid-template-columns: 1fr 1fr 1fr; }
 .get .cal-pre { margin: 8px 0 12px; }
 .get ul { list-style: none; }
 .get li { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 6px 0; border-bottom: var(--line-thin) solid var(--edge); font-size: 14px; color: var(--legend); }
 .get .acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
 
-@media (max-width: 1100px) { .art .cal-card { grid-template-columns: 1fr; } .art .cal-card > .info { border-right: 0; border-bottom: var(--line-thin) solid var(--fg); } }
+@media (max-width: 1100px) { .art .cal-card { grid-template-columns: 1fr; } .art .cal-card > .info { border-right: 0; border-bottom: var(--line-thin) solid var(--edge); } }
 @media (max-width: 640px) {
   .top .cal-caption, .top .btn-pair { display: none; }
   .ba > .art { padding: 4px 0; }
@@ -131,9 +135,9 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <symbol id="cal-mark" viewBox="4 8 40 32">
-    <rect x="26" y="8" width="8" height="30" fill="var(--swipe, #f3dc3a)"/>
-    <path d="M4 38 H44" stroke="currentColor" stroke-width="3.2"/>
-    <path d="M5.2 38 V10 M24 38 V10 M42.8 38 V10 M30 38 V10 M11.5 38 V27 M17.75 38 V27 M36.5 38 V27" stroke="currentColor" stroke-width="2.4"/>
+    <path d="M4 38 H44" stroke="currentColor" stroke-width="2.4"/>
+    <path d="M5.2 38 V10 M24 38 V10 M42.8 38 V10 M11.5 38 V27 M17.75 38 V27 M36.5 38 V27" stroke="currentColor" stroke-width="2"/>
+    <path d="M30 38 V8" stroke="var(--live, #dcb662)" stroke-width="3"/>
   </symbol>
 </svg>
 
@@ -152,7 +156,7 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
   <section class="cal-intro">
     <h1>Technical drawings for everything Claude makes</h1>
     <div>
-      <p>Ask Claude for a report, a review or a dashboard in the Calibrated style. Numbers come back as gauges, rulers and dimension lines, and the <span class="live">one thing that needs you</span> is highlighted.</p>
+      <p>Ask Claude for a report, a review or a dashboard in the Calibrated style. Numbers come back as gauges, rulers and dimension lines, and the <span class="live">one thing that needs you</span> is lit by the lamp.</p>
       <p class="credits"><span><span class="cal-legend">made by</span>&ensp;<a href="https://mylatestwork.dev">emdmed</a></span><span><span class="cal-legend">in use</span>&ensp;<a href="https://lirah.dev">lirah.dev</a></span></p>
       <div class="switch"><span class="btn-pair" role="group" aria-label="Show examples as"><button class="cal-btn" type="button" data-view="plain" aria-pressed="false">plain</button><button class="cal-btn" type="button" data-view="cal" aria-pressed="true">calibrated</button></span><span class="mut" style="font-size:14px">Flip to plain, then click any example to calibrate it.</span></div>
     </div>
@@ -226,12 +230,12 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
         <div class="layer art cal-theme">
           <h2 class="hd">Two changes. Keep or drop each one.</h2>
           <article class="cal-card">
-            <div class="info"><h3>Pricing on a scale</h3><p class="why">Plans read as positions on one price ruler, with the one most people pick highlighted.</p><div class="id"><span class="no">01</span>pricing<span class="end">rev A</span></div></div>
+            <div class="info"><h3>Pricing on a scale</h3><p class="why">Plans read as positions on one price ruler, with the one most people pick lit.</p><div class="id"><span class="no">01</span>pricing<span class="end">rev A</span></div></div>
             <div class="cal-compare"><div><div class="cal-tag">today</div><div class="stage"><div class="cal-note">Plans: Basic €9, Team €29, Business €79</div></div></div><div><div class="cal-tag on">drawn</div><div class="stage"><cal-ruler min="0" max="80" step="5" every="2" unit="€" value="29" width="300" up></cal-ruler></div></div></div>
             <div class="cal-sign" role="group" aria-label="Sign off 01"><button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button><button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="false">drop</button></div>
           </article>
           <article class="cal-card">
-            <div class="info"><h3>Sign-up as steps</h3><p class="why">All five steps visible, the current one on the highlighter.</p><div class="id"><span class="no">02</span>sign-up<span class="end">rev A</span></div></div>
+            <div class="info"><h3>Sign-up as steps</h3><p class="why">All five steps visible, the current one lit.</p><div class="id"><span class="no">02</span>sign-up<span class="end">rev A</span></div></div>
             <div class="cal-compare"><div><div class="cal-tag">today</div><div class="stage"><div class="cal-note">Step 3 of 5: billing details</div></div></div><div><div class="cal-tag on">drawn</div><div class="stage"><cal-progress done="2" total="5" live="3" live-label="3 · billing" step="34"></cal-progress></div></div></div>
             <div class="cal-sign" role="group" aria-label="Sign off 02"><button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button><button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="false">drop</button></div>
           </article>
@@ -254,7 +258,7 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
         <div class="layer art cal-theme">
           <h2 class="hd">Every ticket goes round the same four stations.</h2>
           <div class="row2">
-            <figure class="cal-figure"><svg id="f-loop"></svg><figcaption><b>Cycle</b>The live station is highlighted.</figcaption></figure>
+            <figure class="cal-figure"><svg id="f-loop"></svg><figcaption><b>Cycle</b>The live station is lit.</figcaption></figure>
             <figure class="cal-figure"><svg id="f-fan"></svg><figcaption><b>Team</b>Who is working on what.</figcaption></figure>
           </div>
         </div>
@@ -345,7 +349,7 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
           <div class="mt"><cal-durations max="15" unit="m"><cal-span name="homepage" value="312"></cal-span><cal-span name="search" value="505"></cal-span><cal-span name="checkout" live data-live></cal-span></cal-durations></div>
         </div>
       </div>
-    <p class="ask"><span class="cal-legend">ask claude</span><q>Re-colour it with our brand: navy page, white ink, cyan highlight.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+    <p class="ask"><span class="cal-legend">ask claude</span><q>Re-colour it with our brand: navy page, white ink, cyan lamp.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
   </section>
 
   <section class="cal-sec" id="get">
@@ -477,18 +481,18 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
 
   /* ── finishes: re-seed every example */
   const FIN = [
-    ['film', 'Film', 'Graphite on drafting film', null, ['#f6f7f3', '#1d2126', '#f3dc3a']],
-    ['night', 'Night', 'White ink on a graphite sheet', { '--bg': '#18191a', '--fg': '#e6e6e3', '--muted': '#9aa3a8', '--title': '#f4f6f1', '--live': '#e9d43c', '--ok': '#7cc493', '--fault': '#f0715f', '--shade': '#000', '--swipe-strength': '92%', '--on-swipe': '#18191a', 'color-scheme': 'dark' }],
-    ['harbour', 'Harbour', 'Navy, white ink, cyan highlight', { '--bg': '#10223a', '--fg': '#e9eff6', '--muted': '#9db0c6', '--title': '#ffffff', '--live': '#45d3ea', '--ok': '#6fd39a', '--fault': '#ff8070', '--shade': '#000', '--swipe-strength': '88%', '--on-swipe': '#10223a', 'color-scheme': 'dark' }],
-    ['forest', 'Forest', 'Pine ink, lime highlight', { '--bg': '#f2f5ef', '--fg': '#1d3326', '--muted': '#55685a', '--title': '#12241a', '--live': '#b9e07a', '--ok': '#2b7a46', '--fault': '#b8432f', '--shade': '#4d5a4f' }],
-    ['signal', 'Signal', 'Cool grey, orange highlight', { '--bg': '#f1f2f4', '--fg': '#1b1d22', '--muted': '#5a5f69', '--title': '#0d0e11', '--live': '#ffab6b', '--ok': '#2c7a4b', '--fault': '#c22f6b', '--shade': '#5c616b' }],
-    ['plum', 'Plum', 'Dark plum, pink highlight', { '--bg': '#1d1522', '--fg': '#f0e7f3', '--muted': '#b3a2ba', '--title': '#ffffff', '--live': '#f5a3d6', '--ok': '#86d4a2', '--fault': '#ff7f6e', '--shade': '#000', '--swipe-strength': '90%', '--on-swipe': '#1d1522', 'color-scheme': 'dark' }],
+    ['film', 'Film', 'Ink on paper panels, amber lamp', { '--bg': '#f4f2ec', '--fg': '#262b2e', '--muted': '#646b68', '--title': '#15191b', '--live': '#9c6a06', '--ok': '#3b7449', '--fault': '#b5402e', '--shade': '#6f746a', '--desk-depth': '9%', 'color-scheme': 'light' }],
+    ['night', 'Night', 'Warm ink on slate, amber lamp', { '--bg': '#1b2225', '--fg': '#e5e0d3', '--muted': '#949c97', '--title': '#eef0ec', '--live': '#dcb662', '--ok': '#b2d49c', '--fault': '#e3735f', '--shade': '#000', '--desk-depth': '24%', 'color-scheme': 'dark' }],
+    ['harbour', 'Harbour', 'Navy, white ink, cyan lamp', { '--bg': '#10223a', '--fg': '#e9eff6', '--muted': '#9db0c6', '--title': '#ffffff', '--live': '#45d3ea', '--ok': '#6fd39a', '--fault': '#ff8070', '--shade': '#000', '--desk-depth': '24%', 'color-scheme': 'dark' }],
+    ['forest', 'Forest', 'Pine ink, olive lamp', { '--bg': '#f2f5ef', '--fg': '#1d3326', '--muted': '#55685a', '--title': '#12241a', '--live': '#5a7414', '--ok': '#2b7a46', '--fault': '#b8432f', '--shade': '#4d5a4f', '--desk-depth': '9%', 'color-scheme': 'light' }],
+    ['signal', 'Signal', 'Cool grey, orange lamp', { '--bg': '#f1f2f4', '--fg': '#1b1d22', '--muted': '#5a5f69', '--title': '#0d0e11', '--live': '#b5530c', '--ok': '#2c7a4b', '--fault': '#c22f6b', '--shade': '#5c616b', '--desk-depth': '9%', 'color-scheme': 'light' }],
+    ['plum', 'Plum', 'Dark plum, pink lamp', { '--bg': '#1d1522', '--fg': '#f0e7f3', '--muted': '#b3a2ba', '--title': '#ffffff', '--live': '#f5a3d6', '--ok': '#86d4a2', '--fault': '#ff7f6e', '--shade': '#000', '--desk-depth': '24%', 'color-scheme': 'dark' }],
   ];
   FIN.forEach((f) => { if (!f[4]) f[4] = [f[3]['--bg'], f[3]['--fg'], f[3]['--live']]; });
   const row = $('#finishes-row');
   row.innerHTML = FIN.map(([id, name, sub, , c]) => `<button class="cal-btn" type="button" data-fin="${id}" aria-pressed="false" title="${sub}"><span class="chip" aria-hidden="true"><i style="background:${c[0]}"></i><i style="background:${c[1]}"></i><i style="background:${c[2]}"></i></span>${name}</button>`).join('');
   let finish = null;
-  const KEYS = ['--bg', '--fg', '--muted', '--title', '--live', '--ok', '--fault', '--shade', '--swipe-strength', '--on-swipe', 'color-scheme'];
+  const KEYS = ['--bg', '--fg', '--muted', '--title', '--live', '--ok', '--fault', '--shade', '--desk-depth', 'color-scheme'];
   function applyFinish(id) {
     finish = id;
     const f = FIN.find((x) => x[0] === id), vars = f && f[3];

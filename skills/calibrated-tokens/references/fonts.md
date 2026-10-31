@@ -1,34 +1,34 @@
 # Fonts
 
-Calibrated uses two families, both under the SIL Open Font License and on Google Fonts. The repo bundles no font files. Each stack falls back to system fonts, and the style holds up with them.
+Calibrated uses two monospace families, both under the SIL Open Font License and on Google Fonts. The repo bundles no font files. Each stack falls back to system monos, and the style holds up with them.
 
 | role | variable | font | use | fallback |
 |---|---|---|---|---|
-| body | `--font-body` | **Archivo** | prose, values | Helvetica Neue, Arial, sans-serif |
-| display | `--font-display` | **Archivo**, condensed with `font-stretch: var(--stretch-title)` (72%) | headlines, card titles, section titles, the title-block name, the wordmark | Arial Narrow, Helvetica Neue, Arial, sans-serif |
-| legend | `--font-legend` | **Chivo Mono** | 11px labels, tags, table heads, numbers, every SVG label | `ui-monospace`, SF Mono, Menlo, Consolas, monospace |
+| body | `--font-body` | **IBM Plex Mono** 400 | prose, values | `ui-monospace`, SF Mono, Menlo, Consolas, monospace |
+| display | `--font-display` | **IBM Plex Mono** 400–500, uppercase, tracked | headlines, card titles, the title-block name, the wordmark | same |
+| legend | `--font-legend` | **Chivo Mono** | 11px labels, tags, table heads, numbers, every SVG label | same |
 
-Archivo is a variable font with a width axis (62–125) and a weight axis (100–900), so one family covers body and condensed titles.
+Titles get their weight from caps and tracking, not from bold. Chivo Mono is tighter than Plex at small sizes, which is why it carries the legends and every figure label.
 
 ## Loading from Google Fonts (default)
 Put this before `calibrated.css`. The demo and the artifact template do the same, and Claude artifacts allow Google Fonts.
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Chivo+Mono:wght@300..700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&display=swap">
 ```
 
 ## Self-hosting
-Download the variable woff2 files (both licences allow bundling), put them next to your CSS and declare them before `calibrated.css`:
+Download the woff2 files (both licences allow bundling), put them next to your CSS and declare them before `calibrated.css`:
 ```css
-@font-face { font-family: "Archivo"; src: url(fonts/Archivo-Variable.woff2) format("woff2"); font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
+@font-face { font-family: "IBM Plex Mono"; src: url(fonts/IBMPlexMono-Regular.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "IBM Plex Mono"; src: url(fonts/IBMPlexMono-Medium.woff2) format("woff2"); font-weight: 500; font-display: swap; }
 @font-face { font-family: "Chivo Mono"; src: url(fonts/ChivoMono-Variable.woff2) format("woff2"); font-weight: 300 700; font-display: swap; }
 ```
-Declare the `font-stretch` range, or condensed titles fall back to normal width.
 
 The figure kit measures label widths with the real font: run your drawing code inside `Calibrated.ready(fn)`, which runs again when fonts finish loading, so boxed values always fit.
 
 ## Without the fonts
 - Every label width is measured, so nothing overflows.
-- Without Archivo's width axis, titles render at normal width in Arial. They wrap sooner but stay readable.
+- The page falls back to the system mono and keeps its look: all-mono was chosen partly because it survives without web fonts.
 - System monos are a little wider than Chivo Mono at 11px. Leave about 10% slack in hand-placed layouts.

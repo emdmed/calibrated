@@ -23,9 +23,9 @@ These are principles, not a layout. Apply them to whatever the page is about. Do
 - **Magnify the part that matters.** When the interesting part is small compared with the whole (cache hits in a 1M context, 3 failing of 2,000), draw the whole on its scale and the part in a detail inset at `×N`, with its own ticks.
 - **Put the reading on the drawing.** Thresholds as fault lines, the live position as a node, the result as a plate. The reader shouldn't need the caption to find the answer.
 
-## 2 · One highlight, and a small one
-- The swipe marks the **one** live thing: one segment, one node, one boxed value, one row label. Never fill a large box, a region or a whole stage with the highlighter.
-- Rough check: if more than about a twentieth of the figure is yellow, there's too much.
+## 2 · One lamp, and a small one
+- The lamp lights the **one** live thing: one segment, one node (the star), one boxed value, one row label. It's a line, a word or an outline. Never fill a box, a region or a whole stage with it.
+- Rough check: if the lamp shows in more than one place that isn't the same item (its line, its star, its box), there's too much.
 - To make the headline result stand out, use `K.plate` (double rule), not a fill. To group, use a bracket or a dashed frame, not a tint.
 - `ok` and `fault` mark results and limits only. They aren't fills or decoration either.
 
@@ -40,10 +40,10 @@ These are principles, not a layout. Apply them to whatever the page is about. Do
 - Captions are one line. If a caption needs a second sentence, the drawing is missing a mark.
 
 ## 5 · Density
-- The headline is two lines at most, with a short paragraph beside it. It introduces the sheet, it isn't a landing-page hero. **The first drawing should be on the first screen** (about 900px down at 1280 wide).
+- The headline is two lines at most, with a short paragraph beside it. It introduces the page, it isn't a landing-page hero. **The first drawing should be on the first screen** (about 900px down at 1280 wide).
 - No spacer regions. A rule separates sections, not a band of empty space.
 - A section holding one small figure is too thin: merge it with its neighbour or give it the drawings that belong with it. Items of the same kind sit in a run of cards.
-- Ruled cells, not floating boxes: strips, cards and tables share hairline borders.
+- Panels on the desk, separated by even gaps; inside a panel, hairlines divide cells, strips and table rows.
 
 ## 6 · Labels
 - Inside figures, only legend type: names in uppercase, values as written, units on the numbers (`25k`, `4m 12s`).
@@ -54,7 +54,7 @@ These are principles, not a layout. Apply them to whatever the page is about. Do
 Take a screenshot and check it against this list:
 1. Can every figure be read without its caption? Does each show three or more values?
 2. Are there any labelled boxes with no value, or rectangles joined by lines? Redraw them.
-3. How many highlights does each figure have? It should be exactly one, and small.
+3. How many things does the lamp light in each figure? It should be exactly one, and never as a fill.
 4. Does any figure sit in a frame much wider than itself? Is any stage more than a third empty?
 5. Is the first drawing visible without scrolling? Are there tall empty bands between sections?
 6. Does any text clip in a box, any leader cross another, any label overlap a mark?

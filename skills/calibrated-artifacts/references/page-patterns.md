@@ -1,11 +1,11 @@
 # Page patterns
 
-All four page types share the same frame: **a sheet (`.cal-sheet` with zones) → mast → headline with title block → numbered sections → foot**. They differ in what the sections hold.
+All four page types share the same frame: **panels on the desk inside `.wrap` → mast → intro (headline beside a short lede) → numbered sections → foot**. They differ in what the sections hold. Wrap the page in `.cal-sheet` with zones and add a title block only when it needs drawing numbers and approvals.
 
 ## 1 · Proposal / review board
 *"Here are N changes. Look at each, keep or drop."* This is the template's page.
 
-- **Headline**: what this round decides. The title block carries the drawing number, version, sheet count and revision.
+- **Headline**: what this round decides. The mast carries the version and date; the foot carries the drawing number and revision.
 - **1 · Marks**: a specimen grid of the marks this page uses (optional on later rounds).
 - **2…**: one `cal-card` per item. The info column has the title, *why*, `where / replaces / data`, and the drawing-number strip at the foot. The stage has `cal-compare` with **today** (a `cal-note` of the current text) and **drawn** (the figure). The card ends with `cal-sign` keep/drop. Dropped cards are stamped SUPERSEDED.
 - **Shared parts**: when several items reuse one part, show it once with **full** and **compact** rows (use `K.tag(y, 'FULL')`).
@@ -18,7 +18,7 @@ All four page types share the same frame: **a sheet (`.cal-sheet` with zones) �
 *"How does X work?"* There's no sign-off. Each section answers one question with drawings that measure the answer.
 
 - **Headline**: the question and a short answer, two or three lines beside the title. Not a hero: the first drawing goes on the first screen.
-- Sections in reading order. Each holds a run of `cal-card`s without `cal-compare`: the info column (number, title, *why*, `cal-kv` facts such as `input` / `output` / `cost` / `source`) and a stage the figure fills. Use a bare `cal-figure` with a caption only for a wide figure that spans the sheet.
+- Sections in reading order. Each holds a run of `cal-card`s without `cal-compare`: the info column (number, title, *why*, `cal-kv` facts such as `input` / `output` / `cost` / `source`) and a stage the figure fills. Use a bare `cal-figure` with a caption only for a wide figure that spans the page.
 - **"How it works" isn't a flowchart.** Find what each part measures (how long it takes, how much it holds or passes, how many there are, what it can't reach) and draw that: `timeline` or `loop` for stages, with durations as dimension lines; `fanout` for hierarchies, with counts; `section` for boundaries, with hatch for what's out of reach; `merge` for branches; `matrix` for which-touches-what; `measured` for a total and its parts. A part with nothing to measure goes in the info column as text.
 - Give the reader one worked example with real numbers (one request, one file, one run) and draw that, instead of an abstract box per component.
 - End with a **legend** section: a specimen grid of only the marks used.
@@ -26,8 +26,8 @@ All four page types share the same frame: **a sheet (`.cal-sheet` with zones) �
 ## 3 · Status / report
 *"Where are we?"* Summary first, then detail.
 
-- **Headline**: the one-line state, with the live thing highlighted (`<span class="live">`).
-- **1 · Now**: instruments in a framed panel: `cal-meter` against limits, `cal-progress` for pipelines, `cal-durations` for runs, and `cal-count` for queues.
+- **Headline**: the one-line state, with the live thing in lamp (`<span class="live">`).
+- **1 · Now**: instruments in a panel (`.cal-panel`): `cal-meter` against limits, `cal-progress` for pipelines, `cal-durations` for runs, and `cal-count` for queues.
 - **2 · Detail**: `lanes`, `budget`, `timeline` figures.
 - **3 · Roll-up**: a `cal-table` with compact `cal-diff` cells and `.st` statuses.
 - No sign-off. The title block and foot show when the data was taken.
@@ -61,7 +61,7 @@ All four page types share the same frame: **a sheet (`.cal-sheet` with zones) �
 
 | "A sends to B, which calls C" | not boxes and arrows: a `timeline` of the steps with how long each takes, or a `fanout`/`section` with counts and boundaries |
 
-If none of these fits, draw by hand with the marks (see `marks.md`). Start from the sentence, choose the one scale, place spans and nodes on it, box only the values needed, then highlight one thing.
+If none of these fits, draw by hand with the marks (see `marks.md`). Start from the sentence, choose the one scale, place spans and nodes on it, box only the values needed, then light one thing with the lamp.
 
 ## Numbering
 - Sections: arabic numerals (`1 · Marks`), with the sheet number in the head (`sheet 1/6`).

@@ -1,6 +1,8 @@
 # Component catalogue
 
-## Drawing sheet
+## Drawing sheet (optional)
+
+Most pages are panels straight on the desk inside `.wrap`. Use the sheet and title block only when a page wants the engineering-drawing look: drawing numbers, zones, approvals.
 
 ### Sheet
 ```html
@@ -10,7 +12,7 @@
   </div>
 </div>
 ```
-A thick ink frame with a thin outer border 7px out, like a drawing sheet. `data-zones="8x6"` (columns × rows) makes `Calibrated.sheets()` add numbered column zones top and bottom and lettered row zones left and right. It runs on load; call it again after inserting a sheet. Without JS the frame still draws. Below 700px the side zones hide.
+A hairline frame with a fainter outer rule 6px out, like a drawing sheet. `data-zones="8x6"` (columns × rows) makes `Calibrated.sheets()` add numbered column zones top and bottom and lettered row zones left and right. It runs on load; call it again after inserting a sheet. Without JS the frame still draws. Below 700px the side zones hide.
 
 ### Title block
 ```html
@@ -24,7 +26,7 @@ A thick ink frame with a thin outer border 7px out, like a drawing sheet. `data-
   <div class="wide"><dt>date</dt><dd>2026-10-31</dd></div>
 </dl>
 ```
-Ruled cells, a small legend over each value. `--tb-cols` sets the column count (2 below 700px). `.name` spans the full width and sets its value as a condensed title. `.wide` spans two columns.
+Ruled cells, a small legend over each value. `--tb-cols` sets the column count (2 below 700px). `.name` spans the full width and sets its value in title caps. `.wide` spans two columns.
 
 ### Revisions
 ```html
@@ -39,7 +41,7 @@ Ruled cells, a small legend over each value. `--tb-cols` sets the column count (
 `.cal-rev` is a red revision triangle with the letter from `data-rev`. Put one in the revision table, in the title block, and beside anything on the page that changed in that revision.
 
 ### Stamp
-`<span class="cal-stamp">approved for use</span>` is a red markup stamp. Use it once, for a verdict on the whole sheet. Dropped cards get a SUPERSEDED stamp automatically (see Card).
+`<span class="cal-stamp">approved for use</span>` is a red markup stamp. Use it once, for a verdict on the whole page. Dropped cards get a SUPERSEDED stamp automatically (see Card).
 
 ## Page frame
 
@@ -53,7 +55,7 @@ Ruled cells, a small legend over each value. `--tb-cols` sets the column count (
   <span class="lg up fnt">v2.14.0 · 2026-10-31</span>
 </header>
 ```
-`.cal-mark` is the brand mark, a short ruler with one graduation picked out by the swipe, drawn in `currentColor` with the swipe from `--swipe`. Paste its `<symbol id="cal-mark">` (from `demo/index.html` or the artifact template) once at the top of `<body>`, or point `<use>` at the product's own mark. The mast ends in a thick rule.
+`.cal-mark` is the brand mark, a short ruler with one graduation lit in lamp, drawn in `currentColor` with the lamp from `--live`. Paste its `<symbol id="cal-mark">` (from `demo/index.html` or the artifact template) once at the top of `<body>`, or point `<use>` at the product's own mark. The mast ends in a hairline.
 
 ### Intro
 ```html
@@ -62,7 +64,7 @@ Ruled cells, a small legend over each value. `--tb-cols` sets the column count (
   <div><p>Lede, one or two short paragraphs.</p><p>…</p></div>
 </section>
 ```
-Condensed uppercase headline beside the lede. Stacks below 1100px.
+An uppercase typewriter headline (regular weight, tracked) beside a lede up to 440px wide. Stacks below 1100px.
 
 ### Section with a ruled head
 ```html
@@ -72,22 +74,22 @@ Condensed uppercase headline beside the lede. Stacks below 1100px.
   …
 </section>
 ```
-A thick rule, the number and title in condensed type, a legend note, and the sheet number right-aligned (the last span). Number sections with arabic numerals followed by ` · `.
+A legend line between rules: a short rule, the number and title in ink, a muted note, a rule running right, and the sheet number in faint (the last span, when there are two). Number sections with arabic numerals followed by ` · `.
 
 ### Footer
 `<footer class="cal-foot"><span>checkout · chk-044</span><span>example data · illustrative</span></footer>`
 
 ## Surfaces
-`.cal-panel` (sheet) · `.cal-well` (recessed) · `.cal-raised` (note, with a strong edge) · `.cal-framed` (sheet with a thin ink frame) · `.cal-stack` (vertical grid with the standard gap).
+`.cal-panel` (a panel on the desk) · `.cal-well` (recessed) · `.cal-raised` (note, with a strong hairline) · `.cal-framed` (kept as an alias of `.cal-panel`) · `.cal-stack` (vertical grid with the standard gap).
 
 ## Card
 ```html
 <article class="cal-card">                            <!-- data-state: ok | dropped, set by the sign-off -->
   <div class="info">
+    <div class="id"><span class="no">01</span>load test · v2.4<span class="end">rev B</span></div>
     <h3>Load test as lanes on one ruler</h3>
     <p class="why">Why the change, in two or three sentences.</p>
     <dl class="cal-kv"><dt>where</dt><dd>release checklist</dd><dt>replaces</dt><dd>three status lines</dd><dt>data</dt><dd>start, end, p99, errors</dd></dl>
-    <div class="id"><span class="no">01</span>load test · v2.4<span class="end">rev B</span></div>
   </div>
   <div class="cal-compare">
     <div><div class="cal-tag">today</div><div class="stage"><div class="cal-note">…</div></div></div>
@@ -99,10 +101,10 @@ A thick rule, the number and title in condensed type, a legend note, and the she
   </div>
 </article>
 ```
-- The title comes first, with nothing above it.
-- `.id` is the drawing number. It goes **last** inside `.info`, after the `dl`, and renders as a title-block strip at the foot of the info column: `.no` in a ruled cell, the where in the middle, an optional `.end` cell on the right.
-- `data-state="ok"` fills `.no` green. `data-state="dropped"` strikes the card through in red and stamps it SUPERSEDED.
-- `.cal-tag.on` draws its own live dot; don't add one.
+- `.id` opens the info column: `.no` is an outlined lamp number badge, then where it lives, then an optional `.end` status on the right (`rev B`, or `✓ built` with `data-ink="ok"`). It renders at the top wherever it sits in `.info`; put it first.
+- Then the title, the *why*, and the `cal-kv` sheet (faint keys, muted values) under a hairline.
+- `data-state="ok"` turns the badge green. `data-state="dropped"` fades the card and stamps it SUPERSEDED.
+- `.cal-tag.on` draws its own lamp star; don't add one.
 - With a single stage, use `<div class="stage">…</div>` in place of `.cal-compare`.
 - Below 1100px the card stacks. Below 700px the compare stacks.
 
@@ -127,13 +129,13 @@ A thick rule, the number and title in condensed type, a legend note, and the she
   <button role="tab">alerts<span class="cal-cnt">01</span></button>
 </div>
 ```
-`data-pad` (default 2) sets the zero-padding. `data-ink="live"` puts the swipe behind the box; `ok`/`fault` colour the box. In compact density the noun is hidden. After inserting counts dynamically, call `Calibrated.counts(root)`. The open tab joins the sheet below it.
+`data-pad` (default 2) sets the zero-padding. `data-ink="live"` sets the number and outline in lamp; `ok`/`fault` colour them green or red. In compact density the noun is hidden. After inserting counts dynamically, call `Calibrated.counts(root)`. The open tab turns ink with a 1px underline, and its count box takes an ink outline.
 
 ## Buttons
-`<button class="cal-btn">copy</button>` is a ruled cell with an uppercase legend. Variants:
-- `data-ink="live"`: the primary action, highlighted.
-- `aria-pressed="true"`: filled with ink; with `data-ink="ok|fault"`, filled green or red.
-- `.quiet`: no frame, underlined, for secondary actions.
+`<button class="cal-btn">copy</button>` renders as a bracketed legend word, `[COPY]`: muted, turning ink on hover. Variants:
+- `.primary`: ink text, turning lamp on hover.
+- `aria-pressed="true"`: ink; with `data-ink="ok|fault"`, green or red.
+- `.quiet`: no brackets, underlined, for secondary actions.
 - `disabled`: faint.
 
 ## Tally (sign-off bar; add `.sticky` to pin it)
@@ -146,12 +148,12 @@ A thick rule, the number and title in condensed type, a legend note, and the she
 <table class="cal-table">
   <thead><tr><th>no</th><th>figure</th><th>where</th><th>diff</th><th>effort</th><th>status</th></tr></thead>
   <tbody>
-    <tr><td>01</td><td>Load test lanes</td><td>release checklist</td><td><cal-diff added="212" removed="38" density="compact"></cal-diff></td><td class="effort">■■□</td><td class="st" data-ink="live"><span>in review</span></td></tr>
+    <tr><td>01</td><td>Load test lanes</td><td>release checklist</td><td><cal-diff added="212" removed="38" density="compact"></cal-diff></td><td class="effort">■■□</td><td class="st" data-ink="live">in review</td></tr>
     <tr><td>02</td><td>Error budget ruler</td><td>SLO panel</td><td><cal-diff added="84" removed="12" density="compact"></cal-diff></td><td class="effort">■□□</td><td class="st" data-ink="ok">✓ shipped</td></tr>
   </tbody>
 </table>
 ```
-A parts list: legend heads over a thick rule, the first column in ink legend type. Use `.num` for right-aligned numbers, `.effort` for ■□ effort, and `.st` (+ `data-ink`) for status. A live status needs the inner `<span>` so the swipe sits behind the word.
+A parts list on a panel: legend heads over an `--edge-strong` hairline, the first column in muted legend type. Use `.num` for right-aligned numbers, `.effort` for ■□ effort, and `.st` (+ `data-ink`) for status. A live status is lamp text with a small star; ok gets a check.
 
 ## Tiers, rows, specimens, figure
 ```html
@@ -163,7 +165,7 @@ A parts list: legend heads over a thick rule, the first column in ink legend typ
 
 <figure class="cal-figure"><svg id="fig"></svg><figcaption><b>Lanes</b>Runs on one time ruler.</figcaption></figure>
 ```
-The selected row (`.sel` or `aria-selected="true"`) gets the current tint and a thick ink bar on the left.
+The selected row (`.sel` or `aria-selected="true"`) gets the current tint and a 2px lamp bar on the left.
 
 ## Form
 ```html
@@ -174,7 +176,7 @@ The selected row (`.sel` or `aria-selected="true"`) gets the current tint and a 
 Inputs are write-in lines, like the boxes of a title block. `.hint` and `.err` sit under the field. A checked box is a filled ink square with a tick.
 
 ## Labels and marks
-`.cal-legend` (legend type, uppercase) · `.cal-gl` (legend with a rule to the edge) · `.cal-tag` (`.on` for the active side, with its own live dot) · `.cal-dot` (outlined square = next, `.done`, `.on` live, `.ok`, `.fault`) · `.cal-rev` (revision triangle) · `.live` (highlighter on text) · `.cal-mark` (brand mark).
+`.cal-legend` (legend type, uppercase) · `.cal-gl` (legend with a rule to the edge) · `.cal-tag` (`.on` for the active side, with its own lamp star) · `.cal-dot` (outlined square = next, `.done`, `.on` live star, `.ok`, `.fault`) · `.cal-rev` (revision triangle) · `.live` (lamp text) · `.star` (the lamp star, inline) · `.cal-mark` (brand mark).
 
 ---
 
@@ -192,23 +194,23 @@ All instruments accept `density="full|compact"`, and otherwise follow the neares
 | `unit` | | appended after `k`/`raw` |
 | `width` | 420 full / 144 compact | |
 
-Full: ticks numbered 0/50/100%, alert line with value, a highlighted needle, boxed reading on a leader. Compact: the meter plus `46k/1M`.
+Full: ticks numbered 0/50/100%, alert line with value, a lamp needle, boxed reading on a leader. Compact: the meter plus `46k/1M`.
 
 ### `<cal-position>`
 `index` (1-based), `count`, `label`, `width` (for long sets). Up to 24 items: one tick per item, the current one a filled square, past items muted. Above 24: a scale with a ▼ marker. Full adds the label above and a boxed `3/7`.
 
 ### `<cal-progress>`
-Either `states="done,done,live,todo,fault"` or `done`, `total`, `live` (1-based), `fault` (1-based). Optional: `live-label` (highlighted caption under the live node), `fault-label` (default "needs you"), `done-label` (a dimension line over the done run, e.g. `11 done · 1h 48m`), `step` (default 18). Full adds the boxed `n/N`.
+Either `states="done,done,live,todo,fault"` or `done`, `total`, `live` (1-based), `fault` (1-based). Optional: `live-label` (lamp caption under the live star), `fault-label` (default "needs you"), `done-label` (a dimension line over the done run, e.g. `11 done · 1h 48m`), `step` (default 18). Full adds the boxed `n/N`.
 
 ### `<cal-diff>`
 `added`, `removed`, `label`, `knee` (200), `max` (100000), `name-width` (64). Added lines run right in ok ink, removed lines run left in fault ink, from a centre tick. Linear to the knee, log beyond, with the knee marked by dotted ticks. Stack several in a column: they share the centre line.
 
 ### `<cal-durations>` + `<cal-span>`
 Parent: `max` (auto, rounded up to 5), `unit` (`m`, `s`, `h`), `width` (480).
-Span: `name`, then either `value` (seconds) or `start`/`end` (epoch ms), plus `live`. A live span with `start` ticks every second. Full: shared ruler on top, end ticks, the live span highlighted, ending in a live node with a dashed tail. Compact: thin lines with values aligned on the right.
+Span: `name`, then either `value` (seconds) or `start`/`end` (epoch ms), plus `live`. A live span with `start` ticks every second. Full: shared ruler on top, end ticks, the live span in lamp, ending in the lamp star with a dashed tail. Compact: thin lines with values aligned on the right.
 
 ### `<cal-ruler>`
-`min`, `max`, `step`, `every`, `unit`, `width`, `up` (labels above), `value` (a ▼ marker on a highlight).
+`min`, `max`, `step`, `every`, `unit`, `width`, `up` (labels above), `value` (a lamp ▼ marker).
 
 ### JS
 - `Calibrated.redraw(scope?)`: force a redraw of every instrument (for example after changing CSS variables by hand).

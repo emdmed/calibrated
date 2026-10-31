@@ -3,9 +3,9 @@
    leader + boxed value, ruler, dimension line, detail inset, hatch, nodes,
    numbered command, FIG. label. Plus a few helpers built from them.
 
-   Ink rules (drawing-sheet world): everything is graphite ink in two line
-   weights. The one live thing is highlighted, not recoloured: pass ink 'lv'
-   and the kit lays a highlighter swipe under the ink stroke or text.
+   Ink rules: everything is ink in quiet hairlines. The one live thing is lit
+   by the lamp: pass ink 'lv' and the stroke, text or box outline turns lamp
+   amber, and a live node becomes a small glowing star.
    'ft' is red markup (faults, limits), 'ok' is the checker's green.
 
    Every primitive returns an SVG string. Compose them, then hand the result
@@ -24,10 +24,10 @@
   /* ── ink */
   const TOKENS = {
     fg: '--fg', mu: '--muted', fa: '--faint', e1: '--edge', ed: '--edge-strong',
-    lv: '--fg', ok: '--ok', ft: '--fault', pn: '--panel', bg: '--raised',
-    well: '--well', title: '--title', swipe: '--swipe', on: '--on-swipe',
+    lv: '--live', ok: '--ok', ft: '--fault', pn: '--panel', bg: '--raised',
+    well: '--well', title: '--title', swipe: '--swipe', on: '--on-swipe', glow: '--glow',
   };
-  /* 'lv' draws in ink; the highlight is laid underneath by each primitive */
+  /* 'lv' is the lamp: strokes and text in --live; as a fill it's a faint tint */
   const ink = (c) => (c in TOKENS ? `var(${TOKENS[c]})` : c);
   const LIVE = 'lv';
   const fill = (c) => `fill:${c === 'none' ? 'none' : ink(c)}`;
@@ -76,34 +76,32 @@
   const K = {
     /* text label · t(x, y, 'label', ink, anchor, letterSpacing) */
     t(x, y, s, c = 'mu', a = 'start', ls = 0) {
-      if (c === LIVE) {
-        const w = textWidth(s) + 6, x0 = a === 'end' ? x - w + 3 : a === 'middle' ? x - w / 2 : x - 3;
-        return K.rect(x0, y - 9.5, w, 12, 'swipe', 'none') + K.t(x, y, s, 'on', a, ls);
-      }
       return `<text x="${n2(x)}" y="${n2(y)}" text-anchor="${a}"${ls ? ` letter-spacing="${ls}"` : ''}${paint(c)}>${esc(s)}</text>`;
     },
 
     /* plain line / path / rect / circle, painted with tokens */
     line(x1, y1, x2, y2, c = 'ed', o = {}) {
-      if (c === LIVE) return `<line x1="${n2(x1)}" y1="${n2(y1)}" x2="${n2(x2)}" y2="${n2(y2)}" stroke-width="${(o.w || 1) + 7}"${paint(null, 'swipe')}/>` + K.line(x1, y1, x2, y2, 'on', o);
       return `<line x1="${n2(x1)}" y1="${n2(y1)}" x2="${n2(x2)}" y2="${n2(y2)}"${o.w ? ` stroke-width="${o.w}"` : ''}${o.dash ? ` stroke-dasharray="${o.dash}"` : ''}${o.opacity ? ` stroke-opacity="${o.opacity}"` : ''}${paint(null, c)}/>`;
     },
     path(d, c = 'ed', o = {}) {
-      if (c === LIVE) return `<path d="${d}" stroke-width="${(o.w || 1) + 7}"${paint('none', 'swipe')}/>` + K.path(d, 'on', o);
       return `<path d="${d}"${o.w ? ` stroke-width="${o.w}"` : ''}${o.dash ? ` stroke-dasharray="${o.dash}"` : ''}${o.cap ? ` stroke-linecap="${o.cap}"` : ''}${o.opacity ? ` stroke-opacity="${o.opacity}"` : ''}${paint(o.fill || 'none', c)}/>`;
     },
     rect(x, y, w, h, f = 'none', s = 'ed', o = {}) {
-      if (s === LIVE) return K.rect(x, y, w, h, f === 'none' ? 'none' : 'pn', 'none') + K.rect(x, y, w, h, 'swipe', 'fg', { ...o, w: o.w || 1.3 });
       if (f === LIVE) f = 'swipe';
       return `<rect x="${n2(x)}" y="${n2(y)}" width="${n2(w)}" height="${n2(h)}"${o.w ? ` stroke-width="${o.w}"` : ''}${o.dash ? ` stroke-dasharray="${o.dash}"` : ''}${o.opacity ? ` stroke-opacity="${o.opacity}"` : ''}${paint(f, s)}/>`;
     },
     circle(cx, cy, r, f = 'pn', s = 'fg') {
-      if (s === LIVE) return `<circle cx="${n2(cx)}" cy="${n2(cy)}" r="${r + 3.5}"${paint('swipe', 'none')}/>` + K.circle(cx, cy, r, f, 'fg');
       if (f === LIVE) f = 'swipe';
       return `<circle cx="${n2(cx)}" cy="${n2(cy)}" r="${r}"${paint(f, s)}/>`;
     },
 
-    /* highlight · a highlighter swipe behind any area (the one live thing) */
+    /* star · the lamp: a four-point star with a soft glow. One per figure. */
+    star(x, y, r = 7, c = LIVE) {
+      const a = r * 0.2, d = `M${n2(x)} ${n2(y - r)}L${n2(x + a)} ${n2(y - a)}L${n2(x + r)} ${n2(y)}L${n2(x + a)} ${n2(y + a)}L${n2(x)} ${n2(y + r)}L${n2(x - a)} ${n2(y + a)}L${n2(x - r)} ${n2(y)}L${n2(x - a)} ${n2(y - a)}Z`;
+      return `<path d="${d}"${paint(c, 'none', c === LIVE ? 'filter:drop-shadow(0 0 3px var(--glow))' : '')}/>`;
+    },
+
+    /* highlight · a faint lamp tint behind an area (use sparingly: lamp lines and text come first) */
     highlight(x, y, w, h) { return K.rect(x, y, w, h, 'swipe', 'none'); },
 
     /* centre line · ISO long-dash-dot, for axes and symmetry */
@@ -118,25 +116,23 @@
     /* boxed value · name over value. w = null sizes to the text */
     box(x, y, w, l1, l2, c2 = 'fg', s = 'ed') {
       const W = Math.max(w || 0, Math.max(textWidth(l1), l2 ? textWidth(l2) : 0) + 14);
-      const onLive = s === LIVE, v = onLive && c2 === LIVE ? 'on' : c2;
-      return K.rect(x, y, W, l2 ? 32 : 19, 'pn', s) + K.t(x + 7, y + 13, l1, onLive ? 'on' : 'mu') + (l2 ? K.t(x + 7, y + 26, l2, v) : '');
+      return K.rect(x, y, W, l2 ? 32 : 19, 'pn', s) + K.t(x + 7, y + 13, l1, 'mu') + (l2 ? K.t(x + 7, y + 26, l2, c2) : '');
     },
     boxWidth(l1, l2 = '') { return Math.max(textWidth(l1), textWidth(l2)) + 14; },
 
     /* double-ruled box for the headline result (cache hit, total, verdict) */
     plate(x, y, w, l1, l2, c = 'fg') {
       const W = Math.max(w || 0, Math.max(textWidth(l1), textWidth(l2)) + 18);
-      const ring = c === LIVE ? 'fg' : c;
-      return (c === LIVE ? K.highlight(x, y, W, 40) : K.rect(x, y, W, 40, 'pn', 'none'))
-        + K.rect(x, y, W, 40, 'none', ring, { w: 1.6 }) + K.rect(x + 3, y + 3, W - 6, 34, 'none', ring, { w: 0.6 })
-        + K.t(x + 9, y + 17, l1, 'mu') + K.t(x + 9, y + 32, l2, ring);
+      return K.rect(x, y, W, 40, 'pn', 'none')
+        + K.rect(x, y, W, 40, 'none', c, { w: 1.2 }) + K.rect(x + 3, y + 3, W - 6, 34, 'none', c, { w: 0.6 })
+        + K.t(x + 9, y + 17, l1, c === 'fg' ? 'mu' : c) + K.t(x + 9, y + 32, l2, c);
     },
 
     /* counted box · a zero-padded number in a tight box, vertically centred on y */
     count(x, y, n, c = 'fg', pad = 0) {
       const s = pad ? String(n).padStart(pad, '0') : String(n);
       const w = K.countWidth(s);
-      return K.rect(x, y - 8, w, 16, 'pn', c === 'fg' ? 'ed' : c) + K.t(x + 4, y + 4, s, c === LIVE ? 'fg' : c);
+      return K.rect(x, y - 8, w, 16, 'pn', c === 'fg' ? 'ed' : c) + K.t(x + 4, y + 4, s, c);
     },
     countWidth(s) { return textWidth(s) + 8; },
 
@@ -166,13 +162,12 @@
       return K.path(d, 'fa') + `<path d="${heads}"${paint('fa', 'fa')}/>` + K.t(x + 8, (y1 + y2) / 2 + 4, label, c);
     },
 
-    /* nodes · done ■  todo □  merge ◇  live ● (ink dot on a highlight)  fault ■ (red)  started ▣ */
+    /* nodes · done ■  todo □  merge ◇  live ✦ (a lamp star with a glow)  fault ■ (red)  started ▣ */
     node(x, y, st = 'todo', size = 8) {
       const h = size / 2;
       switch (st) {
         case 'live':
-          return `<circle cx="${n2(x)}" cy="${n2(y)}" r="${size}"${paint('swipe', 'none')}/>`
-            + `<circle cx="${n2(x)}" cy="${n2(y)}" r="${size * 0.5}"${paint('on', 'none')}/>`;
+          return K.star(x, y, size * 0.85);
         case 'done': return K.rect(x - h, y - h, size, size, 'fg', 'none');
         case 'fault': return K.rect(x - h, y - h, size, size, 'ft', 'none');
         case 'merge': return `<path d="M${x} ${y - 6}L${x + 6} ${y}L${x} ${y + 6}L${x - 6} ${y}Z" stroke-width="1.3"${paint('pn', 'fg')}/>`;
