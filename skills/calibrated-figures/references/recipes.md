@@ -57,7 +57,7 @@ recipes.merge({
   steps: ['git switch main', 'git merge --no-ff release/2.4', 'git tag v2.4.0'],
 })
 ```
-The merge to come is lit by the lamp: the dashed merge curve, the merge node, the verdict box and step 2's command. Step 1 hangs under the base, step 2 under the merge node and step 3 above the branch tip. The lamp-outlined verdict box says "merge commit" or "fast-forward" (override with `verdict: [l1, l2]`). `noun` renames what the dimension over the commits counts (default `commits`).
+The merge to come is lit by the lamp: the dashed merge curve, the merge node, the verdict box and step 2's command. Step 1 hangs under the base, step 2 under the merge node and step 3 above the branch tip. The lamp-outlined verdict box says "merge commit" or "fast-forward" (override with `verdict: [l1, l2]`). `noun` renames what the dimension over the commits counts (default `commits`). Leave a step empty (`null`) when it doesn't run: the slots keep their places, and the numbers follow run order.
 
 Moves with `Calibrated.play(svg, recipes.merge, data)`: main and its marks hold still, the branch draws in as one stroke from the fork to the merge with its commits appearing as it reaches them, then the branch name, boxes and commands appear together.
 

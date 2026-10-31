@@ -1153,16 +1153,21 @@ cal-span { display: none; }
       /* the lamp lights the merge to come: its curve, its node, the verdict and step 2 */
       g += ff ? K.rect(396, by - 4, 8, 8, 'pn', 'lv', { w: 1.3 }) : K.path(`M400 ${by - 6}L406 ${by}L400 ${by + 6}L394 ${by}Z`, 'lv', { w: 1.3, fill: 'pn' });
       for (let i = 0; i < n; i++) { const x = n > 1 ? cx0 + i * cs : cx1; if (d >= L1 + x - 110) g += K.node(x, fy, 'done'); }
-      const label = o.label || `Merge plan. ${o.branch} has ${n} ${o.noun || 'commits'}. ${o.base || 'main'} ${ff ? 'has not moved, so this is a fast-forward' : `moved on by ${o.baseAhead}, so this is a merge commit`}. Steps: ${steps.map((s, i) => `${i + 1} ${s}`).join(', ')}.`;
+      const label = o.label || `Merge plan. ${o.branch} has ${n} ${o.noun || 'commits'}. ${o.base || 'main'} ${ff ? 'has not moved, so this is a fast-forward' : `moved on by ${o.baseAhead}, so this is a merge commit`}. Steps: ${steps.filter(Boolean).map((s, i) => `${i + 1} ${s}`).join(', ')}.`;
       if (T < M.flash) return { w, h, markup: g, label };
-      let k = K.t(110, fy - 12, o.branch, 'fg');
+      /* steps keep their slot (1 under the base, 2 at the merge, 3 at the tip)
+         but are numbered in run order, so an empty slot doesn't leave a gap */
+      const num = (i) => String(steps.slice(0, i + 1).filter(Boolean).length);
+      let k = '';
       if (n > 1) k += K.dim(cx0, cx1, fy + 22, `${n} ${o.noun || 'commits'}`);
       if (o.files) k += K.leader([[230, fy + 26], [230, 104]], false) + K.box(180, 104, 100, o.files[0], o.files[1], 'fg');
       const v = o.verdict || (ff ? ['fast-forward', 'no merge commit'] : ['merge commit', `${o.base || 'main'} moved on`]);
       k += K.leader([[400, by - 7], [400, 140], [410, 140]], false) + K.box(410, 124, 102, v[0], v[1], 'lv', 'lv');
-      if (steps[0]) k += K.leader([[250, by + 6], [250, 200]], false) + K.cmd(243, 212, '1', steps[0]);
-      if (steps[1]) k += K.leader([[400, by + 7], [400, 226]], false) + K.cmd(412, 238, '2', steps[1], 'lv', 'end');
-      if (steps[2]) k += K.leader([[cx1, fy - 6], [cx1, 46]], false) + K.cmd(Math.min(250, w - tw('$ ' + steps[2]) - 30), 40, '3', steps[2]);
+      if (steps[0]) k += K.leader([[250, by + 6], [250, 200]], false) + K.cmd(243, 212, num(0), steps[0]);
+      if (steps[1]) k += K.leader([[400, by + 7], [400, 226]], false) + K.cmd(412, 238, num(1), steps[1], 'lv', 'end');
+      if (steps[2]) k += K.leader([[cx1, fy - 6], [cx1, 46]], false) + K.cmd(Math.min(250, w - tw('$ ' + steps[2]) - 30), 40, num(2), steps[2]);
+      /* the branch name goes over step 3's leader, on a panel-coloured ground, so a long name breaks the leader instead of being cut by it */
+      k += K.rect(108, fy - 22, tw(o.branch) + 4, 14, 'pn', 'none') + K.t(110, fy - 12, o.branch, 'fg');
       g += `<g data-land="details">${k}</g>`;
       return { w, h, markup: g, label };
     },
