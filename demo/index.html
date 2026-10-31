@@ -24,11 +24,12 @@ html, body { background: var(--bg); }
 .cal-btn svg { width: 13px; height: 13px; vertical-align: -2px; }
 html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { display: none; }
 #theme { padding: 5px 7px; }
+.cal-intro .credits { display: flex; gap: 28px; flex-wrap: wrap; }
 .cal-intro .switch { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-top: 18px; }
 
 /* the example: plain layer under, calibrated layer over; the switch wipes between them */
 .ba { display: grid; position: relative; background: var(--bg); overflow: hidden; --wipe: 100%; transition: --wipe .9s cubic-bezier(.16, 1, .3, 1); }
-.ba.is-plain { --wipe: 0%; }
+.ba.is-plain, html.pre .ba { --wipe: 0%; }
 /* a plain example is a button: clicking it calibrates that one example */
 .ba.is-plain > .plain { cursor: pointer; }
 .ba.is-plain > .plain:focus-visible { outline: var(--line-thick) solid var(--fg); outline-offset: 3px; }
@@ -120,7 +121,11 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
     if (!t) { try { t = localStorage.getItem('cal-cat-theme'); } catch {} }
     if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'film';
     document.documentElement.dataset.theme = t;
-    if (q.get('view') === 'plain') document.documentElement.dataset.view = 'plain'; })();
+    const v = q.get('view');
+    /* first visit: show the plain page, then calibrate each example as it comes into view */
+    const intro = !v && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (v === 'plain' || intro) document.documentElement.dataset.view = 'plain';
+    if (intro) document.documentElement.classList.add('pre'); })();
 </script>
 </head>
 <body>
@@ -148,6 +153,7 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
     <h1>Technical drawings for everything Claude makes</h1>
     <div>
       <p>Ask Claude for a report, a review or a dashboard in the Calibrated style. Numbers come back as gauges, rulers and dimension lines, and the <span class="live">one thing that needs you</span> is highlighted.</p>
+      <p class="credits"><span><span class="cal-legend">made by</span>&ensp;<a href="https://mylatestwork.dev">emdmed</a></span><span><span class="cal-legend">in use</span>&ensp;<a href="https://lirah.dev">lirah.dev</a></span></p>
       <div class="switch"><span class="btn-pair" role="group" aria-label="Show examples as"><button class="cal-btn" type="button" data-view="plain" aria-pressed="false">plain</button><button class="cal-btn" type="button" data-view="cal" aria-pressed="true">calibrated</button></span><span class="mut" style="font-size:14px">Flip to plain, then click any example to calibrate it.</span></div>
     </div>
   </section>
@@ -354,7 +360,7 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
     </div>
   </section>
 
-  <footer class="cal-foot"><span>calibrated · catalog 2026</span><span>every number on this page is example data</span></footer>
+  <footer class="cal-foot"><span>calibrated · catalog 2026</span><span>every number on this page is example data</span><span>made by <a href="https://mylatestwork.dev">emdmed</a></span></footer>
 </main>
 <script src="../skills/calibrated-figures/assets/calibrated-figures.js"></script>
 <script src="../skills/calibrated-figures/assets/calibrated-recipes.js"></script>
@@ -456,6 +462,18 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
   const setView = (v, animate = true) => { plates.forEach((ba) => setPlate(ba, v === 'plain', animate)); syncSwitch(); };
   $$('button[data-view]').forEach((b) => b.addEventListener('click', () => setView(b.dataset.view)));
   setView(html.dataset.view === 'plain' ? 'plain' : 'cal', false);
+  if (html.classList.contains('pre')) {
+    html.classList.remove('pre');
+    const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      const ba = e.target;
+      io.unobserve(ba);
+      ba._auto = setTimeout(() => { if (ba.classList.contains('is-plain')) { setPlate(ba, false, true); syncSwitch(); } }, 1100);
+    }), { rootMargin: '0px 0px -35% 0px' });
+    plates.forEach((ba) => io.observe(ba));
+    /* the visitor takes over: stop calibrating on their behalf */
+    $$('button[data-view]').forEach((b) => b.addEventListener('click', () => { io.disconnect(); plates.forEach((ba) => clearTimeout(ba._auto)); }));
+  }
 
   /* ── finishes: re-seed every example */
   const FIN = [
