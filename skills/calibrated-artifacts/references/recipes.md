@@ -31,6 +31,8 @@ recipes.lanes({
   w: 520, labelW: 70,
 })
 ```
+Moves with `Calibrated.play(svg, recipes.lanes, data)`: the lanes replay along the ruler and latch in the order they finished. `end` is in ruler units; with `unit` `s`, `m` or `h` the time above each lane counts up as it grows.
+
 Lanes start at 0. A live lane is drawn in lamp, ends in the lamp star and has a dashed tail to the end of the ruler; its box gets a lamp outline and a lamp value. Height grows by 46 per lane.
 
 ### budget
@@ -45,6 +47,8 @@ recipes.budget({
 ```
 Everything above the first alert is hatched in fault red. Pace is a dashed lamp line ending in an open ink circle, with a lamp-outlined box. Work out the pace yourself (used ÷ elapsed × period). Use `unit` instead of `fmt` for simple suffixes.
 
+Moves with `Calibrated.play(svg, recipes.budget, data)`: the used bar fills, then the pace line runs on from it. Each latches as it lands, and the alert the pace crosses blinks.
+
 ### merge
 ```js
 recipes.merge({
@@ -54,7 +58,9 @@ recipes.merge({
   steps: ['git switch main', 'git merge --no-ff release/2.4', 'git tag v2.4.0'],
 })
 ```
-Step 1 hangs under the base, step 2 under the merge node and step 3 above the branch tip. The ink-ruled verdict box says "merge commit" or "fast-forward" (override with `verdict: [l1, l2]`).
+The merge to come is lit by the lamp: the dashed merge curve, the merge node, the verdict box and step 2's command. Step 1 hangs under the base, step 2 under the merge node and step 3 above the branch tip. The lamp-outlined verdict box says "merge commit" or "fast-forward" (override with `verdict: [l1, l2]`).
+
+Moves with `Calibrated.play(svg, recipes.merge, data)`: main and its marks hold still, the branch draws in as one stroke from the fork to the merge with its commits appearing as it reaches them, then the branch name, boxes and commands appear together.
 
 ### fanout
 ```js
@@ -70,6 +76,8 @@ recipes.fanout({
 ```
 Live branches are drawn in ink with a started node and a lamp time. Finished ones settle to faint. The parent's node is live while any child is. Fold old ones into the count.
 
+Moves with `Calibrated.play(svg, recipes.fanout, data)`: the parent holds still, its branches grow out together with each child node appearing as its branch arrives, then the child boxes and their text appear.
+
 ### loop
 ```js
 recipes.loop({
@@ -82,7 +90,16 @@ recipes.loop({
   ],
 })
 ```
-Takes 3–6 stations, placed clockwise from the top. An edge leaving a done station is drawn in ink. The live station is a live node, and its command gets `$ `.
+Takes 3–6 stations, placed clockwise from the top. A done station is a solid square with a green ✓ name, a todo station a hollow square with a muted name. An edge leaving a done station is drawn in ink. The live station is a live node, and its command gets `$ `.
+
+Moves with `Calibrated.play(svg, recipes.loop, data)`: the frame and nodes hold still, the done edges trace clockwise up to the live station, then the names and commands appear.
+
+To step through it, give `at` (the live station's index) instead of states, plus `lap`, `laps` and `center` as a function of the lap. `recipes.loop.step(data, 1)` (or `-1`) returns the next data, or null at the first and last lap; play it to animate the step:
+```js
+let train = { ...data, at: 1, lap: 4, laps: 9, center: (lap) => `train ${lap} of 9` };
+forward.onclick = () => { const next = recipes.loop.step(train, 1); if (next) { train = next; Calibrated.play(svg, recipes.loop, next); } };
+```
+Forward traces the next edge with the star riding its tip; back retracts it. Past the last station the lap closes and the loop clears for the next train. Replaying a stepped data object replays the step; drop `from` to replay the entry.
 
 ### measured
 ```js
@@ -94,6 +111,8 @@ recipes.measured({
 })
 ```
 Drawn on a raised plate. The inset is labelled `DETAIL A  20:1` (`detail` sets the name, default `'A'`; `factor` defaults to `max / zoomMax`). A part with `ink: 'lv'` is filled in lamp on the inset bar and gets a lamp value in its box. Good as a tooltip. `zoomMax` must cover the sum of the parts.
+
+Moves with `Calibrated.play(svg, recipes.measured, data)`: the used bar fills, the projection drops to the inset, the inset fills through the parts with each part's box flashing in as the fill passes it, then the label and plate appear. When the values change, play the new data with `prev` set to the old values (`{ ...next, prev: old.parts.map((p) => p.value) }`): the bars, dots and leaders glide to the new values, the box values count, and the boxes that changed blink. The plate is your text, so update it yourself.
 
 ### timeline
 ```js

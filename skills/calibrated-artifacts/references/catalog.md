@@ -185,6 +185,8 @@ Inputs are write-in lines, like the boxes of a title block. `.hint` and `.err` s
 
 All instruments accept `density="full|compact"`, and otherwise follow the nearest `[data-density]`. Each one draws an `<svg role="img">` with a `<title>` and an `aria-label`.
 
+Every instrument moves on one shared clock: it sweeps in when half in view, glides from where it is when an attribute changes (220–700ms, ease-out, unless noted), and its reading blinks twice when it settles. The `aria-label` and `<title>` always state the final value. `prefers-reduced-motion` or the `still` attribute draws the value at once.
+
 ### `<cal-meter>`
 | attr | default | |
 |---|---|---|
@@ -201,20 +203,30 @@ Full: ticks numbered 0/50/100%, alert line with value, a lamp needle, boxed read
 Motion: the first reading sweeps up from 0 when the meter is half in view; later changes to `value` glide from where the needle is (220–700ms, ease-out). The needle and reading lead and the fill trails 110ms behind; when it settles, the reading blinks twice. The `aria-label` always states the final value. `prefers-reduced-motion` or `still` skips all of it.
 
 ### `<cal-position>`
-`index` (1-based), `count`, `label`, `width` (for long sets). Up to 24 items: one tick per item, the current one a filled square, past items muted. Above 24: a scale with a ▼ marker. Full adds the label above and a boxed `3/7`.
+`index` (1-based), `count`, `label`, `width` (for long sets), `still`. Up to 24 items: one tick per item, the current one a filled square, past items muted. Above 24: a scale with a ▼ marker. Full adds the label above and a boxed `3/7`.
+
+Motion: the marker sweeps from item 1, then glides between items; the ticks it passes darken behind it and the reading counts through.
 
 ### `<cal-progress>`
-Either `states="done,done,live,todo,fault"` or `done`, `total`, `live` (1-based), `fault` (1-based). Optional: `live-label` (lamp caption under the live star), `fault-label` (default "needs you"), `done-label` (a dimension line over the done run, e.g. `11 done · 1h 48m`), `step` (default 18). Full adds the boxed `n/N`.
+Either `states="done,done,live,todo,fault"` or `done`, `total`, `live` (1-based), `fault` (1-based). Optional: `live-label` (lamp caption under the live star), `fault-label` (default "needs you"), `done-label` (a dimension line over the done run, e.g. `11 done · 1h 48m`), `step` (default 18), `still`. Full adds the boxed `n/N`.
+
+Motion: the live star steps node to node at an even 50ms per step, and the done squares latch behind it. A fault and its caption appear on landing. A `states="…"` list draws at once.
 
 ### `<cal-diff>`
 `added`, `removed`, `label`, `knee` (200), `max` (100000), `name-width` (64). Added lines run right in ok ink, removed lines run left in fault ink, from a centre tick. Linear to the knee, log beyond, with the knee marked by dotted ticks. Stack several in a column: they share the centre line.
+
+Motion: both bars grow out from the centre in drawn length (so the log part moves as evenly as the linear part); the end ticks and numbers lead, counting through.
 
 ### `<cal-durations>` + `<cal-span>`
 Parent: `max` (auto, rounded up to 5), `unit` (`m`, `s`, `h`), `width` (480).
 Span: `name`, then either `value` (seconds) or `start`/`end` (epoch ms), plus `live`. A live span with `start` ticks every second. Full: shared ruler on top, end ticks, the live span in lamp, ending in the lamp star with a dashed tail. Compact: thin lines with values aligned on the right.
 
+Motion: bars grow out from the start line and glide to new values; the times count up. A live span's once-a-second tick just redraws, without a glide or a blink.
+
 ### `<cal-ruler>`
-`min`, `max`, `step`, `every`, `unit`, `width`, `up` (labels above), `value` (a lamp ▼ marker).
+`min`, `max`, `step`, `every`, `unit`, `width`, `up` (labels above), `value` (a lamp ▼ marker), `still`.
+
+Motion: the marker sweeps in from `min`, then glides to new values. The scale holds still; a ruler with no value has no motion.
 
 ### JS
 - `Calibrated.redraw(scope?)`: force a redraw of every instrument (for example after changing CSS variables by hand).
