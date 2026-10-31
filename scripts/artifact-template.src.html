@@ -22,9 +22,9 @@
 :root { --live: #f3dc3a; }
 */
 /* page-specific rules go below */
-.head { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: end; padding: clamp(24px, 3.5vw, 48px) 0 clamp(20px, 3vw, 36px); }
+.head { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: clamp(24px, 4vw, 56px); align-items: end; padding: clamp(18px, 2.5vw, 32px) 0 clamp(14px, 2vw, 24px); }
 .sheet-end { display: flex; justify-content: flex-end; margin-top: 32px; }
-.head h1 { font-family: var(--font-display); font-stretch: var(--stretch-title); font-weight: 650; font-size: var(--fs-h1); line-height: .93; text-transform: uppercase; color: var(--title); text-wrap: balance; }
+.head h1 { font-family: var(--font-display); font-stretch: var(--stretch-title); font-weight: 650; font-size: clamp(30px, 3.6vw, 46px); line-height: .93; text-transform: uppercase; color: var(--title); text-wrap: balance; }
 .head .side { display: grid; gap: 18px; }
 .head p { color: var(--legend); max-width: 54ch; }
 @media (max-width: 960px) { .head { grid-template-columns: 1fr; } }

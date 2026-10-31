@@ -15,11 +15,12 @@ All four page types share the same frame: **a sheet (`.cal-sheet` with zones) â†
 - **Tally**: a `cal-tally` (add `.sticky` to pin it) with `n of N signed` and `copy sign-off`.
 
 ## 2 Â· Explainer / drawing set
-*"How does X work?"* There's no sign-off. Each section answers one question.
+*"How does X work?"* There's no sign-off. Each section answers one question with drawings that measure the answer.
 
-- **Headline**: the question and a one-paragraph answer.
-- Sections in reading order. Each holds `cal-figure` blocks (figure + caption), or a card without `cal-compare`.
-- Use `loop` for cycles, `fanout` for hierarchies, `section` for boundaries, `merge` for branches, `matrix` for which-touches-what, and `timeline` for sequences.
+- **Headline**: the question and a short answer, two or three lines beside the title. Not a hero: the first drawing goes on the first screen.
+- Sections in reading order. Each holds a run of `cal-card`s without `cal-compare`: the info column (number, title, *why*, `cal-kv` facts such as `input` / `output` / `cost` / `source`) and a stage the figure fills. Use a bare `cal-figure` with a caption only for a wide figure that spans the sheet.
+- **"How it works" isn't a flowchart.** Find what each part measures (how long it takes, how much it holds or passes, how many there are, what it can't reach) and draw that: `timeline` or `loop` for stages, with durations as dimension lines; `fanout` for hierarchies, with counts; `section` for boundaries, with hatch for what's out of reach; `merge` for branches; `matrix` for which-touches-what; `measured` for a total and its parts. A part with nothing to measure goes in the info column as text.
+- Give the reader one worked example with real numbers (one request, one file, one run) and draw that, instead of an abstract box per component.
 - End with a **legend** section: a specimen grid of only the marks used.
 
 ## 3 Â· Status / report
@@ -57,6 +58,8 @@ All four page types share the same frame: **a sheet (`.cal-sheet` with zones) â†
 | "+184 âˆ’20" | `<cal-diff>` |
 | "3 of 7" | `<cal-position>` |
 | "2 running" | `.cal-count` with `data-ink="live"` |
+
+| "A sends to B, which calls C" | not boxes and arrows: a `timeline` of the steps with how long each takes, or a `fanout`/`section` with counts and boundaries |
 
 If none of these fits, draw by hand with the marks (see `marks.md`). Start from the sentence, choose the one scale, place spans and nodes on it, box only the values needed, then highlight one thing.
 

@@ -43,6 +43,7 @@ const docs = {
   'skills/calibrated-tokens/references/theming.md': 'theming.md',
   'skills/calibrated-figures/references/marks.md': 'marks.md',
   'skills/calibrated-figures/references/recipes.md': 'recipes.md',
+  'skills/calibrated-figures/references/drawing-quality.md': 'drawing-quality.md',
   'skills/calibrated-components/references/catalog.md': 'catalog.md',
 };
 for (const [src, dst] of Object.entries(docs)) {

@@ -14,6 +14,7 @@ Needs **calibrated-tokens** (`calibrated.css`) on the page. All colours are CSS 
 - `assets/calibrated-recipes.js`: optional. Whole figures from data: `Calibrated.recipes.*`, plus `mount` and `render`.
 - `references/marks.md`: every primitive, with its signature and geometry. Read it before you draw by hand.
 - `references/recipes.md`: the data shape of each recipe, and when to use it.
+- `references/drawing-quality.md`: the quality bar and the failures to avoid (flowcharts, big highlights, figures lost in empty frames). Read it before drawing anything new.
 
 Load as classic scripts (they work from `file://` and inside artifacts):
 ```html
@@ -47,6 +48,9 @@ Helpers: `K.t` (text), `K.line`, `K.path`, `K.rect`, `K.circle`, `K.highlight` (
 9. **Accessible.** Every figure gets `role="img"` and an `aria-label` sentence with the same facts (`draw()`/`mount()` set it). Decorative mini-figures get `aria-hidden`.
 10. **Legend type only**: 11px `--font-legend` (Chivo Mono), set by `svg[data-cal]`. No other sizes inside figures.
 11. **Leave alone**: terminals, prompt text, menus, pickers and command palettes. Only draw where there's a quantity to measure.
+12. **Measure, don't diagram.** Each figure reads off a scale or a count, with at least three values. Labelled rectangles joined by lines are a flowchart, not a figure: use the recipe that measures the structure. A box always holds a value.
+13. **Small highlight.** The swipe covers one segment, node or value, never a big box or a region.
+14. **Fit the canvas.** Size the viewBox to the drawing, with no wide empty margins. Magnify the small part that matters with a detail inset.
 
 ## Drawing by hand
 ```html

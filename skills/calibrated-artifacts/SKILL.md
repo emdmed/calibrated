@@ -7,6 +7,13 @@ description: Design and publish Claude artifacts (claude.ai/artifact pages) in t
 
 A Calibrated artifact is a **drawing set**: a framed drawing sheet with a title block, one drawing per item. Each drawing's figure replaces a sentence, a list or a column of numbers, and is built only from eight marks, in ink, with a highlighter on the one live thing.
 
+## What good looks like
+A good page is **dense and measured**. Every drawing reads off a scale, boxes its values on leaders, magnifies the small part that matters, and highlights one small thing. It sits in a card beside a short title, a *why* and its facts. The first drawing is on the first screen.
+
+A bad page is **a slide in a frame**: a big hero headline over empty space, then a box-and-arrow diagram of labelled rectangles with no numbers, one box filled yellow, and the figure using half of a wide empty frame. The fonts and colours are right, but nothing is measured. Avoid every part of this.
+
+These are principles. Don't reuse one layout for every subject. Choose the page type and the drawings from the content.
+
 This skill is self-contained. `assets/template.html` already holds the tokens, the components and the figure kit inlined, and works as a single published file.
 
 ## Files
@@ -14,6 +21,7 @@ This skill is self-contained. `assets/template.html` already holds the tokens, t
 - `assets/blocks.md`: copy-paste HTML for every block: sheet, title block, section, figure card, revisions, specimen grid, instruments, table, tiers, sign-off.
 - `assets/calibrated-inline.css`, `assets/calibrated-inline.js`: the same kit without a page, for inlining into a page you write from scratch.
 - `references/page-patterns.md`: the page types and which blocks each one uses. **Read it first.**
+- `references/drawing-quality.md`: the quality bar for every drawing, and the checklist for the screenshot. **Read it second.**
 - `references/artifact-limits.md`: what an artifact page can and can't do, fonts, themes, and publishing.
 - `references/marks.md`, `references/recipes.md`: how to draw figures (the `K` kit and the nine recipes).
 - `references/catalog.md`: every CSS class and custom element, with attributes.
@@ -22,23 +30,25 @@ This skill is self-contained. `assets/template.html` already holds the tokens, t
 ## Workflow
 1. **Decide the page type** (proposal/review board, explainer, status report, spec sheet) from `page-patterns.md`. Write down the page's single job in one line.
 2. **List the drawings.** For each item, write the sentence or list that the UI or doc says today. That text becomes the figure's subject and its `aria-label`.
-3. **Pick the drawing** for each one: a recipe if one fits (`lanes`, `budget`, `merge`, `fanout`, `loop`, `measured`, `timeline`, `matrix`, `section`), an instrument element for a single quantity (`<cal-meter>`, `<cal-progress>`, `<cal-position>`, `<cal-diff>`, `<cal-durations>`), or a hand-drawn figure from the marks.
-4. **Copy `assets/template.html`** into the working folder as `<name>.html`. Replace the mast, headline, title block, sections and the page-figures script. Delete the example content you don't use. Keep the `<title>` a 2–4 word name.
-5. **Look once.** Take one screenshot if the session can (headless Chromium or a browser tool), fix what it shows, then publish. Check for: boxes that clip text, leaders that cross, more than one highlight per figure, empty stages.
-6. **Publish.** Call the artifacts server's `guide` (topic `pages`) once per session before the first publish, then `publish_files` with the file (or `publish_version` with the content), with a title and `icon: "chart"`. Give the user the link in one sentence.
+3. **Find the numbers.** Write down three or more values each drawing will show (counts, sizes, durations, limits, positions). If an item has none, it gets text or a table, not a drawing.
+4. **Pick the drawing** for each one: a recipe if one fits (`lanes`, `budget`, `merge`, `fanout`, `loop`, `measured`, `timeline`, `matrix`, `section`), an instrument element for a single quantity (`<cal-meter>`, `<cal-progress>`, `<cal-position>`, `<cal-diff>`, `<cal-durations>`), or a hand-drawn figure from the marks. Never a flowchart of labelled boxes (see `drawing-quality.md` §1 for what to draw instead).
+5. **Copy `assets/template.html`** into the working folder as `<name>.html`. Replace the mast, headline, title block, sections and the page-figures script. Delete the example content you don't use. Keep the `<title>` a 2–4 word name. Put every drawing in a `cal-card` with its info column, on explainers and reports as well as proposals.
+6. **Look once.** Take one screenshot if the session can (headless Chromium or a browser tool), fix what it shows, then publish. Go through the checklist at the end of `drawing-quality.md`: values on every figure, no flowcharts, one small highlight, figures that fill their stage, the first drawing on the first screen, no clipping or crossing leaders.
+7. **Publish.** Call the artifacts server's `guide` (topic `pages`) once per session before the first publish, then `publish_files` with the file (or `publish_version` with the content), with a title and `icon: "chart"`. Give the user the link in one sentence.
 
 ## House rules
 1. **A figure replaces text that already exists, from data that already exists.** Show the text beside it (`today` → `drawn`) when the page is a proposal. Drop it on reports.
-2. **Ink for everything; the highlighter for the one live thing** per figure: the running lane, the current step, the projected value. It's a swipe behind ink, never coloured text. `ok`/`fault` only for results, thresholds and revisions.
-3. **Eight marks only**: leader + boxed value, ruler, dimension line, detail inset, hatch, nodes (■ done, □ next, ◇ merge, ● live), numbered command, FIG. label. Don't add pie charts, gradients, icons or emoji.
+2. **Ink for everything; the highlighter for the one live thing** per figure: the running lane, the current step, the projected value. It's a small swipe behind ink (one segment, node or value), never coloured text, and never a large box or region (a small live value box is fine). `ok`/`fault` only for results, thresholds and revisions.
+3. **Eight marks only**: leader + boxed value, ruler, dimension line, detail inset, hatch, nodes (■ done, □ next, ◇ merge, ● live), numbered command, FIG. label. Don't add pie charts, gradients, icons or emoji. No flowcharts: a box always holds a value.
 4. **One scale per figure.** Number the major ticks only. Units go on the numbers.
 5. **Every figure has a stable `FIG.n`**, matching the card's drawing number when it lives in a card.
 6. **Type:** Archivo for body, condensed Archivo caps for headlines and titles, 11px Chivo Mono legends in uppercase for labels and numbers. The wordmark once, in the mast.
 7. **A drawing sheet**: the page sits in `.cal-sheet` with zones; a title block names it. Two line weights, no radius, no shadows, no gradients.
 8. **Numbered sections** (`1 · Name`, a short note, `sheet 1/3`). Numbers must mean something.
-9. **Complete at rest**: everything readable on load; no reveal-on-scroll.
-10. **Words**: short, specific, active. Write *why* in the card, *where* / *replaces* / *data* in the key/value sheet.
-11. **Leave alone**: terminal output, prompt text, menus. Don't draw where there's nothing to measure.
+9. **Dense, not airy.** The headline is short. No empty bands. Each figure fills its stage, and its viewBox fits the drawing.
+10. **Complete at rest**: everything readable on load; no reveal-on-scroll.
+11. **Words**: short, specific, active. Write *why* in the card, *where* / *replaces* / *data* in the key/value sheet.
+12. **Leave alone**: terminal output, prompt text, menus. Don't draw where there's nothing to measure.
 
 ## Themes
 The page follows the viewer: Claude sets `data-theme="light"` or `"dark"` on `<html>`, and the kit maps `light` to the film theme and `dark` to night. With neither, the template follows the OS. To re-colour, override the seeds (`--bg`, `--fg`, `--live`, `--ok`, `--fault`, `--muted`, `--title`) in the marked block after the inlined kit. For dark values, override them in `[data-theme="dark"]` and in the template's `prefers-color-scheme: dark` block (see `artifact-limits.md`).
