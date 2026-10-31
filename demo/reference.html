@@ -175,7 +175,7 @@ pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-
 <header class="top">
   <button class="icon-btn menu-btn" id="menu" aria-label="Open navigation" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 18 18"><path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
   <a class="brand" href="#intro" aria-label="Calibrated, back to top"><svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg><span class="word">Calibrated</span></a>
-  <span class="ver">v0.1.0</span>
+  <span class="ver">v0.1.1</span>
   <span class="sp"></span>
   <a class="top-link" href="index.html">Catalog</a>
   <a class="top-link" href="#install">Install</a>
@@ -279,7 +279,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
 </div></template></div>
         <div class="props-wrap"><table class="props"><thead><tr><th>Attribute</th><th>Default</th><th>Description</th></tr></thead><tbody>
           <tr><td><code>value</code>, <code>max</code></td><td>0, 100</td><td>The reading and the full scale.</td></tr>
-          <tr><td><code>warn</code></td><td>0.8 × max</td><td>Start of the alert zone. The fill turns red past it.</td></tr>
+          <tr><td><code>warn</code></td><td>0.8 × max</td><td>Start of the alert zone. The part of the fill past it turns red, and so does the reading.</td></tr>
           <tr><td><code>label</code></td><td>value</td><td>Name in the box and in the spoken sentence.</td></tr>
           <tr><td><code>format</code></td><td><code>k</code></td><td><code>k</code> (46k, 1M), <code>raw</code>, <code>pct</code> or <code>dur</code>.</td></tr>
           <tr><td><code>unit</code></td><td>none</td><td>Appended after <code>k</code> and <code>raw</code> values.</td></tr>
@@ -438,7 +438,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
 
       <div class="item" id="buttons">
         <h3>Buttons <a class="anchor" href="#buttons" aria-label="Link to Buttons">#</a></h3>
-        <p>Square ruled cells. Primary fills with ink; quiet is an underline.</p>
+        <p>A bracketed word. Primary is in ink and lights the lamp on hover; quiet is an underline.</p>
         <div class="ex"><template><div class="row" style="gap:8px">
   <button class="cal-btn primary">run again</button>
   <button class="cal-btn">copy</button>

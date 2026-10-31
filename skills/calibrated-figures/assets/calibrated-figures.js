@@ -308,6 +308,7 @@
       sec = Math.max(0, Math.round(sec));
       const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s = sec % 60;
       if (h) return `${h}h ${String(m).padStart(2, '0')}m`;
+      if (!m) return `${s}s`;
       return `${m}m ${String(s).padStart(2, '0')}s`;
     },
     pad(n, w = 2) { return String(n).padStart(w, '0'); },

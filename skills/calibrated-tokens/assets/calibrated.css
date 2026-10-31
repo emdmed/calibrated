@@ -72,7 +72,8 @@
   --edge: color-mix(in srgb, var(--bg) 86%, var(--fg));
   --edge-strong: color-mix(in srgb, var(--bg) 70%, var(--fg));
   --legend: color-mix(in srgb, var(--fg) 86%, var(--bg));
-  --faint: color-mix(in srgb, var(--fg) 45%, var(--bg));
+  --faint: color-mix(in srgb, var(--fg) 45%, var(--bg));      /* strokes, ticks, placeholders */
+  --key: color-mix(in srgb, var(--fg) 70%, var(--bg));        /* small label text: keys, terms, quiet tags (≥4.5:1) */
   --glow: color-mix(in srgb, var(--live) 55%, transparent);     /* halo around the lamp star */
   --swipe: color-mix(in srgb, var(--live) 16%, transparent);    /* a faint lamp tint, for areas */
   --on-swipe: var(--fg);
@@ -179,6 +180,7 @@ svg[data-cal] {
   font-size: var(--fs-legend);
   font-variant-numeric: tabular-nums;
   overflow: visible;
+  text-rendering: geometricPrecision;   /* labels keep their measured width when a figure scales */
 }
 
 /* ── the mark: a ruler with one live graduation (draw with <svg class="cal-mark"><use href="#cal-mark"/></svg>) */

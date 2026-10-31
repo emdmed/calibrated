@@ -126,7 +126,7 @@ The base is warm ink on a paper or slate panel, plus three meaningful inks: lamp
 - **Paper** (`paper`): The panel (`--bg`, `--panel`) on film. At night: **Night Slate** (`night-slate`), a deep blue-grey.
 - **Ink Muted** (`ink-muted` / `night-muted`): Labels, section notes, captions, key/value values and secondary meta.
 - **Desk Shade** (`desk-shade`): Never painted directly. Mixed into the panel by `--desk-depth` (9% on film, 24% at night) to make the desk around the panels (`--gutter`), and at 10% for the recessed `--well`. At night it is pure black.
-- **Derived lines**: `--edge` (14% ink) for inner rules and `--edge-strong` (30% ink) for table heads, section rules and note borders. `--faint` (45% ink) is for keys, scale numbers and inactive strokes. `--hover` (5% ink) and `--current` (8% ink) are state washes.
+- **Derived lines**: `--edge` (14% ink) for inner rules and `--edge-strong` (30% ink) for table heads, section rules and note borders. `--faint` (45% ink) is for scale ticks, inactive strokes and placeholders. `--key` (70% ink) is for small label text (keys, terms, quiet tags and statuses) so it holds 4.5:1 on both themes. `--hover` (5% ink) and `--current` (8% ink) are state washes.
 
 ### Named Rules
 **The One Lamp Rule.** Each figure, instrument and working view lights a single live item. Every recipe takes one `live` entry. Rarity is what makes the lamp readable.
@@ -206,7 +206,7 @@ A zero-padded number in a small hairline box, with its noun beside it in legend 
 The masthead holds the ruled mark, the wordmark and a caption. The mark is a short scale with one graduation lit in lamp. Calibrated's own wordmark sets `.word.ruled`, which draws the same scale of ten under the name with a lamp tick at 7. Other products keep a plain `.word`.
 
 ### Title Block (optional)
-A ruled grid of hairline cells, a small faint term over a mono value. The name spans the full row in title caps. Use it when a page needs drawing numbers, versions and approvals in one place.
+A ruled grid of hairline cells, a small `--key` term over a mono value. The name spans the full row in title caps. Use it when a page needs drawing numbers, versions and approvals in one place.
 
 ### Tables, Rows, Revisions
 Tables work like parts lists on a panel: legend heads over an `--edge-strong` hairline, body rows over `--edge` hairlines, a muted mono number in the first column. Status cells are plain words: live statuses are lamp with a small star, shipped is green with a check, faults are red. The selected row in a list takes the 8% wash and a 2px lamp bar on its left edge. The revision table pairs each red triangle with a description and date.
