@@ -175,7 +175,7 @@ pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-
 <header class="top">
   <button class="icon-btn menu-btn" id="menu" aria-label="Open navigation" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 18 18"><path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
   <a class="brand" href="#intro" aria-label="Calibrated, back to top"><svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg><span class="word">Calibrated</span></a>
-  <span class="ver">v0.1.1</span>
+  <span class="ver">v0.2.0</span>
   <span class="sp"></span>
   <a class="top-link" href="index.html">Catalog</a>
   <a class="top-link" href="#install">Install</a>
@@ -272,7 +272,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
 
       <div class="item" id="meter">
         <h3>Meter <a class="anchor" href="#meter" aria-label="Link to Meter">#</a></h3>
-        <p>A value against its limit, with a red-hatched alert zone and a boxed reading.</p>
+        <p>A value against its limit, with a red-hatched alert zone and a boxed reading. It sweeps to its value when it comes into view and glides when the value changes: the needle leads, the fill follows, and the reading blinks when it settles.</p>
         <div class="ex"><template><div class="row">
   <cal-meter value="46000" max="1000000" warn="800000" label="requests today"></cal-meter>
   <cal-meter value="128" max="150" warn="120" label="build cache" unit=" GB" format="raw"></cal-meter>
@@ -284,6 +284,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
           <tr><td><code>format</code></td><td><code>k</code></td><td><code>k</code> (46k, 1M), <code>raw</code>, <code>pct</code> or <code>dur</code>.</td></tr>
           <tr><td><code>unit</code></td><td>none</td><td>Appended after <code>k</code> and <code>raw</code> values.</td></tr>
           <tr><td><code>width</code></td><td>420 / 144</td><td>Full and compact widths.</td></tr>
+          <tr><td><code>still</code></td><td>off</td><td>No motion: draw the value at once. Reduced motion does the same.</td></tr>
         </tbody></table></div>
       </div>
 
@@ -575,6 +576,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
     <section class="group" id="changelog">
       <h2>Changelog</h2>
       <ol class="log">
+        <li><b>Rev F</b><time datetime="2026-10-31">2026-10-31</time><p>The meter moves: it sweeps to its value, glides on change and blinks when it settles.</p></li>
         <li><b>Rev E</b><time datetime="2026-10-31">2026-10-31</time><p>Panel look: mono type, quiet panels, the lamp replaces the highlighter.</p></li>
         <li><b>Rev D</b><time datetime="2026-10-31">2026-10-31</time><p>Ruled mark and condensed wordmark. This demo became a docs site.</p></li>
         <li><b>Rev C</b><time datetime="2026-10-31">2026-10-31</time><p>Own identity: drawing sheet, highlighter, projection mark.</p></li>

@@ -194,8 +194,11 @@ All instruments accept `density="full|compact"`, and otherwise follow the neares
 | `format` | `k` | `k` (46k, 1M) · `raw` · `pct` · `dur` |
 | `unit` | | appended after `k`/`raw` |
 | `width` | 420 full / 144 compact | |
+| `still` | off | no motion: draw the value at once |
 
 Full: ticks numbered 0/50/100%, alert line with value, a lamp needle, boxed reading on a leader. Compact: the meter plus `46k/1M`.
+
+Motion: the first reading sweeps up from 0 when the meter is half in view; later changes to `value` glide from where the needle is (220–700ms, ease-out). The needle and reading lead and the fill trails 110ms behind; when it settles, the reading blinks twice. The `aria-label` always states the final value. `prefers-reduced-motion` or `still` skips all of it.
 
 ### `<cal-position>`
 `index` (1-based), `count`, `label`, `width` (for long sets). Up to 24 items: one tick per item, the current one a filled square, past items muted. Above 24: a scale with a ▼ marker. Full adds the label above and a boxed `3/7`.

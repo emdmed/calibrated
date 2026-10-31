@@ -48,4 +48,4 @@ To self-host instead (for example, a page that must not call Google), publish wi
 - Every figure gets `role="img"` and an `aria-label` sentence with its facts. `mount()` and the elements do this.
 - Focus is a 1px lamp outline. The keep/drop buttons use `aria-pressed`.
 - Live is shown in the lamp colour, which is chosen for at least 4.5:1 on the panel, and the figure's `aria-label` says which item is live.
-- `prefers-reduced-motion` turns off transitions. Nothing in the kit animates except the live duration counter.
+- `prefers-reduced-motion` turns off transitions and instrument motion. Otherwise only `<cal-meter>` moves (it sweeps to its value when it comes into view; `still` turns that off) and the live duration counter ticks.

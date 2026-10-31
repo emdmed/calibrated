@@ -57,6 +57,80 @@
       svg.innerHTML = `<title>${esc(label)}</title>` + markup;
     }
     render() { try { this.paint(this.draw(this.density === 'full')); } catch (e) { console.error(this.localName, e); } }
+    disconnectedCallback() { this.halt(); }
+
+    /* ── motion · a reading glides to its new value, redrawing each frame.
+       motion(target, scale) returns the value to draw now. The first reading
+       sweeps up from 0 when the element scrolls into view; later changes ease
+       from wherever the needle is. The clock is an empty Web Animation on the
+       element, so playbackRate and DevTools slow it like CSS motion.
+       Two values glide: the lead (needle, reading) and the trail (fill), which
+       follows the same curve TRAIL ms later, so the line moves first and the
+       bar catches up. Read the trail with this.trail.
+       Reduced motion, a `still` attribute or no WAAPI: draw the value at once.
+       Labels and titles must always state the target, never the frame. */
+    get still() {
+      return this.hasAttribute('still') || !this.animate || !root.IntersectionObserver ||
+        !!(root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    }
+    motion(target, scale = 1) {
+      if (this._to === undefined) {
+        this._to = target; this._scale = scale;
+        if (this.still) return (this._at = this._tr = target);
+        this._at = this._tr = 0;
+        this._io = new IntersectionObserver((es) => {
+          if (!es.some((e) => e.isIntersecting)) return;
+          this._io.disconnect(); this._io = null; this.glide(0, this._to);
+        }, { threshold: 0.5 });
+        this._io.observe(this);
+        return 0;
+      }
+      this._scale = scale;
+      if (target !== this._to) {
+        this._to = target;
+        if (this.still) { this.halt(); this._at = this._tr = target; }
+        else if (!this._io) this.glide(this._at, target);   /* not seen yet: the sweep picks up the new target */
+      }
+      return this._at;
+    }
+    get trail() { return this._tr === undefined ? this._at : this._tr; }
+    glide(from, to) {
+      if (this._anim) this._anim.cancel();
+      const TRAIL = 110, tFrom = this.trail;
+      /* short hops are quick, a full-scale sweep takes 700ms */
+      const ms = Math.round(220 + 480 * Math.min(1, Math.abs(to - from) / (this._scale || 1)));
+      const a = this.animate([], { duration: ms + TRAIL });
+      this._anim = a;
+      const ease = (e) => 1 - Math.pow(1 - Math.min(1, Math.max(0, e / ms)), 3);   /* ease-out: fast off the stop, settles on the value */
+      const frame = () => {
+        if (this._anim !== a) return;
+        const e = a.currentTime || 0;
+        this._at = from + (to - from) * ease(e);
+        this._tr = tFrom + (to - tFrom) * ease(e - TRAIL);
+        const done = e >= ms + TRAIL;
+        if (done) { this._at = this._tr = to; this._anim = null; }
+        this.render();
+        if (done) this.land();
+        if (this._anim === a) requestAnimationFrame(frame);
+      };
+      requestAnimationFrame(frame);
+    }
+    /* land · once a glide settles, the reading blinks, hard on and off, like an
+       instrument latching its value. Each off stays ~30ms (two frames at 60Hz);
+       shorter and a blink can fall between frames. Marked by [data-cal-reading]. */
+    land() {
+      const el = this.querySelector('[data-cal-reading]');
+      if (!el || !el.animate) return;
+      const BLINKS = 2, OFF = 30, k = [];
+      for (let i = 0; i < BLINKS; i++) { const o = i / BLINKS, h = 1 / (2 * BLINKS); k.push({ opacity: 1, offset: o }, { opacity: 0.15, offset: o + 0.001 }, { opacity: 0.15, offset: o + h }, { opacity: 1, offset: o + h + 0.001 }); }
+      k.push({ opacity: 1, offset: 1 });
+      el.animate(k, { duration: BLINKS * OFF * 2 });
+    }
+    halt() {
+      if (this._anim) { this._anim.cancel(); this._anim = null; }
+      if (this._io) { this._io.disconnect(); this._io = null; }
+      if (this._to !== undefined) this._at = this._tr = this._to;
+    }
   }
 
   /* ── cal-meter · a meter with a printed scale, a hatched alert zone, a needle and a boxed reading */
@@ -65,10 +139,12 @@
     draw(full) {
       const max = num(this, 'max', 100), v = Math.min(num(this, 'value', 0), max), warn = num(this, 'warn', max * 0.8);
       const f = formatter(str(this, 'format', 'k'), str(this, 'unit')), name = str(this, 'label', 'value');
-      const r = v / max, wr = warn / max, reading = `${f(v)} / ${f(max)} · ${fmt.pct(r, 1)}`;
-      const label = `${name}: ${reading}${warn < max ? `, alert at ${fmt.pct(wr)}` : ''}`;
+      const wr = warn / max, label = `${name}: ${f(v)} / ${f(max)} · ${fmt.pct(v / max, 1)}${warn < max ? `, alert at ${fmt.pct(wr)}` : ''}`;
+      /* draw the gliding value; the label above always states the real one */
+      const at = this.motion(v, max), r = at / max, shown = Number.isInteger(v) ? Math.round(at) : at;
+      const read = (x) => `${f(x)} / ${f(max)} · ${fmt.pct(x / max, 1)}`, reading = read(shown);
       const H = K.hatch('ft', 4, 0.55);
-      const over = wr < 1 && r > wr;
+      const fr = this.trail / max, over = wr < 1 && r > wr;   /* the fill trails the needle */
       const meter = (x0, x1, y, labels) => {
         const X = (q) => x0 + q * (x1 - x0); let s = '';
         /* the alert label sits above the scale numbers; drop a number it would touch */
@@ -83,8 +159,8 @@
         }
         if (wr < 1) s += `<rect x="${X(wr)}" y="${y - 5}" width="${X(1) - X(wr)}" height="5" fill="${H.url}"/>`;
         /* the fill is ink up to the alert line and red only for the part past it */
-        s += K.line(x0, y, x1, y, 'ed') + K.rect(x0, y - 4, X(Math.min(r, wr)) - x0, 4, 'fg', 'none');
-        if (over) s += K.rect(X(wr), y - 4, X(r) - X(wr), 4, 'ft', 'none');
+        s += K.line(x0, y, x1, y, 'ed') + K.rect(x0, y - 4, X(Math.min(fr, wr)) - x0, 4, 'fg', 'none');
+        if (wr < 1 && fr > wr) s += K.rect(X(wr), y - 4, X(fr) - X(wr), 4, 'ft', 'none');
         s += K.line(X(r), y - 18, X(r), y + 2, 'lv', { w: 1.6 });
         return s;
       };
@@ -97,15 +173,17 @@
           const ax = Math.min(Math.max(X(wr), x0 + half), w - half - 2);
           g += K.line(X(wr), y - 30, X(wr), y, 'ft', { opacity: 0.7 }) + K.t(ax, y - 34, al, 'ft', 'middle');
         }
-        /* box to the right of the needle; flip it to the left when it would run off the end */
-        const bw = K.boxWidth(name, reading), nx = X(r), right = nx + 14 + bw <= w - 2;
+        /* box to the side the final value takes. Gliding toward a left box, ride on the
+           right until there is room, so the box swaps sides once and early */
+        const bw = Math.max(K.boxWidth(name, reading), K.boxWidth(name, read(v))), nx = X(r);   /* no width wobble mid-glide */
+        const right = X(v / max) + 14 + bw <= w - 2 || nx - 14 - bw < 2;
         const bx = right ? nx + 14 : Math.max(2, nx - 14 - bw), lx = right ? bx : bx + bw;
-        g += K.leader([[nx, y + 4], [nx, y + 24], [lx, y + 24]], false) + K.box(bx, y + 8, bw, name, reading, over ? 'ft' : 'fg');
+        g += K.leader([[nx, y + 4], [nx, y + 24], [lx, y + 24]], false) + `<g data-cal-reading>${K.box(bx, y + 8, bw, name, reading, over ? 'ft' : 'fg')}</g>`;
         return { w, h: y + 44, markup: g, label };
       }
-      const mw = num(this, 'width', 144), y = 22, vs = f(v), ms = '/' + f(max);
-      const w = mw + 10 + tw(vs) + tw(ms) + 2;
-      const g = H.def + meter(1, mw, y, false) + K.t(mw + 10, y + 1, vs, over ? 'ft' : 'fg') + K.t(mw + 10 + tw(vs), y + 1, ms, 'fa');
+      const mw = num(this, 'width', 144), y = 22, vs = f(shown), ms = '/' + f(max);
+      const vw = Math.max(tw(vs), tw(f(v))), w = mw + 10 + vw + tw(ms) + 2;   /* width from the widest, so the row doesn't reflow */
+      const g = H.def + meter(1, mw, y, false) + `<g data-cal-reading>${K.t(mw + 10 + vw, y + 1, vs, over ? 'ft' : 'fg', 'end') + K.t(mw + 10 + vw, y + 1, ms, 'fa')}</g>`;
       return { w, h: y + 4, markup: g, label };
     }
   }

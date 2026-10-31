@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="film">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calibrated · Animation lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&family=Inter:wght@400;500;600;700&display=swap">
+<!-- The kit, loaded live: edits to these files show up on reload. -->
+<link rel="stylesheet" href="../skills/calibrated-tokens/assets/calibrated.css">
+<link rel="stylesheet" href="../skills/calibrated-components/assets/calibrated-components.css">
+<style>
+/* ── lab chrome only. The kit's look lives inside .stage. */
+:root {
+  --l-bg: #ffffff; --l-fg: #111214; --l-muted: #5d626b; --l-line: #e6e6ea; --l-soft: #f6f6f7;
+  --l-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --l-mono: "Chivo Mono", ui-monospace, Menlo, monospace;
+}
+html[data-theme="night"] { --l-bg: #0d0d0e; --l-fg: #ececee; --l-muted: #a2a6ad; --l-line: #26272a; --l-soft: #161618; }
+html, body { background: var(--l-bg); }
+body.lab { font: 400 14px/1.5 var(--l-sans); color: var(--l-fg); margin: 0; }
+.lab * { box-sizing: border-box; }
+.lab button, .lab select, .lab input { font: inherit; color: inherit; }
+
+/* top bar: global controls */
+.bar { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; align-items: center; gap: 18px; padding: 10px 20px; background: var(--l-bg); border-bottom: 1px solid var(--l-line); }
+.bar h1 { font: 600 15px/1 var(--l-sans); margin: 0 8px 0 0; }
+.bar label { display: inline-flex; align-items: center; gap: 6px; color: var(--l-muted); font-size: 13px; }
+.bar select, .bar .lb { background: var(--l-soft); border: 1px solid var(--l-line); border-radius: 6px; padding: 4px 8px; cursor: pointer; }
+.bar .sp { flex: 1; }
+.bar .rate { font: 500 12px/1 var(--l-mono); min-width: 4ch; }
+
+.shell { display: grid; grid-template-columns: 200px minmax(0, 1fr); }
+.nav { position: sticky; top: 53px; height: calc(100vh - 53px); overflow-y: auto; padding: 16px 12px; border-right: 1px solid var(--l-line); }
+.nav h4 { font: 600 12px/1 var(--l-sans); color: var(--l-muted); text-transform: uppercase; letter-spacing: .04em; margin: 16px 8px 6px; }
+.nav h4:first-child { margin-top: 0; }
+.nav a { display: block; padding: 5px 8px; border-radius: 6px; color: var(--l-muted); text-decoration: none; }
+.nav a:hover, .nav a.on { color: var(--l-fg); background: var(--l-soft); }
+.nav a .st { float: right; font: 500 11px/1.6 var(--l-mono); color: var(--l-muted); }
+
+main { padding: 24px 28px 120px; display: grid; gap: 28px; max-width: 1100px; }
+.cell { border: 1px solid var(--l-line); border-radius: 10px; overflow: hidden; scroll-margin-top: 70px; }
+.cell > header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--l-line); background: var(--l-soft); }
+.cell > header h2 { font: 600 15px/1 var(--l-sans); margin: 0; }
+.cell > header .status { font: 500 11px/1 var(--l-mono); padding: 3px 6px; border-radius: 4px; border: 1px solid var(--l-line); color: var(--l-muted); }
+.cell > header .status[data-s="draft"] { color: #9c6a06; border-color: currentColor; }
+.cell > header .status[data-s="done"] { color: #2e7d4f; border-color: currentColor; }
+.cell > header .sp { flex: 1; }
+.cell > header button { background: var(--l-bg); border: 1px solid var(--l-line); border-radius: 6px; padding: 3px 9px; cursor: pointer; font-size: 13px; }
+.cell > header button:hover { border-color: var(--l-muted); }
+.stage { padding: 32px 28px; min-height: 120px; overflow-x: auto; display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+.ctrls { display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 10px 14px; border-top: 1px solid var(--l-line); font-size: 13px; color: var(--l-muted); }
+.ctrls label { display: inline-flex; align-items: center; gap: 6px; }
+.ctrls input[type=range] { width: 130px; }
+.ctrls output { font: 500 12px/1 var(--l-mono); color: var(--l-fg); min-width: 7ch; }
+.notes { padding: 10px 14px; border-top: 1px dashed var(--l-line); font-size: 13px; color: var(--l-muted); }
+.notes:empty { display: none; }
+@media (max-width: 760px) { .shell { grid-template-columns: 1fr; } .nav { display: none; } }
+</style>
+
+<style id="proto">
+/* ── PROTOTYPE ANIMATIONS
+   Draft motion here first. When a component's motion is settled, move it
+   into the kit (calibrated-components.css / .js) and delete it from here.
+   Everything in this block must sit under @media (prefers-reduced-motion: no-preference). */
+</style>
+</head>
+<body class="lab">
+
+<div class="bar">
+  <h1>Animation lab</h1>
+  <label>speed
+    <input type="range" id="rate" min="0" max="5" step="1" value="5">
+    <span class="rate" id="rate-out">1×</span>
+  </label>
+  <label>theme
+    <select id="theme"><option value="film">film</option><option value="night">night</option></select>
+  </label>
+  <label>density
+    <select id="density"><option value="full">full</option><option value="compact">compact</option></select>
+  </label>
+  <button class="lb" id="replay-all" type="button">replay all</button>
+  <span class="sp"></span>
+  <label title="Uses the OS setting; flip it in DevTools › Rendering › prefers-reduced-motion">reduced motion: <b id="rm">off</b></label>
+</div>
+
+<div class="shell">
+  <nav class="nav" id="nav" aria-label="Components"></nav>
+  <main id="main" data-density="full"></main>
+</div>
+
+<script src="../skills/calibrated-figures/assets/calibrated-figures.js"></script>
+<script src="../skills/calibrated-figures/assets/calibrated-recipes.js"></script>
+<script src="../skills/calibrated-components/assets/calibrated-components.js"></script>
+<script>
+(() => {
+  'use strict';
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const rnd = (a, b) => Math.round(a + Math.random() * (b - a));
+
+  /* ── The components to animate.
+     status: todo | draft | done   (shown in the nav and the cell header)
+     html:   what the stage mounts. Replay remounts it from scratch.
+     ctrls:  sliders that set attributes on [data-t] targets live, so
+             value-change transitions can be watched.
+     shuffle: sets new random values on every target at once.
+     notes:  what we want from this component's motion. */
+  const LAB = [
+    { group: 'Instruments' },
+    {
+      id: 'meter', name: 'Meter', status: 'draft',
+      html: `<cal-meter data-t value="46000" max="1000000" warn="800000" label="requests today"></cal-meter>
+             <cal-meter value="128" max="150" warn="120" label="build cache" unit=" GB" format="raw"></cal-meter>
+             <cal-meter value="640" max="1000" warn="800" label="tokens" density="compact"></cal-meter>
+             <cal-meter still value="46000" max="1000000" warn="800000" label="still · no motion"></cal-meter>`,
+      ctrls: [{ attr: 'value', min: 0, max: 1000000, step: 1000, val: 46000 }, { attr: 'warn', min: 0, max: 1000000, step: 10000, val: 800000 }],
+      shuffle: (el) => el.setAttribute('value', rnd(0, +el.getAttribute('max'))),
+      notes: 'Draft: sweeps up from 0 when half in view; later changes ease from where the needle is (220ms + 480ms × share of the scale, ease-out cubic). The needle and reading lead; the fill follows the same curve 110ms behind. On landing the reading blinks twice in 120ms. the box keeps the final side. The fourth meter has the still attribute.',
+    },
+    {
+      id: 'position', name: 'Position', status: 'todo',
+      html: `<cal-position data-t index="3" count="7" label="diff · files"></cal-position>
+             <cal-position index="12" count="140" label="search · matches"></cal-position>`,
+      ctrls: [{ attr: 'index', min: 1, max: 7, step: 1, val: 3 }],
+      shuffle: (el) => el.setAttribute('index', rnd(1, +el.getAttribute('count'))),
+      notes: '',
+    },
+    {
+      id: 'progress', name: 'Progress', status: 'todo',
+      html: `<cal-progress data-t done="11" total="15" live="12" live-label="step 12 · backfill" done-label="11 done · 1h 48m"></cal-progress>
+             <cal-progress done="6" total="15" fault="7" fault-label="step 7 · needs review"></cal-progress>`,
+      ctrls: [{ attr: 'done', min: 0, max: 14, step: 1, val: 11, also: (el, v) => { el.setAttribute('live', v + 1); el.setAttribute('live-label', `step ${v + 1} · backfill`); el.setAttribute('done-label', `${v} done`); } }],
+      shuffle: (el) => { const t = +el.getAttribute('total'), d = rnd(0, t - 1); el.setAttribute('done', d); if (el.hasAttribute('live')) el.setAttribute('live', d + 1); if (el.hasAttribute('fault')) el.setAttribute('fault', d + 1); },
+      notes: '',
+    },
+    {
+      id: 'diff', name: 'Diff', status: 'todo',
+      html: `<div style="display:grid;gap:6px">
+               <cal-diff data-t added="184" removed="20" label="release"></cal-diff>
+               <cal-diff added="147000" removed="3000" label="vendored"></cal-diff>
+               <cal-diff added="12" removed="3" label="config"></cal-diff>
+             </div>`,
+      ctrls: [{ attr: 'added', min: 0, max: 2000, step: 1, val: 184 }, { attr: 'removed', min: 0, max: 2000, step: 1, val: 20 }],
+      shuffle: (el) => { el.setAttribute('added', rnd(0, 3000)); el.setAttribute('removed', rnd(0, 800)); },
+      notes: '',
+    },
+    {
+      id: 'durations', name: 'Durations', status: 'todo',
+      html: `<cal-durations max="15" unit="m">
+               <cal-span name="lint" value="252"></cal-span>
+               <cal-span data-t name="unit tests" value="760"></cal-span>
+               <cal-span name="e2e" live start="${Date.now() - 300000}"></cal-span>
+             </cal-durations>`,
+      ctrls: [{ attr: 'value', min: 0, max: 900, step: 5, val: 760 }],
+      shuffle: (el) => el.setAttribute('value', rnd(30, 880)),
+      notes: 'The live span already ticks every second; any motion must sit well with that.',
+    },
+    {
+      id: 'ruler', name: 'Ruler', status: 'todo',
+      html: `<cal-ruler data-t min="0" max="150" step="10" every="5" unit="k" value="88" width="380"></cal-ruler>`,
+      ctrls: [{ attr: 'value', min: 0, max: 150, step: 1, val: 88 }],
+      shuffle: (el) => el.setAttribute('value', rnd(0, 150)),
+      notes: '',
+    },
+
+    { group: 'Components' },
+    {
+      id: 'counts', name: 'Counts', status: 'todo',
+      html: `<span class="cal-count" data-n="3" data-noun="regions"></span>
+             <span class="cal-count" data-n="2" data-noun="running"></span>
+             <span class="cal-count" data-t data-n="73" data-noun="files"></span>
+             <span class="cal-count" data-n="1" data-noun="failing" data-ink="fault"></span>`,
+      ctrls: [{ attr: 'data-n', min: 0, max: 999, step: 1, val: 73 }],
+      shuffle: (el) => el.setAttribute('data-n', rnd(0, 120)),
+      after: () => Calibrated.counts && Calibrated.counts(),
+      notes: '',
+    },
+    {
+      id: 'tabs', name: 'Tabs', status: 'todo',
+      html: `<div class="cal-tabs" role="tablist">
+               <button role="tab" aria-selected="true">runs<span class="cal-cnt">04</span></button>
+               <button role="tab" aria-selected="false">alerts<span class="cal-cnt">01</span></button>
+               <button role="tab" aria-selected="false">history</button>
+             </div>`,
+      wire: (stage) => $$('[role=tab]', stage).forEach((b) => b.addEventListener('click', () => $$('[role=tab]', stage).forEach((t) => t.setAttribute('aria-selected', t === b)))),
+      notes: 'Click tabs to switch.',
+    },
+    {
+      id: 'buttons', name: 'Buttons', status: 'todo',
+      html: `<button class="cal-btn primary">run again</button>
+             <button class="cal-btn">copy</button>
+             <button class="cal-btn" disabled>export</button>
+             <button class="cal-btn quiet">details</button>
+             <span class="cal-sign" role="group" aria-label="Sign off">
+               <button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button>
+               <button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="false">drop</button>
+             </span>`,
+      wire: (stage) => $$('[aria-pressed]', stage).forEach((b) => b.addEventListener('click', () => $$('[aria-pressed]', stage).forEach((t) => t.setAttribute('aria-pressed', t === b && t.getAttribute('aria-pressed') !== 'true')))),
+      notes: 'Hover, focus, press. Keep/drop toggle.',
+    },
+    {
+      id: 'marks', name: 'Marks in text', status: 'todo',
+      html: `<div class="lg up" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+               <span><span class="cal-dot on"></span> live</span>
+               <span><span class="cal-dot done"></span> done</span>
+               <span><span class="cal-dot"></span> next</span>
+               <span><span class="cal-dot ok"></span> passed</span>
+               <span><span class="cal-dot fault"></span> failed</span>
+               <span><span class="cal-rev" data-rev="B"></span> revised</span>
+             </div>
+             <p style="margin:0">The <span class="live">e2e suite</span> is the only run still going.</p>`,
+      notes: 'The live star is the one candidate for an idle (looping) motion. Keep it subtle.',
+    },
+    {
+      id: 'form', name: 'Form', status: 'todo',
+      html: `<div style="display:grid;gap:14px;width:360px">
+               <div class="cal-field"><label for="lf1">daily limit</label><input class="cal-input" id="lf1" value="150 000"></div>
+               <div class="cal-field"><label for="lf3">owner</label><input class="cal-input" id="lf3" value="#" aria-invalid="true" aria-describedby="lf3e"><span class="err" id="lf3e">Enter a team name, like payments.</span></div>
+               <label class="cal-check"><input type="checkbox" checked> <span>Pause new runs at the limit</span></label>
+             </div>`,
+      notes: 'Focus line, error appearing, checkbox tick.',
+    },
+    {
+      id: 'rows', name: 'Rows', status: 'todo',
+      html: `<div class="cal-rows" style="width:420px">
+               <div><div>Resize product images</div><div class="meta lg">worker 3 · 1 204 jobs · 1m 02s</div></div>
+               <div class="sel"><div>Rebuild search index</div><div class="meta lg">worker 1 · 88 jobs · 0m 41s</div></div>
+               <div><div>Prune old logs</div><div class="meta lg">worker 2 · 12 jobs · 0m 05s</div></div>
+             </div>`,
+      wire: (stage) => $$('.cal-rows > div', stage).forEach((r) => r.addEventListener('click', () => $$('.cal-rows > div', stage).forEach((x) => x.classList.toggle('sel', x === r)))),
+      notes: 'Click rows to move the selection.',
+    },
+    {
+      id: 'revisions', name: 'Revisions', status: 'todo',
+      html: `<table class="cal-revs">
+               <thead><tr><th>rev</th><th>description</th><th>date</th></tr></thead>
+               <tbody>
+                 <tr><td><span class="cal-rev" data-rev="A"></span></td><td>First review: three deploys.</td><td class="lg">2026-10-29</td></tr>
+                 <tr><td><span class="cal-rev" data-rev="B"></span></td><td>Added the rollback for ap-south.</td><td class="lg">2026-10-31</td></tr>
+               </tbody>
+             </table>`,
+      notes: '',
+    },
+  ];
+
+  /* ── build */
+  const main = $('#main'), nav = $('#nav');
+  let navHtml = '';
+  for (const c of LAB) {
+    if (c.group) { navHtml += `<h4>${c.group}</h4>`; continue; }
+    navHtml += `<a href="#${c.id}">${c.name}<span class="st">${c.status}</span></a>`;
+    const cell = document.createElement('section');
+    cell.className = 'cell'; cell.id = c.id;
+    cell.innerHTML = `
+      <header><h2>${c.name}</h2><span class="status" data-s="${c.status}">${c.status}</span><span class="sp"></span>
+        ${c.shuffle ? '<button type="button" data-act="shuffle">shuffle values</button>' : ''}
+        <button type="button" data-act="replay">replay</button></header>
+      <div class="stage cal-theme"></div>
+      ${c.ctrls ? `<div class="ctrls">${c.ctrls.map((k, i) => `<label>${k.attr}<input type="range" data-k="${i}" min="${k.min}" max="${k.max}" step="${k.step}" value="${k.val}"><output>${k.val}</output></label>`).join('')}</div>` : ''}
+      <div class="notes">${c.notes || ''}</div>`;
+    main.append(cell);
+    c.cell = cell;
+    mount(c);
+
+    $('[data-act=replay]', cell).addEventListener('click', () => mount(c));
+    if (c.shuffle) $('[data-act=shuffle]', cell).addEventListener('click', () => {
+      $$('cal-meter, cal-position, cal-progress, cal-diff, cal-span, cal-ruler, .cal-count', $('.stage', cell)).forEach((el) => c.shuffle(el));
+      c.after && c.after();
+    });
+    $$('.ctrls input', cell).forEach((inp) => inp.addEventListener('input', () => {
+      const k = c.ctrls[+inp.dataset.k], t = $('[data-t]', cell), v = +inp.value;
+      inp.nextElementSibling.textContent = v;
+      if (!t) return;
+      t.setAttribute(k.attr, v);
+      k.also && k.also(t, v);
+      c.after && c.after();
+    }));
+  }
+  nav.innerHTML = navHtml;
+
+  /* Replay = throw the stage away and mount fresh, so entrance motion runs again. */
+  function mount(c) {
+    const stage = $('.stage', c.cell);
+    stage.innerHTML = c.html;
+    c.after && c.after();
+    c.wire && c.wire(stage);
+    $$('.ctrls input', c.cell).forEach((inp) => { const k = c.ctrls[+inp.dataset.k]; inp.value = k.val; inp.nextElementSibling.textContent = k.val; });
+  }
+
+  $('#replay-all').addEventListener('click', () => LAB.forEach((c) => c.cell && mount(c)));
+
+  /* ── speed: slows every CSS animation, transition and WAAPI animation on the page */
+  const RATES = [0, 0.1, 0.25, 0.5, 0.75, 1];
+  let rate = 1;
+  $('#rate').addEventListener('input', (e) => { rate = RATES[+e.target.value]; $('#rate-out').textContent = rate === 0 ? 'paused' : rate + '×'; });
+  (function tick() {
+    for (const a of document.getAnimations()) if (a.playbackRate !== rate) a.playbackRate = rate;
+    requestAnimationFrame(tick);
+  })();
+
+  /* ── theme and density */
+  $('#theme').addEventListener('change', (e) => { document.documentElement.dataset.theme = e.target.value; Calibrated.redraw && Calibrated.redraw(); });
+  $('#density').addEventListener('change', (e) => { main.dataset.density = e.target.value; LAB.forEach((c) => c.cell && mount(c)); });
+
+  /* ── reduced-motion readout */
+  const mq = matchMedia('(prefers-reduced-motion: reduce)');
+  const rm = () => { $('#rm').textContent = mq.matches ? 'on' : 'off'; };
+  mq.addEventListener('change', rm); rm();
+
+  /* nav highlight */
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) $$('.nav a').forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id)); }), { rootMargin: '-40% 0px -55% 0px' });
+  $$('.cell').forEach((c) => io.observe(c));
+
+  Calibrated.ready(() => LAB.forEach((c) => c.after && c.after()));
+})();
+</script>
+</body>
+</html>
