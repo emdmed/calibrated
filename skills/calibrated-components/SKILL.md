@@ -45,6 +45,13 @@ Put `data-density="full"` or `"compact"` on any ancestor, or `density` on the el
 
 Instruments redraw by themselves when an attribute or density changes. They also redraw once fonts load.
 
+## Motion
+Every instrument moves, with nothing to set up. When it is half in view it sweeps to its value. When an attribute changes it glides from where it is (220–700ms, ease-out; `<cal-progress>` steps at 50ms a node). The reading blinks twice when it settles. The `aria-label` always states the final value, never a frame.
+- To update a value, set the attribute (`el.setAttribute('value', v)`). Don't replace the element, or it sweeps in from zero again.
+- Add `still` to an instrument to draw it at once: in print, in a long table of instruments, or wherever motion would distract. `prefers-reduced-motion` does the same for the whole page.
+- A live `<cal-span>` ticks once a second without gliding.
+- Headless Chromium freezes the animation clock, so screenshots catch the first frame. Take them with `--force-prefers-reduced-motion` to see the settled drawing.
+
 ## Rules
 - One lamp per view. Use `data-ink="live"` on at most one count or status at a time. The lamp is text, a line, an outline or a star (`.star`), never a fill.
 - Status words use `data-ink="live|ok|fault"` (on `.cal-count`, `.cal-table .st`, and `ok|fault` on pressed `.cal-btn`). Never colour plain text for decoration.

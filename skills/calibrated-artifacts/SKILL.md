@@ -33,7 +33,7 @@ This skill is self-contained. `assets/template.html` already holds the tokens, t
 3. **Find the numbers.** Write down three or more values each drawing will show (counts, sizes, durations, limits, positions). If an item has none, it gets text or a table, not a drawing.
 4. **Pick the drawing** for each one: a recipe if one fits (`lanes`, `budget`, `merge`, `fanout`, `loop`, `measured`, `timeline`, `matrix`, `section`), an instrument element for a single quantity (`<cal-meter>`, `<cal-progress>`, `<cal-position>`, `<cal-diff>`, `<cal-durations>`), or a hand-drawn figure from the marks. Never a flowchart of labelled boxes (see `drawing-quality.md` §1 for what to draw instead).
 5. **Copy `assets/template.html`** into the working folder as `<name>.html`. Replace the mast, headline, title block, sections and the page-figures script. Delete the example content you don't use. Keep the `<title>` a 2–4 word name. Put every drawing in a `cal-card` with its info column, on explainers and reports as well as proposals.
-6. **Look once.** Take one screenshot if the session can (headless Chromium or a browser tool), fix what it shows, then publish. Go through the checklist at the end of `drawing-quality.md`: values on every figure, no flowcharts, one small lamp, figures that fill their stage, the first drawing on the first screen, no clipping or crossing leaders.
+6. **Look once.** Take one screenshot if the session can (headless Chromium or a browser tool; pass `--force-prefers-reduced-motion`, since headless freezes the animation clock on the first frame), fix what it shows, then publish. Go through the checklist at the end of `drawing-quality.md`: values on every figure, no flowcharts, one small lamp, figures that fill their stage, the first drawing on the first screen, no clipping or crossing leaders.
 7. **Publish.** Call the artifacts server's `guide` (topic `pages`) once per session before the first publish, then `publish_files` with the file (or `publish_version` with the content), with a title and `icon: "chart"`. Give the user the link in one sentence.
 
 ## House rules
@@ -46,7 +46,7 @@ This skill is self-contained. `assets/template.html` already holds the tokens, t
 7. **Panels on a desk**: cards, tables and instrument panels sit straight on the desk inside `.wrap`, separated by gaps. Hairlines only (`--edge`, `--edge-strong`, dashed between today and drawn). No thick frames, no radius, no shadows, no gradients. The framed `.cal-sheet` with zones and a title block is optional, for pages that need drawing numbers and approvals.
 8. **Numbered sections** (`1 · Name`, a short note, `sheet 1/3`). Numbers must mean something.
 9. **Dense, not airy.** The headline is short; each card opens with its `.id` line. No empty bands. Each figure fills its stage, and its viewBox fits the drawing.
-10. **Complete at rest**: everything readable on load; no reveal-on-scroll.
+10. **Complete at rest**: everything readable on load; no reveal-on-scroll. Instruments sweep to their value once when they come into view (under a second) and glide when a value changes; that is their only motion. Mount figures with `Calibrated.mount`. Use `Calibrated.play` (see `recipes.md`) only when the replay is the point, for example a run's lanes or a loop the reader steps through with buttons, and on at most one figure per page.
 11. **Words**: short, specific, active. Write *why* in the card, *where* / *replaces* / *data* in the key/value sheet.
 12. **Leave alone**: terminal output, prompt text, menus. Don't draw where there's nothing to measure.
 
