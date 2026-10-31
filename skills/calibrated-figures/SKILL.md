@@ -11,7 +11,7 @@ Needs **calibrated-tokens** (`calibrated.css`) on the page. All colours are CSS 
 
 ## Files (copy into the project)
 - `assets/calibrated-figures.js`: the kit. Defines `window.Calibrated` with `K` (the marks), `draw`, `svg`, `ready`, `density`, `fmt` and `textWidth`.
-- `assets/calibrated-recipes.js`: optional. Whole figures from data: `Calibrated.recipes.*`, plus `mount` and `render`.
+- `assets/calibrated-recipes.js`: optional. Whole figures from data: `Calibrated.recipes.*`, plus `mount`, `render` and `play`.
 - `references/marks.md`: every primitive, with its signature and geometry. Read it before you draw by hand.
 - `references/recipes.md`: the data shape of each recipe, and when to use it.
 - `references/drawing-quality.md`: the quality bar and the failures to avoid (flowcharts, lamp fills, figures lost in empty frames). Read it before drawing anything new.
@@ -80,6 +80,8 @@ Calibrated.ready(() => Calibrated.mount('#load', Calibrated.recipes.lanes({
   ],
 })));
 ```
+To replay it instead, use `Calibrated.play('#load', Calibrated.recipes.lanes, data)`. When the figure is half in view, a time cursor sweeps the ruler, each lane latches as the cursor passes its end, and a live lane's dashed tail then crawls. Reduced motion draws the finished figure. Only recipes with an `extent` move (lanes, budget, merge, fanout, loop and measured for now); `play` mounts the others as they are.
+
 See `references/recipes.md` for all nine. To design a new figure, start from the recipe closest to it and change the layout. Don't invent new marks.
 
 ## Related skills

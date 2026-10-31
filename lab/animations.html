@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="film">
+<html lang="en" data-theme="night">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -49,13 +49,21 @@ main { padding: 24px 28px 120px; display: grid; gap: 28px; max-width: 1100px; }
 .cell > header .sp { flex: 1; }
 .cell > header button { background: var(--l-bg); border: 1px solid var(--l-line); border-radius: 6px; padding: 3px 9px; cursor: pointer; font-size: 13px; }
 .cell > header button:hover { border-color: var(--l-muted); }
-.stage { padding: 32px 28px; min-height: 120px; overflow-x: auto; display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+.cell > .stage { padding: 32px 28px; min-height: 120px; overflow-x: auto; display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
 .ctrls { display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 10px 14px; border-top: 1px solid var(--l-line); font-size: 13px; color: var(--l-muted); }
 .ctrls label { display: inline-flex; align-items: center; gap: 6px; }
 .ctrls input[type=range] { width: 130px; }
 .ctrls output { font: 500 12px/1 var(--l-mono); color: var(--l-fg); min-width: 7ch; }
 .notes { padding: 10px 14px; border-top: 1px dashed var(--l-line); font-size: 13px; color: var(--l-muted); }
 .notes:empty { display: none; }
+/* overview: every animated piece in one grid, wide enough to see them all at once */
+main { max-width: none; }
+.cell { max-width: 1044px; }
+.cell.wide { max-width: none; }
+.all-grid { flex: 1 1 100%; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr)); gap: 22px 28px; }
+.all-grid .tile { margin: 0; min-width: 0; display: grid; gap: 10px; align-content: start; }
+.all-grid .tile figcaption { font: 500 11px/1 var(--l-mono); color: var(--l-muted); text-transform: uppercase; letter-spacing: .06em; }
+.all-grid .tile svg { max-width: 100%; height: auto; min-width: 0 !important; }   /* shrink to fit, never grow */
 @media (max-width: 760px) { .shell { grid-template-columns: 1fr; } .nav { display: none; } }
 </style>
 
@@ -75,7 +83,7 @@ main { padding: 24px 28px 120px; display: grid; gap: 28px; max-width: 1100px; }
     <span class="rate" id="rate-out">1×</span>
   </label>
   <label>theme
-    <select id="theme"><option value="film">film</option><option value="night">night</option></select>
+    <select id="theme"><option value="night">night</option><option value="film">film</option></select>
   </label>
   <label>density
     <select id="density"><option value="full">full</option><option value="compact">compact</option></select>
@@ -100,6 +108,51 @@ main { padding: 24px 28px 120px; display: grid; gap: 28px; max-width: 1100px; }
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
   const rnd = (a, b) => Math.round(a + Math.random() * (b - a));
 
+  /* ── figure data, the same as the reference page */
+  const D = {
+    lanes: { n: 1, title: 'load test · v2.4 · 3 regions', max: 10, lanes: [
+      { name: 'us-east', end: 4.2, label: '4m 12s', box: ['p99 212 ms', '0.02% errors'] },
+      { name: 'eu-west', end: 6.67, label: '6m 40s', box: ['p99 230 ms', '0.03% errors'] },
+      { name: 'ap-south', end: 8.08, label: '8m 05s', live: true, box: ['running', '40% of traffic'] },
+    ] },
+    budget: { n: 2, title: 'error budget · checkout · 30 days', max: 1000, step: 50, every: 4, used: 612, at: 'day 19', pace: 900,
+      fmt: (v) => Math.round(v) + 'm', alerts: [{ v: 800, label: 'alert 80%' }, { v: 950, label: '95%' }], paceLabel: ['at this pace by day 30', '≈ 900m · 80% on day 25'] },
+    merge: { n: 3, title: 'merge · release/2.4 → main', branch: 'release/2.4', commits: 5, baseAhead: 1,
+      files: ['9 files', '+212 −38'], steps: ['git switch main', 'git merge --no-ff release/2.4', 'git tag v2.4.0'] },
+    fanout: { n: 4, title: 'ingest · scheduler · 4 workers', root: ['scheduler', 'queue · 12m'], folded: '+1 finished earlier', children: [
+      { task: 'resize product images', meta: 'worker 3 · 1 204 jobs', time: '1m 02s', live: true },
+      { task: 'rebuild search index', meta: 'queued · 88 jobs', time: 'next' },
+      { task: 'expire stale sessions', meta: 'done · 9 340 rows', time: '2m 10s' },
+    ] },
+    loop: { n: 5, title: 'release train · v2.4', center: (lap) => `train ${lap} of 9`, at: 1, lap: 4, laps: 9, stations: [
+      { name: 'build', cmd: 'make release' },
+      { name: 'test', cmd: 'make test-e2e' },
+      { name: 'stage', cmd: 'deploy staging' },
+      { name: 'ship', cmd: 'deploy prod --canary' },
+    ] },
+    measured: { title: 'storage · bucket assets', max: 1e12, zoomMax: 5e10, factor: 20,
+      fmt: (v) => (v >= 1e12 ? v / 1e12 + ' TB' : Math.round(v / 1e9 * 10) / 10 + ' GB'),
+      parts: [{ label: 'originals', value: 41.4e9, ink: 'fg' }, { label: 'thumbnails', value: 3.1e9, ink: 'mu' }, { label: 'uploads', value: 1.5e9, ink: 'lv' }],
+      plate: ['DEDUP SAVED', '18% · 9.1 GB'] },
+    timeline: { n: 6, title: 'migration · orders db · 10 steps', steps: [61, 95, 120, 130, 88, 250, 140, 160, 110, 152], slowLabel: 'slowest · backfill' },
+    matrix: { n: 7, title: 'services by release', cols: ['gateway', 'auth', 'checkout', 'cart', 'search', 'billing', 'notify', 'catalog', 'admin'],
+      rows: ['2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.9', '3.0'], hits: [[0], [1], [1, 2, 3], [2, 3], [2, 7], [3, 4], [0, 5], [0, 6], [7, 2], [8, 3]],
+      callout: { col: 0, l1: '3 releases touch gateway', l2: 'test 2.1, 2.7, 2.8 together' } },
+    section: { n: 8, title: 'network · prod vpc', boundary: { label: 'egress through proxy only' },
+      regions: [
+        { x: 20, y: 38, w: 360, h: 190, kind: 'hatch', label: 'restricted' },
+        { x: 40, y: 70, w: 230, h: 146, kind: 'clear', label: 'app subnet' },
+        { x: 132, y: 76, kind: 'island', label: 'secrets' }, { x: 194, y: 76, kind: 'island', label: 'kms' },
+        { x: 56, y: 132, w: 196, h: 68, kind: 'strong', label: 'api service', sub: 'read-write · port 443' },
+        { x: 290, y: 132, w: 76, h: 52, kind: 'dotted', label: 'cache', sub: 'ephemeral' },
+      ],
+      callouts: [
+        { at: [350, 56], l1: 'closed', l2: 'restricted, secrets' },
+        { at: [262, 110], l1: 'open', l2: 'app subnet, api' },
+        { l1: 'rotated', l2: 'credentials daily' },
+        { l1: 'outside', l2: 'batch jobs' },
+      ] },
+  };
   /* ── The components to animate.
      status: todo | draft | done   (shown in the nav and the cell header)
      html:   what the stage mounts. Replay remounts it from scratch.
@@ -107,7 +160,46 @@ main { padding: 24px 28px 120px; display: grid; gap: 28px; max-width: 1100px; }
              value-change transitions can be watched.
      shuffle: sets new random values on every target at once.
      notes:  what we want from this component's motion. */
+  const OV = {};   /* the overview's own figure data */
   const LAB = [
+    { group: 'Overview' },
+    {
+      id: 'all', name: 'All animated', status: 'view', wide: true,
+      html: `<div class="all-grid">
+               <figure class="tile"><figcaption>meter</figcaption><cal-meter value="46000" max="1000000" warn="800000" label="requests today"></cal-meter></figure>
+               <figure class="tile"><figcaption>position</figcaption><cal-position index="3" count="7" label="diff · files"></cal-position></figure>
+               <figure class="tile"><figcaption>progress</figcaption><cal-progress done="11" total="15" live="12" live-label="step 12 · backfill" done-label="11 done · 1h 48m"></cal-progress></figure>
+               <figure class="tile"><figcaption>diff</figcaption><cal-diff added="184" removed="20" label="release"></cal-diff></figure>
+               <figure class="tile"><figcaption>durations</figcaption><cal-durations max="15" unit="m">
+                 <cal-span name="lint" value="252"></cal-span><cal-span name="unit tests" value="760"></cal-span><cal-span name="e2e" live start="${Date.now() - 300000}"></cal-span>
+               </cal-durations></figure>
+               <figure class="tile"><figcaption>ruler</figcaption><cal-ruler min="0" max="150" step="10" every="5" unit="k" value="88" width="380"></cal-ruler></figure>
+               <figure class="tile"><figcaption>lanes</figcaption><svg data-fig="lanes"></svg></figure>
+               <figure class="tile"><figcaption>budget</figcaption><svg data-fig="budget"></svg></figure>
+               <figure class="tile"><figcaption>merge</figcaption><svg data-fig="merge"></svg></figure>
+               <figure class="tile"><figcaption>fan-out</figcaption><svg data-fig="fanout"></svg></figure>
+               <figure class="tile"><figcaption>loop</figcaption><svg data-fig="loop"></svg></figure>
+               <figure class="tile"><figcaption>measured</figcaption><svg data-fig="measured"></svg></figure>
+             </div>`,
+      /* shuffle every instrument with its own cell's rule, and the measured parts */
+      shuffle: (el) => {
+        const id = { 'cal-meter': 'meter', 'cal-position': 'position', 'cal-progress': 'progress', 'cal-diff': 'diff', 'cal-span': 'durations', 'cal-ruler': 'ruler' }[el.localName];
+        const c = LAB.find((x) => x.id === id);
+        c && c.shuffle && c.shuffle(el);
+      },
+      /* the overview keeps its own measured and loop data, so it never moves the other cells */
+      wire: () => { OV.measured = D.measured; OV.loop = D.loop; },
+      alsoShuffle: (stage) => {
+        const c = LAB.find((x) => x.id === 'fig-measured'), old = OV.measured, next = c.reshuffle(old);
+        OV.measured = next;
+        Calibrated.play($('svg[data-fig="measured"]', stage), Calibrated.recipes.measured, { ...next, prev: old.parts.map((p) => p.value) });
+        const R = Calibrated.recipes.loop, step = R.step(OV.loop, 1) || R.step({ ...OV.loop, lap: 1 }, 1);
+        OV.loop = { ...step, from: undefined, lapFrom: undefined, dir: undefined };
+        Calibrated.play($('svg[data-fig="loop"]', stage), R, step);
+      },
+      autoplay: true,
+      notes: 'Every animated instrument and figure in one grid, so their motion can be judged side by side. It plays on a loop: the entrance, then three shuffles 2.2s apart (every instrument and the measured parts take new values, the loop steps forward), then it restarts from the original values. The loop follows the speed slider; pause stops it, replay restarts it. Shuffle by hand any time.',
+    },
     { group: 'Instruments' },
     {
       id: 'meter', name: 'Meter', status: 'draft',
@@ -120,52 +212,122 @@ main { padding: 24px 28px 120px; display: grid; gap: 28px; max-width: 1100px; }
       notes: 'Draft: sweeps up from 0 when half in view; later changes ease from where the needle is (220ms + 480ms × share of the scale, ease-out cubic). The needle and reading lead; the fill follows the same curve 110ms behind. On landing the reading blinks twice in 120ms. the box keeps the final side. The fourth meter has the still attribute.',
     },
     {
-      id: 'position', name: 'Position', status: 'todo',
+      id: 'position', name: 'Position', status: 'draft',
       html: `<cal-position data-t index="3" count="7" label="diff · files"></cal-position>
-             <cal-position index="12" count="140" label="search · matches"></cal-position>`,
+             <cal-position index="12" count="140" label="search · matches"></cal-position>
+             <cal-position index="9" count="18" density="compact"></cal-position>
+             <cal-position still index="3" count="7" label="still · no motion"></cal-position>`,
       ctrls: [{ attr: 'index', min: 1, max: 7, step: 1, val: 3 }],
       shuffle: (el) => el.setAttribute('index', rnd(1, +el.getAttribute('count'))),
-      notes: '',
+      notes: 'Draft: uses the meter\'s clock. The marker sweeps from item 1 when half in view, then glides between items (220ms + 480ms × share of the list, ease-out cubic). Ticks it passes ink in 110ms behind it. The reading counts through each item and blinks twice on landing. The reading box is sized for n/n so nothing reflows.',
     },
     {
-      id: 'progress', name: 'Progress', status: 'todo',
+      id: 'progress', name: 'Progress', status: 'draft',
       html: `<cal-progress data-t done="11" total="15" live="12" live-label="step 12 · backfill" done-label="11 done · 1h 48m"></cal-progress>
-             <cal-progress done="6" total="15" fault="7" fault-label="step 7 · needs review"></cal-progress>`,
+             <cal-progress done="6" total="15" fault="7" fault-label="step 7 · needs review"></cal-progress>
+             <cal-progress done="5" total="5"></cal-progress>
+             <cal-progress done="4" total="9" live="5" density="compact"></cal-progress>
+             <cal-progress still done="11" total="15" live="12" live-label="still · no motion"></cal-progress>`,
       ctrls: [{ attr: 'done', min: 0, max: 14, step: 1, val: 11, also: (el, v) => { el.setAttribute('live', v + 1); el.setAttribute('live-label', `step ${v + 1} · backfill`); el.setAttribute('done-label', `${v} done`); } }],
       shuffle: (el) => { const t = +el.getAttribute('total'), d = rnd(0, t - 1); el.setAttribute('done', d); if (el.hasAttribute('live')) el.setAttribute('live', d + 1); if (el.hasAttribute('fault')) el.setAttribute('fault', d + 1); },
-      notes: '',
+      notes: 'Draft: uses the meter\'s clock. The live star leads, stepping node to node from step 1 when half in view, at an even 50ms per step (linear); done squares latch behind it 110ms later. Filled squares being added or removed flicker (30ms filled, 30ms empty) until the count settles; empty squares hold still. The count steps with the star and blinks twice on landing; it turns green only once all are done and landed. The done-label dimension and the captions sit at their final places from the start; a fault node and its caption appear on landing.',
     },
     {
-      id: 'diff', name: 'Diff', status: 'todo',
+      id: 'diff', name: 'Diff', status: 'draft',
       html: `<div style="display:grid;gap:6px">
                <cal-diff data-t added="184" removed="20" label="release"></cal-diff>
                <cal-diff added="147000" removed="3000" label="vendored"></cal-diff>
                <cal-diff added="12" removed="3" label="config"></cal-diff>
-             </div>`,
+               <cal-diff added="0" removed="0" label="docs"></cal-diff>
+               <cal-diff still added="184" removed="20" label="still"></cal-diff>
+             </div>
+             <cal-diff added="212" removed="38" density="compact"></cal-diff>`,
       ctrls: [{ attr: 'added', min: 0, max: 2000, step: 1, val: 184 }, { attr: 'removed', min: 0, max: 2000, step: 1, val: 20 }],
       shuffle: (el) => { el.setAttribute('added', rnd(0, 3000)); el.setAttribute('removed', rnd(0, 800)); },
-      notes: '',
+      notes: 'Draft: uses the meter\'s clock. Both bars grow out from the centre when half in view, gliding in drawn length (so the log part moves as evenly as the linear part; 220ms + 480ms × share of the side, ease-out cubic). The end ticks and numbers lead, counting through the values they pass; the bars trail 110ms behind. Both numbers blink twice on landing. Widths are fixed, so a column keeps its centre line.',
     },
     {
-      id: 'durations', name: 'Durations', status: 'todo',
+      id: 'durations', name: 'Durations', status: 'draft',
       html: `<cal-durations max="15" unit="m">
                <cal-span name="lint" value="252"></cal-span>
                <cal-span data-t name="unit tests" value="760"></cal-span>
                <cal-span name="e2e" live start="${Date.now() - 300000}"></cal-span>
+             </cal-durations>
+             <cal-durations max="15" unit="m" density="compact">
+               <cal-span name="lint" value="252"></cal-span>
+               <cal-span name="unit tests" value="760"></cal-span>
+               <cal-span name="e2e" live start="${Date.now() - 300000}"></cal-span>
+             </cal-durations>
+             <cal-durations still max="15" unit="m">
+               <cal-span name="still" value="252"></cal-span>
+               <cal-span name="no motion" value="760"></cal-span>
              </cal-durations>`,
       ctrls: [{ attr: 'value', min: 0, max: 900, step: 5, val: 760 }],
-      shuffle: (el) => el.setAttribute('value', rnd(30, 880)),
-      notes: 'The live span already ticks every second; any motion must sit well with that.',
+      shuffle: (el) => el.hasAttribute('start') ? el.setAttribute('start', Date.now() - rnd(30, 880) * 1000) : el.setAttribute('value', rnd(30, 880)),
+      notes: 'Draft: uses the meter\'s clock. Bars grow out from the start line when half in view (220ms + 480ms × share of the scale, ease-out cubic); the end tick, the live star and the times lead, counting up; the bars trail 110ms behind; the times blink twice on landing. A finished span glides to a new value from where it is. The live span grows with the rest on entry, then its once-a-second tick just redraws: no glide, no blink. A new start (shuffle) glides it like a finished span.',
     },
     {
-      id: 'ruler', name: 'Ruler', status: 'todo',
-      html: `<cal-ruler data-t min="0" max="150" step="10" every="5" unit="k" value="88" width="380"></cal-ruler>`,
+      id: 'ruler', name: 'Ruler', status: 'draft',
+      html: `<cal-ruler data-t min="0" max="150" step="10" every="5" unit="k" value="88" width="380"></cal-ruler>
+             <cal-ruler up min="0" max="60" step="5" every="2" unit="s" value="42" width="380"></cal-ruler>
+             <cal-ruler min="0" max="100" step="10" every="5" width="380"></cal-ruler>
+             <cal-ruler still min="0" max="150" step="10" every="5" unit="k" value="88" width="380"></cal-ruler>`,
       ctrls: [{ attr: 'value', min: 0, max: 150, step: 1, val: 88 }],
-      shuffle: (el) => el.setAttribute('value', rnd(0, 150)),
-      notes: '',
+      shuffle: (el) => el.hasAttribute('value') && el.setAttribute('value', rnd(+el.getAttribute('min'), +el.getAttribute('max'))),
+      notes: 'Draft: uses the meter\'s clock. The marker sweeps in from min when half in view, then glides to new values from where it is (220ms + 480ms × share of the scale, ease-out cubic) and blinks twice on landing. The scale itself holds still; a ruler with no value has no motion. The fourth ruler has the still attribute.',
     },
 
+    { group: 'Figures' },
+    { id: 'fig-lanes', name: 'Lanes', status: 'draft', fig: 'lanes', html: `<svg></svg>`, notes: 'Draft: a replay of the run. When half in view, a time cursor sweeps the ruler at an even pace (700ms for the whole scale); each lane\'s end node rides it and its line trails 110ms behind, while the time above counts up. As the cursor passes a lane\'s end, its node latches (done square, or the lamp star for the live one), and the label, leader and box appear and blink twice. The ruler and names hold still. Once landed, the live lane\'s dashed tail crawls right, one dash every 1.2s. Reduced motion draws it finished and still.' },
+    { id: 'fig-budget', name: 'Budget', status: 'draft', fig: 'budget', html: `<svg></svg>`, notes: 'Draft: uses the lanes replay. When half in view, a cursor runs along the ruler at an even pace (700ms for the whole scale): the used bar fills behind it (110ms trail) with an open node on its tip. At the used mark the node latches and the used box appears; both blink twice. The cursor runs on as the dashed lamp pace line, its open circle leading; an alert line it crosses blinks twice; at the pace mark the circle, leader and lamp box latch and blink. The hatched zone, the ruler and alerts not reached hold still. Reduced motion draws it finished.' },
+    { id: 'fig-merge', name: 'Merge', status: 'draft', fig: 'merge', html: `<svg></svg>`, notes: 'Draft: the straight main line, its dashed future, and its nodes and text hold still. When half in view the branch draws as one stroke along its length at an even pace (700ms): up out of main, along the commits (each square appears as the stroke reaches it), then the dashed merge back into main. After an 80ms beat the branch name, boxes, dimension and commands appear at once and blink twice. Reduced motion draws it finished.' },
+    { id: 'fig-fanout', name: 'Fan-out', status: 'draft', fig: 'fanout', html: `<svg></svg>`, notes: 'Draft: the parent box and its star hold still. When half in view the branches grow out of it together at one speed (450ms for the longest), the folded one splitting off where it forks; each child node appears as its branch reaches it. After an 80ms beat the child boxes, their text and the folded note appear at once and blink twice. Reduced motion draws it finished.' },
+    { id: 'fig-loop', name: 'Loop', status: 'draft', fig: 'loop', html: `<svg></svg>`, steps: true, notes: 'Draft: the frame (circle, centre lines, faint edges) and the station nodes, star included, hold still. When half in view the done edges trace clockwise one after another (260ms each), so the ink runs up to the live station. After an 80ms beat the station names, commands and centre label appear at once and blink twice. Back and forward step the live station (420ms, ease-out cubic): forward traces the next edge in ink with the star riding its tip; back retracts the edge with the star riding home. The two stations whose labels change blink on landing. Forward from ship closes the lap: the edge into build traces, then the loop clears and the train count steps up and blinks; back from build reverses it. Steps stop at train 1 and train 9. Reduced motion jumps.' },
+    { id: 'fig-measured', name: 'Measured', status: 'draft', fig: 'measured', html: `<svg></svg>`,
+      reshuffle: (d) => ({ ...d, parts: d.parts.map((p, i) => { const [a, b] = [[8, 44], [1, 4], [0.3, 2]][i]; return { ...p, value: Math.round((a + Math.random() * (b - a)) * 10) * 1e8 }; }) }),
+      notes: 'Draft: the rulers, the inset frame and its scale hold still. When half in view the used bar fills on the long ruler (220ms, ease-out cubic), the dashed projection drops to the inset (220ms), and the inset fills left to right through the parts at an even pace (460ms); as the fill passes a part, its dot appears and its leader and box flash in (blink twice). After an 80ms beat the detail label and plate appear and blink twice. Shuffle changes the parts: the figure stays whole and the used bar, the inset fills, the dots and leaders glide from the old values to the new (220ms + 480ms × the largest change as a share of the inset, ease-out cubic), the box values count, and the boxes that changed blink on landing. While gliding a box is as wide as the wider of its two values, so the row holds still. Reduced motion draws it finished.' },
+    { id: 'fig-timeline', name: 'Timeline', status: 'todo', fig: 'timeline', html: `<svg></svg>`, notes: 'Consecutive steps; the slowest is called out.' },
+    { id: 'fig-matrix', name: 'Matrix', status: 'todo', fig: 'matrix', html: `<svg></svg>`, notes: 'Which releases touch which services.' },
+    { id: 'fig-section', name: 'Section', status: 'todo', fig: 'section', html: `<svg></svg>`, notes: 'Nested regions: hatched is closed, clear is open.' },
+
     { group: 'Components' },
+    {
+      id: 'card', name: 'Card and sign-off', status: 'todo',
+      html: `<div style="display:grid;gap:12px;width:100%"><article class="cal-card">
+               <div class="info">
+                 <h3>Load test as lanes on one ruler</h3>
+                 <p class="why">Three regions ran the same test. Drawn on one time ruler, the slow region and the one still running read before any number does.</p>
+                 <dl class="cal-kv"><dt>where</dt><dd>release checklist</dd><dt>replaces</dt><dd>three status lines</dd><dt>data</dt><dd>start, end, p99, errors</dd></dl>
+                 <div class="id"><span class="no">01</span>load test · v2.4<span class="end">rev B</span></div>
+               </div>
+               <div class="cal-compare">
+                 <div><div class="cal-tag">today</div><div class="stage"><div class="cal-note">
+                   <div class="cal-gl">load test · 3 regions</div>
+                   <div class="r"><span class="k">us-east</span><span>done · 4m 12s</span></div>
+                   <div class="r"><span class="k">eu-west</span><span>done · 6m 40s</span></div>
+                   <div class="r"><span class="k">ap-south</span><span>running · 8m 05s</span></div>
+                 </div></div></div>
+                 <div><div class="cal-tag on">drawn</div><div class="stage"><svg data-fig="lanes"></svg></div></div>
+               </div>
+               <div class="cal-sign" role="group" aria-label="Sign off 01">
+                 <button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button>
+                 <button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="false">drop</button>
+               </div>
+             </article>
+             <div class="cal-tally"><span class="tn">0 of 1 signed</span><span class="sp"></span><button class="cal-btn">copy sign-off</button></div></div>`,
+      wire: (stage) => {
+        const card = $('.cal-card', stage);
+        $$('.cal-sign .cal-btn', stage).forEach((b) => b.addEventListener('click', () => {
+          const on = b.getAttribute('aria-pressed') !== 'true';
+          $$('.cal-sign .cal-btn', stage).forEach((x) => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', String(on));
+          if (on) { card.dataset.v = b.dataset.v; card.dataset.state = b.dataset.v === 'drop' ? 'dropped' : 'ok'; }
+          else { delete card.dataset.v; delete card.dataset.state; }
+          $('.tn', stage).textContent = `${card.dataset.v ? 1 : 0} of 1 signed`;
+        }));
+      },
+      notes: 'Keep/drop sets the card state and the tally.',
+    },
     {
       id: 'counts', name: 'Counts', status: 'todo',
       html: `<span class="cal-count" data-n="3" data-noun="regions"></span>
@@ -233,6 +395,34 @@ main { padding: 24px 28px 120px; display: grid; gap: 28px; max-width: 1100px; }
       notes: 'Click rows to move the selection.',
     },
     {
+      id: 'table', name: 'Table', status: 'todo',
+      html: `<table class="cal-table">
+               <thead><tr><th>no</th><th>figure</th><th>where</th><th>diff</th><th>effort</th><th>status</th></tr></thead>
+               <tbody>
+                 <tr><td>01</td><td>Load test lanes</td><td>release checklist</td><td><cal-diff added="212" removed="38" density="compact"></cal-diff></td><td class="effort" aria-label="effort 2 of 3"><span class="cal-dot done"></span><span class="cal-dot done"></span><span class="cal-dot"></span></td><td class="st" data-ink="live"><span>in review</span></td></tr>
+                 <tr><td>02</td><td>Error budget ruler</td><td>SLO panel</td><td><cal-diff added="84" removed="12" density="compact"></cal-diff></td><td class="effort" aria-label="effort 1 of 3"><span class="cal-dot done"></span><span class="cal-dot"></span><span class="cal-dot"></span></td><td class="st" data-ink="ok">shipped</td></tr>
+                 <tr><td>03</td><td>Network section</td><td>security review</td><td><cal-diff added="9" removed="1460" density="compact"></cal-diff></td><td class="effort" aria-label="effort 3 of 3"><span class="cal-dot done"></span><span class="cal-dot done"></span><span class="cal-dot done"></span></td><td class="st">to do</td></tr>
+               </tbody>
+             </table>`,
+      notes: 'A parts list with compact diffs in cells.',
+    },
+    {
+      id: 'titleblock', name: 'Title block', status: 'todo',
+      html: `<dl class="cal-titleblock tb6">
+               <div class="name"><dt>title</dt><dd>Checkout · deploy review</dd></div>
+               <div><dt>dwg no.</dt><dd>CHK-044</dd></div>
+               <div><dt>scale</dt><dd>1:1</dd></div>
+               <div><dt>sheet</dt><dd>1 / 3</dd></div>
+               <div><dt>rev</dt><dd>B <span class="cal-rev" data-rev="B"></span></dd></div>
+               <div><dt>units</dt><dd>ms</dd></div>
+               <div><dt>date</dt><dd>2026-10-31</dd></div>
+               <div class="wide"><dt>drawn</dt><dd>release bot</dd></div>
+               <div class="wide"><dt>checked</dt><dd>payments</dd></div>
+               <div class="wide"><dt>approved</dt><dd>pending</dd></div>
+             </dl>`,
+      notes: '',
+    },
+    {
       id: 'revisions', name: 'Revisions', status: 'todo',
       html: `<table class="cal-revs">
                <thead><tr><th>rev</th><th>description</th><th>date</th></tr></thead>
@@ -241,6 +431,14 @@ main { padding: 24px 28px 120px; display: grid; gap: 28px; max-width: 1100px; }
                  <tr><td><span class="cal-rev" data-rev="B"></span></td><td>Added the rollback for ap-south.</td><td class="lg">2026-10-31</td></tr>
                </tbody>
              </table>`,
+      notes: '',
+    },
+    {
+      id: 'tiers', name: 'When to draw', status: 'todo',
+      html: `<div class="cal-tiers">
+               <div><div class="tt">Draw next</div><p>Lists that are really quantities: queues as counts, run histories as lanes, file badges as diff pairs.</p></div>
+               <div><div class="tt">Leave alone</div><p>Terminals, prose, menus, pickers and command palettes. Drawing over them adds lines and measures nothing.</p></div>
+             </div>`,
       notes: '',
     },
   ];
@@ -252,10 +450,12 @@ main { padding: 24px 28px 120px; display: grid; gap: 28px; max-width: 1100px; }
     if (c.group) { navHtml += `<h4>${c.group}</h4>`; continue; }
     navHtml += `<a href="#${c.id}">${c.name}<span class="st">${c.status}</span></a>`;
     const cell = document.createElement('section');
-    cell.className = 'cell'; cell.id = c.id;
+    cell.className = 'cell' + (c.wide ? ' wide' : ''); cell.id = c.id;
     cell.innerHTML = `
       <header><h2>${c.name}</h2><span class="status" data-s="${c.status}">${c.status}</span><span class="sp"></span>
-        ${c.shuffle ? '<button type="button" data-act="shuffle">shuffle values</button>' : ''}
+        ${c.autoplay ? '<button type="button" data-act="auto" aria-pressed="true">❚❚ pause</button>' : ''}
+        ${c.steps ? '<button type="button" data-act="back">◀ back</button><button type="button" data-act="fwd">forward ▶</button>' : ''}
+        ${c.shuffle || c.reshuffle ? '<button type="button" data-act="shuffle">shuffle values</button>' : ''}
         <button type="button" data-act="replay">replay</button></header>
       <div class="stage cal-theme"></div>
       ${c.ctrls ? `<div class="ctrls">${c.ctrls.map((k, i) => `<label>${k.attr}<input type="range" data-k="${i}" min="${k.min}" max="${k.max}" step="${k.step}" value="${k.val}"><output>${k.val}</output></label>`).join('')}</div>` : ''}
@@ -265,8 +465,22 @@ main { padding: 24px 28px 120px; display: grid; gap: 28px; max-width: 1100px; }
     mount(c);
 
     $('[data-act=replay]', cell).addEventListener('click', () => mount(c));
+    /* step figures: play one step, and keep the new position for replays */
+    if (c.steps) $$('[data-act=back], [data-act=fwd]', cell).forEach((b) => b.addEventListener('click', () => {
+      const R = Calibrated.recipes[c.fig], next = R.step(D[c.fig], b.dataset.act === 'fwd' ? 1 : -1);
+      if (!next) return;
+      D[c.fig] = { ...next, from: undefined, lapFrom: undefined, dir: undefined };
+      Calibrated.play($('svg', $(':scope > .stage', cell)), R, next);
+    }));
+    /* figures that take new values: play the change from the old ones, keep the new for replays */
+    if (c.reshuffle) $('[data-act=shuffle]', cell).addEventListener('click', () => {
+      const old = D[c.fig], next = c.reshuffle(old);
+      D[c.fig] = next;
+      Calibrated.play($('svg', $(':scope > .stage', cell)), Calibrated.recipes[c.fig], { ...next, prev: old.parts.map((p) => p.value) });
+    });
     if (c.shuffle) $('[data-act=shuffle]', cell).addEventListener('click', () => {
-      $$('cal-meter, cal-position, cal-progress, cal-diff, cal-span, cal-ruler, .cal-count', $('.stage', cell)).forEach((el) => c.shuffle(el));
+      $$('cal-meter, cal-position, cal-progress, cal-diff, cal-span, cal-ruler, .cal-count', $(':scope > .stage', cell)).forEach((el) => c.shuffle(el));
+      c.alsoShuffle && c.alsoShuffle($(':scope > .stage', cell));
       c.after && c.after();
     });
     $$('.ctrls input', cell).forEach((inp) => inp.addEventListener('input', () => {
@@ -282,11 +496,20 @@ main { padding: 24px 28px 120px; display: grid; gap: 28px; max-width: 1100px; }
 
   /* Replay = throw the stage away and mount fresh, so entrance motion runs again. */
   function mount(c) {
-    const stage = $('.stage', c.cell);
+    const stage = $(':scope > .stage', c.cell);
     stage.innerHTML = c.html;
+    figs(c);
     c.after && c.after();
     c.wire && c.wire(stage);
     $$('.ctrls input', c.cell).forEach((inp) => { const k = c.ctrls[+inp.dataset.k]; inp.value = k.val; inp.nextElementSibling.textContent = k.val; });
+  }
+
+  /* recipes draw into an <svg>: the cell's own figure, or any svg[data-fig] inside it */
+  function figs(c) {
+    const stage = $(':scope > .stage', c.cell);
+    const show = (sv, name) => Calibrated.play(sv, Calibrated.recipes[name], D[name]);
+    if (c.fig) show($('svg', stage), c.fig);
+    $$('svg[data-fig]', stage).forEach((sv) => show(sv, sv.dataset.fig));
   }
 
   $('#replay-all').addEventListener('click', () => LAB.forEach((c) => c.cell && mount(c)));
@@ -299,6 +522,28 @@ main { padding: 24px 28px 120px; display: grid; gap: 28px; max-width: 1100px; }
     for (const a of document.getAnimations()) if (a.playbackRate !== rate) a.playbackRate = rate;
     requestAnimationFrame(tick);
   })();
+
+  /* ── autoplay: cells with autoplay loop through their entrance, a few
+     shuffles and a restart. The clock follows the speed slider. */
+  const AUTO = { entrance: 3000, every: 2200, shuffles: 3, hold: 2600 };
+  LAB.filter((c) => c.autoplay && c.cell).forEach((c) => {
+    let on = true, t = 0, done = 0, last = performance.now();
+    const btn = $('[data-act=auto]', c.cell);
+    btn.addEventListener('click', () => {
+      on = !on; btn.setAttribute('aria-pressed', on); btn.textContent = on ? '❚❚ pause' : '▶ play';
+    });
+    $('[data-act=replay]', c.cell).addEventListener('click', () => { t = 0; done = 0; });
+    (function run() {
+      const now = performance.now(), dt = Math.min(250, now - last); last = now;   /* a long stall (hidden tab) never skips a step */
+      if (on) t += dt * rate;
+      const next = done < AUTO.shuffles ? AUTO.entrance + done * AUTO.every : AUTO.entrance + (AUTO.shuffles - 1) * AUTO.every + AUTO.hold;
+      if (on && t >= next) {
+        if (done < AUTO.shuffles) { $('[data-act=shuffle]', c.cell).click(); done++; }
+        else { mount(c); t = 0; done = 0; }
+      }
+      requestAnimationFrame(run);
+    })();
+  });
 
   /* ── theme and density */
   $('#theme').addEventListener('change', (e) => { document.documentElement.dataset.theme = e.target.value; Calibrated.redraw && Calibrated.redraw(); });
@@ -313,7 +558,7 @@ main { padding: 24px 28px 120px; display: grid; gap: 28px; max-width: 1100px; }
   const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) $$('.nav a').forEach((a) => a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id)); }), { rootMargin: '-40% 0px -55% 0px' });
   $$('.cell').forEach((c) => io.observe(c));
 
-  Calibrated.ready(() => LAB.forEach((c) => c.after && c.after()));
+  Calibrated.ready(() => LAB.forEach((c) => { if (!c.cell) return; figs(c); c.after && c.after(); }));   /* redraw once fonts are in, so measured boxes fit */
 })();
 </script>
 </body>
