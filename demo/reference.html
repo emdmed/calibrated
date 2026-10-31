@@ -175,7 +175,7 @@ pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-
 <header class="top">
   <button class="icon-btn menu-btn" id="menu" aria-label="Open navigation" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 18 18"><path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
   <a class="brand" href="#intro" aria-label="Calibrated, back to top"><svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg><span class="word">Calibrated</span></a>
-  <span class="ver">v0.4.0</span>
+  <span class="ver">v0.4.1</span>
   <span class="sp"></span>
   <a class="top-link" href="index.html">Catalog</a>
   <a class="top-link" href="#install">Install</a>
@@ -576,6 +576,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
     <section class="group" id="changelog">
       <h2>Changelog</h2>
       <ol class="log">
+        <li><b>Rev J</b><time datetime="2026-10-31">2026-10-31</time><p>Merge steps can be left out and the rest are numbered in run order; long branch names are no longer cut by a leader.</p></li>
         <li><b>Rev H</b><time datetime="2026-10-31">2026-10-31</time><p>The timeline replays and its ruler fits the run, from seconds to hours. Loop stations can fault; merge and timeline take a <code>noun</code>.</p></li>
         <li><b>Rev G</b><time datetime="2026-10-31">2026-10-31</time><p>Every instrument moves like the meter. Figures replay with <code>Calibrated.play</code>; the loop steps and the measured figure glides to new values.</p></li>
         <li><b>Rev F</b><time datetime="2026-10-31">2026-10-31</time><p>The meter moves: it sweeps to its value, glides on change and blinks when it settles.</p></li>
