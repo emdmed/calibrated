@@ -152,7 +152,8 @@ Calibrated.ready(() => {
   }));
 });
 
-/* ── sign-off: keep / roll back per drawing, tally, copy */
+/* ── sign-off: keep / roll back per drawing, tally, copy. A button with data-ink="live" (rework)
+   stamps the card REWORK and shows the card's optional .note line, whose text is copied too. */
 (() => {
   const cards = [...document.querySelectorAll('.cal-card')];
   const n = document.getElementById('tally-n'), msg = document.getElementById('tally-msg');
@@ -161,12 +162,17 @@ Calibrated.ready(() => {
     const card = b.closest('.cal-card'), on = b.getAttribute('aria-pressed') !== 'true';
     card.querySelectorAll('.cal-sign .cal-btn').forEach((x) => x.setAttribute('aria-pressed', 'false'));
     b.setAttribute('aria-pressed', String(on));
-    if (on) { card.dataset.v = b.dataset.v; card.dataset.state = b.dataset.ink === 'fault' ? 'dropped' : 'ok'; }
+    if (on) { card.dataset.v = b.dataset.v; card.dataset.state = { fault: 'dropped', live: 'rework' }[b.dataset.ink] || 'ok'; }
     else { delete card.dataset.v; delete card.dataset.state; }
+    const note = card.querySelector('.cal-sign .note');
+    if (note) { note.hidden = card.dataset.state !== 'rework'; if (!note.hidden) note.querySelector('input')?.focus(); }
     tally();
   }));
   document.getElementById('tally-copy').addEventListener('click', async () => {
-    const text = cards.map((c) => `${c.querySelector('.no').textContent} ${c.querySelector('h3').textContent}: ${c.dataset.v || '—'}`).join('\n');
+    const text = cards.map((c) => {
+      const note = c.dataset.state === 'rework' ? c.querySelector('.cal-sign .note input')?.value.trim() : '';
+      return `${c.querySelector('.no').textContent} ${c.querySelector('h3').textContent}: ${c.dataset.v || '—'}${note ? ' — ' + note : ''}`;
+    }).join('\n');
     try { await navigator.clipboard.writeText(text); msg.textContent = 'copied'; }
     catch { msg.textContent = 'copy blocked: select the drawings and copy by hand'; }
   });

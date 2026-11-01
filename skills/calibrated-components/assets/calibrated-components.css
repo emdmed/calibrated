@@ -250,12 +250,12 @@
 .cal-figure > figcaption { border-top: var(--line-thin) solid var(--edge); padding: 7px 14px; font-size: 12.5px; color: var(--muted); display: flex; gap: 10px; align-items: baseline; }
 .cal-figure > figcaption b { font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--fg); font-weight: 400; white-space: nowrap; }
 
-/* ── rows · a list pane with an optional selected row */
+/* ── rows · a list pane with an optional selected row. The chosen row boxes its .v label
+   (or, with no .v, is boxed whole, inset); see "the chosen value" below. */
 .cal-rows { background: var(--panel); border: var(--line-thin) solid var(--edge); font-size: 13px; line-height: 1.6; }
 .cal-rows > * { padding: 8px 14px 9px; border-bottom: var(--line-thin) solid var(--edge); }
 .cal-rows > *:last-child { border-bottom: 0; }
-.cal-rows > *:hover { background: var(--hover); }
-.cal-rows > .sel, .cal-rows > [aria-selected="true"] { background: var(--current); box-shadow: inset 2px 0 var(--live); }
+.cal-rows > :is(.sel, [aria-selected="true"]):not(:has(.v)) { outline: var(--line-thin) solid var(--fg); outline-offset: -5px; }
 .cal-rows .meta { color: var(--muted); }
 
 /* ── form controls */
@@ -276,6 +276,407 @@
 .cal-check input:disabled, .cal-check:has(input:disabled) { cursor: not-allowed; opacity: .5; }
 .cal-check input:checked::after { content: ""; width: 6px; height: 6px; background: var(--fg); }
 .cal-check input:focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: 2px; }
+
+/* ════ more controls ════ */
+
+/* shared legend type for the controls below */
+.cal-kbd, .cal-affix, .cal-badge, .cal-crumbs, .cal-detent label, .cal-switch .o, .cal-menu .it, .cal-steps li, .cal-details > summary, .cal-drop .lead, .cal-chips .chip, .cal-toast, .cal-empty .ttl, .cal-pager, .cal-range output, .cal-range .nums {
+  font-family: var(--font-legend); font-size: var(--fs-legend); letter-spacing: var(--track-legend); text-transform: uppercase; font-variant-numeric: tabular-nums;
+}
+
+/* ── kbd · a key cap as a small hairline box */
+.cal-kbd { display: inline-block; color: var(--muted); border: var(--line-thin) solid var(--edge-strong); padding: 0 4px; line-height: 14px; min-width: 16px; text-align: center; font-size: 10px; }
+
+/* ── select · a write-in line ending in the ▼ marker */
+.cal-select {
+  appearance: none; border-radius: 0; min-width: 200px; cursor: pointer;
+  font: 14px var(--font-legend); color: var(--fg); padding: 5px 24px 4px 2px;
+  border: 0; border-bottom: var(--line-thin) solid var(--edge-strong);
+  background: transparent no-repeat;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 10px) 55%, calc(100% - 5px) 55%; background-size: 5px 5px;
+}
+.cal-select:hover:not(:focus) { border-bottom-color: var(--fg); }
+.cal-select:focus { outline: none; border-bottom-color: var(--live); box-shadow: 0 1px 0 var(--live); }
+.cal-select option { background: var(--raised); color: var(--fg); }
+@supports (appearance: base-select) {
+  .cal-select, .cal-select::picker(select) { appearance: base-select; }
+  .cal-select { background-image: none; display: flex; justify-content: space-between; align-items: center; padding-right: 4px; }
+  .cal-select::picker-icon { content: "▼"; font-size: 8px; color: var(--muted); transition: none; }
+  .cal-select:open::picker-icon { rotate: 0deg; color: var(--live); }
+  .cal-select::picker(select) { border: var(--line-thin) solid var(--edge-strong); background: var(--raised); padding: 0; margin-top: 4px; border-radius: 0; box-shadow: none; }
+  .cal-select option { font: 13px var(--font-legend); padding: 6px 12px 6px 14px; border-top: var(--line-thin) solid var(--edge); }
+  .cal-select option:first-of-type { border-top: 0; }
+  .cal-select option::checkmark { display: none; }
+  .cal-select option:hover, .cal-select option:focus-visible { background: none; outline: none; }
+}
+/* option list · an always-open list of options, or a picker drawn at rest */
+.cal-list { border: var(--line-thin) solid var(--edge-strong); background: var(--raised); min-width: 200px; }
+.cal-list > div { font: 13px var(--font-legend); padding: 6px 12px 6px 14px; border-top: var(--line-thin) solid var(--edge); display: flex; justify-content: space-between; gap: 12px; }
+.cal-list > div:first-child { border-top: 0; }
+.cal-list .lg { color: var(--faint); }
+
+/* ── menu · a numbered parts list in a popover */
+.cal-menu { margin: 0; border: var(--line-thin) solid var(--edge-strong); background: var(--raised); color: var(--fg); padding: 4px 0; min-width: 210px; }
+.cal-menu[popover] { position-area: bottom span-right; margin-top: 4px; position-try-fallbacks: flip-block, flip-inline; }
+.cal-menu .it { display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: 0; padding: 5px 12px; color: var(--fg); cursor: pointer; text-align: left; }
+.cal-menu .it .n { color: var(--faint); }
+.cal-menu .it .cal-kbd { margin-left: auto; }
+.cal-menu .it:focus-visible { outline: none; }
+.cal-menu .it[data-ink="fault"] { color: var(--fault); }
+.cal-menu hr { border: 0; border-top: var(--line-thin) solid var(--edge); margin: 4px 0; }
+
+/* ── radio · a drawing balloon with an ink dot */
+.cal-radio { display: inline-flex; gap: 9px; align-items: center; cursor: pointer; font-size: 13px; }
+.cal-radio input { appearance: none; width: 13px; height: 13px; border-radius: 50%; border: var(--line-thin) solid var(--edge-strong); margin: 0; display: grid; place-items: center; cursor: pointer; }
+.cal-radio:hover input, .cal-radio input:checked { border-color: var(--fg); }
+.cal-radio input:checked::after { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--fg); }
+.cal-radio input:focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: 2px; }
+.cal-radio:has(input:disabled) { opacity: .5; cursor: not-allowed; }
+.cal-radio .meta { color: var(--muted); font: var(--fs-legend) var(--font-legend); }
+
+/* ── switch · a lever on a short track: OFF ├──■ ON */
+.cal-switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; }
+.cal-switch .txt { margin-right: 10px; }
+.cal-switch .o { color: var(--faint); transition: color .12s ease-out; }
+.cal-switch:has(input:not(:checked)) .o.off, .cal-switch:has(input:checked) .o.on { color: var(--fg); }
+.cal-switch input {
+  appearance: none; position: relative; width: 36px; height: 12px; margin: 0; cursor: pointer;
+  border-left: var(--line-thin) solid var(--edge-strong); border-right: var(--line-thin) solid var(--edge-strong);
+  background: linear-gradient(var(--edge-strong), var(--edge-strong)) center / 100% 1px no-repeat;
+}
+.cal-switch input::after { content: ""; position: absolute; top: 1px; left: 2px; width: 10px; height: 10px; border: var(--line-thin) solid var(--fg); background: var(--panel); transition: translate .18s ease-out, background .18s; }
+.cal-switch input:checked::after { translate: 20px 0; background: var(--fg); }
+.cal-switch input:focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: 3px; }
+
+/* ── dialog · a raised panel with a ruled head */
+.cal-dialog { border: var(--line-thin) solid var(--edge-strong); background: var(--panel); color: var(--fg); padding: 0; width: min(440px, calc(100vw - 32px)); margin: auto; }
+.cal-dialog::backdrop { background: color-mix(in srgb, var(--shade) 55%, transparent); }
+.cal-dialog header { display: flex; align-items: center; gap: 10px; padding: 10px 14px 9px 16px; border-bottom: var(--line-thin) solid var(--edge-strong); font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--muted); }
+.cal-dialog header b { font-weight: 400; color: var(--fg); }
+.cal-dialog header .sp { flex: 1; }
+.cal-dialog .bd { padding: 14px 16px; display: grid; gap: 12px; font-size: 13px; }
+.cal-dialog .bd .cal-kv { border-top: 0; padding-top: 0; }
+.cal-dialog footer { display: flex; justify-content: flex-end; gap: 6px; padding: 5px 12px; border-top: var(--line-thin) solid var(--edge); }
+.cal-btn[data-ink="fault"].primary { color: var(--fault); }
+
+/* ── tooltip · a leader line to a boxed value */
+[data-tip] { position: relative; text-decoration: underline dotted var(--faint); text-underline-offset: 3px; cursor: help; }
+[data-tip]::before, [data-tip]::after { position: absolute; left: 50%; opacity: 0; pointer-events: none; transition: opacity .12s ease-out; z-index: 3; }
+[data-tip]::before { content: ""; bottom: 100%; width: 1px; height: 12px; background: var(--fg); }
+[data-tip]::after {
+  content: attr(data-tip); bottom: calc(100% + 12px); translate: -7px 0; white-space: nowrap;
+  font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--fg);
+  background: var(--raised); border: var(--line-thin) solid var(--fg); padding: 1px 6px;
+}
+[data-tip]:hover::before, [data-tip]:hover::after, [data-tip]:focus-visible::before, [data-tip]:focus-visible::after, [data-tip].show::before, [data-tip].show::after { opacity: 1; }
+[data-tip][data-tip-end]::after { translate: calc(-100% + 7px) 0; }
+[data-tip]:focus-visible { outline: none; color: var(--live); }
+:has(> [data-tip]:is(:hover, :focus-visible)) > [data-tip].show:not(:hover, :focus-visible)::before,
+:has(> [data-tip]:is(:hover, :focus-visible)) > [data-tip].show:not(:hover, :focus-visible)::after { opacity: 0; }
+
+/* ── number + affix · a write-in line with a unit; ↑ ↓ step it (see calibrated-components.js) */
+.cal-affixed { display: inline-flex; align-items: center; gap: 6px; border-bottom: var(--line-thin) solid var(--edge-strong); }
+.cal-affixed:hover:not(:focus-within) { border-bottom-color: var(--fg); }
+.cal-affixed:focus-within { border-bottom-color: var(--live); box-shadow: 0 1px 0 var(--live); }
+.cal-affixed .cal-input { border: 0; box-shadow: none; flex: 1; }
+.cal-affixed .cal-btn { padding: 4px 1px; }
+.cal-affix { color: var(--key); white-space: nowrap; }
+.cal-num .cal-input { text-align: right; width: 9ch; }
+.cal-num .cal-affix { text-transform: none; letter-spacing: 0; font-size: 12px; }
+.cal-field .hint.focus-only { visibility: hidden; }
+.cal-field:focus-within .hint.focus-only { visibility: visible; }
+
+/* ── search */
+.cal-search { width: 100%; }
+.cal-search .cal-input { min-width: 0; }
+.cal-search .cal-btn[hidden] { display: none; }
+.cal-rows > [hidden] { display: none; }
+.cal-rows mark { background: var(--select-bg); color: var(--select-fg); }
+
+/* ── fieldset group */
+.cal-group { border: 0; display: grid; gap: 14px; width: 100%; min-width: 0; }
+.cal-group > legend { float: left; width: 100%; display: flex; gap: 8px; align-items: center; font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--muted); }
+.cal-group > legend b { font-weight: 400; color: var(--fg); }
+.cal-group > legend::after { content: ""; flex: 1; border-top: var(--line-thin) solid var(--edge); }
+.cal-group > legend + * { clear: both; }
+.cal-group .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.cal-group .opts { display: flex; gap: 18px; flex-wrap: wrap; }
+
+/* ── callout · a drawing's NOTES block */
+.cal-callout { position: relative; background: var(--raised); border: var(--line-thin) solid var(--edge-strong); padding: 10px 14px 12px 16px; width: 100%; font-size: 13px; }
+.cal-callout ol { list-style: none; counter-reset: n; display: grid; gap: 4px; }
+.cal-callout li { counter-increment: n; display: flex; gap: 10px; }
+.cal-callout li::before { content: counter(n) "."; font: var(--fs-legend) var(--font-legend); color: var(--key); padding-top: 3px; min-width: 14px; }
+.cal-callout[data-ink="fault"] { border-color: color-mix(in srgb, var(--fault) 55%, var(--edge-strong)); }
+.cal-callout[data-ink="fault"] .cal-gl::before { content: ""; width: 10px; height: 10px; flex: none; border: var(--line-thin) solid var(--fault); background: repeating-linear-gradient(-45deg, var(--fault) 0 1px, transparent 1px 3.5px); }
+.cal-callout[data-ink="fault"] li::before { color: var(--fault); }
+.cal-callout[data-ink="fault"] .cal-gl { color: var(--fault); }
+
+/* ── toast · a raised strip that reports and goes */
+.cal-toast { display: flex; align-items: center; gap: 10px; background: var(--raised); border: var(--line-thin) solid var(--edge-strong); padding: 3px 6px 3px 12px; color: var(--fg); min-width: 300px; }
+.cal-toast .msg { flex: 1; text-transform: none; font-family: var(--font-body); font-size: 12.5px; letter-spacing: 0; }
+.cal-toast[data-ink="ok"] .ic { color: var(--ok); }
+.cal-toast[data-ink="fault"] { border-color: color-mix(in srgb, var(--fault) 60%, var(--edge-strong)); }
+.cal-toast[data-ink="fault"] .ic { color: var(--fault); }
+.cal-toasts { position: fixed; right: 16px; bottom: 56px; display: grid; gap: 8px; z-index: 20; }
+.cal-toasts .cal-toast { animation: toast-in .2s ease-out; }
+@keyframes toast-in { from { opacity: 0; translate: 0 6px; } }
+
+/* ── empty state · a hatched zone with one way forward */
+.cal-empty { width: 100%; min-height: 150px; display: grid; place-items: center; border: var(--line-thin) dashed var(--edge-strong); background: repeating-linear-gradient(-45deg, var(--edge) 0 1px, transparent 1px 7px); padding: 18px; }
+.cal-empty > div { background: var(--panel); border: var(--line-thin) solid var(--edge-strong); padding: 10px 16px 6px; display: grid; justify-items: center; gap: 2px; text-align: center; }
+.cal-empty .ttl { color: var(--fg); }
+.cal-empty p { font-size: 12.5px; color: var(--muted); }
+
+/* ── breadcrumb · a sheet path */
+.cal-crumbs ol { list-style: none; display: flex; flex-wrap: wrap; gap: 0; color: var(--muted); }
+.cal-crumbs li + li::before { content: "/"; color: var(--faint); padding: 0 9px; }
+.cal-crumbs a { text-decoration: none; }
+.cal-crumbs a:hover { color: var(--fg); text-decoration: underline; text-decoration-color: var(--fg); }
+.cal-crumbs [aria-current] { color: var(--fg); }
+
+/* ── badge · a boxed status word */
+.cal-badge { display: inline-flex; align-items: center; gap: 6px; border: var(--line-thin) solid var(--edge-strong); padding: 0 6px; line-height: 16px; color: var(--muted); white-space: nowrap; }
+.cal-badge .cal-dot { margin: 0; }
+.cal-badge[data-ink="live"] { color: var(--live); border-color: color-mix(in srgb, var(--live) 55%, var(--edge-strong)); }
+.cal-badge[data-ink="ok"] { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 55%, var(--edge-strong)); }
+.cal-badge[data-ink="fault"] { color: var(--fault); border-color: color-mix(in srgb, var(--fault) 55%, var(--edge-strong)); }
+
+/* ── file drop */
+.cal-drop { display: grid; justify-items: center; gap: 4px; width: 100%; padding: 22px 16px; border: var(--line-thin) dashed var(--edge-strong); cursor: pointer; text-align: center; }
+.cal-drop:hover, .cal-drop.over { border-color: var(--fg); }
+.cal-drop.over { border-style: solid; background: var(--hover); }
+.cal-drop:has(input:focus-visible) { outline: var(--line-thin) solid var(--live); outline-offset: 2px; }
+.cal-drop input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.cal-drop .lead { color: var(--fg); }
+.cal-drop .lead u { color: var(--muted); text-decoration: none; }
+.cal-drop .lead u::before { content: "["; } .cal-drop .lead u::after { content: "]"; }
+.cal-drop .hint { font-size: 12px; color: var(--muted); }
+.drop-wrap { width: 100%; display: grid; gap: 8px; }
+
+/* ── chips · boxed words on a write-in line */
+.cal-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; width: 100%; border-bottom: var(--line-thin) solid var(--edge-strong); padding: 4px 0 5px; cursor: text; }
+.cal-chips:focus-within { border-bottom-color: var(--live); box-shadow: 0 1px 0 var(--live); }
+.cal-chips .chip { display: inline-flex; align-items: center; gap: 4px; border: var(--line-thin) solid var(--edge-strong); padding: 0 2px 0 6px; line-height: 16px; color: var(--fg); }
+.cal-chips .chip button { background: none; border: 0; color: var(--muted); cursor: pointer; font: inherit; padding: 0 3px; }
+.cal-chips .chip button:hover { color: var(--fault); }
+.cal-chips input { flex: 1; min-width: 90px; border: 0; background: transparent; color: var(--fg); font: 13px var(--font-legend); padding: 2px; outline: none; }
+.cal-chips input::placeholder { color: var(--faint); }
+
+/* ── steps · progress nodes with names */
+.cal-steps { list-style: none; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; width: 100%; }
+.cal-steps li { position: relative; padding-top: 18px; color: var(--muted); padding-right: 8px; }
+.cal-steps li::before { content: ""; position: absolute; top: 0; left: 0; width: 9px; height: 9px; border: var(--line-thin) solid var(--edge-strong); background: var(--panel); }
+.cal-steps li::after { content: ""; position: absolute; top: 4px; left: 13px; right: 4px; height: 1px; background: var(--edge-strong); }
+.cal-steps li:last-child::after { display: none; }
+.cal-steps li.done { color: var(--fg); }
+.cal-steps li.done::before { background: var(--fg); border-color: var(--fg); }
+.cal-steps li.done::after { background: var(--fg); }
+.cal-steps li[aria-current="step"] { color: var(--live); }
+.cal-steps li[aria-current="step"]::before { border: 0; width: 11px; height: 11px; top: -1px; left: -1px; background: var(--live); clip-path: var(--star); }
+.cal-steps li .s { display: block; color: var(--faint); font-size: 10px; }
+
+/* ── date · native date and time on a write-in line */
+.cal-date { font: 14px var(--font-legend); color-scheme: inherit; min-width: 170px; }
+.cal-date::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 1; width: 10px; height: 10px; padding: 0; margin-left: 8px;
+  background: no-repeat; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: 0 60%, 5px 60%; background-size: 5px 5px; }
+.cal-date::-webkit-datetime-edit-fields-wrapper { padding: 0; }
+.cal-code pre, .cal-kbd { font-variant-ligatures: none; }
+
+.cal-affixed:has([aria-invalid="true"]) { border-bottom-color: var(--fault); }
+.cal-affixed:has([aria-invalid="true"]):focus-within { box-shadow: 0 1px 0 var(--fault); }
+.cal-rows > .none { color: var(--muted); font-size: 12.5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cal-rows > .none b { font-weight: 400; color: var(--fg); }
+.cal-rows > .file { display: flex; justify-content: space-between; gap: 12px; }
+.cal-rows > .file.bad .lg { color: var(--fault); }
+.cal-chips .chip { transition: border-color .2s, color .2s; }
+.cal-chips .chip.dup { border-color: var(--live); color: var(--live); }
+.cal-field .err[hidden], .cal-field .hint[hidden] { display: none; }
+
+/* ── the chosen value · its label boxed in an ink hairline (the boxed-value mark).
+   The box sits in the row's padding, so the text never moves. No tint, no lamp. */
+.cal-list .v, .cal-menu .it .v, .cal-select option .v, .cal-rows .v { display: inline-block; border: var(--line-thin) solid transparent; padding: 0 5px; margin: 0 -6px; line-height: 1.45; }
+.cal-list > .sel .v, .cal-select option:checked .v, .cal-rows > :is(.sel, [aria-selected="true"]) .v,
+.cal-menu .it:is(:hover, :focus-visible, .on) .v { border-color: var(--fg); color: var(--title); }
+.cal-menu .it[data-ink="fault"]:is(:hover, :focus-visible, .on) .v { border-color: var(--fault); color: var(--fault); }
+.cal-rows > .sel, .cal-rows > [aria-selected="true"] { background: none; box-shadow: none; }
+.cal-rows > :is(.sel, [aria-selected="true"]):not(:has(.v)) { outline: var(--line-thin) solid var(--fg); outline-offset: -5px; }
+.cal-rows > .none[hidden] { display: none; }
+
+/* ── sign-off: keep · rework · drop. Rework stamps the card in lamp and asks what isn't good enough. */
+.cal-btn[data-ink="live"][aria-pressed="true"] { color: var(--live); }
+.cal-card[data-state="rework"]::after {
+  content: "rework";
+  position: absolute; top: 14px; right: 18px;
+  font: 500 11px/1 var(--font-legend); letter-spacing: .16em; text-transform: uppercase;
+  color: var(--live); border: var(--line-thin) solid color-mix(in srgb, var(--live) 70%, var(--edge-strong)); padding: 5px 8px 4px;
+  background: var(--panel);
+}
+.cal-card .cal-sign .note { flex: 1; display: flex; align-items: center; gap: 10px; margin-right: 14px; min-width: 0;
+  font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--live); white-space: nowrap; }
+.cal-card .cal-sign .note[hidden] { display: none; }
+.cal-card .cal-sign .note .cal-input { flex: 1; font-size: 13px; padding: 3px 2px 2px; text-transform: none; letter-spacing: 0; }
+@media (max-width: 1100px) { .cal-card[data-state="rework"] .id .end { visibility: hidden; } }
+@media (max-width: 700px) { .cal-card .cal-sign { flex-wrap: wrap; } .cal-card .cal-sign .note { flex-basis: 100%; margin: 4px 0 2px; } }
+
+/* hover moves the box: the row under the pointer (or keyboard) takes it, and the chosen row gives it up
+   until the pointer leaves. No background change anywhere. */
+.cal-list .v, .cal-menu .it .v, .cal-select option .v, .cal-rows .v { transition: border-color .1s ease-out, color .1s ease-out; }
+.cal-list > div:hover .v,
+.cal-select option:is(:hover, :focus-visible) .v,
+.cal-rows > :hover .v { border-color: var(--fg); color: var(--title); }
+.cal-list:has(> div:hover) > .sel:not(:hover) .v,
+.cal-select:has(option:is(:hover, :focus-visible)) option:checked:not(:hover, :focus-visible) .v,
+.cal-rows:has(> :hover .v) > :is(.sel, [aria-selected="true"]):not(:hover) .v { border-color: transparent; color: inherit; }
+.cal-rows > *:hover { background: none; }
+
+.cal-field > .lbl { font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--muted); }
+
+/* ── textarea · a recessed editor pane with a terminal status line */
+.cal-term { width: 100%; background: var(--well); border: var(--line-thin) solid var(--edge-strong); }
+.cal-term:hover:not(:focus-within) { border-color: var(--fg); }
+.cal-term:focus-within { border-color: var(--live); }
+.cal-term[data-over] { border-color: var(--fault); }
+.cal-textarea {
+  display: block; width: 100%; min-height: calc(4 * 1.7em + 20px); resize: vertical; field-sizing: content; overflow-wrap: anywhere;
+  font: 13px/1.7 var(--font-body); color: var(--fg); background: transparent; border: 0; border-radius: 0; padding: 10px 12px;
+  caret-color: var(--live); caret-shape: block; outline: none;
+}
+.cal-textarea::placeholder { color: var(--faint); }
+.cal-term .bar { display: flex; align-items: center; gap: 14px; border-top: var(--line-thin) solid var(--edge); padding: 3px 8px 3px 12px;
+  font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; font-variant-numeric: tabular-nums; color: var(--muted); }
+.cal-term .bar .sp { flex: 1; }
+.cal-term .mode { color: var(--faint); }
+.cal-term:focus-within .mode { color: var(--live); }
+
+/* ── detent choice · ordered options as labelled ticks; the lamp ▼ over the chosen one */
+.cal-detent { --col: 52px; position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: var(--col); padding-top: 14px; }
+.cal-detent::before { content: ""; position: absolute; top: 14px; left: calc(var(--col) / 2); right: calc(var(--col) / 2); height: 1px; background: var(--edge-strong); }
+.cal-detent label { position: relative; display: grid; justify-items: center; padding: 10px 0 2px; color: var(--muted); cursor: pointer; transition: color .12s ease-out; }
+.cal-detent label::before { content: ""; position: absolute; top: 0; left: 50%; width: 1px; height: 6px; background: var(--faint); transition: height .12s ease-out, background .12s; }
+.cal-detent label:hover { color: var(--fg); }
+.cal-detent label:hover::before { background: var(--fg); }
+.cal-detent label:has(:checked) { color: var(--title); }
+.cal-detent label:has(:checked)::before { background: var(--fg); height: 8px; }
+.cal-detent input { position: absolute; opacity: 0; pointer-events: none; }
+.cal-detent label:has(:focus-visible) span { outline: var(--line-thin) solid var(--live); outline-offset: 3px; }
+.cal-detent .mk { position: absolute; top: 2px; left: var(--x, 50%); width: 11px; height: 10px; translate: -50% 0; background: var(--live); clip-path: polygon(0 0, 100% 0, 50% 100%); transition: left .32s cubic-bezier(.16, 1, .3, 1); }
+.cal-detent:not(.js) .mk { display: none; }
+.cal-detent:not(.js) label:has(:checked)::after { content: ""; position: absolute; top: -12px; left: 50%; width: 11px; height: 10px; translate: -50% 0; background: var(--live); clip-path: polygon(0 0, 100% 0, 50% 100%); }
+@media (prefers-reduced-motion: reduce) { .cal-detent .mk { transition: none; } }
+
+/* ── range · a handle on a ruler, the run to the value drawn heavier */
+.cal-range { --p: .5; --g: var(--muted); position: relative; width: 100%; max-width: 380px; padding-top: 30px; }
+.cal-range input { appearance: none; width: 100%; height: 20px; background: transparent; margin: 0; cursor: grab; display: block; }
+.cal-range input:active { cursor: grabbing; }
+.cal-range input:hover { --g: var(--fg); }
+.cal-range input:active, .cal-range input:focus-visible { --g: var(--live); }
+.cal-range input:focus-visible { outline: none; }
+.cal-range input::-webkit-slider-runnable-track { height: 20px;
+  background:
+    linear-gradient(var(--fg), var(--fg)) 0 50% / calc(6.5px + var(--p) * (100% - 13px)) 2px no-repeat,
+    repeating-linear-gradient(to right, var(--fg) 0 1px, transparent 1px 50%) 6.5px 50% / calc(100% - 13px) 12px no-repeat,
+    linear-gradient(var(--fg), var(--fg)) calc(100% - 6px) 50% / 1px 12px no-repeat,
+    repeating-linear-gradient(to right, var(--faint) 0 1px, transparent 1px 10%) 6.5px 50% / calc(100% - 13px) 7px no-repeat,
+    linear-gradient(var(--edge-strong), var(--edge-strong)) 0 50% / 100% 1px no-repeat; }
+.cal-range input::-moz-range-track { height: 20px;
+  background:
+    linear-gradient(var(--fg), var(--fg)) 0 50% / calc(6.5px + var(--p) * (100% - 13px)) 2px no-repeat,
+    repeating-linear-gradient(to right, var(--fg) 0 1px, transparent 1px 50%) 6.5px 50% / calc(100% - 13px) 12px no-repeat,
+    linear-gradient(var(--fg), var(--fg)) calc(100% - 6px) 50% / 1px 12px no-repeat,
+    repeating-linear-gradient(to right, var(--faint) 0 1px, transparent 1px 10%) 6.5px 50% / calc(100% - 13px) 7px no-repeat,
+    linear-gradient(var(--edge-strong), var(--edge-strong)) 0 50% / 100% 1px no-repeat; }
+.cal-range input::-webkit-slider-thumb { appearance: none; box-sizing: border-box; width: 13px; height: 20px; border: var(--line-thin) solid var(--g); border-radius: 0;
+  background: linear-gradient(var(--g), var(--g)) 4px 4px / 1px 10px no-repeat, linear-gradient(var(--g), var(--g)) 6px 4px / 1px 10px no-repeat, var(--panel); }
+.cal-range input::-moz-range-thumb { box-sizing: border-box; width: 13px; height: 20px; border: var(--line-thin) solid var(--g); border-radius: 0;
+  background: linear-gradient(var(--g), var(--g)) 4px 4px / 1px 10px no-repeat, linear-gradient(var(--g), var(--g)) 6px 4px / 1px 10px no-repeat, var(--panel); }
+.cal-range .nums { margin: 4px 6.5px 0; display: flex; justify-content: space-between; color: var(--muted); }
+.cal-range .nums span { width: 0; display: flex; justify-content: center; white-space: nowrap; }
+.cal-range output { position: absolute; top: 0; left: calc(6.5px + (100% - 13px) * var(--p)); translate: -50% 0; color: var(--fg); border: var(--line-thin) solid var(--fg); padding: 0 5px; line-height: 16px; background: var(--panel); white-space: nowrap; }
+.cal-range output::after { content: ""; position: absolute; left: 50%; top: 100%; width: 1px; height: 12px; background: var(--fg); }
+.cal-range:has(input:active, input:focus-visible) output { border-color: var(--live); color: var(--live); }
+
+/* ── detail callout · a lettered balloon on a leader; open drops into an inset */
+.cal-details { width: 100%; }
+.cal-details > summary { list-style: none; display: flex; align-items: center; gap: 10px; padding: 6px 0; cursor: pointer; color: var(--muted); }
+.cal-details > summary::-webkit-details-marker { display: none; }
+.cal-details > summary:focus-visible { outline: none; }
+.cal-details > summary:focus-visible .bl { outline: var(--line-thin) solid var(--live); outline-offset: 2px; }
+.cal-details .bl { flex: none; width: 18px; height: 18px; border-radius: 50%; border: var(--line-thin) solid var(--edge-strong); display: grid; place-items: center; color: var(--fg); font-size: 10px; line-height: 1; transition: background .15s, color .15s, border-color .15s; }
+.cal-details > summary b { font-weight: 400; color: var(--fg); }
+.cal-details .ld { flex: 1; min-width: 16px; border-bottom: var(--line-thin) dotted var(--edge-strong); }
+.cal-details .tg::before { content: "[show]"; }
+.cal-details[open] .tg::before { content: "[hide]"; }
+.cal-details > summary:hover .bl { border-color: var(--fg); }
+.cal-details > summary:hover .tg { color: var(--fg); }
+.cal-details[open] .bl { background: var(--fg); border-color: var(--fg); color: var(--panel); }
+.cal-details > .bd { margin-left: 8.5px; border-left: var(--line-thin) dashed var(--edge-strong); padding: 2px 0 10px 18px; }
+.cal-details .inset { background: var(--raised); border: var(--line-thin) solid var(--edge-strong); padding: 8px 12px 10px; font-size: 13px; }
+@media (prefers-reduced-motion: no-preference) {
+  .cal-details { interpolate-size: allow-keywords; }
+  .cal-details::details-content { height: 0; overflow: clip; transition: height .24s cubic-bezier(.16, 1, .3, 1), content-visibility .24s allow-discrete; }
+  .cal-details[open]::details-content { height: auto; }
+}
+
+/* ── pager · bracketed steps, underlined pages, the current page boxed */
+.cal-pager { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; color: var(--muted); }
+.cal-pager .cal-btn:first-child { margin-right: 8px; }
+.cal-pager .cal-btn:last-child { margin-left: 8px; }
+.cal-pager .pg { font: inherit; letter-spacing: inherit; background: none; border: var(--line-thin) solid transparent; padding: 0 5px; line-height: 18px; color: var(--muted); cursor: pointer;
+  text-decoration: underline; text-decoration-color: var(--edge-strong); text-underline-offset: 3px; }
+.cal-pager button.pg:hover { color: var(--fg); text-decoration-color: var(--fg); }
+.cal-pager .cur { color: var(--title); border-color: var(--fg); text-decoration: none; cursor: default; }
+.cal-pager .gap { color: var(--faint); padding: 0 3px; }
+
+/* ── code block · a plain well with a little flavour */
+.cal-code { position: relative; width: 100%; background: var(--well); }
+.cal-code pre { margin: 0; padding: 12px 14px 22px; font: 12.5px/1.75 var(--font-legend); font-variant-ligatures: none; overflow-x: auto; }
+.cal-code .ln, .cal-code .cm { display: block; white-space: pre; }
+.cal-code .ln::before { content: "$ "; color: var(--faint); }
+.cal-code .cm { color: var(--muted); }
+.cal-code::after { content: attr(data-lang); position: absolute; right: 10px; bottom: 5px; font: 10px var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--faint); }
+.cal-code > .cal-btn { position: absolute; top: 4px; right: 6px; opacity: 0; transition: opacity .12s ease-out; }
+.cal-code:hover > .cal-btn, .cal-code:focus-within > .cal-btn { opacity: 1; }
+@media (hover: none) { .cal-code > .cal-btn { opacity: 1; } }
+
+/* ── spinners · drawn from the loop and measured figures. <cal-spin> draws the dial SVG. */
+cal-spin { display: inline-block; line-height: 0; vertical-align: middle; }
+/* loop dial: hairline circle, dash-dot centre lines, four stations, the star stepping clockwise with an ink arc behind */
+.cal-spin { width: 56px; height: 56px; flex: none; overflow: visible; }
+.cal-spin :is(.o, .cl, .st rect, .tr) { vector-effect: non-scaling-stroke; }
+.cal-spin.sm { width: 24px; height: 24px; }
+.cal-spin .o { fill: none; stroke: var(--edge-strong); stroke-width: 1; }
+.cal-spin .cl { stroke: var(--faint); stroke-width: .7; stroke-dasharray: 5 2 1 2; }
+.cal-spin .st rect { fill: var(--panel); stroke: var(--fg); stroke-width: 1; }
+.cal-spin .tr { fill: none; stroke: var(--fg); stroke-width: 1.6; }
+.cal-spin .sr { fill: var(--live); }
+.cal-spin .run { transform-origin: 20px 20px; animation: cal-loop 2.4s infinite; }
+.cal-spin.sm .cl, .cal-spin.sm .st { display: none; }
+@keyframes cal-loop {
+  0% { rotate: 0deg; animation-timing-function: cubic-bezier(.65, 0, .35, 1); } 18%, 25% { rotate: 90deg; animation-timing-function: cubic-bezier(.65, 0, .35, 1); }
+  43%, 50% { rotate: 180deg; animation-timing-function: cubic-bezier(.65, 0, .35, 1); } 68%, 75% { rotate: 270deg; animation-timing-function: cubic-bezier(.65, 0, .35, 1); }
+  93%, 100% { rotate: 360deg; } }
+/* measured bar: a hairline frame, an ink run sliding inside, a lamp leading edge, a scale underneath */
+.cal-scan { --p: .3; position: relative; display: inline-block; width: 150px; height: 7px; flex: none; border: var(--line-thin) solid var(--edge-strong); margin-bottom: 5px; }
+.cal-scan::after { content: ""; position: absolute; left: -1px; right: -1px; top: calc(100% + 1px); height: 4px;
+  background: repeating-linear-gradient(to right, var(--faint) 0 1px, transparent 1px 10%) 0 0 / calc(100% - 1px) 100% no-repeat, linear-gradient(var(--faint), var(--faint)) 100% 0 / 1px 100% no-repeat; }
+.cal-scan > i { position: absolute; top: 1px; bottom: 1px; left: 1px; width: 30%; background: var(--fg); animation: cal-measure 1.6s cubic-bezier(.65, 0, .35, 1) infinite alternate; }
+.cal-scan > i::after { content: ""; position: absolute; right: -2px; top: -4px; bottom: -4px; width: 2px; background: var(--live); }
+.cal-scan.det > i { width: calc((100% - 2px) * var(--p)); animation: none; }
+@keyframes cal-measure { to { left: calc(70% - 1px); } }
+/* node row: the progress nodes with the star stepping along */
+.cal-wait { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; }
+.cal-wait > i { width: 7px; height: 7px; border: var(--line-thin) solid var(--edge-strong); animation: cal-node 1.2s steps(1) infinite; }
+.cal-wait > i:nth-child(2) { animation-delay: .3s; } .cal-wait > i:nth-child(3) { animation-delay: .6s; } .cal-wait > i:nth-child(4) { animation-delay: .9s; }
+@keyframes cal-node { 0%, 23% { border-color: transparent; background: var(--live); clip-path: var(--star); scale: 1.45; } 24%, 100% { border-color: var(--edge-strong); background: transparent; clip-path: none; scale: 1; } }
+.cal-btn .cal-wait { margin-right: 3px; vertical-align: 0; }
+.cal-btn .cal-wait > i { width: 5px; height: 5px; }
+@media (prefers-reduced-motion: reduce) {
+  .cal-spin .run, .cal-scan > i { animation: none; }
+  .cal-wait > i { animation: none; }
+  .cal-wait > i:first-child { border-color: transparent; background: var(--live); clip-path: var(--star); scale: 1.45; }
+}
 
 /* ── footer */
 .cal-foot { padding: 32px 0 48px; color: var(--key); display: flex; gap: 16px; justify-content: space-between; flex-wrap: wrap; font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; }

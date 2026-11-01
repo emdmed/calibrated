@@ -1,6 +1,6 @@
 ---
 name: calibrated-components
-description: Pure CSS and vanilla JS (custom elements, no build, no framework) UI components in the Calibrated technical-drawing style: quiet panels on a darker desk, hairlines, monospace type and an amber lamp for the one live thing. Pure CSS covers cards with an info column and before/after stages, ruled section heads, boxed counts, counted tabs, bracketed buttons, parts-list tables, key/value sheets, rows, form fields, a sign-off tally, a revision table and triangle, a stamp, and an optional zone-framed drawing sheet and title block. Custom elements cover instruments that draw quantities: <cal-meter>, <cal-position>, <cal-progress>, <cal-diff>, <cal-durations>, <cal-ruler>, with full and compact density. Use when building dashboards, dialogs, status pages, review boards or settings in the Calibrated style, or when asked for reusable calibrated components that drop into any stack.
+description: Pure CSS and vanilla JS (custom elements, no build, no framework) UI components in the Calibrated technical-drawing style: quiet panels on a darker desk, hairlines, monospace type and an amber lamp for the one live thing. Pure CSS covers cards with an info column and before/after stages, ruled section heads, boxed counts, counted tabs, bracketed buttons, parts-list tables, key/value sheets, rows, a sign-off tally (keep/rework/drop), a revision table and triangle, a stamp, and an optional zone-framed drawing sheet and title block. Form controls: inputs, textarea (editor pane), select, radio, checkbox, switch, detent choice, range on a ruler, number with units, search, tag input, file drop, date/time, field groups. Overlays and feedback: menu, dialog, tooltip, callout, toast, empty state, spinners. Navigation: breadcrumb, pager, steps; plus status badges, code blocks and key caps. Custom elements cover instruments that draw quantities: <cal-meter>, <cal-position>, <cal-progress>, <cal-diff>, <cal-durations>, <cal-ruler>, with full and compact density, and the <cal-spin> spinner. Use when building dashboards, forms, dialogs, settings, status pages or review boards in the Calibrated style, or when asked for reusable calibrated components that drop into any stack.
 ---
 
 # Calibrated · components
@@ -11,7 +11,7 @@ UI parts that apply the Calibrated language to every quantity: a count, a positi
 
 ## Files
 - `assets/calibrated-components.css`: every `cal-*` class. Load it after `calibrated.css`.
-- `assets/calibrated-components.js`: the custom elements, plus `Calibrated.redraw()`, `Calibrated.counts()` and `Calibrated.sheets()`. Load it after `calibrated-figures.js`.
+- `assets/calibrated-components.js`: the custom elements, the wiring for the controls that need a hand (textarea status line, detent, range, number, tag input, file drop, dialog openers, menus), plus `Calibrated.redraw()`, `counts()`, `sheets()`, `controls()`, `toast()` and `pager()`. Load it after `calibrated-figures.js`.
 - `references/catalog.md`: markup, attributes and variants for every part. Read it before you write markup.
 
 ```html
@@ -38,6 +38,22 @@ UI parts that apply the Calibrated language to every quantity: a count, a positi
 | what changed since the last version | `.cal-revs` + `.cal-rev` triangles |
 | a structure, process or comparison | a figure from **calibrated-figures** inside `.cal-figure` |
 
+## Pick the control by the task
+
+| the user… | use |
+|---|---|
+| types a line / a paragraph | `.cal-input` / `.cal-term` + `.cal-textarea` (editor pane with a status line) |
+| picks one of many / one of a few ordered values / one of a few others | `.cal-select` / `.cal-detent` / `.cal-radio` |
+| turns a setting on or off / ticks items | `.cal-switch` / `.cal-check` |
+| sets an amount on a scale / types a number with a unit | `.cal-range` / `.cal-num` + `.cal-affix` |
+| filters a list / adds several names / uploads files / picks a date | `.cal-search` / `.cal-chips` / `.cal-drop` / `.cal-date` |
+| acts on one item / confirms something destructive | `.cal-menu` popover / `.cal-dialog` |
+| needs a value explained in place / a standing note or warning | `[data-tip]` / `.cal-callout` |
+| hears that something finished / waits for it | `Calibrated.toast()` / `<cal-spin>`, `.cal-scan`, `.cal-wait` |
+| has nothing here yet | `.cal-empty` |
+| moves through pages / steps / a hierarchy | `Calibrated.pager()` / `.cal-steps` / `.cal-crumbs` |
+| reads a status / copies a command / a shortcut | `.cal-badge` / `.cal-code` / `.cal-kbd` |
+
 ## Density
 Put `data-density="full"` or `"compact"` on any ancestor, or `density` on the element.
 - **Full** prints the scale, boxes the value and adds leaders.
@@ -57,6 +73,8 @@ Every instrument moves, with nothing to set up. When it is half in view it sweep
 - Status words use `data-ink="live|ok|fault"` (on `.cal-count`, `.cal-table .st`, and `ok|fault` on pressed `.cal-btn`). Never colour plain text for decoration.
 - Counts that change are zero-padded (`data-pad="2"`), so the layout doesn't jump.
 - Buttons are bracketed words: `[keep]`. Pressed turns ink (or ok/fault). Use `.primary` for the main action and `.quiet` for a secondary, underlined one.
+- A chosen row or option is boxed in ink (its `.v` label), never tinted or barred; hover moves the box. Focus is the lamp: a lamp underline on write-in lines, a lamp outline elsewhere.
+- Native elements first: `<select>`, `<dialog>`, `popover`, `<details>`, radios and checkboxes stay real, so the controls work without JS and from a file.
 - Panels, not frames: surfaces separate by tone and gaps, lines are hairlines (`--edge`, `--edge-strong`). No shadows, no radius, no gradients.
 - A card's `.id` line (number badge, where, status) opens its info column.
 - Every instrument draws an `<svg role="img">` with a sentence label. Add `label="…"` attributes so the sentence names the thing.

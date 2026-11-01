@@ -7,7 +7,8 @@ All four page types share the same frame: **panels on the desk inside `.wrap` �
 
 - **Headline**: what this round decides. The mast carries the version and date; the foot carries the drawing number and revision.
 - **1 · Marks**: a specimen grid of the marks this page uses (optional on later rounds).
-- **2…**: one `cal-card` per item. The info column has the title, *why*, `where / replaces / data`, and the drawing-number strip at the foot. The stage has `cal-compare` with **today** (a `cal-note` of the current text) and **drawn** (the figure). The card ends with `cal-sign` keep/drop. Dropped cards are stamped SUPERSEDED.
+- **2…**: one `cal-card` per item. The info column has the title, *why*, `where / replaces / data`, and the drawing-number strip at the foot. The stage has `cal-compare` with **today** (a `cal-note` of the current text) and **drawn** (the figure). The card ends with `cal-sign` keep/drop, plus rework (with a note line) when the board will have another round. Dropped cards are stamped SUPERSEDED, rework cards REWORK.
+- **Later rounds**: keep the drawing numbers. Mark reworked cards with a `.cal-rev` triangle in the `.id` line, quote the reviewer's note in the info column, and start kept cards already pressed keep (`data-v="keep" data-state="ok"` and `aria-pressed="true"`), so only the reworked ones need a decision.
 - **Shared parts**: when several items reuse one part, show it once with **full** and **compact** rows (use `K.tag(y, 'FULL')`).
 - **Roll-out**: a `cal-table` of every item, with figure, where, new data needed, effort ■□□ and status.
 - **Tiers**: what's next, and what to leave alone.

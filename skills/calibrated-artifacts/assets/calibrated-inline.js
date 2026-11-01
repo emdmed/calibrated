@@ -936,6 +936,11 @@
      <cal-span name="deploy" value="485" live></cal-span>   <!-- or start="<epoch ms>" to tick live -->
    </cal-durations>
    <cal-ruler min="0" max="150" step="10" every="5" unit="k"></cal-ruler>
+   <cal-spin></cal-spin>                                    <!-- the loop dial spinner -->
+
+   Plus the wiring for the CSS controls (textarea status line, detent, range,
+   number, file drop, tag input, dialog openers, menus) and Calibrated.toast()
+   and Calibrated.pager(). See references/catalog.md.
 
    Full or compact: the nearest [data-density="full|compact"], or a
    density="…" attribute on the element itself. Full prints scales, boxes
@@ -1410,9 +1415,195 @@
     });
   }
 
-  const boot = () => { counts(); sheets(); };
+
+  /* ── cal-spin · the loop dial spinner: a hairline circle on dash-dot centre lines with four
+     stations, the lamp star stepping clockwise with an ink arc behind. size="sm" drops the
+     stations for inline use; label="…" names what is loading (default "Loading"). */
+  class CalSpin extends HTMLElement {
+    static get observedAttributes() { return ['size', 'label']; }
+    connectedCallback() { this.render(); }
+    attributeChangedCallback() { if (this.isConnected) this.render(); }
+    render() {
+      const sm = this.getAttribute('size') === 'sm', label = this.getAttribute('label') || 'Loading';
+      if (!this.hasAttribute('role')) this.setAttribute('role', 'status');
+      this.setAttribute('aria-label', label);
+      this.innerHTML = `<svg class="cal-spin${sm ? ' sm' : ''}" viewBox="0 0 40 40" aria-hidden="true">`
+        + '<circle class="o" cx="20" cy="20" r="14"/><path class="cl" d="M20 2V38M2 20H38"/>'
+        + '<g class="st"><rect x="18" y="4" width="4" height="4"/><rect x="32" y="18" width="4" height="4"/><rect x="18" y="32" width="4" height="4"/><rect x="4" y="18" width="4" height="4"/></g>'
+        + '<g class="run"><path class="tr" d="M6 20A14 14 0 0 1 20 6"/><path class="sr" d="M20 1.5 21.3 4.7 24.5 6 21.3 7.3 20 10.5 18.7 7.3 15.5 6 18.7 4.7Z"/></g></svg>';
+    }
+  }
+  define('cal-spin', CalSpin);
+
+  /* ── controls · the few CSS parts that need a hand. Listeners sit on the document, so
+     parts added later work too; controls(scope) paints their resting state (call it after
+     inserting markup, like counts()). */
+  const group = (n) => Math.round(n).toLocaleString('en-US').replace(/,/g, ' ');
+  const digits = (s) => parseInt(String(s).replace(/[^\d-]/g, ''), 10);
+  const fileSize = (b) => (b >= 1e6 ? (b / 1e6).toFixed(1) + ' MB' : b >= 1e3 ? Math.round(b / 1e3) + ' KB' : b + ' B');
+
+  /* textarea · .cal-term[data-max] > .cal-textarea + .bar (.mode, .pos, .cal-count > b) */
+  function term(box) {
+    const ta = box.querySelector('.cal-textarea'); if (!ta) return;
+    const max = parseInt(box.dataset.max, 10), n = ta.value.length, over = max > 0 && n > max;
+    const b = box.querySelector('.cal-count b'), cnt = box.querySelector('.cal-count');
+    if (b) b.textContent = String(n).padStart(String(max || n).length, '0');
+    if (cnt) cnt.dataset.ink = over ? 'fault' : '';
+    box.toggleAttribute('data-over', over);
+    ta.setAttribute('aria-invalid', String(over));
+    const pos = box.querySelector('.pos');
+    if (pos) { const before = ta.value.slice(0, ta.selectionStart).split('\n'); pos.textContent = `ln ${before.length}, col ${before[before.length - 1].length + 1}`; }
+    const mode = box.querySelector('.mode');
+    if (mode) mode.textContent = document.activeElement === ta ? '-- insert --' : '-- normal --';
+    box.dispatchEvent(new CustomEvent('cal-count', { detail: { length: n, max, over } }));
+  }
+  /* detent · .cal-detent > .mk + label > input[type=radio]: the marker glides over the chosen tick */
+  function detent(g) {
+    g.classList.add('js');
+    const l = g.querySelector('label:has(:checked)'); if (!l) return;
+    g.style.setProperty('--x', l.offsetLeft + l.offsetWidth / 2 + 'px');
+  }
+  /* range · .cal-range > output + input[type=range]: --p and the boxed reading */
+  function range(w) {
+    const r = w.querySelector('input[type="range"]'); if (!r) return;
+    const min = +r.min || 0, max = r.max === '' ? 100 : +r.max, unit = w.dataset.unit ?? '';
+    w.style.setProperty('--p', (r.value - min) / (max - min || 1));
+    const o = w.querySelector('output'); if (o) o.textContent = r.value + unit;
+    r.setAttribute('aria-valuetext', r.value + unit);
+  }
+  /* file drop · label.cal-drop > input[type=file], listing into the .cal-rows named by data-list */
+  function listFiles(z, files) {
+    const list = z.dataset.list && document.getElementById(z.dataset.list); if (!list) return;
+    const max = parseFloat(z.dataset.max) || Infinity;
+    list.replaceChildren(...[...files].map((f) => {
+      const r = document.createElement('div'), big = f.size > max;
+      r.className = 'file' + (big ? ' bad' : '');
+      r.innerHTML = '<span></span><span class="lg"></span>';
+      r.children[0].textContent = f.name;
+      r.children[1].textContent = fileSize(f.size) + (big ? ` · over ${fileSize(max)}` : '');
+      if (!big) r.children[1].classList.add('mut');
+      return r;
+    }));
+  }
+  /* tag input · .cal-chips > .chip* + input: Enter or comma adds, Backspace on empty removes, a repeat lights the original */
+  function addChip(box, v) {
+    const input = box.querySelector('input');
+    const dup = [...box.querySelectorAll('.chip')].find((c) => c.firstChild.textContent.trim().toLowerCase() === v.toLowerCase());
+    if (dup) { dup.classList.add('dup'); setTimeout(() => dup.classList.remove('dup'), 900); return; }
+    const c = document.createElement('span'), x = document.createElement('button');
+    c.className = 'chip'; c.append(v);
+    x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', 'Remove ' + v); c.append(x);
+    box.insertBefore(c, input);
+    box.dispatchEvent(new CustomEvent('cal-chips', { bubbles: true, detail: { values: chipValues(box) } }));
+  }
+  const chipValues = (box) => [...box.querySelectorAll('.chip')].map((c) => c.firstChild.textContent.trim());
+
+  function controls(scope = document) {
+    scope.querySelectorAll('.cal-term').forEach(term);
+    scope.querySelectorAll('.cal-detent').forEach(detent);
+    scope.querySelectorAll('.cal-range').forEach(range);
+  }
+
+  const on = (type, sel, fn, opts) => document.addEventListener(type, (e) => { const t = e.target.closest?.(sel); if (t) fn(t, e); }, opts);
+  on('input', '.cal-term .cal-textarea', (t) => term(t.closest('.cal-term')));
+  ['keyup', 'click', 'select', 'focusin', 'focusout'].forEach((ev) => on(ev, '.cal-term .cal-textarea', (t) => term(t.closest('.cal-term'))));
+  on('change', '.cal-detent input', (t) => detent(t.closest('.cal-detent')));
+  on('input', '.cal-range input[type="range"]', (t) => range(t.closest('.cal-range')));
+  /* number · .cal-num input[data-step]: ↑ ↓ step it, Shift ×10; digits are grouped on blur */
+  on('keydown', '.cal-num input[data-step]', (t, e) => {
+    if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    e.preventDefault();
+    const step = (parseFloat(t.dataset.step) || 1) * (e.shiftKey ? 10 : 1) * (e.key === 'ArrowUp' ? 1 : -1);
+    const min = t.dataset.min !== undefined ? parseFloat(t.dataset.min) : 0, max = t.dataset.max !== undefined ? parseFloat(t.dataset.max) : Infinity;
+    t.value = group(Math.min(max, Math.max(min, (digits(t.value) || 0) + step)));
+    t.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  on('focusout', '.cal-num input[data-step]', (t) => { const v = digits(t.value); if (Number.isFinite(v) && /^[\d\s-]+$/.test(t.value.trim())) t.value = group(v); });
+  on('dragover', '.cal-drop', (z, e) => { e.preventDefault(); z.classList.add('over'); });
+  on('dragleave', '.cal-drop', (z) => z.classList.remove('over'));
+  on('drop', '.cal-drop', (z, e) => {
+    e.preventDefault(); z.classList.remove('over');
+    const input = z.querySelector('input[type="file"]');
+    try { input.files = e.dataTransfer.files; } catch { /* read-only in old browsers */ }
+    listFiles(z, e.dataTransfer.files);
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  on('change', '.cal-drop input[type="file"]', (t, e) => { if (e.isTrusted) listFiles(t.closest('.cal-drop'), t.files); });
+  on('keydown', '.cal-chips input', (t, e) => {
+    const box = t.closest('.cal-chips'), v = t.value.trim().replace(/,$/, '');
+    if ((e.key === 'Enter' || e.key === ',') && v) { e.preventDefault(); addChip(box, v); t.value = ''; }
+    else if (e.key === 'Backspace' && !t.value) { const last = [...box.querySelectorAll('.chip')].pop(); if (last) { last.remove(); box.dispatchEvent(new CustomEvent('cal-chips', { bubbles: true, detail: { values: chipValues(box) } })); } }
+  });
+  on('click', '.cal-chips .chip button', (b) => { const box = b.closest('.cal-chips'); b.parentElement.remove(); box.querySelector('input')?.focus(); box.dispatchEvent(new CustomEvent('cal-chips', { bubbles: true, detail: { values: chipValues(box) } })); });
+  on('click', '.cal-chips', (box, e) => { if (e.target === box) box.querySelector('input')?.focus(); });
+  /* dialog · <button data-dialog="id"> opens <dialog class="cal-dialog" id="id"> as a modal */
+  on('click', '[data-dialog]', (b) => { const d = document.getElementById(b.dataset.dialog); if (d?.showModal && !d.open) d.showModal(); });
+  /* menu · a .cal-menu[popover]: where anchor positioning is missing, sit it under its button;
+     focus the first item on open, arrow keys move, picking an item closes it */
+  const anchored = !!root.CSS?.supports?.('position-area: bottom');
+  document.addEventListener('toggle', (e) => {
+    const m = e.target; if (!m.matches?.('.cal-menu[popover]') || e.newState !== 'open') return;
+    const b = document.querySelector(`[popovertarget="${m.id}"]`);
+    if (!anchored && b) { const r = b.getBoundingClientRect(); Object.assign(m.style, { position: 'fixed', inset: 'auto', left: r.left + 'px', top: r.bottom + 4 + 'px' }); }
+    m.querySelector('.it')?.focus();
+  }, true);
+  on('click', '.cal-menu[popover] .it', (it) => it.closest('.cal-menu').hidePopover?.());
+  on('keydown', '.cal-menu .it', (it, e) => {
+    const items = [...it.closest('.cal-menu').querySelectorAll('.it')], i = items.indexOf(it);
+    if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+    if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+  });
+
+  /* ── toast · Calibrated.toast('Limit saved', { ink: 'ok', action: 'undo', onAction, timeout })
+     ink: 'live' (in progress, the lamp star) · 'ok' · 'fault' · none. Returns the element;
+     .remove() it to dismiss early. Toasts stack bottom right in one polite live region. */
+  function toast(message, o = {}) {
+    let box = document.querySelector('.cal-toasts');
+    if (!box) { box = document.createElement('div'); box.className = 'cal-toasts'; box.setAttribute('role', 'status'); box.setAttribute('aria-live', 'polite'); document.body.append(box); }
+    const el = document.createElement('div'), ic = { live: '<span class="star"></span>', ok: '<span class="ic">✓</span>', fault: '<span class="ic">✕</span>' }[o.ink] || '';
+    el.className = 'cal-toast'; if (o.ink) el.dataset.ink = o.ink;
+    el.innerHTML = `${ic}<span class="msg">${esc(message)}</span>`
+      + (o.action ? `<button class="cal-btn" type="button" data-act>${esc(o.action)}</button>` : '')
+      + '<button class="cal-btn" type="button" data-hide aria-label="Dismiss">hide</button>';
+    el.querySelector('[data-act]')?.addEventListener('click', () => { o.onAction?.(); el.remove(); });
+    el.querySelector('[data-hide]').addEventListener('click', () => el.remove());
+    box.append(el);
+    const t = o.timeout ?? (o.ink === 'live' ? 0 : 5000);
+    if (t) setTimeout(() => el.remove(), t);
+    return el;
+  }
+
+  /* ── pager · Calibrated.pager(nav, { page, pages, onChange }) draws [‹ prev] 01 … 04 [05] 06 … 12 [next ›]
+     into a <nav class="cal-pager">. The current page is boxed and not a link. Returns { set(page) }. */
+  function pager(nav, o = {}) {
+    let p = o.page || 1; const N = Math.max(1, o.pages || 1);
+    const two = (k) => String(k).padStart(String(N).length < 2 ? 2 : String(N).length, '0');
+    const pages = () => {
+      const list = [...new Set([1, N, p - 1, p, p + 1].filter((k) => k >= 1 && k <= N))].sort((a, b) => a - b), out = [];
+      list.forEach((k, j) => { if (j && k - list[j - 1] > 1) out.push(0); out.push(k); });
+      return out;
+    };
+    const draw = (refocus) => {
+      nav.innerHTML = `<button class="cal-btn" type="button" data-go="${p - 1}" ${p === 1 ? 'disabled' : ''} aria-label="Previous page">‹ prev</button>`
+        + pages().map((k) => (k === 0 ? '<span class="gap" aria-hidden="true">…</span>'
+          : k === p ? `<span class="pg cur" aria-current="page" aria-label="Page ${k}, current">${two(k)}</span>`
+          : `<button class="pg" type="button" data-go="${k}" aria-label="Page ${k}">${two(k)}</button>`)).join('')
+        + `<button class="cal-btn" type="button" data-go="${p + 1}" ${p === N ? 'disabled' : ''} aria-label="Next page">next ›</button>`;
+      if (refocus) (nav.querySelector(refocus + ':not(:disabled)') || nav.querySelector('button:not(:disabled)'))?.focus();
+    };
+    const set = (k, refocus) => { k = Math.min(N, Math.max(1, k)); if (k === p && nav.childElementCount) return; p = k; draw(refocus); o.onChange?.(p); };
+    nav.classList.add('cal-pager'); if (!nav.hasAttribute('aria-label')) nav.setAttribute('aria-label', 'Pages');
+    nav.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-go]'); if (!b || b.disabled) return;
+      set(+b.dataset.go, b.classList.contains('cal-btn') ? (b.dataset.go < p ? '.cal-btn:first-child' : '.cal-btn:last-child') : null);
+    });
+    draw();
+    return { set: (k) => set(k), get page() { return p; } };
+  }
+
+  const boot = () => { counts(); sheets(); controls(); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
-  root.Calibrated = Object.assign(C, { redraw, counts, sheets });
+  root.Calibrated = Object.assign(C, { redraw, counts, sheets, controls, toast, pager });
 })(typeof window !== 'undefined' ? window : globalThis);

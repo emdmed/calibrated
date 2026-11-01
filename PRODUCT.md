@@ -23,7 +23,7 @@ Used inside other people's products and inside Claude artifacts (sandboxed singl
 
 ## Capabilities and Constraints
 - Seed-based theming: a few seed colours, everything else derived.
-- API names are fixed: `cal-*` classes, `<cal-meter>`, `<cal-position>`, `<cal-progress>`, `<cal-diff>`, `<cal-durations>`, `<cal-ruler>`, `Calibrated.K`, recipes.
+- API names are fixed: `cal-*` classes, `<cal-meter>`, `<cal-position>`, `<cal-progress>`, `<cal-diff>`, `<cal-durations>`, `<cal-ruler>`, `<cal-spin>`, `Calibrated.K`, `Calibrated.controls/toast/pager`, recipes.
 - Fonts cannot be bundled unless their licence allows; system fallbacks must hold up.
 
 ## Brand Commitments

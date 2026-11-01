@@ -74,12 +74,14 @@ For a page that needs the engineering-drawing look (drawing numbers, zones, appr
     <div><div class="cal-tag on">drawn</div><div class="stage"><svg id="fig-3"></svg></div></div>
   </div>
   <div class="cal-sign" role="group" aria-label="Sign off 03">
+    <label class="note" hidden>rework<input class="cal-input" placeholder="what isn’t good enough yet?" aria-label="What needs rework in 03"></label>
     <button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button>
+    <button class="cal-btn" data-ink="live" data-v="rework" aria-pressed="false">rework</button>
     <button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="false">drop</button>
   </div>
 </article>
 ```
-The `.id` line opens `.info`: an outlined lamp number badge, where it lives, and a status on the right (`rev A`, or `✓ built` with `data-ink="ok"`). A kept card's badge turns green; a dropped card fades and is stamped SUPERSEDED. For a report, drop `.cal-sign` and replace `.cal-compare` with `<div class="stage"><svg id="fig-3"></svg></div>`.
+The `.id` line opens `.info`: an outlined lamp number badge, where it lives, and a status on the right (`rev A`, or `✓ built` with `data-ink="ok"`). A kept card's badge turns green; a dropped card fades and is stamped SUPERSEDED; a card sent back for rework is stamped REWORK in lamp and opens its note line, so the reviewer can say what isn't good enough. Leave out the rework button and the note when there is no second round. For a report, drop `.cal-sign` and replace `.cal-compare` with `<div class="stage"><svg id="fig-3"></svg></div>`.
 
 ## Figure with caption (explainer)
 ```html
@@ -169,7 +171,7 @@ Put the same `<span class="cal-rev" data-rev="B"></span>` beside whatever change
 ```
 
 ## Sign-off tally
-The template already wires this up: buttons set `data-v` on the card, the tally counts cards and `copy sign-off` copies `NN Title: keep|drop` lines.
+The template already wires this up: buttons set `data-v` on the card, the tally counts cards and `copy sign-off` copies `NN Title: keep|rework|drop` lines, with the rework note after a dash.
 ```html
 <div class="cal-tally"><span id="tally-n">0 of 6 signed</span><span class="sp"></span><span id="tally-msg" class="mut"></span><button class="cal-btn" id="tally-copy">copy sign-off</button></div>
 ```
