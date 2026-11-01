@@ -2,7 +2,7 @@
 
 **A technical-drawing design language for UIs, packaged as Claude Code skills.**
 
-**Site:** [calibrated-design.vercel.app](https://calibrated-design.vercel.app): every page type with a Plain / Calibrated switch, plus the [developer reference](https://calibrated-design.vercel.app/reference).
+**Site:** [calibrated-design.vercel.app](https://calibrated-design.vercel.app): every page type with a Plain / Calibrated switch, [five finished example pages](https://calibrated-design.vercel.app/examples) with the requests that made them, plus the [developer reference](https://calibrated-design.vercel.app/reference).
 
 Calibrated draws a count, a position, progress, a size or a duration as a small technical figure instead of a sentence: rulers, leader lines to boxed values, dimension lines, detail insets, hatching and status nodes. Pages are quiet panels on a darker desk: warm ink, hairline rules, monospace type, numbered drawings. One amber lamp marks the live thing, as a line, a word, an outline or a small glowing star. Everything is pure CSS and dependency-free vanilla JS. There's no build step and no framework, so it drops into any stack and into Claude artifacts.
 
@@ -62,7 +62,7 @@ Or use the files directly:
 A figure replaces text the UI already shows, using data it already has. It uses eight marks only and one scale per figure, with numbers at the major ticks. Values go in boxes on leaders. Everything is ink in hairlines; the lamp marks the one live thing as a line, a word or a star (never a fill), red markup marks faults and limits, green marks what passed. Hatch means you can't. Full form prints the scale and boxes; compact keeps only the marks. Leave terminals, prompts and menus alone.
 
 ## Demo
-Live at [calibrated-design.vercel.app](https://calibrated-design.vercel.app), or open `demo/index.html` in a browser: a catalog of the pages Claude can make in the style, each with a Plain / Calibrated switch and six colour finishes (`?theme=night` and `?view=plain` work too). The developer reference, with every mark, instrument, recipe and part and its code, is `demo/reference.html`.
+Live at [calibrated-design.vercel.app](https://calibrated-design.vercel.app), or open `demo/index.html` in a browser: a catalog of the pages Claude can make in the style, each with a Plain / Calibrated switch and six colour finishes (`?theme=night` and `?view=plain` work too). `demo/examples.html` has five complete pages (ops report, release go/no-go board, explainer, API spec sheet, branded app screen), each with the request that made it and the parts it uses. The developer reference, with every mark, instrument, recipe and part and its code, is `demo/reference.html`.
 
 ## Fonts
 The style uses **IBM Plex Mono** (body and titles) and **Chivo Mono** (legends, numbers, every SVG label). Both are OFL and on Google Fonts. The repo bundles no font files: the demo and the artifact template link Google Fonts, which Claude artifacts allow. Without them, the stacks fall back to `ui-monospace`, SF Mono, Menlo and Consolas, and the figure kit measures labels with whatever font loaded. See `skills/calibrated-tokens/references/fonts.md`.

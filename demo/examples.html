@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="film">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calibrated · Examples</title>
+<meta name="description" content="Five finished pages made with Calibrated: an ops report, a release go/no-go board, an explainer, an API spec sheet and a branded app screen. Each one with the request that made it and the parts it uses.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&display=swap">
+<link rel="stylesheet" href="../skills/calibrated-tokens/assets/calibrated.css">
+<link rel="stylesheet" href="../skills/calibrated-components/assets/calibrated-components.css">
+<style>
+/* The site chrome matches the catalog (index.html). Everything inside .page is a
+   finished page as Claude would hand it back: panels on the desk, kit parts only. */
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+html, body { background: var(--bg); }
+.top { position: sticky; top: 0; z-index: 20; background: var(--bg); }
+.top .cal-mast { padding: 12px 0 10px; }
+.top .word.ruled { font-size: 20px; }
+.top a.word { text-decoration: none; }
+.cal-btn svg { width: 13px; height: 13px; vertical-align: -2px; }
+html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { display: none; }
+#theme { padding: 3px 4px; }
+#theme::before, #theme::after { content: none; }
+.nav { display: inline-flex; gap: 6px; }
+.nav a { text-decoration: none; }
+.nav a[aria-current="page"] { color: var(--fg); box-shadow: inset 0 -1px var(--live); }
+.gh { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); text-decoration: none; font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; padding: 4px 2px; }
+.gh svg { width: 15px; height: 15px; flex: none; }
+.gh:hover { color: var(--fg); }
+
+/* the index of examples in the intro */
+.cal-intro { align-items: start; }
+.cal-intro .lead p { margin-top: 18px; max-width: 58ch; }
+.toc { width: 100%; }
+.toc a { text-decoration: none; }
+.toc a:hover { color: var(--live); }
+.toc td:nth-child(3) { color: var(--muted); font-size: 12px; }
+
+/* the brief: what was asked, what was pasted, what it is built from */
+.brief { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px 48px; margin-bottom: 18px; align-items: start; }
+.brief .ask { display: flex; gap: 10px 12px; align-items: baseline; flex-wrap: wrap; color: var(--legend); }
+.brief .ask q { quotes: "“" "”"; flex: 1 1 30ch; }
+.brief .data { margin-top: 10px; font-size: 12.5px; color: var(--muted); max-width: 70ch; }
+.brief .data b { font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--key); font-weight: 400; margin-right: 6px; }
+.brief .cal-kv { border-top: 0; padding-top: 0; }
+.brief .cal-kv code { white-space: nowrap; }
+
+/* a finished page: the desk, and the page's own wrap inside it */
+.page.cal-theme { background: var(--gutter); padding: clamp(6px, 2vw, 22px) clamp(12px, 2.6vw, 34px) 4px; overflow: hidden; }
+.page .cal-intro { padding-top: clamp(20px, 2.6vw, 32px); }
+.page .cal-intro h1 { font-size: clamp(22px, 2.4vw, 32px); }
+.page .cal-sec { margin-top: clamp(28px, 3vw, 40px); }
+.page .cal-foot { padding: 26px 0 22px; }
+.page .cal-figure > svg { max-width: calc(100% - 36px); }
+.page .cal-card + .cal-card { margin-top: var(--gap); }
+
+/* small layout helpers used inside the pages */
+.now { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 26px 48px; padding: 18px 20px 20px; }
+.now > div { min-width: 0; overflow-x: auto; }
+.cell-h { font: 11px/1 var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.counts { display: flex; gap: 10px 18px; flex-wrap: wrap; align-items: center; }
+.figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr)); gap: var(--gap); }
+.row2 { display: flex; flex-wrap: wrap; gap: var(--gap); align-items: flex-start; }
+.row2 > * { flex: 1 1 340px; min-width: 0; }
+.limits { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 24px 40px; padding: 18px 20px 20px; }
+.limits > div { min-width: 0; overflow-x: auto; }
+.limits p { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+
+/* example 5 · an app screen */
+.app { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: var(--gap); margin-top: 18px; }
+.app .side .cal-gl { padding: 12px 14px 6px; margin: 0; background: var(--panel); }
+.app .side .cal-rows { border: 0; }
+.app .main { display: grid; gap: var(--gap); min-width: 0; }
+.app .main > .cal-panel { padding: 16px 20px 18px; min-width: 0; }
+.app .form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px 24px; align-items: start; margin-top: 4px; }
+.app .btns { display: flex; gap: 10px; justify-content: flex-end; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+.app .panel-h { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.app .panel-h .sp { flex: 1; }
+.app .cal-table { background: none; }
+.finish-row { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin: 0 0 14px; }
+.finish-row .chip { width: 22px; height: 12px; border: var(--line-thin) solid currentColor; display: inline-grid; grid-template-columns: 1fr 1fr 1fr; margin: 0 7px 0 3px; vertical-align: -2px; }
+
+@media (max-width: 1100px) { .brief { grid-template-columns: 1fr; } }
+@media (max-width: 820px) { .app { grid-template-columns: 1fr; } }
+@media (max-width: 640px) {
+  .top .cal-caption, .top .gh span { display: none; }
+  .top .cal-mast { gap: 10px; }
+  .toc th:nth-child(3), .toc td:nth-child(3) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+<script>
+  (() => { let t = new URLSearchParams(location.search).get('theme');
+    if (!t) { try { t = localStorage.getItem('cal-cat-theme'); } catch {} }
+    if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'film';
+    document.documentElement.dataset.theme = t; })();
+</script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="cal-mark" viewBox="4 8 40 32">
+    <path d="M4 38 H44" stroke="currentColor" stroke-width="2.4"/>
+    <path d="M5.2 38 V10 M24 38 V10 M42.8 38 V10 M11.5 38 V27 M17.75 38 V27 M36.5 38 V27" stroke="currentColor" stroke-width="2"/>
+    <path d="M30 38 V8" stroke="var(--live, #dcb662)" stroke-width="3"/>
+  </symbol>
+  <symbol id="i-gh" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></symbol>
+</svg>
+
+<div class="top"><div class="wrap">
+  <header class="cal-mast">
+    <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
+    <a class="word ruled" href="index.html">Calibrated</a>
+    <span class="cal-caption lg">examples · finished pages</span>
+    <span class="sp"></span>
+    <nav class="nav" aria-label="Site"><a class="cal-btn" href="index.html">catalog</a><a class="cal-btn" href="examples.html" aria-current="page">examples</a><a class="cal-btn" href="reference.html">reference</a></nav>
+    <a class="cal-btn primary" href="index.html#get" style="text-decoration:none">install</a>
+    <a class="gh" href="https://github.com/emdmed/calibrated" aria-label="Calibrated on GitHub"><svg aria-hidden="true"><use href="#i-gh"/></svg><span>github</span></a>
+    <button class="cal-btn" type="button" id="theme" aria-label="Switch to dark theme"><svg class="i-sun" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="3.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 1.5v2M9 14.5v2M1.5 9h2M14.5 9h2M3.7 3.7l1.4 1.4M12.9 12.9l1.4 1.4M3.7 14.3l1.4-1.4M12.9 5.1l1.4-1.4" stroke="currentColor" stroke-width="1.5"/></svg><svg class="i-moon" viewBox="0 0 18 18" aria-hidden="true"><path d="M14.8 11.2A6.3 6.3 0 0 1 6.8 3.2a6.3 6.3 0 1 0 8 8z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+  </header>
+</div></div>
+
+<main class="wrap">
+  <section class="cal-intro">
+    <div class="lead">
+      <h1>Five finished pages, start to end</h1>
+      <p>The catalog shows one drawing per page type. These are whole pages: the kind of report, review board, explainer, spec sheet and app screen a team would share. Each starts with the request that made it and the numbers pasted with it, and lists the skill and parts it is built from.</p>
+      <p class="mut">All figures and instruments are live. Buttons work. Every number is example data.</p>
+    </div>
+    <table class="cal-table toc">
+      <thead><tr><th>no</th><th>page</th><th>type</th></tr></thead>
+      <tbody>
+        <tr><td>01</td><td><a href="#ops">Platform · weekly ops report</a></td><td>status report</td></tr>
+        <tr><td>02</td><td><a href="#release">Release 2.4 · go / no-go</a></td><td>review board</td></tr>
+        <tr><td>03</td><td><a href="#upload">How a photo upload works</a></td><td>explainer</td></tr>
+        <tr><td>04</td><td><a href="#api">Orders API · v3</a></td><td>spec sheet</td></tr>
+        <tr><td>05</td><td><a href="#app">Workspace settings, in your brand</a></td><td>app screen</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ════ 1 · status report ════ -->
+  <section class="cal-sec" id="ops">
+    <div class="cal-sec-h"><b>1 · Weekly ops report</b><span>status report · instruments, budget, lanes, roll-up</span><span>example 1/5</span></div>
+    <div class="brief">
+      <div>
+        <p class="ask"><span class="cal-legend">ask claude</span><q>Make this week's platform ops report as a Calibrated artifact. Lead with what needs attention.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+        <p class="data"><b>pasted with it</b>error budget 612 of 1000 min on day 19 · CI 41.2k of 50k min · release 2.14 canary: 4 of 6 regions, ap-south rolling · this week's 4 deploys with diffs</p>
+      </div>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>budget</code> · <code>lanes</code></dd><dt>instruments</dt><dd><code>&lt;cal-meter&gt;</code> · <code>&lt;cal-progress&gt;</code> · <code>&lt;cal-durations&gt;</code> · <code>&lt;cal-diff&gt;</code></dd><dt>parts</dt><dd>mast · intro · sections · counts · table · foot</dd></dl>
+    </div>
+    <div class="page cal-theme" data-density="full">
+      <header class="cal-mast">
+        <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
+        <span class="word">Platform</span>
+        <span class="cal-caption lg">ops report · week 44</span>
+        <span class="sp"></span>
+        <span class="lg up fnt">data at fri 31 oct · 17:00</span>
+      </header>
+      <section class="cal-intro">
+        <h1>2.14 is rolling out to <span class="live">ap-south</span>. CI minutes are past their alert.</h1>
+        <div><p>The error budget is fine for now, but at this week's pace it crosses the 80% alert on day 25. CI is at 82% of its allowance with ten days left in the cycle: the e2e suite doubled after the checkout tests landed.</p></div>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>1 · Now</b><span>limits and what is running</span><span>sheet 1/3</span></div>
+        <div class="cal-panel now">
+          <div><div class="cell-h">error budget · 30 days</div><cal-meter value="612" max="1000" warn="800" label="budget used" format="raw" unit=" min" width="320"></cal-meter></div>
+          <div><div class="cell-h">ci minutes · cycle to 10 nov</div><cal-meter value="41200" max="50000" warn="40000" label="ci minutes" width="320"></cal-meter></div>
+          <div><div class="cell-h">release 2.14 · regions</div><cal-progress done="4" total="6" live="5" live-label="5 · ap-south canary" done-label="4 regions · 23 min"></cal-progress></div>
+          <div><div class="cell-h">this week</div><div class="counts"><span class="cal-count" data-n="4" data-noun="deploys"></span><span class="cal-count" data-n="1" data-noun="rolling" data-ink="live"></span><span class="cal-count" data-n="1" data-noun="over limit" data-ink="fault"></span><span class="cal-count" data-n="0" data-noun="rolled back"></span></div></div>
+        </div>
+        <div class="cal-panel now" style="margin-top:var(--gap);grid-template-columns:1fr">
+          <div><div class="cell-h">2.14 pipeline · today</div><cal-durations max="15" unit="m" width="560"><cal-span name="build" value="252"></cal-span><cal-span name="e2e tests" value="400"></cal-span><cal-span name="canary" live data-live="290"></cal-span></cal-durations></div>
+        </div>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>2 · Detail</b><span>where the pace lands · the canary per region</span><span>sheet 2/3</span></div>
+        <div class="figs">
+          <figure class="cal-figure"><svg id="f-ops-budget"></svg><figcaption><b>Budget</b>Minutes used, both alerts, and where this week's pace lands on day 30.</figcaption></figure>
+          <figure class="cal-figure"><svg id="f-ops-lanes"></svg><figcaption><b>Canary</b>Minutes per region on one ruler. ap-south is still going.</figcaption></figure>
+        </div>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>3 · Roll-up</b><span>every deploy this week</span><span>sheet 3/3</span></div>
+        <table class="cal-table">
+          <thead><tr><th>no</th><th>service</th><th>change</th><th>diff</th><th class="num">ci min</th><th>status</th></tr></thead>
+          <tbody>
+            <tr><td>01</td><td>checkout-api</td><td>rate-limit login attempts</td><td><cal-diff added="212" removed="38" density="compact"></cal-diff></td><td class="num">1 840</td><td class="st" data-ink="live">rolling</td></tr>
+            <tr><td>02</td><td>payments</td><td>retry with idempotency keys</td><td><cal-diff added="84" removed="12" density="compact"></cal-diff></td><td class="num">610</td><td class="st" data-ink="ok">live</td></tr>
+            <tr><td>03</td><td>cart</td><td>remove legacy coupons</td><td><cal-diff added="9" removed="1460" density="compact"></cal-diff></td><td class="num">420</td><td class="st" data-ink="ok">live</td></tr>
+            <tr><td>04</td><td>e2e suite</td><td>checkout tests, 3 browsers</td><td><cal-diff added="2310" removed="0" density="compact"></cal-diff></td><td class="num">6 900</td><td class="st" data-ink="fault">over ci budget</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <footer class="cal-foot"><span>platform · ops-044</span><span>source: grafana, github actions · fri 17:00</span></footer>
+    </div>
+  </section>
+
+  <!-- ════ 2 · review board ════ -->
+  <section class="cal-sec" id="release">
+    <div class="cal-sec-h"><b>2 · Release go / no-go</b><span>review board · cards, sign-off, revisions</span><span>example 2/5</span></div>
+    <div class="brief">
+      <div>
+        <p class="ask"><span class="cal-legend">ask claude</span><q>Turn the release 2.4 checklist into a Calibrated go / no-go board. One card per gate, with go / hold, and a sign-off I can paste into Slack.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+        <p class="data"><b>pasted with it</b><code>git log</code> of release/2.4 (5 commits, main 1 ahead) · migration log, 10 steps · the 6 PRs and the services each one touches</p>
+      </div>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>merge</code> · <code>timeline</code> · <code>matrix</code></dd><dt>parts</dt><dd>cards with today / drawn · keep-drop sign-off · revision triangles · sticky tally</dd></dl>
+    </div>
+    <div class="page cal-theme" data-density="full">
+      <header class="cal-mast">
+        <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
+        <span class="word">Release 2.4</span>
+        <span class="cal-caption lg">go / no-go board</span>
+        <span class="sp"></span>
+        <span class="lg up fnt">rev B · thu 30 oct</span>
+      </header>
+      <section class="cal-intro">
+        <h1>Three gates decide whether 2.4 ships on Monday.</h1>
+        <div><p>Each card is one gate, drawn from the logs. Mark it go or hold. When all three are signed, copy the sign-off into #release.</p></div>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>1 · Gates</b><span>today · drawn</span><span>sheet 1/2</span></div>
+        <article class="cal-card">
+          <div class="info">
+            <div class="id"><span class="no">01</span>merge plan<span class="end">rev A</span></div>
+            <h3>Lands as a merge commit</h3>
+            <p class="why">main moved on by one commit, so this can't fast-forward. The three commands run in the order drawn.</p>
+            <dl class="cal-kv"><dt>branch</dt><dd>release/2.4 · 5 commits</dd><dt>files</dt><dd>9 · +212 −38</dd><dt>owner</dt><dd>Priya</dd></dl>
+          </div>
+          <div class="cal-compare">
+            <div><div class="cal-tag">today</div><div class="stage"><div class="cal-note"><div class="cal-gl">git status</div><div class="r"><span class="k">ahead</span><span>5 commits</span></div><div class="r"><span class="k">behind</span><span>1 commit</span></div><pre>git merge --no-ff release/2.4</pre></div></div></div>
+            <div><div class="cal-tag on">drawn</div><div class="stage"><svg id="f-rel-merge"></svg></div></div>
+          </div>
+          <div class="cal-sign" role="group" aria-label="Sign off 01"><button class="cal-btn" data-ink="ok" data-v="go" aria-pressed="false">go</button><button class="cal-btn" data-ink="fault" data-v="hold" aria-pressed="false">hold</button></div>
+        </article>
+        <article class="cal-card">
+          <div class="info">
+            <div class="id"><span class="no">02</span>orders db migration<span class="end">rev B <span class="cal-rev" data-rev="B"></span></span></div>
+            <h3>Ten steps in 21 minutes</h3>
+            <p class="why">The dry run on a copy of production. Step 6, the backfill, is a third of the run: it locks the orders table for 4 minutes, so it runs in the 02:00 window.</p>
+            <dl class="cal-kv"><dt>window</dt><dd>mon 02:00–03:00</dd><dt>lock</dt><dd>orders · 4m 10s</dd><dt>owner</dt><dd>Tomás</dd></dl>
+          </div>
+          <div class="cal-compare">
+            <div><div class="cal-tag">today</div><div class="stage"><div class="cal-note"><div class="cal-gl">migrate · dry run</div><div class="r"><span class="k">steps</span><span>10 / 10 ok</span></div><div class="r"><span class="k">total</span><span>21m 46s</span></div><div class="r"><span class="k">slowest</span><span>6 · backfill 4m 10s</span></div></div></div></div>
+            <div><div class="cal-tag on">drawn</div><div class="stage"><svg id="f-rel-timeline"></svg></div></div>
+          </div>
+          <div class="cal-sign" role="group" aria-label="Sign off 02"><button class="cal-btn" data-ink="ok" data-v="go" aria-pressed="false">go</button><button class="cal-btn" data-ink="fault" data-v="hold" aria-pressed="false">hold</button></div>
+        </article>
+        <article class="cal-card">
+          <div class="info">
+            <div class="id"><span class="no">03</span>blast radius<span class="end">rev A</span></div>
+            <h3>Checkout is touched three times</h3>
+            <p class="why">Six PRs across six services. Three of them change checkout, so its smoke tests run together, after the merge.</p>
+            <dl class="cal-kv"><dt>prs</dt><dd>#471 – #488</dd><dt>test</dt><dd>checkout smoke, all three</dd><dt>owner</dt><dd>Lena</dd></dl>
+          </div>
+          <div class="cal-compare">
+            <div><div class="cal-tag">today</div><div class="stage"><div class="cal-note"><div class="cal-gl">services by pr</div><div class="r"><span class="k">#471</span><span>gateway, auth</span></div><div class="r"><span class="k">#474</span><span>checkout</span></div><div class="r"><span class="k">#479</span><span>checkout, payments</span></div><div class="r"><span class="k">…</span><span>3 more</span></div></div></div></div>
+            <div><div class="cal-tag on">drawn</div><div class="stage"><svg id="f-rel-matrix"></svg></div></div>
+          </div>
+          <div class="cal-sign" role="group" aria-label="Sign off 03"><button class="cal-btn" data-ink="ok" data-v="go" aria-pressed="false">go</button><button class="cal-btn" data-ink="fault" data-v="hold" aria-pressed="false">hold</button></div>
+        </article>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>2 · Revisions</b><span>what changed since the first round</span><span>sheet 2/2</span></div>
+        <table class="cal-revs" style="width:100%">
+          <thead><tr><th>rev</th><th>change</th><th>date</th></tr></thead>
+          <tbody>
+            <tr><td><span class="cal-rev" data-rev="A"></span></td><td>First round: three gates.</td><td class="lg">28 oct</td></tr>
+            <tr><td><span class="cal-rev" data-rev="B"></span></td><td>Gate 02: backfill moved to the 02:00 window after the dry run.</td><td class="lg">30 oct</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <div class="cal-tally sticky" id="rel-tally"><span data-n>0 of 3 signed</span><span class="sp"></span><span class="mut" data-msg role="status"></span><button class="cal-btn" type="button" data-copy-signoff>copy sign-off</button></div>
+      <footer class="cal-foot"><span>release 2.4 · rel-024 · rev B</span><span>source: git, migrate --dry-run, github prs</span></footer>
+    </div>
+  </section>
+
+  <!-- ════ 3 · explainer ════ -->
+  <section class="cal-sec" id="upload">
+    <div class="cal-sec-h"><b>3 · How a photo upload works</b><span>explainer · one worked example, measured</span><span>example 3/5</span></div>
+    <div class="brief">
+      <div>
+        <p class="ask"><span class="cal-legend">ask claude</span><q>Explain what happens after a customer taps upload, for the support team, as a Calibrated explainer. Use one real photo as the example.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+        <p class="data"><b>pasted with it</b>trace of one 12 MB photo through the pipeline · the resizer's job list · the account's storage breakdown</p>
+      </div>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>timeline</code> · <code>fanout</code> · <code>measured</code></dd><dt>parts</dt><dd>cards without compare · key/value facts · tiers</dd></dl>
+    </div>
+    <div class="page cal-theme" data-density="full">
+      <header class="cal-mast">
+        <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
+        <span class="word">Photos</span>
+        <span class="cal-caption lg">how it works · for support</span>
+        <span class="sp"></span>
+        <span class="lg up fnt">drawing set · 3 sheets</span>
+      </header>
+      <section class="cal-intro">
+        <h1>One 12 MB photo, from the upload button to every screen.</h1>
+        <div><p>A customer on a phone uploads one photo. It takes 15 seconds before it shows in their library, and most of that is the resizer making six copies. Here is where the time goes, who does the work and where the photo ends up.</p></div>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>1 · The trip</b><span>how long each step takes</span><span>sheet 1/3</span></div>
+        <article class="cal-card">
+          <div class="info">
+            <div class="id"><span class="no">01</span>upload pipeline</div>
+            <h3>Six steps, 15 seconds</h3>
+            <p class="why">If a customer says “it's stuck”, it is almost always step 3. Anything past 30 seconds is worth a ticket.</p>
+            <dl class="cal-kv"><dt>input</dt><dd>IMG_4471.heic · 12 MB</dd><dt>output</dt><dd>6 sizes · 14 MB</dd><dt>slowest</dt><dd>resize · 6 s</dd></dl>
+          </div>
+          <div class="stage"><svg id="f-up-timeline"></svg></div>
+        </article>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>2 · The work</b><span>one job per size, in parallel</span><span>sheet 2/3</span></div>
+        <article class="cal-card">
+          <div class="info">
+            <div class="id"><span class="no">02</span>resizer</div>
+            <h3>Six copies at once</h3>
+            <p class="why">The small sizes finish first, so the library shows a thumbnail before the full-size copy is ready.</p>
+            <dl class="cal-kv"><dt>workers</dt><dd>6 per photo</dd><dt>shows first</dt><dd>thumbnail · 0.4 s</dd><dt>last</dt><dd>original, re-encoded</dd></dl>
+          </div>
+          <div class="stage"><svg id="f-up-fan"></svg></div>
+        </article>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>3 · Where it lands</b><span>the customer's storage, and this photo in it</span><span>sheet 3/3</span></div>
+        <article class="cal-card">
+          <div class="info">
+            <div class="id"><span class="no">03</span>storage</div>
+            <h3>26 MB of a 100 GB plan</h3>
+            <p class="why">The photo and its copies are a sliver of the plan. Copies count toward storage, which is the most common billing question.</p>
+            <dl class="cal-kv"><dt>plan</dt><dd>100 GB</dd><dt>used</dt><dd>4.4 GB</dd><dt>this photo</dt><dd>12 MB + 14 MB copies</dd></dl>
+          </div>
+          <div class="stage"><svg id="f-up-measured"></svg></div>
+        </article>
+        <div class="cal-tiers" style="margin-top:var(--gap)">
+          <div><div class="tt">Tell the customer</div><p>Keep the app open until the thumbnail shows. After that the upload is safe even if they close it.</p></div>
+          <div><div class="tt">Escalate</div><p>An upload past 30 seconds, or a photo that shows only as a thumbnail an hour later: send the photo id to #photos-oncall.</p></div>
+        </div>
+      </section>
+      <footer class="cal-foot"><span>photos · exp-007</span><span>source: trace 9f2c · 31 oct</span></footer>
+    </div>
+  </section>
+
+  <!-- ════ 4 · spec sheet ════ -->
+  <section class="cal-sec" id="api">
+    <div class="cal-sec-h"><b>4 · Orders API · v3</b><span>spec sheet · drawing frame, title block, stamp</span><span>example 4/5</span></div>
+    <div class="brief">
+      <div>
+        <p class="ask"><span class="cal-legend">ask claude</span><q>Write the spec sheet for Orders API v3 in the Calibrated style, as an engineering drawing with a title block. Partners read this.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+        <p class="data"><b>pasted with it</b>the OpenAPI file · network diagram notes · rate limits and timeouts · key rotation runbook · change log</p>
+      </div>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>section</code> · <code>loop</code></dd><dt>instruments</dt><dd><code>&lt;cal-ruler&gt;</code> · <code>&lt;cal-meter&gt;</code></dd><dt>parts</dt><dd>sheet with zones · title block · stamp · revision table · parameters table</dd></dl>
+    </div>
+    <div class="page cal-theme" data-density="full">
+      <div class="cal-sheet" data-zones="8x6">
+        <header class="cal-mast">
+          <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
+          <span class="word">Orders API</span>
+          <span class="cal-caption lg">spec sheet · v3</span>
+          <span class="sp"></span>
+          <span class="cal-stamp">approved for use</span>
+        </header>
+        <section class="cal-intro">
+          <h1>Create, read and refund orders over HTTPS.</h1>
+          <div><p>v3 adds refunds and drops the XML responses. Everything a partner can reach goes through the gateway; card data never leaves the vault.</p></div>
+        </section>
+
+        <section class="cal-sec">
+          <div class="cal-sec-h"><b>1 · Boundary</b><span>what a partner can reach · hatched means closed</span><span>sheet 1/4</span></div>
+          <figure class="cal-figure"><svg id="f-api-section"></svg><figcaption><b>Section</b>Inside the API boundary, open and closed.</figcaption></figure>
+        </section>
+
+        <section class="cal-sec">
+          <div class="cal-sec-h"><b>2 · Limits</b><span>per partner key</span><span>sheet 2/4</span></div>
+          <div class="cal-panel limits">
+            <div><div class="cell-h">request timeout</div><cal-ruler min="0" max="30" step="1" every="5" unit="s" value="10" width="300" up></cal-ruler><p>Requests are cut at 10 s. Refunds can take up to 8 s.</p></div>
+            <div><div class="cell-h">payload</div><cal-ruler min="0" max="10" step="0.5" every="4" unit=" MB" value="2" width="300" up></cal-ruler><p>2 MB per request. Batch creates take up to 100 orders.</p></div>
+            <div><div class="cell-h">rate · acme today</div><cal-meter value="412" max="600" warn="480" label="req/min" format="raw" width="300"></cal-meter><p>600 per minute per key. Past 480 the response carries a warning header.</p></div>
+          </div>
+        </section>
+
+        <section class="cal-sec">
+          <div class="cal-sec-h"><b>3 · Key rotation</b><span>every 90 days · the step in progress is lit</span><span>sheet 3/4</span></div>
+          <div class="row2">
+            <figure class="cal-figure"><svg id="f-api-loop"></svg><figcaption><b>Cycle</b>Old keys work for 14 days after a new one is issued.</figcaption></figure>
+            <div class="cal-panel" style="padding:16px 18px">
+              <div class="cal-gl">rotate a key</div>
+              <pre class="cal-pre" style="margin-top:10px">orders keys create --partner acme
+orders keys deploy --partner acme --to prod
+orders keys revoke --partner acme --older-than 14d
+orders audit --partner acme --since 90d</pre>
+            </div>
+          </div>
+        </section>
+
+        <section class="cal-sec">
+          <div class="cal-sec-h"><b>4 · Endpoints</b><span>parameters and status</span><span>sheet 4/4</span></div>
+          <table class="cal-table">
+            <thead><tr><th>no</th><th>method</th><th>path</th><th class="num">limit / min</th><th class="num">timeout</th><th>status</th></tr></thead>
+            <tbody>
+              <tr><td>01</td><td>POST</td><td><code>/v3/orders</code></td><td class="num">600</td><td class="num">10 s</td><td class="st" data-ink="ok">stable</td></tr>
+              <tr><td>02</td><td>GET</td><td><code>/v3/orders/{id}</code></td><td class="num">1 200</td><td class="num">5 s</td><td class="st" data-ink="ok">stable</td></tr>
+              <tr><td>03</td><td>POST</td><td><code>/v3/orders/{id}/refunds</code> <span class="cal-rev" data-rev="C"></span></td><td class="num">120</td><td class="num">10 s</td><td class="st" data-ink="live">beta</td></tr>
+              <tr><td>04</td><td>GET</td><td><code>/v2/orders.xml</code></td><td class="num">60</td><td class="num">5 s</td><td class="st" data-ink="fault">removed 1 jan</td></tr>
+            </tbody>
+          </table>
+          <div class="row2" style="margin-top:var(--gap)">
+            <dl class="cal-titleblock" style="--tb-cols:4">
+              <div class="name"><dt>title</dt><dd>Orders API · v3</dd></div>
+              <div><dt>doc no.</dt><dd>API-031</dd></div><div><dt>sheet</dt><dd>1 / 1</dd></div>
+              <div><dt>rev</dt><dd>C <span class="cal-rev" data-rev="C"></span></dd></div><div><dt>date</dt><dd>2026-10-29</dd></div>
+              <div class="wide"><dt>owner</dt><dd>orders team</dd></div><div class="wide"><dt>approved</dt><dd>M. Okafor</dd></div>
+            </dl>
+            <table class="cal-revs">
+              <thead><tr><th>rev</th><th>change</th><th>date</th></tr></thead>
+              <tbody>
+                <tr><td><span class="cal-rev" data-rev="A"></span></td><td>First release of v3.</td><td class="lg">2026-08-04</td></tr>
+                <tr><td><span class="cal-rev" data-rev="B"></span></td><td>Payload limit raised to 2 MB.</td><td class="lg">2026-09-15</td></tr>
+                <tr><td><span class="cal-rev" data-rev="C"></span></td><td>Refunds endpoint, in beta.</td><td class="lg">2026-10-29</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <footer class="cal-foot"><span>orders api · api-031 · rev C</span><span>partner copy · public</span></footer>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ 5 · app screen in a brand finish ════ -->
+  <section class="cal-sec" id="app">
+    <div class="cal-sec-h"><b>5 · Workspace settings</b><span>app screen · your colours · the form works</span><span>example 5/5</span></div>
+    <div class="brief">
+      <div>
+        <p class="ask"><span class="cal-legend">ask claude</span><q>Build the usage and limits screen for our app with the Calibrated components, in our brand: navy page, white ink, cyan lamp.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+        <p class="data"><b>pasted with it</b>brand colours · the current settings page · the usage API response</p>
+      </div>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-tokens</code> · <code>calibrated-components</code></dd><dt>instruments</dt><dd><code>&lt;cal-meter&gt;</code> · <code>&lt;cal-position&gt;</code> · <code>&lt;cal-durations&gt;</code></dd><dt>parts</dt><dd>tabs with counts · rows · form fields with an error · checkbox · table · buttons</dd><dt>theme</dt><dd>three seed colours: <code>--bg</code> <code>--fg</code> <code>--live</code></dd></dl>
+    </div>
+    <div class="finish-row" role="group" aria-label="Brand finish" id="app-fin"></div>
+    <div class="page cal-theme" id="app-page" data-density="full">
+      <header class="cal-mast">
+        <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
+        <span class="word">Northwind</span>
+        <span class="cal-caption lg">workspace · acme</span>
+        <span class="sp"></span>
+        <span class="cal-count" data-n="1" data-noun="over limit" data-ink="fault"></span>
+      </header>
+      <div class="cal-tabs" role="tablist" aria-label="Workspace" style="margin-top:16px">
+        <button role="tab" aria-selected="false">overview</button>
+        <button role="tab" aria-selected="true">usage<span class="cal-cnt">03</span></button>
+        <button role="tab" aria-selected="false">members<span class="cal-cnt">12</span></button>
+        <button role="tab" aria-selected="false">api keys<span class="cal-cnt">02</span></button>
+        <button role="tab" aria-selected="false">billing</button>
+      </div>
+      <div class="app">
+        <aside class="side">
+          <div class="cal-gl">projects</div>
+          <div class="cal-rows" role="listbox" aria-label="Projects">
+            <div role="option" aria-selected="false">Web shop<div class="meta lg">1.9M events · 4 members</div></div>
+            <div role="option" aria-selected="true">Mobile app<div class="meta lg">2.3M events · 6 members</div></div>
+            <div role="option" aria-selected="false">Data warehouse<div class="meta lg">0.4M events · 2 members</div></div>
+            <div role="option" aria-selected="false">Staging<div class="meta lg">22k events · 12 members</div></div>
+          </div>
+        </aside>
+        <div class="main">
+          <div class="cal-panel">
+            <div class="panel-h"><span class="cal-legend" style="color:var(--fg)">mobile app · this month</span><span class="sp"></span><cal-position index="3" count="4" label="projects"></cal-position></div>
+            <div class="now" style="padding:0">
+              <div><div class="cell-h">events</div><cal-meter value="2300000" max="3000000" warn="2400000" label="events" width="300"></cal-meter></div>
+              <div><div class="cell-h">seats</div><cal-meter value="12" max="12" warn="9" label="seats" format="raw" width="300"></cal-meter></div>
+              <div><div class="cell-h">storage</div><cal-meter value="38" max="100" warn="80" label="storage" format="raw" unit=" GB" width="300"></cal-meter></div>
+            </div>
+          </div>
+          <div class="cal-panel">
+            <div class="panel-h"><span class="cal-legend" style="color:var(--fg)">scheduled exports · last run</span><span class="sp"></span><span class="cal-count" data-n="1" data-noun="running" data-ink="live"></span></div>
+            <cal-durations max="10" unit="m" width="560"><cal-span name="daily csv" value="96"></cal-span><cal-span name="bigquery" value="372"></cal-span><cal-span name="s3 archive" live data-live="214"></cal-span></cal-durations>
+          </div>
+          <div class="cal-panel">
+            <div class="panel-h"><span class="cal-legend" style="color:var(--fg)">limits</span></div>
+            <form class="form" id="limits" novalidate>
+              <div class="cal-field"><label for="cap">monthly event cap</label><input class="cal-input" id="cap" value="3 000 000" inputmode="numeric"><span class="hint">Events past the cap are dropped, not billed.</span></div>
+              <div class="cal-field"><label for="alert">alert email</label><input class="cal-input" id="alert" value="ops@acme" aria-describedby="alert-e" aria-invalid="true"><span class="err" id="alert-e">Enter a full address, like ops@acme.com.</span></div>
+              <div class="cal-field"><label for="at">alert at</label><input class="cal-input" id="at" value="80 %"></div>
+              <label class="cal-check" style="margin-top:18px"><input type="checkbox" checked> <span>Pause exports at the cap</span></label>
+            </form>
+            <div class="btns"><span class="mut lg" id="save-msg" role="status"></span><button class="cal-btn quiet" type="button" id="reset">cancel</button><button class="cal-btn primary" type="submit" form="limits">save</button></div>
+          </div>
+          <div class="cal-panel">
+            <div class="panel-h"><span class="cal-legend" style="color:var(--fg)">api keys</span><span class="sp"></span><button class="cal-btn" type="button">new key</button></div>
+            <table class="cal-table">
+              <thead><tr><th>no</th><th>name</th><th>key</th><th>last used</th><th>status</th></tr></thead>
+              <tbody>
+                <tr><td>01</td><td>ios release</td><td><code>nw_live_…8f2c</code></td><td class="lg">2 min ago</td><td class="st" data-ink="ok">active</td></tr>
+                <tr><td>02</td><td>android release</td><td><code>nw_live_…a71e</code></td><td class="lg">just now</td><td class="st" data-ink="live">sending</td></tr>
+                <tr><td>03</td><td>old sdk</td><td><code>nw_live_…03b9</code></td><td class="lg">41 days ago</td><td class="st">revoked</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <footer class="cal-foot"><span>northwind · settings</span><span>seats are full · add one in billing</span></footer>
+    </div>
+  </section>
+
+  <section class="cal-sec" id="next">
+    <div class="cal-sec-h"><b>Make your own</b><span>install once, then ask in plain words</span><span>emdmed/calibrated</span></div>
+    <div class="cal-tiers" style="border:0">
+      <div style="padding:0;background:none"><div class="tt">1 · Install</div><p>Paste both lines into Claude Code.</p><pre class="cal-pre" id="cmd" style="white-space:pre;overflow-x:auto;margin:8px 0 10px">/plugin marketplace add emdmed/calibrated
+/plugin install calibrated@calibrated</pre><button class="cal-btn primary" type="button" data-copy-from="#cmd">copy</button></div>
+      <div style="padding:0;background:none"><div class="tt">2 · Ask</div><p>Copy any request above, paste your own numbers after it, and say “in the Calibrated style”.</p></div>
+      <div style="padding:0;background:none"><div class="tt">3 · Look closer</div><p>The catalog flips every page type between plain and calibrated. The reference has every part and its code.</p><p style="margin-top:10px"><a class="cal-btn" href="index.html" style="text-decoration:none">catalog</a> <a class="cal-btn" href="reference.html" style="text-decoration:none">reference</a></p></div>
+    </div>
+  </section>
+
+  <footer class="cal-foot"><span>calibrated · examples · every number on this page is example data</span><span><a href="https://github.com/emdmed/calibrated">github</a> · made by <a href="https://mylatestwork.dev">emdmed</a></span></footer>
+</main>
+<script src="../skills/calibrated-figures/assets/calibrated-figures.js"></script>
+<script src="../skills/calibrated-figures/assets/calibrated-recipes.js"></script>
+<script src="../skills/calibrated-components/assets/calibrated-components.js"></script>
+<script>
+(() => {
+  const { recipes: R, play } = Calibrated;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const html = document.documentElement;
+
+  /* ── figures: [recipe, data] per svg id (example data) */
+  const D = {
+    'ops-budget': ['budget', { n: 1, title: 'error budget · checkout · 30 days', max: 1000, step: 50, every: 4, used: 612, at: 'day 19', pace: 966,
+      fmt: (v) => Math.round(v) + 'm', alerts: [{ v: 800, label: 'alert 80%' }, { v: 950, label: '95%' }], paceLabel: ['at this pace by day 30', '≈ 966m · 80% on day 25'] }],
+    'ops-lanes': ['lanes', { n: 2, title: 'release 2.14 · canary · minutes', max: 10, unit: 'm', step: 1, every: 5, w: 520, labelW: 72, lanes: [
+      { name: 'us-east', end: 4.2, label: '4m 12s', box: ['p99 212 ms', '0.02% errors'] },
+      { name: 'eu-west', end: 6.67, label: '6m 40s', box: ['p99 230 ms', '0.03% errors'] },
+      { name: 'ap-south', end: 8.08, label: '8m 05s', live: true, box: ['rolling', '40% of traffic'] },
+    ] }],
+    'rel-merge': ['merge', { n: 1, title: 'merge · release/2.4 → main', base: 'main', branch: 'release/2.4', commits: 5, baseAhead: 1,
+      files: ['9 files', '+212 −38'], steps: ['git switch main', 'git merge --no-ff release/2.4', 'git tag v2.4.0'] }],
+    'rel-timeline': ['timeline', { n: 2, title: 'migration · orders db · dry run', steps: [61, 95, 120, 130, 88, 250, 140, 160, 110, 152], slowLabel: 'slowest · backfill' }],
+    'rel-matrix': ['matrix', { n: 3, title: 'release 2.4 · services by pr', cols: ['gateway', 'auth', 'checkout', 'payments', 'search', 'email'],
+      rows: ['#471', '#474', '#479', '#481', '#486', '#488'], hits: [[0, 1], [2], [2, 3], [4], [2, 5], [1]],
+      callout: { col: 2, l1: '3 prs touch checkout', l2: 'smoke-test #474, #479, #486 together' } }],
+    'up-timeline': ['timeline', { n: 1, title: 'one photo · IMG_4471 · 12 MB', steps: [4, 1, 6, 2, 1, 1],
+      names: ['upload', 'scan', 'resize', 'encode', 'store', 'notify'], noun: 'step', slowLabel: 'slowest · resize', totalLabel: 'in the library' }],
+    'up-fan': ['fanout', { n: 2, title: 'resizer · IMG_4471 · 6 sizes', root: ['resizer', '1 photo · 6 jobs'], folded: '+3 smaller sizes done', children: [
+      { task: 'thumbnail · 320 px', meta: 'done · 41 KB', time: '0.4 s' },
+      { task: 'desktop · 2560 px', meta: 'worker 4 · 2.1 MB', time: '4.2 s', live: true },
+      { task: 'original · re-encoded', meta: 'worker 6 · 9.8 MB', time: '6 s', live: true },
+    ] }],
+    'up-measured': ['measured', { n: 3, title: 'storage · acme · 100 GB plan', max: 1e11, zoomMax: 5e9, factor: 20,
+      fmt: (v) => (v >= 1e10 ? Math.round(v / 1e9) + ' GB' : v >= 1e9 ? Math.round(v / 1e8) / 10 + ' GB' : Math.round(v / 1e6) + ' MB'),
+      parts: [{ label: 'photos', value: 3.1e9, ink: 'fg' }, { label: 'copies', value: 1.25e9, ink: 'mu' }, { label: 'this photo', value: 2.6e7, ink: 'lv' }],
+      plate: ['PLAN USED', '4.4 of 100 GB'] }],
+    'api-section': ['section', { n: 1, title: 'orders api · v3 · boundary', boundary: { label: 'partners reach the gateway only' },
+      regions: [
+        { x: 20, y: 38, w: 360, h: 190, kind: 'hatch', label: 'private network' },
+        { x: 40, y: 70, w: 230, h: 146, kind: 'clear', label: 'orders service' },
+        { x: 156, y: 76, kind: 'island', label: 'card vault' }, { x: 234, y: 76, kind: 'island', label: 'pii' },
+        { x: 56, y: 132, w: 196, h: 68, kind: 'strong', label: 'orders db', sub: 'read-write · v3 only' },
+        { x: 290, y: 132, w: 76, h: 52, kind: 'dotted', label: 'cache', sub: '60 s' },
+      ],
+      callouts: [
+        { at: [350, 56], l1: 'closed', l2: 'private network' },
+        { at: [262, 110], l1: 'open', l2: 'orders, refunds' },
+        { l1: 'locked', l2: 'card vault, pii' },
+        { l1: 'outside', l2: 'webhooks · retried 24 h', live: true },
+      ] }],
+    'api-loop': ['loop', { n: 2, w: 460, title: 'api keys · rotation', center: 'every 90 days', stations: [
+      { name: 'issue', cmd: 'keys create', state: 'done' },
+      { name: 'deploy', cmd: 'keys deploy', state: 'live' },
+      { name: 'revoke', cmd: 'keys revoke' },
+      { name: 'audit', cmd: 'audit --since 90d' },
+    ] }],
+  };
+  const drawAll = () => { Object.entries(D).forEach(([id, [r, d]]) => play('#f-' + id, R[r], d)); if (Calibrated.counts) Calibrated.counts(); };
+  const t0 = Date.now();
+  $$('cal-span[data-live]').forEach((s) => s.setAttribute('start', t0 - (+s.dataset.live) * 1000));
+  Calibrated.ready(drawAll);
+
+  /* ── theme */
+  const themeBtn = $('#theme');
+  const setTheme = (t) => {
+    html.dataset.theme = t;
+    themeBtn.setAttribute('aria-label', t === 'night' ? 'Switch to light theme' : 'Switch to dark theme');
+    try { localStorage.setItem('cal-cat-theme', t); } catch {}
+    if (Calibrated.redraw) Calibrated.redraw();
+  };
+  setTheme(html.dataset.theme);
+  themeBtn.addEventListener('click', () => setTheme(html.dataset.theme === 'night' ? 'film' : 'night'));
+
+  /* ── example 2 · go / hold sign-off and the copied summary */
+  const rel = $('#release'), cards = $$('.cal-card', rel), tallyEl = $('#rel-tally');
+  const tally = () => { $('[data-n]', tallyEl).textContent = `${cards.filter((c) => c.dataset.v).length} of ${cards.length} signed`; };
+  $$('.cal-sign .cal-btn', rel).forEach((b) => b.addEventListener('click', () => {
+    const card = b.closest('.cal-card'), on = b.getAttribute('aria-pressed') !== 'true';
+    $$('.cal-sign .cal-btn', card).forEach((x) => x.setAttribute('aria-pressed', 'false'));
+    b.setAttribute('aria-pressed', String(on));
+    if (on) { card.dataset.v = b.dataset.v; card.dataset.state = b.dataset.v === 'hold' ? 'dropped' : 'ok'; }
+    else { delete card.dataset.v; delete card.dataset.state; }
+    tally();
+  }));
+  $('[data-copy-signoff]', tallyEl).addEventListener('click', async () => {
+    const lines = cards.map((c) => `${$('.no', c).textContent} ${$('h3', c).textContent}: ${c.dataset.v || 'not signed'}`);
+    const holds = cards.filter((c) => c.dataset.v === 'hold').length, open = cards.filter((c) => !c.dataset.v).length;
+    const verdict = holds ? `NO-GO · ${holds} on hold` : open ? `pending · ${open} not signed` : 'GO for Monday';
+    const text = `Release 2.4 · ${verdict}\n` + lines.join('\n');
+    const msg = $('[data-msg]', tallyEl);
+    try { await navigator.clipboard.writeText(text); msg.textContent = 'copied · ' + verdict.toLowerCase(); } catch { msg.textContent = 'copy failed'; }
+  });
+
+  /* ── example 5 · brand finishes, project rows, the limits form */
+  const FIN = [
+    ['harbour', 'Northwind', { '--bg': '#10223a', '--fg': '#e9eff6', '--muted': '#9db0c6', '--title': '#ffffff', '--live': '#45d3ea', '--ok': '#6fd39a', '--fault': '#ff8070', '--shade': '#000', '--desk-depth': '24%', 'color-scheme': 'dark' }],
+    ['forest', 'Forest', { '--bg': '#f2f5ef', '--fg': '#1d3326', '--muted': '#55685a', '--title': '#12241a', '--live': '#5a7414', '--ok': '#2b7a46', '--fault': '#b8432f', '--shade': '#4d5a4f', '--desk-depth': '9%', 'color-scheme': 'light' }],
+    ['plum', 'Plum', { '--bg': '#1d1522', '--fg': '#f0e7f3', '--muted': '#b3a2ba', '--title': '#ffffff', '--live': '#f5a3d6', '--ok': '#86d4a2', '--fault': '#ff7f6e', '--shade': '#000', '--desk-depth': '24%', 'color-scheme': 'dark' }],
+    ['house', 'Calibrated', null],
+  ];
+  const appPage = $('#app-page'), finRow = $('#app-fin');
+  const chip = (v) => v ? `<span class="chip" aria-hidden="true"><i style="background:${v['--bg']}"></i><i style="background:${v['--fg']}"></i><i style="background:${v['--live']}"></i></span>` : '';
+  finRow.innerHTML = '<span class="cal-legend">brand</span>' + FIN.map(([id, name, v]) => `<button class="cal-btn" type="button" data-fin="${id}" aria-pressed="false">${chip(v)}${name}</button>`).join('');
+  const applyFin = (id) => {
+    const f = FIN.find((x) => x[0] === id);
+    ['--bg', '--fg', '--muted', '--title', '--live', '--ok', '--fault', '--shade', '--desk-depth', 'color-scheme'].forEach((k) => appPage.style.removeProperty(k));
+    if (f[2]) Object.entries(f[2]).forEach(([k, v]) => appPage.style.setProperty(k, v));
+    $$('[data-fin]', finRow).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.fin === id)));
+    if (Calibrated.redraw) Calibrated.redraw(appPage);
+  };
+  finRow.addEventListener('click', (e) => { const b = e.target.closest('[data-fin]'); if (b) applyFin(b.dataset.fin); });
+  applyFin('harbour');
+
+  const rows = $$('#app-page .cal-rows > [role="option"]'), pos = $('#app-page cal-position'), head = $('#app-page .panel-h .cal-legend');
+  rows.forEach((r, i) => r.addEventListener('click', () => {
+    rows.forEach((x) => x.setAttribute('aria-selected', String(x === r)));
+    pos.setAttribute('index', i + 1);
+    head.textContent = r.firstChild.textContent.trim().toLowerCase() + ' · this month';
+  }));
+  $$('#app-page [role="tab"]').forEach((t, _, all) => t.addEventListener('click', () => all.forEach((x) => x.setAttribute('aria-selected', String(x === t)))));
+
+  const form = $('#limits'), alertIn = $('#alert'), err = $('#alert-e'), saveMsg = $('#save-msg');
+  const check = () => { const ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(alertIn.value.trim()); alertIn.setAttribute('aria-invalid', String(!ok)); err.hidden = ok; return ok; };
+  alertIn.addEventListener('input', () => { check(); saveMsg.textContent = ''; });
+  form.addEventListener('submit', (e) => { e.preventDefault(); if (check()) saveMsg.textContent = 'saved'; else { saveMsg.textContent = ''; alertIn.focus(); } });
+  $('#reset').addEventListener('click', () => { form.reset(); check(); saveMsg.textContent = ''; });
+
+  /* ── copy */
+  const copy = async (btn, text) => {
+    const was = btn.textContent;
+    try { await navigator.clipboard.writeText(text); btn.textContent = 'copied'; } catch { btn.textContent = 'select it'; }
+    setTimeout(() => { btn.textContent = was; }, 1600);
+  };
+  $$('[data-copy]').forEach((b) => b.addEventListener('click', () => copy(b, b.parentElement.querySelector('q').textContent)));
+  $$('[data-copy-from]').forEach((b) => b.addEventListener('click', () => copy(b, $(b.dataset.copyFrom).textContent)));
+})();
+</script>
+</body>
+</html>
