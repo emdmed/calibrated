@@ -1,6 +1,6 @@
 {
   "name": "calibrated",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "Calibrated: a technical-drawing design language for UIs. Pure CSS tokens, an SVG figure kit (rulers, leaders, boxed values, dimension lines, hatching, nodes) and vanilla JS components, plus a standalone skill for designing Claude artifacts in the style.",
   "author": { "name": "Enrique Darderes", "email": "enrique.darderes@gmail.com" },
   "license": "MIT",
