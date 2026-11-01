@@ -81,6 +81,7 @@ Place boxes in a column at the right edge, or under the drawing. Leaders should 
 
 ## Mounting
 - `Calibrated.draw(svgOrSelector, markup, label)`: fills the svg and sets `data-cal`, `viewBox` (from width/height when missing), `role="img"` and `aria-label`.
+  Redrawing swaps only the top-level elements whose markup changed (`Calibrated.patch(svg, markup)`), so a figure redrawn every frame keeps its still parts. Don't edit a drawn svg's children by hand; draw again instead.
 - `Calibrated.svg(w, h, markup, label)` returns a complete `<svg>` string.
 - `Calibrated.ready(fn)`: runs after fonts load, and again whenever a font loads later.
 - `Calibrated.density(el)` returns `'full'` or `'compact'` from the nearest `[data-density]`.

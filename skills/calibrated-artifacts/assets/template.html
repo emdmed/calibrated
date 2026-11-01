@@ -1313,21 +1313,97 @@ cal-span { display: none; }
 
   /* ── mounting */
 
+  /* attr(el, name, value) · sets an attribute only when it changes, so a
+     figure redrawn every frame doesn't invalidate its own style */
+  function attr(el, name, value) {
+    value = String(value);
+    if (el.getAttribute(name) !== value) el.setAttribute(name, value);
+  }
+
+  /* parts(markup) · the markup split into its top-level elements (and any
+     text between them), or null when it can't be split cleanly */
+  function parts(s) {
+    const out = [], n = s.length;
+    let i = 0, depth = 0, start = 0;
+    while (i < n) {
+      if (s[i] !== '<') {
+        const j = s.indexOf('<', i), e = j < 0 ? n : j;
+        if (!depth) out.push(s.slice(i, e));
+        i = e;
+        continue;
+      }
+      if (s.startsWith('<!--', i)) {
+        const j = s.indexOf('-->', i);
+        if (j < 0) return null;
+        if (!depth) out.push(s.slice(i, j + 3));
+        i = j + 3;
+        continue;
+      }
+      let j = i + 1, q = '';
+      for (; j < n; j++) {
+        const c = s[j];
+        if (q) { if (c === q) q = ''; } else if (c === '"' || c === "'") q = c; else if (c === '>') break;
+      }
+      if (j >= n) return null;
+      if (s[i + 1] === '/') depth--;
+      else {
+        if (!depth) start = i;
+        if (s[j - 1] !== '/') depth++;
+      }
+      if (depth < 0) return null;
+      if (!depth) out.push(s.slice(start, j + 1));
+      i = j + 1;
+    }
+    return depth ? null : out;
+  }
+
+  /* patch(svg, markup) · sets an <svg>'s contents like innerHTML, but keeps
+     the top-level elements whose markup didn't change and parses only the
+     rest. A figure replayed frame by frame then rebuilds just what moved
+     (the line, the nodes), not the ruler and frame around it. */
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  function patch(svg, markup) {
+    const next = parts(markup), prev = svg._calParts, kids = [...svg.childNodes];
+    svg._calParts = next;
+    if (!next || !prev || prev.length !== kids.length) { svg.innerHTML = markup; return svg; }
+    /* unchanged parts are reused by their markup; the rest is parsed in one go */
+    const pool = new Map();
+    prev.forEach((p, i) => { const l = pool.get(p); if (l) l.push(kids[i]); else pool.set(p, [kids[i]]); });
+    const nodes = new Array(next.length), freshAt = [];
+    let fresh = '';
+    next.forEach((p, i) => {
+      const l = pool.get(p);
+      if (l && l.length) nodes[i] = l.shift();
+      else { fresh += p; freshAt.push(i); }
+    });
+    if (freshAt.length) {
+      const scratch = document.createElementNS(SVG_NS, 'svg');
+      scratch.innerHTML = fresh;
+      /* adjacent text parts merge when parsed together: fall back to a full redraw */
+      if (scratch.childNodes.length !== freshAt.length) { svg.innerHTML = markup; return svg; }
+      const made = [...scratch.childNodes];
+      freshAt.forEach((at, k) => { nodes[at] = made[k]; });
+    }
+    pool.forEach((l) => l.forEach((node) => node.remove()));
+    nodes.forEach((node, i) => { if (svg.childNodes[i] !== node) svg.insertBefore(node, svg.childNodes[i] || null); });
+    return svg;
+  }
+
   /* draw(svg, markup, label) · fills an <svg>, marks it as a figure, sets role and label */
   function draw(svg, markup, label) {
     if (typeof svg === 'string') svg = document.querySelector(svg);
     if (!svg) return null;
-    svg.setAttribute('data-cal', '');
+    attr(svg, 'data-cal', '');
     if (!svg.getAttribute('viewBox') && svg.getAttribute('width')) {
       svg.setAttribute('viewBox', `0 0 ${svg.getAttribute('width')} ${svg.getAttribute('height')}`);
     }
     /* never shrink below 90% of natural size: legends stay ≥ 10px; the container scrolls instead */
     const nw = parseFloat(svg.getAttribute('width'));
-    if (nw > 200) svg.style.minWidth = Math.round(nw * 0.9) + 'px';
-    if (label) { svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', label); }
+    const minW = Math.round(nw * 0.9) + 'px';
+    if (nw > 200 && svg.style.minWidth !== minW) svg.style.minWidth = minW;
+    if (label) { attr(svg, 'role', 'img'); attr(svg, 'aria-label', label); }
     else if (!svg.hasAttribute('aria-label')) svg.setAttribute('aria-hidden', 'true');
-    svg.innerHTML = markup;
-    return svg;
+    return patch(svg, markup);
   }
 
   /* svg(w, h, markup, label) · a complete <svg> string */
@@ -1361,7 +1437,7 @@ cal-span { display: none; }
     pad(n, w = 2) { return String(n).padStart(w, '0'); },
   };
 
-  const api = { K, draw, svg, density, ink, textWidth, resetMetrics, ready, esc, id, fmt, FS, CH };
+  const api = { K, draw, patch, attr, svg, density, ink, textWidth, resetMetrics, ready, esc, id, fmt, FS, CH };
   root.Calibrated = Object.assign(root.Calibrated || {}, api);
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -1873,8 +1949,8 @@ cal-span { display: none; }
   function mount(svg, r) {
     if (typeof svg === 'string') svg = document.querySelector(svg);
     if (!svg) return null;
-    svg.setAttribute('width', r.w); svg.setAttribute('height', r.h);
-    svg.setAttribute('viewBox', `0 0 ${r.w} ${r.h}`);
+    C.attr(svg, 'width', r.w); C.attr(svg, 'height', r.h);
+    C.attr(svg, 'viewBox', `0 0 ${r.w} ${r.h}`);
     return C.draw(svg, r.markup, r.label);
   }
   const render = (r) => C.svg(r.w, r.h, r.markup, r.label);
@@ -1907,55 +1983,91 @@ cal-span { display: none; }
     return { ...o, at: to, lap: l, from: at, lapFrom: lap, dir };
   };
 
+  /* the landing blink: two hard offs of 30ms each (two frames at 60Hz;
+     shorter and a blink can fall between frames), run as a Web Animation so
+     dropped frames can't stretch or skip it */
+  const OFF = 30, BLINK = 4 * OFF;
+  const BLINK_FRAMES = [0, 0.5].flatMap((o) => [
+    { opacity: 0.15, offset: o }, { opacity: 0.15, offset: o + 0.25 },
+    { opacity: 1, offset: o + 0.2501 }, { opacity: 1, offset: o + 0.5 },
+  ]);
+  const reduced = () => !!(root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  /* crawl(svg) · dashed live tails (data-crawl) move one dash period every
+     1.2s: alive, never busy. Tails already crawling keep going. */
+  function crawl(svg) {
+    if (!svg.animate || reduced()) return;
+    svg._calCrawl = (svg._calCrawl || []).filter((a) => a.effect && a.effect.target && a.effect.target.isConnected);
+    svg.querySelectorAll('[data-crawl]').forEach((el) => {
+      if (svg._calCrawl.some((a) => a.effect.target === el)) return;
+      const p = (el.getAttribute('stroke-dasharray') || '2 4').split(/[\s,]+/).reduce((a, b) => a + +b, 0);
+      svg._calCrawl.push(el.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: -p }], { duration: p * 200, iterations: Infinity }));
+    });
+  }
+
   /* play(svg, recipe, data) · mount a recipe and replay it: when the figure is
      half in view, a time cursor sweeps the ruler at an even pace (700ms for
      the whole scale) and the recipe redraws each frame. Lines trail the
      cursor by 110ms. A recipe with a duration (ms) sets its own length.
-     Whatever latches (data-land) blinks twice on landing,
-     and dashed live tails (data-crawl) then crawl slowly, for as long as the
-     figure is shown. The clock is a Web Animation on the svg, so playbackRate
-     and DevTools slow it like CSS motion. Reduced motion, { still: true }, a
-     recipe without an extent or no WAAPI: mount the finished figure. */
+     Each frame redraws only the parts that changed (see draw). Whatever
+     latches (data-land) blinks twice on landing, and dashed live tails
+     (data-crawl) then crawl slowly, for as long as the figure is shown. The
+     clock is a Web Animation on the svg, so playbackRate and DevTools slow
+     it like CSS motion. New data for a replay in flight goes through
+     update(), which retargets it instead of cutting it short. Reduced
+     motion, { still: true }, a recipe without an extent or no WAAPI: mount
+     the finished figure. */
   function play(svg, recipe, data, opts = {}) {
     if (typeof svg === 'string') svg = document.querySelector(svg);
     if (!svg) return null;
     if (svg._calStop) svg._calStop();
-    const ext = recipe.extent ? recipe.extent(data) : 0;
-    if (opts.still || !ext || !svg.animate || !root.IntersectionObserver ||
-      (root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches)) return mount(svg, recipe(data));
-    const TRAIL = 110, OFF = 30, BLINK = 4 * OFF, ms = recipe.duration ? recipe.duration(data) : Math.round(700 * Math.min(1, ext / (data.max || ext)));
-    const at = (e) => ext * Math.min(1, Math.max(0, e / ms));
+    const ext0 = recipe.extent ? recipe.extent(data) : 0;
+    if (opts.still || !ext0 || !svg.animate || !root.IntersectionObserver || reduced()) {
+      mount(svg, recipe(data));
+      crawl(svg);
+      return svg;
+    }
+    const TRAIL = 110, ms = recipe.duration ? recipe.duration(data) : Math.round(700 * Math.min(1, ext0 / (data.max || ext0)));
+    /* the replay draws `cur`, which update() may swap for newer data */
+    let cur = data, draw = recipe;
+    const at = (e) => {
+      const ext = draw.extent(cur) || ext0;
+      return ext * Math.min(1, Math.max(0, e / ms));
+    };
     const landed = new Map();
-    let clock = null, io = null, crawl = [];
+    let clock = null, io = null;
     const stop = () => {
       if (io) io.disconnect();
       if (clock) clock.cancel();
-      crawl.forEach((c) => c.cancel());
-      io = clock = null; crawl = []; svg._calStop = null;
+      (svg._calCrawl || []).forEach((a) => a.cancel());
+      io = clock = null; svg._calCrawl = []; svg._calStop = svg._calRetarget = null;
     };
     svg._calStop = stop;
+    svg._calRetarget = (r, d) => {
+      draw = r; cur = d;
+      if (!clock) mount(svg, draw({ ...cur, t: 0, tt: 0 }));   /* still waiting to be seen */
+    };
     const frame = () => {
       if (!clock) return;
       if (!svg.isConnected) return stop();
       const e = clock.currentTime || 0;
-      mount(svg, recipe({ ...data, t: at(e), tt: at(e - TRAIL) }));
+      mount(svg, draw({ ...cur, t: at(e), tt: at(e - TRAIL) }));
       let busy = e < ms + TRAIL;
       svg.querySelectorAll('[data-land]').forEach((g) => {
         const k = g.getAttribute('data-land');
         if (!landed.has(k)) landed.set(k, e);
         const q = e - landed.get(k);
-        if (q < BLINK) { busy = true; if (q % (2 * OFF) < OFF) g.style.opacity = '0.15'; }
+        if (q >= BLINK) return;
+        busy = true;
+        /* a group redrawn mid-blink picks the blink up where it was */
+        if (g._calLanded !== landed) { g._calLanded = landed; g.animate(BLINK_FRAMES, { duration: BLINK }).currentTime = q; }
       });
       if (busy) return requestAnimationFrame(frame);
-      clock.cancel(); clock = null;
-      mount(svg, recipe(data));
-      /* the crawl moves one dash period every 1.2s: alive, never busy */
-      crawl = [...svg.querySelectorAll('[data-crawl]')].map((el) => {
-        const p = (el.getAttribute('stroke-dasharray') || '2 4').split(/[\s,]+/).reduce((a, b) => a + +b, 0);
-        return el.animate([{ strokeDashoffset: 0 }, { strokeDashoffset: -p }], { duration: p * 200, iterations: Infinity });
-      });
+      clock.cancel(); clock = null; svg._calRetarget = null;
+      mount(svg, draw(cur));
+      crawl(svg);
     };
-    mount(svg, recipe({ ...data, t: 0, tt: 0 }));
+    mount(svg, draw({ ...cur, t: 0, tt: 0 }));
     io = new IntersectionObserver((es) => {
       if (!es.some((x) => x.isIntersecting)) return;
       io.disconnect(); io = null;
@@ -1966,7 +2078,21 @@ cal-span { display: none; }
     return svg;
   }
 
-  root.Calibrated = Object.assign(C, { recipes, mount, render, play });
+  /* update(svg, recipe, data) · show new data without replaying. A replay in
+     flight, or one still waiting to be seen, carries on and lands on the new
+     data; otherwise the figure is redrawn still, keeping its crawl. Use it
+     for live values (a running clock) between replays, so a tick never cuts
+     a replay short. */
+  function update(svg, recipe, data) {
+    if (typeof svg === 'string') svg = document.querySelector(svg);
+    if (!svg) return null;
+    if (svg._calRetarget) { svg._calRetarget(recipe, data); return svg; }
+    mount(svg, recipe(data));
+    crawl(svg);
+    return svg;
+  }
+
+  root.Calibrated = Object.assign(C, { recipes, mount, render, play, update });
 })(typeof window !== 'undefined' ? window : globalThis);
 
 /* Calibrated — components (custom elements)
@@ -2033,12 +2159,14 @@ cal-span { display: none; }
     }
     paint({ w, h, markup, label }) {
       const svg = this.surface();
-      svg.setAttribute('width', w); svg.setAttribute('height', h);
-      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
-      svg.setAttribute('role', 'img');
-      svg.setAttribute('aria-label', label);
-      if (w > 200) svg.style.minWidth = Math.round(w * 0.9) + 'px';   /* scroll, don't shrink legends */
-      svg.innerHTML = `<title>${esc(label)}</title>` + markup;
+      C.attr(svg, 'width', w); C.attr(svg, 'height', h);
+      C.attr(svg, 'viewBox', `0 0 ${w} ${h}`);
+      C.attr(svg, 'role', 'img');
+      C.attr(svg, 'aria-label', label);
+      const minW = Math.round(w * 0.9) + 'px';   /* scroll, don't shrink legends */
+      if (w > 200 && svg.style.minWidth !== minW) svg.style.minWidth = minW;
+      /* each frame of a glide swaps only the parts that moved */
+      C.patch(svg, `<title>${esc(label)}</title>` + markup);
     }
     render() { try { this.paint(this.draw(this.density === 'full')); } catch (e) { console.error(this.localName, e); } }
     disconnectedCallback() { this.halt(); }
