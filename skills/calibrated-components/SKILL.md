@@ -12,6 +12,7 @@ UI parts that apply the Calibrated language to every quantity: a count, a positi
 ## Files
 - `assets/calibrated-components.css`: every `cal-*` class. Load it after `calibrated.css`.
 - `assets/calibrated-components.js`: the custom elements, the wiring for the controls that need a hand (textarea status line, detent, range, number, tag input, file drop, dialog openers, menus), plus `Calibrated.redraw()`, `counts()`, `sheets()`, `controls()`, `toast()` and `pager()`. Load it after `calibrated-figures.js`.
+- `references/ux-rules.md`: how to compose a page people can use: order of work, when to draw and when not to, actions, forms, words, colour meaning, and the check before you deliver. **Read it first.**
 - `references/catalog.md`: markup, attributes and variants for every part. Read it before you write markup.
 
 ```html
@@ -21,22 +22,25 @@ UI parts that apply the Calibrated language to every quantity: a count, a positi
 <script src="js/calibrated-components.js" defer></script>
 ```
 
+## Start from the usual pattern
+Lay the screen out the way people expect (a form, a settings page, a table with filters, a report with the summary first), with one boxed `.cal-btn.primary` for the main action. Then swap in the parts below where they explain a quantity faster than text. On app screens, forms and dialogs, put `data-mode="app"` on the screen: it drops sheet numbers and sets section and table heads in sentence case. See `references/ux-rules.md`.
+
 ## Pick the part by the quantity
 
-| the UI shows… | use |
-|---|---|
-| a loose number ("3 regions", "2 running") | `.cal-count` boxed + noun |
-| "46.0k / 1.0M" against a limit | `<cal-meter>` |
-| "3/7", "12/140" while stepping through a set | `<cal-position>` |
-| "11/15 steps", a step list, a pipeline | `<cal-progress>` |
-| "+184 −20" | `<cal-diff>` |
-| several "4m 12s" in a list | `<cal-durations>` with `<cal-span>` |
-| a bare scale or slider readout | `<cal-ruler>` |
-| a feature, finding or change to review | `.cal-card` with `.cal-compare` and `.cal-sign` |
-| a roll-up of items with status | `.cal-table` |
-| what this page is, its number, version, date | the mast, or an optional `.cal-titleblock` |
-| what changed since the last version | `.cal-revs` + `.cal-rev` triangles |
-| a structure, process or comparison | a figure from **calibrated-figures** inside `.cal-figure` |
+| the UI shows… | use | but not when… |
+|---|---|---|
+| a loose number ("3 regions", "2 running") | `.cal-count` boxed + noun | it's a plain fact in a sentence |
+| "46.0k / 1.0M" against a limit | `<cal-meter>` | there's no limit to measure against |
+| "3/7", "12/140" while stepping through a set | `<cal-position>` | the reader needs the items' names: use a list or `.cal-steps` |
+| "11/15 steps", a step list, a pipeline | `<cal-progress>` | each step needs its own label: use `.cal-steps` |
+| "+184 −20" | `<cal-diff>` | |
+| several "4m 12s" in a list | `<cal-durations>` with `<cal-span>` | |
+| a bare scale or slider readout | `<cal-ruler>` | the values have names (plans, tiers): label every mark, or use a table |
+| a feature, finding or change to review | `.cal-card` with `.cal-compare` and `.cal-sign` | |
+| a roll-up of items with status, or values people compare or copy | `.cal-table` | |
+| what this page is, its number, version, date | the mast, or an optional `.cal-titleblock` | it's an app screen: use the mast only |
+| what changed since the last version | `.cal-revs` + `.cal-rev` triangles | it's an app screen |
+| a structure, process or comparison | a figure from **calibrated-figures** inside `.cal-figure` | the figure would hold fewer facts than the sentence |
 
 ## Pick the control by the task
 
@@ -71,8 +75,12 @@ Every instrument moves, with nothing to set up. When it is half in view it sweep
 ## Rules
 - One lamp per view. Use `data-ink="live"` on at most one count or status at a time. The lamp is text, a line, an outline or a star (`.star`), never a fill.
 - Status words use `data-ink="live|ok|fault"` (on `.cal-count`, `.cal-table .st`, and `ok|fault` on pressed `.cal-btn`). Never colour plain text for decoration.
-- Counts that change are zero-padded (`data-pad="2"`), so the layout doesn't jump.
-- Buttons are bracketed words: `[keep]`. Pressed turns ink (or ok/fault). Use `.primary` for the main action and `.quiet` for a secondary, underlined one.
+- Counts that change live are zero-padded (`data-pad="2"`), so the layout doesn't jump. Other counts (tabs, totals) are not.
+- Buttons come in tiers: `.primary` is filled with ink, for the one main action in a view, with a verb label ("Send for approval"). The default `.cal-btn` is a hairline box for every other action. `.inline` is a bracketed word, `[copy]`, for small actions in text. `.quiet` is underlined, for cancel, back and navigation. Pressed toggles turn ink (or ok/fault).
+- Hierarchy reads in four steps: the headline, section heads (16px medium), block heads (`.cal-block-h`, 12px medium caps in ink), then labels and scales (11px). Inside a panel, give each group (instruments, a figure, a table, notes) a `.cal-block` with a head, so the groups are ruled apart.
+- Field labels, helper text and errors are sentence case. Caps are for section heads, tags, table heads and buttons. Anything people click or fill in is at least 12px (`--fs-control`).
+- Drafting terms (FIG, SHEET, REV, DETAIL, title block, stamp) belong on document pages. Leave them off app screens and forms.
+- Red means wrong or removed, green means passed or approved: an approval stamp is `<span class="cal-stamp" data-ink="ok">`.
 - A chosen row or option is boxed in ink (its `.v` label), never tinted or barred; hover moves the box. Focus is the lamp: a lamp underline on write-in lines, a lamp outline elsewhere.
 - Native elements first: `<select>`, `<dialog>`, `popover`, `<details>`, radios and checkboxes stay real, so the controls work without JS and from a file.
 - Panels, not frames: surfaces separate by tone and gaps, lines are hairlines (`--edge`, `--edge-strong`). No shadows, no radius, no gradients.

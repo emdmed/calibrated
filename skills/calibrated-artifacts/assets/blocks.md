@@ -120,20 +120,25 @@ Calibrated.ready(() => {
 The full set of eight is in `references/marks.md` and in the repo's `demo/index.html`.
 
 ## Instruments panel
+Each group gets a block with a head, so the panel reads as separate parts. `.cal-blocks` sets blocks side by side with a hairline between; stacked blocks are ruled apart.
 ```html
-<div class="cal-panel" style="display:grid;gap:16px;padding:16px 18px" data-density="full">
-  <cal-meter value="46000" max="1000000" warn="800000" label="requests today"></cal-meter>
-  <cal-position index="3" count="7" label="diff · files"></cal-position>
-  <cal-progress done="11" total="15" live="12" live-label="step 12 · backfill" done-label="11 done · 1h 48m"></cal-progress>
-  <cal-diff added="184" removed="20" label="release"></cal-diff>
-  <cal-durations max="15" unit="m">
-    <cal-span name="build" value="252"></cal-span>
-    <cal-span name="rollout" value="485" live></cal-span>
-  </cal-durations>
-  <div style="display:flex;gap:16px;flex-wrap:wrap">
-    <span class="cal-count" data-n="3" data-noun="deploys"></span>
-    <span class="cal-count" data-n="1" data-noun="rolling" data-ink="live"></span>
+<div class="cal-panel" style="padding:18px 20px" data-density="full">
+  <div class="cal-blocks">
+    <div class="cal-block"><div class="cal-block-h">requests<span>today</span></div>
+      <cal-meter value="46000" max="1000000" warn="800000" label="requests today"></cal-meter></div>
+    <div class="cal-block"><div class="cal-block-h">migration<span>15 steps</span></div>
+      <cal-progress done="11" total="15" live="12" live-label="step 12 · backfill" done-label="11 done · 1h 48m"></cal-progress></div>
   </div>
+  <div class="cal-block"><div class="cal-block-h">this release<span>minutes per stage</span></div>
+    <cal-durations max="15" unit="m">
+      <cal-span name="build" value="252"></cal-span>
+      <cal-span name="rollout" value="485" live></cal-span>
+    </cal-durations></div>
+  <div class="cal-block"><div class="cal-block-h">this week</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap">
+      <span class="cal-count" data-n="3" data-noun="deploys"></span>
+      <span class="cal-count" data-n="1" data-noun="rolling" data-ink="live"></span>
+    </div></div>
 </div>
 ```
 
@@ -142,9 +147,9 @@ The full set of eight is in `references/marks.md` and in the repo's `demo/index.
 <table class="cal-table">
   <thead><tr><th>no</th><th>service</th><th>change</th><th>diff</th><th>status</th></tr></thead>
   <tbody>
-    <tr><td>01</td><td>checkout-api</td><td>rate-limit login</td><td><cal-diff added="212" removed="38" density="compact"></cal-diff></td><td class="st" data-ink="live">rolling</td></tr>
-    <tr><td>02</td><td>payments</td><td>retry idempotency keys</td><td><cal-diff added="84" removed="12" density="compact"></cal-diff></td><td class="st" data-ink="ok">live</td></tr>
-    <tr><td>03</td><td>search</td><td>reindex on deploy</td><td><cal-diff added="40" removed="6" density="compact"></cal-diff></td><td class="st">to do</td></tr>
+    <tr><td>01</td><td>checkout-api</td><td>rate-limit login</td><td><cal-diff added="212" removed="38"></cal-diff></td><td class="st" data-ink="live">rolling</td></tr>
+    <tr><td>02</td><td>payments</td><td>retry idempotency keys</td><td><cal-diff added="84" removed="12"></cal-diff></td><td class="st" data-ink="ok">live</td></tr>
+    <tr><td>03</td><td>search</td><td>reindex on deploy</td><td><cal-diff added="40" removed="6"></cal-diff></td><td class="st">to do</td></tr>
   </tbody>
 </table>
 ```
@@ -160,7 +165,7 @@ A live status is lamp text with a small star, and an ok status gets its check fr
   </tbody>
 </table>
 ```
-Put the same `<span class="cal-rev" data-rev="B"></span>` beside whatever changed in revision B. For a verdict on the whole page: `<span class="cal-stamp">approved for use</span>`.
+Put the same `<span class="cal-rev" data-rev="B"></span>` beside whatever changed in revision B. For a verdict on the whole page: `<span class="cal-stamp" data-ink="ok">approved for use</span>`.
 
 ## Tiers
 ```html
@@ -173,7 +178,7 @@ Put the same `<span class="cal-rev" data-rev="B"></span>` beside whatever change
 ## Sign-off tally
 The template already wires this up: buttons set `data-v` on the card, the tally counts cards and `copy sign-off` copies `NN Title: keep|rework|drop` lines, with the rework note after a dash.
 ```html
-<div class="cal-tally"><span id="tally-n">0 of 6 signed</span><span class="sp"></span><span id="tally-msg" class="mut"></span><button class="cal-btn" id="tally-copy">copy sign-off</button></div>
+<div class="cal-tally"><span id="tally-n">0 of 6 signed</span><span class="sp"></span><span id="tally-msg" class="mut"></span><button class="cal-btn primary" id="tally-copy">copy sign-off</button></div>
 ```
 
 ## Commands as text (beside a merge or steps figure)

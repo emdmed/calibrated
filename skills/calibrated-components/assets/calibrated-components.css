@@ -40,7 +40,7 @@
 .cal-titleblock dt { font: 10.5px var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--key); }
 .cal-titleblock dd { font-family: var(--font-legend); font-variant-numeric: tabular-nums; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .cal-titleblock .name { grid-column: 1 / -1; }
-.cal-titleblock .name dd { font-family: var(--font-display); font-weight: 400; font-size: 17px; text-transform: uppercase; letter-spacing: var(--track-title); line-height: 1.25; white-space: normal; color: var(--title); }
+.cal-titleblock .name dd { font-family: var(--font-display); font-weight: 500; font-size: 17px; text-transform: uppercase; letter-spacing: var(--track-title); line-height: 1.25; white-space: normal; color: var(--title); }
 .cal-titleblock .wide { grid-column: span 2; }
 
 /* ── revision table and the revision triangle that points at a change */
@@ -68,6 +68,9 @@
   border: var(--line-thin) solid var(--fault);
   padding: 5px 8px 4px;
 }
+/* an approval or a live stamp takes its meaning's ink: red stays for dropped, superseded, rework */
+.cal-stamp[data-ink="ok"] { color: var(--ok); border-color: var(--ok); }
+.cal-stamp[data-ink="live"] { color: var(--live); border-color: var(--live); }
 
 /* ════ page frame ════ */
 
@@ -78,7 +81,7 @@
 
 /* ── intro · a typewriter-caps headline beside a short lede */
 .cal-intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: clamp(24px, 4vw, 48px); padding: clamp(28px, 3.5vw, 44px) 0 clamp(20px, 3vw, 36px); align-items: end; }
-.cal-intro h1 { font-family: var(--font-display); font-weight: 400; font-size: var(--fs-h1); line-height: 1.12; letter-spacing: .02em; text-transform: uppercase; color: var(--title); text-wrap: balance; }
+.cal-intro h1 { font-family: var(--font-display); font-weight: 500; font-size: var(--fs-h1); line-height: 1.12; letter-spacing: .02em; text-transform: uppercase; color: var(--title); text-wrap: balance; }
 .cal-intro p { max-width: 62ch; color: var(--legend); }
 .cal-intro p + p { margin-top: 12px; }
 
@@ -91,9 +94,22 @@
 }
 .cal-sec-h::before { content: ""; width: 18px; border-top: var(--line-thin) solid var(--edge-strong); }
 .cal-sec-h::after { content: ""; flex: 1; min-width: 24px; border-top: var(--line-thin) solid var(--edge-strong); order: 1; }
-.cal-sec-h b { font-weight: 400; color: var(--fg); font-size: 12px; letter-spacing: .06em; }
-.cal-sec-h > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.cal-sec-h b { font: 500 var(--fs-h2)/1.2 var(--font-display); color: var(--title); text-transform: none; letter-spacing: .01em; }
+.cal-sec-h > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: var(--fs-control); text-transform: none; letter-spacing: .01em; }
+.cal-sec-h > span ~ span:last-child { font-size: var(--fs-legend); text-transform: uppercase; letter-spacing: var(--track-legend); }
 .cal-sec-h > span ~ span:last-child { order: 2; flex: none; color: var(--key); }
+/* ── block · one group inside a panel (the instruments, a figure, a table, the notes).
+   Blocks stacked in a panel are ruled apart; side by side in .cal-blocks they get a rule between.
+   <div class="cal-block"><div class="cal-block-h">budget<span>30 days</span></div> … </div> */
+.cal-block-h { display: flex; gap: 10px; align-items: baseline; margin-bottom: 14px;
+  font: 500 var(--fs-control)/1.3 var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--fg); }
+.cal-block-h > span { font-weight: 400; color: var(--muted); text-transform: none; letter-spacing: .01em; }
+.cal-block-h > span:last-child:not(:first-child) { margin-left: auto; }
+.cal-block + .cal-block { border-top: var(--line-thin) solid var(--edge); margin-top: 22px; padding-top: 20px; }
+.cal-blocks { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 22px 0; }
+.cal-blocks > .cal-block { min-width: 0; padding-right: 24px; }
+.cal-blocks > .cal-block + .cal-block { border-top: 0; margin-top: 0; padding-top: 0; border-left: var(--line-thin) solid var(--edge); padding-left: 24px; }
+.cal-blocks + .cal-block, .cal-block + .cal-blocks { border-top: var(--line-thin) solid var(--edge); margin-top: 22px; padding-top: 20px; }
 .cal-lede { max-width: 72ch; color: var(--muted); margin: -4px 0 20px; }
 
 /* ── surfaces */
@@ -118,7 +134,7 @@
 .cal-card { background: var(--panel); display: grid; grid-template-columns: 290px minmax(0, 1fr); min-height: 220px; position: relative; }
 .cal-card > .info { padding: 16px 18px 18px; border-right: var(--line-thin) solid var(--edge); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .cal-card > .stage, .cal-stage { padding: 14px 18px 18px; display: flex; flex-direction: column; align-items: safe center; justify-content: center; gap: 12px; min-width: 0; overflow-x: auto; }
-.cal-card h3 { font-family: var(--font-display); font-weight: 400; font-size: var(--fs-h3); line-height: 1.25; color: var(--title); text-transform: uppercase; letter-spacing: var(--track-title); text-wrap: balance; }
+.cal-card h3 { font-family: var(--font-display); font-weight: 500; font-size: var(--fs-h3); line-height: 1.25; color: var(--title); text-transform: uppercase; letter-spacing: var(--track-title); text-wrap: balance; }
 .cal-card .why { font-size: 13px; color: var(--fg); max-width: 46ch; }
 .cal-card > .info > .cal-kv { margin-top: auto; }
 .cal-card .id {
@@ -147,7 +163,7 @@
 .cal-stack > .cal-kv, .cal-panel > .cal-kv { background: var(--panel); border: 0; padding: 12px 16px; }
 
 /* ── compare · two views side by side (today / proposed, before / after) */
-.cal-compare { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); }
+.cal-compare { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.8fr); }
 .cal-compare > div { padding: 12px 18px 18px; display: flex; flex-direction: column; min-width: 0; }
 .cal-compare > div + div { border-left: var(--line-thin) dashed var(--edge); }
 .cal-compare .stage { flex: 1; display: flex; flex-direction: column; align-items: safe center; justify-content: center; gap: 12px; min-height: 150px; overflow-x: auto; }
@@ -172,35 +188,51 @@
 [data-density="compact"] .cal-count > span { display: none; }
 
 /* ── tabs · keys with a counted box; the open one is underlined in ink */
-.cal-tabs { display: flex; align-items: end; gap: 16px; border-bottom: var(--line-thin) solid var(--edge); font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--muted); }
+.cal-tabs { display: flex; align-items: end; gap: 16px; border-bottom: var(--line-thin) solid var(--edge); font: var(--fs-control) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--muted); }
 .cal-tabs > * { padding: 0 0 6px; margin-bottom: -1px; background: none; border: 0; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
 .cal-tabs > *:hover { color: var(--fg); }
 .cal-tabs > .on, .cal-tabs > [aria-selected="true"] { color: var(--fg); box-shadow: inset 0 -1px var(--fg); }
 .cal-tabs .cal-cnt { margin-left: 5px; }
 .cal-tabs > .on .cal-cnt, .cal-tabs > [aria-selected="true"] .cal-cnt { border-color: var(--fg); }
 
-/* ── button · a bracketed word: [keep]. Pressed takes the meaning's ink. */
+/* ── button · three tiers, so the main action always leads:
+   primary  filled with ink, one per view          <button class="cal-btn primary">
+   default  a hairline box: every other action      <button class="cal-btn">
+   inline   a bracketed word for small actions in running text, toasts and fields: [copy]
+   quiet    an underlined word for cancel and back
+   Pressed toggles take their meaning's ink in text and box. */
 .cal-btn {
-  font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase;
-  background: none; color: var(--muted);
-  border: 0; padding: 5px 3px; cursor: pointer;
-  transition: color .12s ease-out;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  font: var(--fs-control)/1.2 var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase;
+  background: none; color: var(--fg);
+  border: var(--line-thin) solid var(--edge-strong); padding: 6px 12px; cursor: pointer;
+  transition: color .12s ease-out, border-color .12s ease-out, background-color .12s ease-out;
 }
-.cal-btn::before { content: "["; }
-.cal-btn::after { content: "]"; }
-.cal-btn:hover { color: var(--fg); }
-.cal-btn:disabled { color: var(--faint); cursor: not-allowed; }
-.cal-btn.primary { color: var(--fg); }
-.cal-btn.primary:not(:disabled):hover { color: var(--live); }
-.cal-btn[aria-pressed="true"] { color: var(--fg); }
-.cal-btn[data-ink="ok"][aria-pressed="true"] { color: var(--ok); }
-.cal-btn[data-ink="fault"][aria-pressed="true"] { color: var(--fault); }
-.cal-btn.quiet::before, .cal-btn.quiet::after { content: none; }
-.cal-btn.quiet { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--edge-strong); }
-.cal-btn.quiet:not(:disabled):hover { text-decoration-color: var(--fg); }
+.cal-btn:not(:disabled):hover { border-color: var(--fg); }
+.cal-btn:focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: 2px; }
+.cal-btn:disabled { color: var(--faint); border-color: var(--edge); cursor: not-allowed; }
+/* primary · filled with ink (never with the lamp) */
+.cal-btn.primary { background: var(--fg); color: var(--panel); border-color: var(--fg); }
+.cal-btn.primary:not(:disabled):hover { background: var(--title); border-color: var(--title); }
+.cal-btn.primary:disabled { background: var(--edge-strong); border-color: var(--edge-strong); color: var(--panel); }
+/* pressed toggles: the box and the word take the meaning's ink */
+.cal-btn[aria-pressed="false"] { color: var(--muted); }
+.cal-btn[aria-pressed="false"]:not(:disabled):hover { color: var(--fg); }
+.cal-btn[aria-pressed="true"] { color: var(--fg); border-color: var(--fg); }
+.cal-btn[data-ink="ok"][aria-pressed="true"] { color: var(--ok); border-color: var(--ok); }
+.cal-btn[data-ink="fault"][aria-pressed="true"] { color: var(--fault); border-color: var(--fault); }
+/* inline · a bracketed word; automatic inside toasts, fields and code blocks */
+:is(.cal-btn.inline, .cal-toast .cal-btn, .cal-affixed .cal-btn, .cal-code > .cal-btn) { border: 0; padding: 5px 3px; color: var(--muted); background: none; }
+:is(.cal-btn.inline, .cal-toast .cal-btn, .cal-affixed .cal-btn, .cal-code > .cal-btn)::before { content: "["; }
+:is(.cal-btn.inline, .cal-toast .cal-btn, .cal-affixed .cal-btn, .cal-code > .cal-btn)::after { content: "]"; }
+:is(.cal-btn.inline, .cal-toast .cal-btn, .cal-affixed .cal-btn, .cal-code > .cal-btn):not(:disabled):hover { color: var(--fg); }
+/* quiet · an underlined word */
+.cal-btn.quiet { border: 0; padding: 6px 3px; color: var(--muted); background: none; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--edge-strong); }
+.cal-btn.quiet:not(:disabled):hover { color: var(--fg); text-decoration-color: var(--fg); }
+.cal-btn.quiet[aria-current="page"] { color: var(--fg); text-decoration-color: var(--fg); }
 
 /* ── sign-off row at the foot of a card */
-.cal-sign { display: flex; gap: 8px; justify-content: flex-end; align-items: center; padding: 4px 15px; border-top: var(--line-thin) solid var(--edge); }
+.cal-sign { display: flex; gap: 8px; justify-content: flex-end; align-items: center; padding: 8px 15px; border-top: var(--line-thin) solid var(--edge); }
 
 /* ── tally · approval strip that collects decisions (add .sticky to pin it) */
 .cal-tally {
@@ -260,7 +292,9 @@
 
 /* ── form controls */
 .cal-field { display: grid; gap: 4px; }
-.cal-field > label { font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--muted); }
+.cal-field > label { font: var(--fs-control) var(--font-legend); letter-spacing: .01em; color: var(--legend); }
+/* sentence case even when the label is written in lower case */
+.cal-field > label::first-letter, .cal-field > .lbl::first-letter { text-transform: uppercase; }
 .cal-input { font: 14px var(--font-legend); font-variant-numeric: tabular-nums; color: var(--fg); background: transparent; border: 0; border-bottom: var(--line-thin) solid var(--edge-strong); padding: 5px 2px 4px; min-width: 0; border-radius: 0; }
 .cal-input:hover:not(:disabled):not(:focus) { border-bottom-color: var(--fg); }
 .cal-input:focus { outline: none; border-bottom-color: var(--live); box-shadow: 0 1px 0 var(--live); }
@@ -358,7 +392,8 @@
 .cal-dialog .bd { padding: 14px 16px; display: grid; gap: 12px; font-size: 13px; }
 .cal-dialog .bd .cal-kv { border-top: 0; padding-top: 0; }
 .cal-dialog footer { display: flex; justify-content: flex-end; gap: 6px; padding: 5px 12px; border-top: var(--line-thin) solid var(--edge); }
-.cal-btn[data-ink="fault"].primary { color: var(--fault); }
+.cal-btn[data-ink="fault"].primary { background: var(--fault); border-color: var(--fault); color: var(--panel); }
+.cal-btn[data-ink="fault"].primary:not(:disabled):hover { background: var(--fault); border-color: var(--fault); opacity: .88; }
 
 /* ── tooltip · a leader line to a boxed value */
 [data-tip] { position: relative; text-decoration: underline dotted var(--faint); text-underline-offset: 3px; cursor: help; }
@@ -396,7 +431,8 @@
 
 /* ── fieldset group */
 .cal-group { border: 0; display: grid; gap: 14px; width: 100%; min-width: 0; }
-.cal-group > legend { float: left; width: 100%; display: flex; gap: 8px; align-items: center; font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--muted); }
+.cal-group > legend { float: left; width: 100%; display: flex; gap: 8px; align-items: center; font: var(--fs-control) var(--font-legend); letter-spacing: .01em; color: var(--legend); }
+.cal-group > legend b { font-weight: 500; color: var(--title); }
 .cal-group > legend b { font-weight: 400; color: var(--fg); }
 .cal-group > legend::after { content: ""; flex: 1; border-top: var(--line-thin) solid var(--edge); }
 .cal-group > legend + * { clear: both; }
@@ -505,7 +541,7 @@
 .cal-rows > .none[hidden] { display: none; }
 
 /* ── sign-off: keep · rework · drop. Rework stamps the card in lamp and asks what isn't good enough. */
-.cal-btn[data-ink="live"][aria-pressed="true"] { color: var(--live); }
+.cal-btn[data-ink="live"][aria-pressed="true"] { color: var(--live); border-color: var(--live); }
 .cal-card[data-state="rework"]::after {
   content: "rework";
   position: absolute; top: 14px; right: 18px;
@@ -531,7 +567,7 @@
 .cal-rows:has(> :hover .v) > :is(.sel, [aria-selected="true"]):not(:hover) .v { border-color: transparent; color: inherit; }
 .cal-rows > *:hover { background: none; }
 
-.cal-field > .lbl { font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--muted); }
+.cal-field > .lbl { font: var(--fs-control) var(--font-legend); letter-spacing: .01em; color: var(--legend); }
 
 /* ── textarea · a recessed editor pane with a terminal status line */
 .cal-term { width: 100%; background: var(--well); border: var(--line-thin) solid var(--edge-strong); }
@@ -548,6 +584,8 @@
   font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; font-variant-numeric: tabular-nums; color: var(--muted); }
 .cal-term .bar .sp { flex: 1; }
 .cal-term .mode { color: var(--faint); }
+/* the vim mode and caret position are for editors only: opt in with data-status="editor" */
+.cal-term:not([data-status="editor"]) .bar .mode, .cal-term:not([data-status="editor"]) .bar .pos { display: none; }
 .cal-term:focus-within .mode { color: var(--live); }
 
 /* ── detent choice · ordered options as labelled ticks; the lamp ▼ over the chosen one */
@@ -706,3 +744,11 @@ cal-span { display: none; }
 @media (max-width: 520px) {
   .cal-specimens { --cols: 1; }
 }
+
+/* ════ app mode · data-mode="app" on any ancestor ════
+   For screens and forms people use, not drawings they read: no sheet numbers,
+   sentence-case section heads and table heads. Document pages keep the drawing-set look. */
+[data-mode="app"] .cal-sec-h > span ~ span:last-child { display: none; }
+[data-mode="app"] .cal-sec-h, [data-mode="app"] .cal-table th, [data-mode="app"] .cal-kv dt { text-transform: none; letter-spacing: .01em; }
+[data-mode="app"] .cal-sec-h b { font-size: var(--fs-control); }
+[data-mode="app"] .cal-dialog header { text-transform: none; letter-spacing: .01em; }

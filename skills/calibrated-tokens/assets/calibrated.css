@@ -17,7 +17,7 @@
   --ok: #3b7449;            /* check green */
   --fault: #b5402e;         /* markup red */
   --shade: #6f746a;         /* the desk under the panels */
-  --desk-depth: 9%;
+  --desk-depth: 14%;
   color-scheme: light;
 }
 
@@ -31,14 +31,14 @@
   --ok: #b2d49c;
   --fault: #e3735f;
   --shade: #000;
-  --desk-depth: 24%;
+  --desk-depth: 42%;
   color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {
   [data-theme="auto"] {
     --bg: #1b2225; --fg: #e5e0d3; --muted: #949c97; --title: #eef0ec;
     --live: #dcb662; --ok: #b2d49c; --fault: #e3735f; --shade: #000;
-    --desk-depth: 24%; color-scheme: dark;
+    --desk-depth: 42%; color-scheme: dark;
   }
 }
 
@@ -52,6 +52,8 @@
   --fs-body: 14px;
   --fs-small: 12.5px;
   --fs-legend: 11px;        /* every SVG label, tag, table head */
+  --fs-control: 12px;       /* what people click or fill in: buttons, tabs, field labels */
+  --fs-h2: 16px;            /* section heads: between titles and labels */
   --fs-h3: 19px;
   --fs-h1: clamp(28px, 3.2vw, 42px);
   --track-legend: .05em;
@@ -123,9 +125,9 @@ svg { height: auto; }
   font-variant-numeric: tabular-nums;
 }
 .up { text-transform: uppercase; }
-.title {                       /* titles: typewriter caps, regular weight, tracked */
+.title {                       /* titles: typewriter caps, medium weight, tracked */
   font-family: var(--font-display);
-  font-weight: 400;
+  font-weight: 500;
   text-transform: uppercase;
   letter-spacing: var(--track-title);
   line-height: 1.2;

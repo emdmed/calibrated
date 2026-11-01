@@ -469,10 +469,11 @@
   /* redraw once fonts are in, so measured boxes fit */
   C.ready(() => redraw());
 
-  /* zero-padded boxed counts: <span class="cal-count" data-n="3" data-pad="2" data-noun="places"> */
+  /* boxed counts: <span class="cal-count" data-n="3" data-noun="places">; add data-pad="2" to
+     zero-pad a count that changes live, so the layout doesn't jump */
   function counts(scope = document) {
     scope.querySelectorAll('.cal-count[data-n]').forEach((el) => {
-      const pad = parseInt(el.dataset.pad || '2', 10), n = el.dataset.n;
+      const pad = parseInt(el.dataset.pad || '1', 10), n = el.dataset.n;
       el.innerHTML = `<b>${esc(String(n).padStart(pad, '0'))}</b>` + (el.dataset.noun ? `<span>${esc(el.dataset.noun)}</span>` : '');
       el.setAttribute('role', 'img');   /* so the label is read, not "zero three" */
       el.setAttribute('aria-label', `${n} ${el.dataset.noun || ''}`.trim());
@@ -524,7 +525,7 @@
     const ta = box.querySelector('.cal-textarea'); if (!ta) return;
     const max = parseInt(box.dataset.max, 10), n = ta.value.length, over = max > 0 && n > max;
     const b = box.querySelector('.cal-count b'), cnt = box.querySelector('.cal-count');
-    if (b) b.textContent = String(n).padStart(String(max || n).length, '0');
+    if (b) b.textContent = box.dataset.status === 'editor' ? String(n).padStart(String(max || n).length, '0') : String(n);
     if (cnt) cnt.dataset.ink = over ? 'fault' : '';
     box.toggleAttribute('data-over', over);
     ta.setAttribute('aria-invalid', String(over));
@@ -650,11 +651,11 @@
     return el;
   }
 
-  /* ── pager · Calibrated.pager(nav, { page, pages, onChange }) draws [‹ prev] 01 … 04 [05] 06 … 12 [next ›]
+  /* ── pager · Calibrated.pager(nav, { page, pages, onChange }) draws [‹ prev] 1 … 4 [5] 6 … 12 [next ›]
      into a <nav class="cal-pager">. The current page is boxed and not a link. Returns { set(page) }. */
   function pager(nav, o = {}) {
     let p = o.page || 1; const N = Math.max(1, o.pages || 1);
-    const two = (k) => String(k).padStart(String(N).length < 2 ? 2 : String(N).length, '0');
+    const two = (k) => String(k);
     const pages = () => {
       const list = [...new Set([1, N, p - 1, p, p + 1].filter((k) => k >= 1 && k <= N))].sort((a, b) => a - b), out = [];
       list.forEach((k, j) => { if (j && k - list[j - 1] > 1) out.push(0); out.push(k); });

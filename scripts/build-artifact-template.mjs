@@ -45,6 +45,7 @@ const docs = {
   'skills/calibrated-figures/references/recipes.md': 'recipes.md',
   'skills/calibrated-figures/references/drawing-quality.md': 'drawing-quality.md',
   'skills/calibrated-components/references/catalog.md': 'catalog.md',
+  'skills/calibrated-components/references/ux-rules.md': 'ux-rules.md',
 };
 for (const [src, dst] of Object.entries(docs)) {
   writeFileSync(join(out, 'references', dst), `<!-- copied from ${src} by scripts/build-artifact-template.mjs -->\n` + read(src));

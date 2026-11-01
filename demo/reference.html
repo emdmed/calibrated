@@ -419,12 +419,12 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
     <button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="false">drop</button>
   </div>
 </article>
-<div class="cal-tally"><span id="tally-n">0 of 1 signed</span><span class="sp"></span><span id="tally-msg" class="mut" role="status"></span><button class="cal-btn" id="tally-copy">copy sign-off</button></div></template></div>
+<div class="cal-tally"><span id="tally-n">0 of 1 signed</span><span class="sp"></span><span id="tally-msg" class="mut" role="status"></span><button class="cal-btn primary" id="tally-copy">copy sign-off</button></div></template></div>
       </div>
 
       <div class="item" id="counts">
         <h3>Counts <a class="anchor" href="#counts" aria-label="Link to Counts">#</a></h3>
-        <p>A zero-padded number in a box with its noun. <code>Calibrated.counts()</code> fills them from <code>data-n</code>.</p>
+        <p>A number in a box with its noun; <code>data-pad="2"</code> zero-pads one that changes live. <code>Calibrated.counts()</code> fills them from <code>data-n</code>.</p>
         <div class="ex"><template><div class="row" style="gap:18px">
   <span class="cal-count" data-n="3" data-noun="regions"></span>
   <span class="cal-count" data-n="2" data-noun="running"></span>
@@ -437,19 +437,20 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
         <h3>Tabs <a class="anchor" href="#tabs" aria-label="Link to Tabs">#</a></h3>
         <p>Ruled tabs with boxed counts.</p>
         <div class="ex"><template><div class="cal-tabs" role="tablist">
-  <button role="tab" aria-selected="true">runs<span class="cal-cnt">04</span></button>
-  <button role="tab">alerts<span class="cal-cnt">01</span></button>
+  <button role="tab" aria-selected="true">runs<span class="cal-cnt">4</span></button>
+  <button role="tab">alerts<span class="cal-cnt">1</span></button>
   <button role="tab">history</button>
 </div></template></div>
       </div>
 
       <div class="item" id="buttons">
         <h3>Buttons <a class="anchor" href="#buttons" aria-label="Link to Buttons">#</a></h3>
-        <p>A bracketed word. Primary is in ink and lights the lamp on hover; quiet is an underline.</p>
-        <div class="ex"><template><div class="row" style="gap:8px">
+        <p>Tiers, so the main action leads: primary is filled with ink (one per view), the default is a hairline box, inline is a bracketed word for small actions in text, quiet is an underline.</p>
+        <div class="ex"><template><div class="row" style="gap:8px;align-items:center">
   <button class="cal-btn primary">run again</button>
-  <button class="cal-btn">copy</button>
+  <button class="cal-btn">preview</button>
   <button class="cal-btn" disabled>export</button>
+  <button class="cal-btn inline">copy</button>
   <button class="cal-btn quiet">details</button>
 </div></template></div>
       </div>
@@ -496,9 +497,9 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
         <div class="ex"><template><table class="cal-table">
   <thead><tr><th>no</th><th>figure</th><th>where</th><th>diff</th><th>effort</th><th>status</th></tr></thead>
   <tbody>
-    <tr><td>01</td><td>Load test lanes</td><td>release checklist</td><td><cal-diff added="212" removed="38" density="compact"></cal-diff></td><td class="effort" aria-label="effort 2 of 3"><span class="cal-dot done"></span><span class="cal-dot done"></span><span class="cal-dot"></span></td><td class="st" data-ink="live"><span>in review</span></td></tr>
-    <tr><td>02</td><td>Error budget ruler</td><td>SLO panel</td><td><cal-diff added="84" removed="12" density="compact"></cal-diff></td><td class="effort" aria-label="effort 1 of 3"><span class="cal-dot done"></span><span class="cal-dot"></span><span class="cal-dot"></span></td><td class="st" data-ink="ok">shipped</td></tr>
-    <tr><td>03</td><td>Network section</td><td>security review</td><td><cal-diff added="9" removed="1460" density="compact"></cal-diff></td><td class="effort" aria-label="effort 3 of 3"><span class="cal-dot done"></span><span class="cal-dot done"></span><span class="cal-dot done"></span></td><td class="st">to do</td></tr>
+    <tr><td>01</td><td>Load test lanes</td><td>release checklist</td><td><cal-diff added="212" removed="38"></cal-diff></td><td class="effort" aria-label="effort 2 of 3"><span class="cal-dot done"></span><span class="cal-dot done"></span><span class="cal-dot"></span></td><td class="st" data-ink="live"><span>in review</span></td></tr>
+    <tr><td>02</td><td>Error budget ruler</td><td>SLO panel</td><td><cal-diff added="84" removed="12"></cal-diff></td><td class="effort" aria-label="effort 1 of 3"><span class="cal-dot done"></span><span class="cal-dot"></span><span class="cal-dot"></span></td><td class="st" data-ink="ok">shipped</td></tr>
+    <tr><td>03</td><td>Network section</td><td>security review</td><td><cal-diff added="9" removed="1460"></cal-diff></td><td class="effort" aria-label="effort 3 of 3"><span class="cal-dot done"></span><span class="cal-dot done"></span><span class="cal-dot done"></span></td><td class="st">to do</td></tr>
   </tbody>
 </table></template></div>
       </div>
@@ -551,7 +552,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
         <h3>Textarea <a class="anchor" href="#textarea" aria-label="Link to Textarea">#</a></h3>
         <p>A recessed editor pane with a block caret and a terminal-style status line: the mode, the caret's line and column, and the count, which turns red past <code>data-max</code>.</p>
         <div class="ex"><template><div class="cal-field" style="max-width:480px"><label for="x-notes">release notes</label>
-  <div class="cal-term" data-max="200">
+  <div class="cal-term" data-max="200" data-status="editor">
     <textarea class="cal-textarea" id="x-notes" spellcheck="false">Rate-limit login to 10 attempts a minute per account.
 Lockouts now clear after 15 minutes instead of an hour.</textarea>
     <div class="bar" aria-hidden="true"><span class="mode">-- normal --</span><span class="sp"></span><span class="pos">ln 1, col 1</span><span class="cal-count"><b>000</b><span>/ 200</span></span></div>
@@ -777,6 +778,7 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
     <section class="group" id="changelog">
       <h2>Changelog</h2>
       <ol class="log">
+        <li><b>Rev L</b><time datetime="2026-11-01">2026-11-01</time><p>Usable first: a UX rules reference every skill reads before composing, and an app mode (<code>data-mode="app"</code>) for screens and forms. The primary button is boxed, field labels are sentence case at 12px, an approval stamp is green, textareas show only their count unless they opt into the editor line, counts aren't zero-padded unless they change live, and loops show their direction. Clearer hierarchy and separation: buttons in tiers (filled primary, boxed default, bracketed inline, underlined quiet), medium-weight titles, 16px section heads, block heads that rule the groups in a panel apart (<code>.cal-block</code>), and a darker desk.</p></li>
         <li><b>Rev K</b><time datetime="2026-11-01">2026-11-01</time><p>Twenty-six controls: textarea, select, menu, radio, switch, detent, dialog, tooltip, range, number, search, field group, detail callout, callout, toast, empty state, breadcrumb, pager, badge, file drop, tags, steps, code block, key cap, spinners, date. Chosen rows are boxed instead of barred; sign-off gains rework.</p></li>
         <li><b>Rev J</b><time datetime="2026-10-31">2026-10-31</time><p>Merge steps can be left out and the rest are numbered in run order; long branch names are no longer cut by a leader.</p></li>
         <li><b>Rev H</b><time datetime="2026-10-31">2026-10-31</time><p>The timeline replays and its ruler fits the run, from seconds to hours. Loop stations can fault; merge and timeline take a <code>noun</code>.</p></li>
@@ -962,7 +964,7 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
     if (r) frame(ex, `<svg id="${r}"></svg>\n\n<script>\n  Calibrated.mount('#${r}', Calibrated.recipes.${r}(${ser(D[r], 1)}));\n<\/script>`, 'html');
     else if (c === 'marks') frame(ex, marksCode, 'js');
     else if (c === 'seeds') frame(ex, ":root {\n  --bg: #f4f2ec;   /* panel */\n  --fg: #262b2e;   /* ink */\n  --live: #9c6a06; /* lamp */\n}\n/* or scope a theme to one region */\n.cal-theme { --bg: #1b2225; --fg: #e5e0d3; --live: #dcb662; }", 'css');
-    else if (c === 'density') frame(ex, '<div data-density="compact">\n  <cal-meter value="46000" max="1000000" warn="800000" label="requests today"></cal-meter>\n  <cal-progress done="6" total="15" fault="7"></cal-progress>\n  <cal-diff added="184" removed="20" label="release"></cal-diff>\n</div>\n\n<!-- or per element -->\n<cal-diff added="184" removed="20" density="compact"></cal-diff>', 'html');
+    else if (c === 'density') frame(ex, '<div data-density="compact">\n  <cal-meter value="46000" max="1000000" warn="800000" label="requests today"></cal-meter>\n  <cal-progress done="6" total="15" fault="7"></cal-progress>\n  <cal-diff added="184" removed="20" label="release"></cal-diff>\n</div>\n\n<!-- or per element -->\n<cal-diff added="184" removed="20"></cal-diff>', 'html');
     else frame(ex);
   });
   $$('cal-span[live]').forEach((s) => s.setAttribute('start', liveStart));

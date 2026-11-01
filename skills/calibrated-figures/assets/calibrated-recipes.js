@@ -196,7 +196,9 @@
       if (n > 1) k += K.dim(cx0, cx1, fy + 22, `${n} ${o.noun || 'commits'}`);
       if (o.files) k += K.leader([[230, fy + 26], [230, 104]], false) + K.box(180, 104, 100, o.files[0], o.files[1], 'fg');
       const v = o.verdict || (ff ? ['fast-forward', 'no merge commit'] : ['merge commit', `${o.base || 'main'} moved on`]);
-      k += K.leader([[400, by - 7], [400, 140], [410, 140]], false) + K.box(410, 124, 102, v[0], v[1], 'lv', 'lv');
+      /* the verdict box keeps inside the frame however long its words are */
+      const vw = Math.max(102, K.boxWidth(v[0], v[1])), vx = Math.min(410, w - vw - 1);
+      k += K.leader([[400, by - 7], [400, 140], [vx, 140]], false) + K.box(vx, 124, vw, v[0], v[1], 'lv', 'lv');
       if (steps[0]) k += K.leader([[250, by + 6], [250, 200]], false) + K.cmd(243, 212, num(0), steps[0]);
       if (steps[1]) k += K.leader([[400, by + 7], [400, 226]], false) + K.cmd(412, 238, num(1), steps[1], 'lv', 'end');
       if (steps[2]) k += K.leader([[cx1, fy - 6], [cx1, 46]], false) + K.cmd(Math.min(250, w - tw('$ ' + steps[2]) - 30), 40, num(2), steps[2]);
@@ -293,6 +295,12 @@
         });
       }
       g += K.centre(cx - R * 1.3, cy, cx + R * 1.3, cy) + K.centre(cx, cy - R * 1.3, cx, cy + R * 1.3) + K.cross(cx, cy, 4);
+      /* direction: an arrowhead mid-edge, so the reader sees which way the cycle runs */
+      P.forEach((p, i) => {
+        const q = P[(i + 1) % N], mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2, an = Math.atan2(q[1] - p[1], q[0] - p[0]);
+        const wing = (d) => `${(mx + 5 * Math.cos(an + d)).toFixed(2)} ${(my + 5 * Math.sin(an + d)).toFixed(2)}`;
+        g += K.path(`M${wing(Math.PI * 0.8)} L${mx.toFixed(2)} ${my.toFixed(2)} L${wing(-Math.PI * 0.8)}`, 'mu', { w: 1.2 });
+      });
       const changed = (i) => stepping && !moving && (i === o.from || i === o.at);
       const c0 = centre(lap);
       const ck = c0 ? K.t(cx, cy + 24, c0, 'mu', 'middle') : '';
@@ -306,7 +314,7 @@
         const ty = side === 0 ? (sin < 0 ? y - 26 : y + 22) : y - 4;
         const an = side === 1 ? 'start' : side === -1 ? 'end' : 'middle';
         const ts = textStates[i], live = ts === 'live', done = ts === 'done', fault = ts === 'fault';
-        let m = K.t(tx, ty, (done ? '\u2713 ' : '') + String(s.name).toUpperCase(), live ? 'lv' : done ? 'ok' : fault ? 'ft' : 'mu', an, 0.5);
+        let m = K.t(tx, ty, (done ? '\u2713 ' : '') + `${i + 1} \u00b7 ` + String(s.name).toUpperCase(), live ? 'lv' : done ? 'ok' : fault ? 'ft' : 'mu', an, 0.5);
         if (s.cmd) m += K.t(tx, ty + 13, (live ? '$ ' : '') + s.cmd, live ? 'fg' : 'fa', an);
         k += changed(i) ? `<g data-land="st${i}">${m}</g>` : m;
       });

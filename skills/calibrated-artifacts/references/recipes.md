@@ -92,7 +92,7 @@ recipes.loop({
 ```
 Takes 3–6 stations, placed clockwise from the top. A done station is a solid square with a green ✓ name, a todo station a hollow square with a muted name. A `fault` station (a halted run) is a red square with a red name. In the step form, a station with `skip: true` stays open when the live one is past it (a detour not taken). An edge leaving a done station is drawn in ink. The live station is a live node, and its command gets `$ `.
 
-Moves with `Calibrated.play(svg, recipes.loop, data)`: the frame and nodes hold still, the done edges trace clockwise up to the live station, then the names and commands appear.
+Stations are numbered from the top, clockwise, and each edge carries an arrowhead, so the direction reads without a legend. Moves with `Calibrated.play(svg, recipes.loop, data)`: the frame and nodes hold still, the done edges trace clockwise up to the live station, then the names and commands appear.
 
 To step through it, give `at` (the live station's index) instead of states, plus `lap`, `laps` and `center` as a function of the lap. `recipes.loop.step(data, 1)` (or `-1`) returns the next data, or null at the first and last lap; play it to animate the step:
 ```js

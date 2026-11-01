@@ -96,19 +96,25 @@
   <!-- 2 · instruments -->
   <section class="cal-sec" id="now">
     <div class="cal-sec-h"><b>2 · Right now</b><span>instruments</span><span>sheet 2/3</span></div>
-    <div class="cal-panel" style="display:grid;gap:18px;padding:16px 18px">
-      <cal-meter value="612" max="1000" warn="800" label="error budget used" format="raw" unit=" min"></cal-meter>
-      <cal-progress done="4" total="6" live="5" live-label="canary · ap-south" done-label="4 regions · 23m"></cal-progress>
-      <cal-durations max="15" unit="m">
-        <cal-span name="build" value="252"></cal-span>
-        <cal-span name="tests" value="400"></cal-span>
-        <cal-span name="rollout" value="485" live></cal-span>
-      </cal-durations>
-      <div style="display:flex;gap:18px;flex-wrap:wrap">
-        <span class="cal-count" data-n="3" data-noun="deploys"></span>
-        <span class="cal-count" data-n="1" data-noun="rolling" data-ink="live"></span>
-        <span class="cal-count" data-n="0" data-noun="rolled back"></span>
+    <div class="cal-panel" style="padding:18px 20px">
+      <div class="cal-blocks">
+        <div class="cal-block"><div class="cal-block-h">error budget<span>30 days</span></div>
+          <cal-meter value="612" max="1000" warn="800" label="error budget used" format="raw" unit=" min"></cal-meter></div>
+        <div class="cal-block"><div class="cal-block-h">rollout<span>6 regions</span></div>
+          <cal-progress done="4" total="6" live="5" live-label="canary · ap-south" done-label="4 regions · 23m"></cal-progress></div>
       </div>
+      <div class="cal-block"><div class="cal-block-h">this deploy<span>minutes per stage</span></div>
+        <cal-durations max="15" unit="m">
+          <cal-span name="build" value="252"></cal-span>
+          <cal-span name="tests" value="400"></cal-span>
+          <cal-span name="rollout" value="485" live></cal-span>
+        </cal-durations></div>
+      <div class="cal-block"><div class="cal-block-h">this week</div>
+        <div style="display:flex;gap:18px;flex-wrap:wrap">
+          <span class="cal-count" data-n="3" data-noun="deploys"></span>
+          <span class="cal-count" data-n="1" data-noun="rolling" data-ink="live"></span>
+          <span class="cal-count" data-n="0" data-noun="rolled back"></span>
+        </div></div>
     </div>
   </section>
 
@@ -118,14 +124,14 @@
     <table class="cal-table">
       <thead><tr><th>no</th><th>service</th><th>change</th><th>diff</th><th>status</th></tr></thead>
       <tbody>
-        <tr><td>01</td><td>checkout-api</td><td>rate-limit login</td><td><cal-diff added="212" removed="38" density="compact"></cal-diff></td><td class="st" data-ink="live">rolling</td></tr>
-        <tr><td>02</td><td>payments</td><td>retry idempotency keys</td><td><cal-diff added="84" removed="12" density="compact"></cal-diff></td><td class="st" data-ink="ok">live</td></tr>
-        <tr><td>03</td><td>cart</td><td>drop legacy coupons</td><td><cal-diff added="9" removed="1460" density="compact"></cal-diff></td><td class="st" data-ink="ok">live</td></tr>
+        <tr><td>01</td><td>checkout-api</td><td>rate-limit login</td><td><cal-diff added="212" removed="38"></cal-diff></td><td class="st" data-ink="live">rolling</td></tr>
+        <tr><td>02</td><td>payments</td><td>retry idempotency keys</td><td><cal-diff added="84" removed="12"></cal-diff></td><td class="st" data-ink="ok">live</td></tr>
+        <tr><td>03</td><td>cart</td><td>drop legacy coupons</td><td><cal-diff added="9" removed="1460"></cal-diff></td><td class="st" data-ink="ok">live</td></tr>
       </tbody>
     </table>
   </section>
 
-  <div class="cal-tally sticky"><span id="tally-n">0 of 2 signed</span><span class="sp"></span><span id="tally-msg" class="mut" role="status"></span><button class="cal-btn" id="tally-copy">copy sign-off</button></div>
+  <div class="cal-tally sticky"><span id="tally-n">0 of 2 signed</span><span class="sp"></span><span id="tally-msg" class="mut" role="status"></span><button class="cal-btn primary" id="tally-copy">copy sign-off</button></div>
   <footer class="cal-foot"><span>checkout · chk-044 · rev A</span><span>example data · replace it</span></footer>
 </div>
 

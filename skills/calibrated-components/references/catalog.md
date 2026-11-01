@@ -41,7 +41,7 @@ Ruled cells, a small legend over each value. `--tb-cols` sets the column count (
 `.cal-rev` is a red revision triangle with the letter from `data-rev`. Put one in the revision table, in the title block, and beside anything on the page that changed in that revision.
 
 ### Stamp
-`<span class="cal-stamp">approved for use</span>` is a red markup stamp. Use it once, for a verdict on the whole page. Dropped cards get a SUPERSEDED stamp automatically (see Card).
+`<span class="cal-stamp">superseded</span>` is a red markup stamp. Add `data-ink="ok"` for an approval (`approved for use`, green) or `data-ink="live"` for a pending verdict (lamp). Red is only for dropped, rejected or superseded. Use it once, for a verdict on the whole page, and only on document pages. Dropped cards get a SUPERSEDED stamp automatically (see Card).
 
 ## Page frame
 
@@ -131,14 +131,30 @@ A legend line between rules: a short rule, the number and title in ink, a muted 
   <button role="tab">alerts<span class="cal-cnt">01</span></button>
 </div>
 ```
-`data-pad` (default 2) sets the zero-padding. `data-ink="live"` sets the number and outline in lamp; `ok`/`fault` colour them green or red. In compact density the noun is hidden. After inserting counts dynamically, call `Calibrated.counts(root)`. The open tab turns ink with a 1px underline, and its count box takes an ink outline.
+`data-pad` zero-pads the number (no padding by default). Use `data-pad="2"` only for counts that change live, so the layout doesn't jump. `data-ink="live"` sets the number and outline in lamp; `ok`/`fault` colour them green or red. In compact density the noun is hidden. After inserting counts dynamically, call `Calibrated.counts(root)`. The open tab turns ink with a 1px underline, and its count box takes an ink outline.
+
+## Block
+A group inside a panel: the instruments, a figure, a table, the notes. A block head names it, and blocks are ruled apart so the panel reads as separate parts.
+```html
+<div class="cal-blocks">                                 <!-- side by side, a hairline between -->
+  <div class="cal-block"><div class="cal-block-h">tasks<span>11 of 15</span></div><cal-progress …></cal-progress></div>
+  <div class="cal-block"><div class="cal-block-h">budget</div><cal-meter …></cal-meter></div>
+</div>
+<div class="cal-block"><div class="cal-block-h">channels<span>days running</span></div><figure class="cal-figure">…</figure></div>
+```
+`.cal-block-h` is a 12px medium caps label in ink, with an optional muted note in a `<span>` (a last span goes to the right). Stacked `.cal-block`s get a hairline and 20px between them; inside `.cal-blocks` they sit side by side with a hairline between. Use them in any panel that holds more than one kind of thing.
+
+## App mode
+`data-mode="app"` on any ancestor (the screen, a dialog, a form) marks it as a tool rather than a document: section heads lose their sheet number, and section heads, table heads and key/value keys switch to sentence case. Use it on settings screens, forms and dialogs. Leave out FIG labels, title blocks, revision triangles and stamps there too.
 
 ## Buttons
-`<button class="cal-btn">copy</button>` renders as a bracketed legend word, `[COPY]`: muted, turning ink on hover. Variants:
-- `.primary`: ink text, turning lamp on hover.
-- `aria-pressed="true"`: ink; with `data-ink="ok|live|fault"`, green, lamp or red.
-- `.primary` with `data-ink="fault"`: a destructive main action, in red.
-- `.quiet`: no brackets, underlined, for secondary actions.
+Buttons come in tiers, so the main action always leads. All are 12px legend caps.
+- `.primary`: the one main action in a view, **filled with ink** (panel-coloured text). Give it a verb label ("send for approval"). One per view.
+- `.primary` with `data-ink="fault"`: a destructive main action, filled red.
+- default `<button class="cal-btn">preview</button>`: every other action, **a hairline box** in `--edge-strong` that turns ink on hover. Keep / rework / drop, prev / next, open a dialog.
+- `.inline`: a bracketed word, `[copy]`, for small actions in running text. Buttons inside toasts, affixed fields and code blocks get this look automatically.
+- `.quiet`: an underlined word for cancel, back and navigation links. Put it on the side away from the primary. `aria-current="page"` turns it ink.
+- `aria-pressed="false"` is muted; `aria-pressed="true"` turns text and box ink, or green, lamp or red with `data-ink="ok|live|fault"`.
 - `disabled`: faint.
 
 ## Tally (sign-off bar; add `.sticky` to pin it)
@@ -151,8 +167,8 @@ A legend line between rules: a short rule, the number and title in ink, a muted 
 <table class="cal-table">
   <thead><tr><th>no</th><th>figure</th><th>where</th><th>diff</th><th>effort</th><th>status</th></tr></thead>
   <tbody>
-    <tr><td>01</td><td>Load test lanes</td><td>release checklist</td><td><cal-diff added="212" removed="38" density="compact"></cal-diff></td><td class="effort">■■□</td><td class="st" data-ink="live">in review</td></tr>
-    <tr><td>02</td><td>Error budget ruler</td><td>SLO panel</td><td><cal-diff added="84" removed="12" density="compact"></cal-diff></td><td class="effort">■□□</td><td class="st" data-ink="ok">✓ shipped</td></tr>
+    <tr><td>01</td><td>Load test lanes</td><td>release checklist</td><td><cal-diff added="212" removed="38"></cal-diff></td><td class="effort">■■□</td><td class="st" data-ink="live">in review</td></tr>
+    <tr><td>02</td><td>Error budget ruler</td><td>SLO panel</td><td><cal-diff added="84" removed="12"></cal-diff></td><td class="effort">■□□</td><td class="st" data-ink="ok">✓ shipped</td></tr>
   </tbody>
 </table>
 ```
@@ -183,12 +199,12 @@ Inputs are write-in lines, like the boxes of a title block. `.hint` and `.err` s
 <div class="cal-field"><label for="notes">release notes</label>
   <div class="cal-term" data-max="200">
     <textarea class="cal-textarea" id="notes" spellcheck="false" aria-describedby="notes-h"></textarea>
-    <div class="bar" aria-hidden="true"><span class="mode">-- normal --</span><span class="sp"></span><span class="pos">ln 1, col 1</span><span class="cal-count"><b>000</b><span>/ 200</span></span></div>
+    <div class="bar" aria-hidden="true"><span class="sp"></span><span class="cal-count"><b>0</b><span>/ 200</span></span></div>
   </div>
   <span class="hint" id="notes-h">Up to 200 characters.</span>
 </div>
 ```
-A recessed pane with a block caret and no ruled lines. The status line reads like a terminal's: the mode (`-- insert --` in lamp while typing), the caret's line and column, and the boxed count, which turns red past `data-max` (the pane outline turns red too and the textarea gets `aria-invalid`). The JS keeps the bar current and fires `cal-count` on `.cal-term` (`detail: { length, max, over }`) so the page can swap its hint for an error. The bar is optional; without it the pane is just a quiet textarea.
+A recessed pane with a block caret and no ruled lines. By default the status line shows only the boxed count, which turns red past `data-max` (the pane outline turns red too and the textarea gets `aria-invalid`). The JS keeps the bar current and fires `cal-count` on `.cal-term` (`detail: { length, max, over }`) so the page can swap its hint for an error. The bar is optional; without it the pane is just a quiet textarea. For code, commit messages or prompts, add `data-status="editor"` to `.cal-term` and put `<span class="mode">-- normal --</span>` and `<span class="pos">ln 1, col 1</span>` in the bar: it then reads like a terminal's (the mode in lamp while typing, the caret's line and column, a zero-padded count). Without `data-status="editor"`, `.mode` and `.pos` stay hidden.
 
 ### Select and option list
 ```html
@@ -358,7 +374,7 @@ Drawn from the figures. The loop dial is the loop recipe in small: four square s
 `<nav class="cal-crumbs" aria-label="Breadcrumb"><ol><li><a href="…">checkout</a></li><li><a href="…">deploys</a></li><li aria-current="page">v2.14.0</li></ol></nav>`. A sheet path in legend type with faint slashes; the current page is ink and not a link.
 
 ### Pager
-`Calibrated.pager(document.querySelector('nav#pages'), { page: 3, pages: 12, onChange: (p) => … })` draws `[‹ prev] 01 02 [03] 04 … 12 [next ›]` into the nav: bracketed steps, underlined page numbers, the current page boxed and not a link, the middle folded into a faint ellipsis. Returns `{ set(page), page }`.
+`Calibrated.pager(document.querySelector('nav#pages'), { page: 3, pages: 12, onChange: (p) => … })` draws `‹ prev  1 2 [3] 4 … 12  next ›` into the nav: bracketed steps, underlined page numbers, the current page boxed and not a link, the middle folded into a faint ellipsis. Returns `{ set(page), page }`.
 
 ### Steps (wizard)
 ```html

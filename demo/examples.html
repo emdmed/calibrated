@@ -24,7 +24,7 @@ html, body { background: var(--gutter); }
 html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { display: none; }
 #theme { padding: 3px 4px; }
 #theme::before, #theme::after { content: none; }
-.nav { display: inline-flex; gap: 6px; }
+.nav { display: inline-flex; gap: 16px; }
 .nav a { text-decoration: none; }
 .nav a[aria-current="page"] { color: var(--fg); box-shadow: inset 0 -1px var(--live); }
 .gh { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); text-decoration: none; font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; padding: 4px 2px; }
@@ -68,7 +68,6 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
 /* small layout helpers used inside the pages */
 .now { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 26px 48px; padding: 18px 20px 20px; }
 .now > div { min-width: 0; overflow-x: auto; }
-.cell-h { font: 11px/1 var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
 .counts { display: flex; gap: 10px 18px; flex-wrap: wrap; align-items: center; }
 .figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr)); gap: var(--gap); }
 .row2 { display: flex; flex-wrap: wrap; gap: var(--gap); align-items: flex-start; }
@@ -148,10 +147,10 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
     <a class="word ruled" href="index.html">Calibrated</a>
     <span class="cal-caption lg">examples · finished pages</span>
     <span class="sp"></span>
-    <nav class="nav" aria-label="Site"><a class="cal-btn" href="index.html">catalog</a><a class="cal-btn" href="examples.html" aria-current="page">examples</a><a class="cal-btn" href="reference.html">reference</a></nav>
+    <nav class="nav" aria-label="Site"><a class="cal-btn quiet" href="index.html">catalog</a><a class="cal-btn quiet" href="examples.html" aria-current="page">examples</a><a class="cal-btn quiet" href="reference.html">reference</a></nav>
     <a class="cal-btn primary" href="index.html#get" style="text-decoration:none">install</a>
     <a class="gh" href="https://github.com/emdmed/calibrated" aria-label="Calibrated on GitHub"><svg aria-hidden="true"><use href="#i-gh"/></svg><span>github</span></a>
-    <button class="cal-btn" type="button" id="theme" aria-label="Switch to dark theme"><svg class="i-sun" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="3.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 1.5v2M9 14.5v2M1.5 9h2M14.5 9h2M3.7 3.7l1.4 1.4M12.9 12.9l1.4 1.4M3.7 14.3l1.4-1.4M12.9 5.1l1.4-1.4" stroke="currentColor" stroke-width="1.5"/></svg><svg class="i-moon" viewBox="0 0 18 18" aria-hidden="true"><path d="M14.8 11.2A6.3 6.3 0 0 1 6.8 3.2a6.3 6.3 0 1 0 8 8z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
+    <button class="cal-btn inline" type="button" id="theme" aria-label="Switch to dark theme"><svg class="i-sun" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="3.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 1.5v2M9 14.5v2M1.5 9h2M14.5 9h2M3.7 3.7l1.4 1.4M12.9 12.9l1.4 1.4M3.7 14.3l1.4-1.4M12.9 5.1l1.4-1.4" stroke="currentColor" stroke-width="1.5"/></svg><svg class="i-moon" viewBox="0 0 18 18" aria-hidden="true"><path d="M14.8 11.2A6.3 6.3 0 0 1 6.8 3.2a6.3 6.3 0 1 0 8 8z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
   </header>
 </div></div>
 
@@ -201,13 +200,13 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
       <section class="cal-sec">
         <div class="cal-sec-h"><b>1 · Now</b><span>limits and what is running</span><span>sheet 1/3</span></div>
         <div class="cal-panel now">
-          <div><div class="cell-h">error budget · 30 days</div><cal-meter value="612" max="1000" warn="800" label="budget used" format="raw" unit=" min" width="320"></cal-meter></div>
-          <div><div class="cell-h">ci minutes · cycle to 10 nov</div><cal-meter value="41200" max="50000" warn="40000" label="ci minutes" width="320"></cal-meter></div>
-          <div><div class="cell-h">release 2.14 · regions</div><cal-progress done="4" total="6" live="5" live-label="5 · ap-south canary" done-label="4 regions · 23 min"></cal-progress></div>
-          <div><div class="cell-h">this week</div><div class="counts"><span class="cal-count" data-n="4" data-noun="deploys"></span><span class="cal-count" data-n="1" data-noun="rolling" data-ink="live"></span><span class="cal-count" data-n="1" data-noun="over limit" data-ink="fault"></span><span class="cal-count" data-n="0" data-noun="rolled back"></span></div></div>
+          <div><div class="cal-block-h">error budget · 30 days</div><cal-meter value="612" max="1000" warn="800" label="budget used" format="raw" unit=" min" width="320"></cal-meter></div>
+          <div><div class="cal-block-h">ci minutes · cycle to 10 nov</div><cal-meter value="41200" max="50000" warn="40000" label="ci minutes" width="320"></cal-meter></div>
+          <div><div class="cal-block-h">release 2.14 · regions</div><cal-progress done="4" total="6" live="5" live-label="5 · ap-south canary" done-label="4 regions · 23 min"></cal-progress></div>
+          <div><div class="cal-block-h">this week</div><div class="counts"><span class="cal-count" data-n="4" data-noun="deploys"></span><span class="cal-count" data-n="1" data-noun="rolling" data-ink="live"></span><span class="cal-count" data-n="1" data-noun="over limit" data-ink="fault"></span><span class="cal-count" data-n="0" data-noun="rolled back"></span></div></div>
         </div>
         <div class="cal-panel now" style="margin-top:var(--gap);grid-template-columns:1fr">
-          <div><div class="cell-h">2.14 pipeline · today</div><cal-durations max="15" unit="m" width="560"><cal-span name="build" value="252"></cal-span><cal-span name="e2e tests" value="400"></cal-span><cal-span name="canary" live data-live="290"></cal-span></cal-durations></div>
+          <div><div class="cal-block-h">2.14 pipeline · today</div><cal-durations max="15" unit="m" width="560"><cal-span name="build" value="252"></cal-span><cal-span name="e2e tests" value="400"></cal-span><cal-span name="canary" live data-live="290"></cal-span></cal-durations></div>
         </div>
       </section>
 
@@ -224,10 +223,10 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
         <table class="cal-table" id="ops-roll">
           <thead><tr><th>no</th><th>service</th><th>change</th><th>diff</th><th class="num">ci min</th><th>status</th></tr></thead>
           <tbody>
-            <tr><td>01</td><td>checkout-api</td><td>rate-limit login attempts</td><td><cal-diff added="212" removed="38" density="compact"></cal-diff></td><td class="num">1 840</td><td class="st" data-ink="live">rolling</td></tr>
-            <tr><td>02</td><td>payments</td><td>retry with idempotency keys</td><td><cal-diff added="84" removed="12" density="compact"></cal-diff></td><td class="num">610</td><td class="st" data-ink="ok">live</td></tr>
-            <tr><td>03</td><td>cart</td><td>remove legacy coupons</td><td><cal-diff added="9" removed="1460" density="compact"></cal-diff></td><td class="num">420</td><td class="st" data-ink="ok">live</td></tr>
-            <tr><td>04</td><td>e2e suite</td><td>checkout tests, 3 browsers</td><td><cal-diff added="2310" removed="0" density="compact"></cal-diff></td><td class="num">6 900</td><td class="st" data-ink="fault">over ci budget</td></tr>
+            <tr><td>01</td><td>checkout-api</td><td>rate-limit login attempts</td><td><cal-diff added="212" removed="38"></cal-diff></td><td class="num">1 840</td><td class="st" data-ink="live">rolling</td></tr>
+            <tr><td>02</td><td>payments</td><td>retry with idempotency keys</td><td><cal-diff added="84" removed="12"></cal-diff></td><td class="num">610</td><td class="st" data-ink="ok">live</td></tr>
+            <tr><td>03</td><td>cart</td><td>remove legacy coupons</td><td><cal-diff added="9" removed="1460"></cal-diff></td><td class="num">420</td><td class="st" data-ink="ok">live</td></tr>
+            <tr><td>04</td><td>e2e suite</td><td>checkout tests, 3 browsers</td><td><cal-diff added="2310" removed="0"></cal-diff></td><td class="num">6 900</td><td class="st" data-ink="fault">over ci budget</td></tr>
           </tbody>
         </table>
         <div class="pager-row"><span class="cal-legend" id="ops-wk">week 44 · 4 deploys</span><span class="sp"></span><nav id="ops-pages" aria-label="Weeks"></nav></div>
@@ -318,12 +317,12 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
         <div class="cal-field" style="max-width:720px"><label for="rel-note">note for #release</label>
           <div class="cal-term" data-max="280">
             <textarea class="cal-textarea" id="rel-note" spellcheck="false" aria-describedby="rel-note-h">Backfill runs mon 02:00. Tomás is on call until 03:00; ping him before touching orders.</textarea>
-            <div class="bar" aria-hidden="true"><span class="mode">-- normal --</span><span class="sp"></span><span class="pos">ln 1, col 1</span><span class="cal-count"><b>000</b><span>/ 280</span></span></div>
+            <div class="bar" aria-hidden="true"><span class="sp"></span><span class="cal-count"><b>0</b><span>/ 280</span></span></div>
           </div>
           <span class="hint" id="rel-note-h">Slack cuts the preview at 280 characters.</span>
         </div>
       </section>
-      <div class="cal-tally sticky" id="rel-tally"><span data-n>0 of 3 signed</span><span class="sp"></span><span class="mut" data-msg role="status"></span><button class="cal-btn" type="button" data-copy-signoff>copy sign-off</button></div>
+      <div class="cal-tally sticky" id="rel-tally"><span data-n>0 of 3 signed</span><span class="sp"></span><span class="mut" data-msg role="status"></span><button class="cal-btn primary" type="button" data-copy-signoff>copy sign-off</button></div>
       <footer class="cal-foot"><span>release 2.4 · rel-024 · rev B</span><span>source: git, migrate --dry-run, github prs</span></footer>
     </div>
   </section>
@@ -414,7 +413,7 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
           <span class="word">Orders API</span>
           <span class="cal-caption lg">spec sheet · v3</span>
           <span class="sp"></span>
-          <span class="cal-stamp">approved for use</span>
+          <span class="cal-stamp" data-ink="ok">approved for use</span>
         </header>
         <section class="cal-intro">
           <h1>Create, read and refund orders over HTTPS.</h1>
@@ -429,9 +428,9 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
         <section class="cal-sec">
           <div class="cal-sec-h"><b>2 · Limits</b><span>per partner key</span><span>sheet 2/4</span></div>
           <div class="cal-panel limits">
-            <div><div class="cell-h">request timeout</div><cal-ruler min="0" max="30" step="1" every="5" unit="s" value="10" width="300" up></cal-ruler><p>Requests are cut at 10 s. Refunds can take up to 8 s.</p></div>
-            <div><div class="cell-h">payload</div><cal-ruler min="0" max="10" step="0.5" every="4" unit=" MB" value="2" width="300" up></cal-ruler><p>2 MB per request. Batch creates take up to 100 orders.</p></div>
-            <div><div class="cell-h">rate · acme today</div><cal-meter value="412" max="600" warn="480" label="req/min" format="raw" width="300"></cal-meter><p>600 per minute per key. Past 480 the response carries a warning header.</p></div>
+            <div><div class="cal-block-h">request timeout</div><cal-ruler min="0" max="30" step="1" every="5" unit="s" value="10" width="300" up></cal-ruler><p>Requests are cut at 10 s. Refunds can take up to 8 s.</p></div>
+            <div><div class="cal-block-h">payload</div><cal-ruler min="0" max="10" step="0.5" every="4" unit=" MB" value="2" width="300" up></cal-ruler><p>2 MB per request. Batch creates take up to 100 orders.</p></div>
+            <div><div class="cal-block-h">rate · acme today</div><cal-meter value="412" max="600" warn="480" label="req/min" format="raw" width="300"></cal-meter><p>600 per minute per key. Past 480 the response carries a warning header.</p></div>
           </div>
         </section>
 
@@ -490,7 +489,7 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
       <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-tokens</code> · <code>calibrated-components</code></dd><dt>instruments</dt><dd><code>&lt;cal-meter&gt;</code> · <code>&lt;cal-position&gt;</code> · <code>&lt;cal-durations&gt;</code></dd><dt>parts</dt><dd>tabs with counts · rows · number with units · range · tag input · a field with an error · checkbox · search with an empty state · dialog with radio and date · toasts</dd><dt>theme</dt><dd>three seed colours: <code>--bg</code> <code>--fg</code> <code>--live</code></dd></dl>
     </div>
     <div class="finish-row" role="group" aria-label="Brand finish" id="app-fin"></div>
-    <div class="page cal-theme" id="app-page" data-density="full">
+    <div class="page cal-theme" id="app-page" data-density="full" data-mode="app">
       <header class="cal-mast">
         <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
         <span class="word">Northwind</span>
@@ -500,9 +499,9 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
       </header>
       <div class="cal-tabs" role="tablist" aria-label="Workspace" style="margin-top:16px">
         <button role="tab" aria-selected="false">overview</button>
-        <button role="tab" aria-selected="true">usage<span class="cal-cnt">03</span></button>
+        <button role="tab" aria-selected="true">usage<span class="cal-cnt">3</span></button>
         <button role="tab" aria-selected="false">members<span class="cal-cnt">12</span></button>
-        <button role="tab" aria-selected="false">api keys<span class="cal-cnt">02</span></button>
+        <button role="tab" aria-selected="false">api keys<span class="cal-cnt">2</span></button>
         <button role="tab" aria-selected="false">billing</button>
       </div>
       <div class="app">
@@ -519,9 +518,9 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
           <div class="cal-panel">
             <div class="panel-h"><span class="cal-legend" style="color:var(--fg)">mobile app · this month</span><span class="sp"></span><cal-position index="3" count="4" label="projects"></cal-position></div>
             <div class="now" style="padding:0">
-              <div><div class="cell-h">events</div><cal-meter value="2300000" max="3000000" warn="2400000" label="events" width="300"></cal-meter></div>
-              <div><div class="cell-h">seats</div><cal-meter value="12" max="12" warn="9" label="seats" format="raw" width="300"></cal-meter></div>
-              <div><div class="cell-h">storage</div><cal-meter value="38" max="100" warn="80" label="storage" format="raw" unit=" GB" width="300"></cal-meter></div>
+              <div><div class="cal-block-h">events</div><cal-meter value="2300000" max="3000000" warn="2400000" label="events" width="300"></cal-meter></div>
+              <div><div class="cal-block-h">seats</div><cal-meter value="12" max="12" warn="9" label="seats" format="raw" width="300"></cal-meter></div>
+              <div><div class="cal-block-h">storage</div><cal-meter value="38" max="100" warn="80" label="storage" format="raw" unit=" GB" width="300"></cal-meter></div>
             </div>
           </div>
           <div class="cal-panel">
@@ -542,7 +541,7 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
                 <div class="cal-chips" id="cc" aria-labelledby="cc-l"><span class="chip">#mobile<button type="button" aria-label="Remove #mobile">×</button></span><span class="chip">#ops<button type="button" aria-label="Remove #ops">×</button></span><input aria-label="Add a channel" placeholder="add a channel"></div></div>
               <label class="cal-check wide"><input type="checkbox" checked> <span>Pause exports at the cap</span></label>
             </form>
-            <div class="btns"><button class="cal-btn quiet" type="button" id="reset">cancel</button><button class="cal-btn primary" type="submit" form="limits" id="save">save</button></div>
+            <div class="btns"><button class="cal-btn quiet" type="button" id="reset">cancel</button><button class="cal-btn primary" type="submit" form="limits" id="save">save changes</button></div>
           </div>
           <div class="cal-panel">
             <div class="panel-h"><span class="cal-legend" style="color:var(--fg)">api keys</span><span class="cal-count" id="key-n"><b>04</b><span>keys</span></span><span class="sp"></span>
@@ -588,7 +587,7 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
       </div>
       <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-components</code></dd><dt>parts</dt><dd>steps · fields with an error · select · tag input · file drop · radio · date and time · note pane · key/value review · checkbox · stamp · status badge · node row while sending</dd></dl>
     </div>
-    <div class="page cal-theme" data-density="full">
+    <div class="page cal-theme" data-density="full" data-mode="app">
       <header class="cal-mast">
         <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
         <span class="word">Harbourline</span>
@@ -640,13 +639,13 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
               <div class="cal-field"><label for="sp-note">anything we should know</label>
                 <div class="cal-term" data-max="500">
                   <textarea class="cal-textarea" id="sp-note" spellcheck="false" placeholder="minimum orders, holidays, cold-chain notes">Minimum order 40 kg. We do not deliver on Norwegian public holidays.</textarea>
-                  <div class="bar" aria-hidden="true"><span class="mode">-- normal --</span><span class="sp"></span><span class="pos">ln 1, col 1</span><span class="cal-count"><b>000</b><span>/ 500</span></span></div>
+                  <div class="bar" aria-hidden="true"><span class="sp"></span><span class="cal-count"><b>0</b><span>/ 500</span></span></div>
                 </div></div>
             </fieldset>
             <fieldset class="cal-group step" data-step="4" hidden><legend><b>4 · Review</b><span>check it, then send</span></legend>
               <dl class="cal-kv" id="sp-sum"></dl>
               <label class="cal-check"><input type="checkbox" id="sp-ok"> <span>The information above is correct</span></label>
-              <div class="done-row" id="sp-done" hidden><span class="cal-stamp">received</span><p class="mut" style="font-size:13px;max-width:46ch">Procurement has it and replies within two working days.</p></div>
+              <div class="done-row" id="sp-done" hidden><span class="cal-stamp" data-ink="ok">received</span><p class="mut" style="font-size:13px;max-width:46ch">Procurement has it and replies within two working days.</p></div>
             </fieldset>
           </form>
           <div class="btns"><button class="cal-btn" type="button" id="sp-back" disabled>back</button><span class="sp"></span><span class="mut" style="font-size:12.5px" id="sp-msg" role="status"></span><button class="cal-btn primary" type="button" id="sp-next">next · documents</button></div>
@@ -862,7 +861,7 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
   const group = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
   Calibrated.pager($('#ops-pages'), { page: 4, pages: 4, onChange: (p) => {
     const wk = 40 + p, rows = WEEKS[wk];
-    roll.innerHTML = rows ? rows.map(([svc, chg, add, rem, ci, ink, st], i) => `<tr><td>${String(i + 1).padStart(2, '0')}</td><td>${svc}</td><td>${chg}</td><td><cal-diff added="${add}" removed="${rem}" density="compact"></cal-diff></td><td class="num">${group(ci)}</td><td class="st" data-ink="${ink}">${st}</td></tr>`).join('') : wk44;
+    roll.innerHTML = rows ? rows.map(([svc, chg, add, rem, ci, ink, st], i) => `<tr><td>${String(i + 1).padStart(2, '0')}</td><td>${svc}</td><td>${chg}</td><td><cal-diff added="${add}" removed="${rem}"></cal-diff></td><td class="num">${group(ci)}</td><td class="st" data-ink="${ink}">${st}</td></tr>`).join('') : wk44;
     wkLabel.textContent = `week ${wk} · ${roll.rows.length} deploys`;
   } });
 

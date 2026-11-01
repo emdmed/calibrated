@@ -21,13 +21,13 @@ typography:
   display:
     fontFamily: "IBM Plex Mono, ui-monospace, SF Mono, Menlo, Consolas, monospace"
     fontSize: "clamp(28px, 3.2vw, 42px)"
-    fontWeight: 400
+    fontWeight: 500
     lineHeight: 1.12
     letterSpacing: "0.02em"
   title:
     fontFamily: "IBM Plex Mono, ui-monospace, SF Mono, Menlo, Consolas, monospace"
     fontSize: "19px"
-    fontWeight: 400
+    fontWeight: 500
     lineHeight: 1.25
     letterSpacing: "0.03em"
   body:
@@ -119,8 +119,8 @@ The base is warm ink on a paper or slate panel, plus three meaningful inks: lamp
 - **Lamp** (`lamp` / `night-lamp`): The one live thing. Used as stroke and text colour: the live lane, the live station name, the live value and its box outline, the live count, the live status cell, the `.live` word in running text, and the star node. On film it's a dark amber so lamp text stays readable on paper. A 16% lamp tint (`--swipe`) exists for marking an area, and is used rarely. `--glow` (55% lamp) is the halo behind the star.
 
 ### Tertiary
-- **Markup Red** (`markup-red` / `night-markup`): Faults, limits, alert thresholds, invalid fields, revision triangles and the SUPERSEDED stamp.
-- **Check Green** (`check-green` / `night-check`): Passed and kept: shipped statuses, the pressed `[keep]`, a kept card's number badge.
+- **Markup Red** (`markup-red` / `night-markup`): Faults, limits, alert thresholds, invalid fields, revision triangles and the SUPERSEDED stamp. Never approvals: an "approved" stamp is green.
+- **Check Green** (`check-green` / `night-check`): Passed, kept and approved: shipped statuses, the pressed `[keep]`, a kept card's number badge, an approval stamp.
 
 ### Neutral
 - **Paper** (`paper`): The panel (`--bg`, `--panel`) on film. At night: **Night Slate** (`night-slate`), a deep blue-grey.
@@ -143,13 +143,22 @@ The base is warm ink on a paper or slate panel, plus three meaningful inks: lamp
 **Character:** A typewriter on a bench. Words are set in IBM Plex Mono; titles are the same face in uppercase at regular weight, tracked a little. Chivo Mono, tighter and smaller, carries every legend: labels, numbers, tags, table heads and every figure label, with tabular figures so values line up in boxes and columns.
 
 ### Hierarchy
-- **Display** (400, `clamp(28px, 3.2vw, 42px)`, 1.12, 0.02em, uppercase): The page headline, one per page, set left beside a short lede.
-- **Title** (400, 19px, 1.25, 0.03em, uppercase): Card headings and the title-block name (17px).
+- **Display** (500, `clamp(28px, 3.2vw, 42px)`, 1.12, 0.02em, uppercase): The page headline, one per page, set left beside a short lede.
+- **Title** (500, 19px, 1.25, 0.03em, uppercase): Card headings and the title-block name (17px).
+- **Section** (500, 16px, 1.2, sentence case): The name in a section head (`2 · Review board`), with its note at 12px muted and the sheet number in legend caps.
+- **Block** (Chivo Mono 500, 12px, 0.05em, uppercase, ink): The head of one group inside a panel (`BUDGET`), with an optional muted note.
 - **Body** (400, 14px, 1.6): Running text. Ledes cap at 62–72ch, card text at 46ch. Small text is 12–13px.
-- **Legend** (Chivo Mono 400, 11px, 0.05em, uppercase for labels, tabular): Section heads, tags, keys, table heads, buttons, tabs, counts, the tally, the footer and every SVG label. Ligatures are off.
+- **Legend** (Chivo Mono 400, 11px, 0.05em, uppercase for labels, tabular): Section heads, tags, keys, table heads, counts, the tally, the footer and every SVG label. Ligatures are off.
+- **Control** (Chivo Mono 400, 12px): Buttons and tabs in caps; field labels, group legends and helper text in sentence case. What people click or fill in is never below 12px.
 
 ### Named Rules
-**The All-Mono Rule.** Every word on the page is monospace. Titles get their weight from caps and tracking, not from bold.
+**The All-Mono Rule.** Every word on the page is monospace. Titles get their weight from caps, tracking and medium (500) weight, never from bold (600+).
+
+**The Four-Steps Rule.** Every view reads in four steps: headline (display), section (16px, medium), block (12px medium caps, ink), then labels and scales (11px, muted or faint). If two steps look alike, the lower one gets quieter.
+
+**The Short-Caps Rule.** Caps are for short labels: titles, section heads, tags, table heads, buttons. Field labels, helper text, errors and anything longer than four words stay in sentence case, so forms read like forms.
+
+**The Usable-First Rule.** A page works as an ordinary, well-made page before it looks like a drawing: the usual layout for its task, one main action that looks like a button, every fact still on the figure that replaces it. Drafting terms (FIG, SHEET, REV, title blocks, stamps) belong to document pages; app screens and forms use `data-mode="app"` and leave them out. See `skills/calibrated-components/references/ux-rules.md`.
 
 **The Legible Legend Rule.** Figure legends never render below 10px. A figure wider than 200px sets a `min-width` of 90% of its natural size, and its container scrolls on narrow screens instead of shrinking the drawing.
 
@@ -175,12 +184,13 @@ All containers and controls are square (0px radius). Lines are hairlines: 1px `-
 ## Components
 
 ### Buttons
-A bracketed word: `[keep]`, `[roll back]`, `[copy sign-off]`.
-- **Default:** Muted legend text in brackets, no border, no fill. Hover turns ink.
-- **Primary:** Ink text; hover turns lamp.
-- **Pressed toggles:** `aria-pressed` turns ink, or green / red when `data-ink` is `ok` / `fault` (the keep/drop sign-off).
-- **Quiet:** No brackets; an `--edge-strong` underline that darkens on hover.
-- **Disabled:** Faint text.
+Four tiers in 12px legend caps, so the main action always leads.
+- **Primary:** The one main action per view, filled with ink and set in panel-coloured text. Labelled with a verb. A destructive primary is filled red. Never filled with the lamp.
+- **Default:** Every other action. Ink text in an `--edge-strong` hairline box that turns ink on hover.
+- **Inline:** A bracketed word, `[copy]`, for small actions in running text, toasts, fields and code blocks.
+- **Quiet:** An underlined word for cancel, back and navigation.
+- **Pressed toggles:** Unpressed is muted. `aria-pressed` turns text and box ink, or green / red when `data-ink` is `ok` / `fault` (the keep/drop sign-off).
+- **Disabled:** Faint text, faint box.
 
 ### Tabs
 Legend keys in a row. The open one turns ink with a 1px ink underline. Counts sit beside the key in a small outlined box.
@@ -237,6 +247,7 @@ The demo (`demo/index.html`) and the reference (`demo/reference.html`) are docs 
 - **Don't** light more than one live item in a figure or working view.
 - **Don't** frame panels in thick ink borders or round their corners.
 - **Don't** add drop shadows or gradients. The star's glow is the only one.
-- **Don't** use bold for titles. Caps and tracking carry them.
+- **Don't** use bold (600+) for titles. Caps, tracking and medium weight carry them.
+- **Don't** let a panel hold several groups without block heads or rules between them.
 - **Don't** draw checks or stars with text glyphs inside figures. Use the kit's marks.
 - **Don't** tilt the SUPERSEDED or verdict stamp. Markup stamps sit square.
