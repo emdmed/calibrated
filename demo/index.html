@@ -15,8 +15,9 @@
    cal-tiers, cal-btn. Only the Plain / Calibrated layering is custom. */
 @property --wipe { syntax: '<percentage>'; inherits: true; initial-value: 100%; }
 html { scroll-behavior: smooth; scroll-padding-top: 76px; }
-html, body { background: var(--bg); }
-.top { position: sticky; top: 0; z-index: 20; background: var(--bg); }
+html, body { background: var(--gutter); }
+@media (max-width: 640px) { html { scroll-padding-top: 104px; } }
+.top { position: sticky; top: 0; z-index: 20; background: var(--gutter); }
 .top .cal-mast { padding: 12px 0 10px; }
 .top .word.ruled { font-size: 20px; }
 .btn-pair { display: inline-flex; gap: 6px; }
@@ -37,12 +38,12 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
 .order { margin-top: 0; }
 .order-h { display: flex; align-items: baseline; gap: 10px; margin-bottom: 8px; }
 .order-h .sp { flex: 1; }
-.order pre { margin: 0; font: 13px/1.75 var(--font-legend); color: var(--fg); background: var(--well); padding: 10px 14px; white-space: pre; overflow-x: auto; border-left: var(--line-thin) solid var(--edge-strong); }
+.order .cal-code pre { font-size: 13px; color: var(--fg); }
 .order .alt { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 20px; margin-top: 10px; font-size: 13px; color: var(--muted); }
 .order .alt a:not(.gh) { color: var(--legend); }
 
 /* the example: plain layer under, calibrated layer over; the switch wipes between them */
-.ba { display: grid; grid-template-columns: minmax(0, 1fr); position: relative; background: var(--bg); overflow: hidden; --wipe: 100%; transition: --wipe .9s cubic-bezier(.16, 1, .3, 1); }
+.ba { display: grid; grid-template-columns: minmax(0, 1fr); position: relative; background: var(--panel); overflow: hidden; --wipe: 100%; transition: --wipe .9s cubic-bezier(.16, 1, .3, 1); }
 .ba.is-plain, html.pre .ba { --wipe: 0%; }
 /* a plain example is a button: clicking it calibrates that one example */
 .ba.is-plain > .plain { cursor: pointer; }
@@ -52,17 +53,18 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
 .ba.is-plain > .hint { opacity: 1; transform: none; }
 .ba.is-plain:hover > .hint { border-color: var(--live); }
 .ba > .layer { grid-area: 1 / 1; min-width: 0; position: relative; }
-.ba > .art { clip-path: inset(0 calc(100% - var(--wipe)) 0 0); padding: 8px 0 4px; overflow-x: auto; }
+.ba > .art { clip-path: inset(0 calc(100% - var(--wipe)) 0 0); padding: clamp(20px, 2.6vw, 36px); overflow-x: auto; }
+/* only the layer on show sets the height, so a shorter page leaves no empty band (both stay in flow while the wipe runs) */
+.ba:not(.is-plain):not(.sweep) > .plain, .ba.is-plain:not(.sweep) > .art { position: absolute; top: 0; left: 0; right: 0; }
 /* inside an example the figures stand on the sheet: no frames, no caption strips */
 .art .cal-figure { border: 0; background: none; display: block; overflow-x: auto; }
 .art .cal-figure > svg { margin: 0; max-width: 100%; justify-self: safe center; }
 .art .cal-figure > figcaption { display: none; }
 .ba::after { content: ""; position: absolute; top: 0; bottom: 0; left: calc(var(--wipe) - 1px); width: 1.6px; background: var(--live); box-shadow: 0 0 6px var(--glow); opacity: 0; transition: opacity .25s ease-out; pointer-events: none; z-index: 3; }
 .ba.sweep::after { opacity: 1; }
-.ba.tinted > .art { padding: 22px 26px 26px; }
 .art .cal-mast { padding: 2px 0 12px; gap: 10px; }
 .art .cal-mast .word { font-size: 19px; }
-.art h2.hd { font-family: var(--font-display); font-weight: 400; letter-spacing: var(--track-title); text-transform: uppercase; color: var(--title); font-size: clamp(21px, 2.1vw, 28px); line-height: 1.2; margin: 6px 0 16px; text-wrap: balance; max-width: 24ch; }
+.art h2.hd { font-family: var(--font-display); font-weight: 400; letter-spacing: var(--track-title); text-transform: uppercase; color: var(--title); font-size: clamp(20px, 2vw, 26px); line-height: 1.2; margin: 6px 0 20px; text-wrap: balance; max-width: 32ch; }
 .art .cal-mast + h2.hd { margin-top: 18px; }
 .art h2.hd .live { color: var(--live); }
 .art .grid2 { display: flex; flex-wrap: wrap; gap: 28px 64px; }
@@ -77,41 +79,160 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
 .art .row2 > * { min-width: 0; max-width: 100%; }
 .art .row2 > dl, .art .row2 > table { flex: 1 1 320px; }
 .art .cal-revs { width: 100%; }
-.art .form { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px 22px; align-items: end; }
 .art .btns { display: flex; gap: 8px; justify-content: flex-end; align-items: center; margin-top: 16px; }
+
+/* sections: a chapter break well over twice the largest gap inside a section */
+main > .cal-sec { margin-top: clamp(72px, 9vw, 128px); }
+main > .cal-sec > .cal-sec-h { margin-bottom: 26px; }
+@media (min-width: 641px) { main > .cal-sec > .cal-sec-h b { font-size: 13px; } }
 
 /* the sentence that makes it */
 .ask { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; margin-top: 14px; color: var(--legend); }
 .ask q { quotes: "“" "”"; }
 
-/* the plain layer: a page without Calibrated (deliberately generic) */
-.plain { border-radius: 4px; font: 400 14px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color: #1e293b; background: #f8fafc; padding: 20px 22px 24px; letter-spacing: 0; }
-.plain .p-head { background: #6366f1; color: #fff; border-radius: 14px; padding: 18px 20px; margin-bottom: 14px; }
-.plain .p-head b { display: block; font-size: 20px; font-weight: 700; }
-.plain .p-head span { opacity: .85; font-size: 13px; }
-.plain .p-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 14px; }
-.plain .p-card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(15, 23, 42, .1); padding: 14px 16px; }
-.plain .p-card small { display: block; color: #64748b; font-size: 12.5px; }
-.plain .p-card strong { display: block; font-size: 24px; font-weight: 700; color: #0f172a; }
-.plain .p-bar { height: 8px; border-radius: 99px; background: #e2e8f0; margin-top: 8px; overflow: hidden; }
-.plain .p-bar i { display: block; height: 100%; border-radius: inherit; background: #3b82f6; }
-.plain h4 { font-size: 15px; font-weight: 600; margin: 4px 0 6px; color: #0f172a; }
-.plain ul { padding-left: 20px; margin: 0 0 12px; }
-.plain li { margin: 3px 0; }
-.plain p { margin: 0 0 10px; }
-.plain .p-btn { display: inline-block; background: #3b82f6; color: #fff; border-radius: 8px; padding: 7px 14px; font-weight: 600; font-size: 13px; margin-right: 6px; }
-.plain .p-btn.ghost { background: #e2e8f0; color: #334155; }
-.plain table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(15, 23, 42, .1); }
-.plain td, .plain th { padding: 8px 12px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
-.plain th { color: #64748b; font-weight: 600; }
-.plain .pill { display: inline-block; border-radius: 99px; padding: 1px 9px; font-size: 12px; background: #dbeafe; color: #1d4ed8; }
-.plain .pill.g { background: #dcfce7; color: #15803d; }
+/* the plain layer: the same page as a good, ordinary Claude artifact would make it */
+.plain { --p-bg: #fafaf9; --p-card: #fff; --p-line: #e7e5e4; --p-ink: #1c1917; --p-text: #44403c; --p-mut: #78716c; --p-soft: #f5f5f4;
+  --p-acc: #2563eb; --p-acc-soft: #eff6ff; --p-ok: #15803d; --p-ok-soft: #f0fdf4; --p-warn: #b45309; --p-warn-soft: #fffbeb; --p-warn-line: #fcd34d; --p-bad: #dc2626; --p-bad-soft: #fef2f2;
+  border-radius: 12px; font: 400 14px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, Roboto, sans-serif; color: var(--p-text); background: var(--p-bg); padding: 26px 28px 58px; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: #3a3633; --p-ink: #fafaf9; --p-text: #d6d3d1; --p-mut: #a8a29e; --p-soft: #302c29;
+  --p-acc: #60a5fa; --p-acc-soft: #1e293b; --p-ok: #4ade80; --p-ok-soft: #14271c; --p-warn: #fbbf24; --p-warn-soft: #2b2316; --p-warn-line: #78591a; --p-bad: #f87171; --p-bad-soft: #2d1b1b; }
+.plain > * + * { margin-top: 18px; }
+.plain .p-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; padding-bottom: 18px; border-bottom: 1px solid var(--p-line); }
+.plain .p-eye { font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--p-mut); }
+.plain .p-title { font-size: 22px; font-weight: 650; color: var(--p-ink); letter-spacing: -.01em; line-height: 1.25; margin-top: 4px; }
+.plain .p-sub { font-size: 13px; color: var(--p-mut); margin-top: 4px; }
+.plain .p-h { font-size: 14px; font-weight: 600; color: var(--p-ink); margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+.plain .p-h .p-mute { font-weight: 400; }
+.plain .p-mute { color: var(--p-mut); font-size: 13px; }
+.plain .p-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.plain .p-card { background: var(--p-card); border: 1px solid var(--p-line); border-radius: 10px; padding: 14px 16px; }
+.plain .p-kpi small { display: block; font-size: 12.5px; color: var(--p-mut); }
+.plain .p-kpi strong { display: block; font-size: 26px; font-weight: 650; color: var(--p-ink); letter-spacing: -.02em; line-height: 1.2; margin: 2px 0; }
+.plain .p-kpi strong em { font-style: normal; font-size: 15px; font-weight: 500; color: var(--p-mut); letter-spacing: 0; }
+.plain .p-bar { position: relative; height: 6px; border-radius: 99px; background: var(--p-soft); margin-top: 10px; }
+.plain .p-bar i { display: block; height: 100%; border-radius: inherit; background: var(--p-acc); }
+.plain .p-bar i.warn { background: #f59e0b; } .plain .p-bar i.bad { background: var(--p-bad); }
+.plain .p-bar b { position: absolute; top: -3px; bottom: -3px; width: 2px; border-radius: 1px; background: var(--p-ink); opacity: .55; }
+.plain .p-badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 99px; padding: 2px 10px; font-size: 12px; font-weight: 500; white-space: nowrap; background: var(--p-soft); color: var(--p-text); }
+.plain .p-badge::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.plain .p-badge.ok { background: var(--p-ok-soft); color: var(--p-ok); }
+.plain .p-badge.warn { background: var(--p-warn-soft); color: var(--p-warn); }
+.plain .p-badge.acc { background: var(--p-acc-soft); color: var(--p-acc); }
+.plain .p-badge.bad { background: var(--p-bad-soft); color: var(--p-bad); }
+.plain .p-callout { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--p-warn-line); background: var(--p-warn-soft); border-radius: 10px; padding: 11px 14px; font-size: 13.5px; color: var(--p-text); }
+.plain .p-callout svg { flex: none; width: 16px; height: 16px; margin-top: 2px; color: var(--p-warn); }
+.plain .p-callout.info { border-color: var(--p-line); background: var(--p-card); }
+.plain .p-callout.info svg { color: var(--p-acc); }
+.plain .p-callout b { color: var(--p-ink); font-weight: 600; }
+.plain .p-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--p-card); border: 1px solid var(--p-line); border-radius: 10px; overflow: hidden; }
+.plain .p-table th, .plain .p-table td { padding: 9px 14px; text-align: left; border-bottom: 1px solid var(--p-line); font-size: 13.5px; }
+.plain .p-table tr:last-child td { border-bottom: 0; }
+.plain .p-table th { background: var(--p-soft); color: var(--p-mut); font-size: 12px; font-weight: 600; }
+.plain .p-table td.n, .plain .p-table th.n { text-align: right; }
+.plain .p-table td:first-child { color: var(--p-ink); font-weight: 500; }
+.plain .p-btns { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.plain .p-btn { display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; padding: 7px 14px; font-weight: 500; font-size: 13px; background: var(--p-ink); color: var(--p-bg); border: 1px solid var(--p-ink); }
+.plain .p-btn.ghost { background: var(--p-card); color: var(--p-ink); border-color: var(--p-line); }
+.plain .p-btn.danger { background: none; border-color: transparent; color: var(--p-bad); padding-inline: 4px; }
+.plain .p-cmp { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin: 10px 0 14px; }
+.plain .p-cmp > div { border-radius: 8px; padding: 10px 12px; background: var(--p-soft); font-size: 13px; }
+.plain .p-cmp > div.new { background: var(--p-acc-soft); }
+.plain .p-cmp small { display: block; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--p-mut); margin-bottom: 6px; }
+.plain .p-cmp .new small { color: var(--p-acc); }
+.plain .p-plans { display: flex; gap: 6px; }
+.plain .p-plans span { flex: 1; text-align: center; border: 1px solid var(--p-line); background: var(--p-card); border-radius: 6px; padding: 4px 0; font-size: 12px; }
+.plain .p-plans span.on { border-color: var(--p-acc); color: var(--p-acc); font-weight: 600; }
+.plain .p-dots { display: flex; gap: 4px; align-items: center; font-size: 12px; color: var(--p-mut); }
+.plain .p-dots i { flex: 1; height: 5px; border-radius: 99px; background: var(--p-line); }
+.plain .p-dots i.done { background: var(--p-acc); opacity: .5; } .plain .p-dots i.on { background: var(--p-acc); }
+.plain .p-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; counter-reset: st; }
+.plain .p-steps > div { position: relative; padding-top: 38px; font-size: 13px; }
+.plain .p-steps > div::before { counter-increment: st; content: counter(st); position: absolute; top: 0; left: 0; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 600; background: var(--p-soft); color: var(--p-mut); border: 1px solid var(--p-line); }
+.plain .p-steps > div::after { content: ""; position: absolute; top: 14px; left: 36px; right: 0; height: 2px; background: var(--p-line); }
+.plain .p-steps > div:last-child::after { content: none; }
+.plain .p-steps > .done::before { content: "✓"; background: var(--p-ok-soft); color: var(--p-ok); border-color: transparent; }
+.plain .p-steps > .done::after { background: var(--p-ok); opacity: .4; }
+.plain .p-steps > .on::before { background: var(--p-acc); color: #fff; border-color: transparent; box-shadow: 0 0 0 4px var(--p-acc-soft); }
+.plain .p-steps b { display: block; color: var(--p-ink); font-weight: 600; }
+.plain .p-steps span { color: var(--p-mut); font-size: 12.5px; }
+.plain .p-people > div { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--p-line); font-size: 13.5px; }
+.plain .p-people > div:last-child { border-bottom: 0; padding-bottom: 0; }
+.plain .p-people > div:first-child { padding-top: 0; }
+.plain .p-av { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 11.5px; font-weight: 600; background: var(--p-soft); color: var(--p-text); }
+.plain .p-people .who { flex: 1; min-width: 0; } .plain .p-people .who b { color: var(--p-ink); font-weight: 500; }
+.plain .p-faq > div { border-top: 1px solid var(--p-line); padding: 10px 0; font-size: 13.5px; }
+.plain .p-faq > div:last-child { border-bottom: 1px solid var(--p-line); }
+.plain .p-faq b { display: flex; justify-content: space-between; color: var(--p-ink); font-weight: 500; }
+.plain .p-faq b::after { content: "+"; color: var(--p-mut); font-weight: 400; }
+.plain .p-faq .open b::after { content: "−"; }
+.plain .p-faq p { margin: 6px 0 0; color: var(--p-mut); }
+.plain .p-log { font-size: 13.5px; }
+.plain .p-log > div { display: flex; gap: 10px; align-items: baseline; padding: 4px 0; }
+.plain .p-log code { font: 600 12px ui-monospace, monospace; background: var(--p-soft); color: var(--p-ink); border-radius: 4px; padding: 1px 6px; }
+.plain .p-log time { color: var(--p-mut); font-size: 12.5px; margin-left: auto; }
+.plain .p-tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--p-line); font-size: 13.5px; font-weight: 500; }
+.plain .p-tabs span { padding: 0 0 9px; color: var(--p-mut); display: inline-flex; gap: 6px; align-items: center; }
+.plain .p-tabs span.on { color: var(--p-ink); box-shadow: inset 0 -2px var(--p-ink); }
+.plain .p-tabs em { font-style: normal; font-size: 11.5px; background: var(--p-soft); border-radius: 99px; padding: 0 7px; }
+.plain .p-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px 22px; }
+.plain .p-field > small { display: block; font-size: 13px; font-weight: 500; color: var(--p-ink); margin-bottom: 6px; }
+.plain .p-field > .p-hint { display: block; font-size: 12px; color: var(--p-mut); margin-top: 5px; }
+.plain .p-input { display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--p-line); background: var(--p-card); border-radius: 8px; padding: 7px 11px; font-size: 13.5px; color: var(--p-ink); }
+.plain .p-input em { font-style: normal; color: var(--p-mut); font-size: 12.5px; }
+.plain .p-slider { position: relative; height: 6px; border-radius: 99px; background: var(--p-soft); margin: 14px 0 4px; }
+.plain .p-slider i { display: block; height: 100%; border-radius: inherit; background: var(--p-acc); }
+.plain .p-slider b { position: absolute; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: #fff; border: 2px solid var(--p-acc); box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+.plain .p-seg { display: inline-flex; background: var(--p-soft); border-radius: 8px; padding: 3px; font-size: 13px; }
+.plain .p-seg span { padding: 4px 12px; border-radius: 6px; color: var(--p-mut); }
+.plain .p-seg span.on { background: var(--p-card); color: var(--p-ink); font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.plain .p-toggle { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: 13.5px; color: var(--p-ink); }
+.plain .p-toggle i { flex: none; width: 34px; height: 20px; border-radius: 99px; background: var(--p-acc); position: relative; }
+.plain .p-toggle i::after { content: ""; position: absolute; top: 2px; right: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; }
+.plain .p-opts { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
+.plain .p-opts span { display: flex; align-items: center; gap: 9px; border: 1px solid var(--p-line); background: var(--p-card); border-radius: 8px; padding: 8px 12px; font-size: 13.5px; color: var(--p-ink); }
+.plain .p-opts span::before { content: ""; flex: none; width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--p-line); box-sizing: border-box; }
+.plain .p-opts span.on { border-color: var(--p-acc); background: var(--p-acc-soft); }
+.plain .p-opts span.on::before { border: 4.5px solid var(--p-acc); }
+.plain .p-drop { border: 1.5px dashed var(--p-line); border-radius: 10px; padding: 16px; text-align: center; font-size: 13px; color: var(--p-mut); background: var(--p-card); }
+.plain .p-drop b { color: var(--p-acc); font-weight: 500; }
+.plain .p-file { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 7px 12px; background: var(--p-soft); border-radius: 8px; margin-top: 8px; color: var(--p-ink); }
+.plain .p-file em { font-style: normal; color: var(--p-mut); }
+.plain .p-area { border: 1px solid var(--p-line); background: var(--p-card); border-radius: 8px; padding: 9px 11px; font-size: 13.5px; color: var(--p-ink); min-height: 72px; }
+.plain .p-chips { display: flex; gap: 6px; flex-wrap: wrap; border: 1px solid var(--p-line); background: var(--p-card); border-radius: 8px; padding: 6px 8px; }
+.plain .p-chips span { background: var(--p-soft); border-radius: 99px; padding: 1px 10px; font-size: 12.5px; color: var(--p-ink); }
+.plain .p-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding-top: 14px; border-top: 1px solid var(--p-line); }
+
+/* the calibrated layer: page-level layout for the parts */
+.art .cal-crumbs { margin: 0 0 4px; }
+.art .notes-row { display: flex; flex-wrap: wrap; gap: 20px 40px; align-items: flex-start; }
+.art .notes-row > * { flex: 1 1 280px; min-width: 0; }
+.art .dets { display: grid; gap: 2px; max-width: 640px; }
+.art .limits { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 22px 40px; align-items: start; }
+.art .limits + .limits { margin-top: 8px; align-items: end; }
+.art .limits .cal-detent { width: max-content; }
+.art .limits .cal-switch { padding-bottom: 26px; }
+.art .stamp-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.art .head-row { display: flex; align-items: center; justify-content: space-between; gap: 10px 20px; flex-wrap: wrap; }
+.art .head-row .cal-crumbs { margin: 0; }
+.art .note-field { margin-top: 18px; max-width: 640px; }
+
+/* the form plate: the steps follow the fieldset being filled */
+.art .cal-steps { max-width: 640px; }
+.art .rf { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 30px 56px; align-items: start; }
+.art .rf .cal-group > .cal-stack { gap: 18px; }
+.art .rf .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 18px 32px; align-items: start; }
+.art .rf .cal-rows:empty { display: none; }
+.art .rf .cal-rows { margin-top: -10px; }
 
 /* parts and finishes */
 #marks .cal-spec svg { max-width: 180px; }
-/* page-level grids stand open: no cell rules, just space */
-main > .cal-sec .cal-specimens { background: none; border: 0; gap: 36px 48px; }
-main > .cal-sec .cal-spec { background: none; padding: 0; }
+/* parts and marks are plates: the kit's ruled cells on the desk */
+.parts { --cols: 3; }
+#marks { --cols: 4; }
+.parts .cal-spec, #marks .cal-spec { padding: 18px 20px 20px; }
+.marks-h { margin: 64px 0 22px; }
+@media (max-width: 1100px) { .parts, #marks { --cols: 2; } }
+@media (max-width: 520px) { .parts, #marks { --cols: 1; } }
 .get.cal-tiers { border: 0; gap: 48px; }
 .get.cal-tiers > div { padding: 0; background: none; }
 .get.cal-tiers > div + div { border-left: 0; border-top: 0; }
@@ -122,11 +243,17 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
 .finish-row .cal-btn { display: inline-flex; align-items: center; }
 .finish-row .chip { margin: 0 7px 0 3px; }
 .finish-row .chip { width: 22px; height: 12px; border: var(--line-thin) solid currentColor; display: inline-grid; grid-template-columns: 1fr 1fr 1fr; }
-.get .cal-pre { margin: 8px 0 12px; }
+.get .cal-code { margin: 8px 0 12px; }
+/* the controls: each specimen holds one working control, full width */
+#controls { --cols: 4; }
+#controls .cal-spec { padding: 18px 20px 20px; min-height: 0; }
+#controls .cal-spec > :first-child { min-height: 96px; display: grid; align-content: center; gap: 10px; min-width: 0; }
+#controls .row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+@media (max-width: 1100px) { #controls { --cols: 2; } }
+@media (max-width: 520px) { #controls { --cols: 1; } }
 .get ul { list-style: none; }
 .get li { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 6px 0; border-bottom: var(--line-thin) solid var(--edge); font-size: 14px; color: var(--legend); }
 .get .acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
-.get .cal-pre { white-space: pre; overflow-x: auto; font-size: 12.5px; padding: 9px 12px; }
 
 /* motion: instruments in an open grid, each value under its legend */
 .art .motion-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 30px 56px; }
@@ -144,6 +271,7 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
   .top .cal-mast { gap: 10px; }
   .ba > .art { padding: 4px 0; }
 }
+@media (max-width: 520px) { .cal-steps li { font-size: 10px; letter-spacing: .02em; padding-right: 4px; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .ba { transition: none; } }
 </style>
 <script>
@@ -191,9 +319,9 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
     <div>
       <div class="order" id="order">
         <div class="order-h"><span class="cal-legend">install · paste into claude code</span><span class="sp"></span><button class="cal-btn primary" type="button" data-copy-from="#cmd-hero">copy</button></div>
-        <pre id="cmd-hero">/plugin marketplace add emdmed/calibrated
-/plugin install calibrated@calibrated</pre>
-        <p class="alt"><a class="gh" href="https://github.com/emdmed/calibrated"><svg aria-hidden="true"><use href="#i-gh"/></svg><span>emdmed/calibrated</span></a><a href="#get">other ways to install</a><a href="examples.html">see five finished pages</a></p>
+        <div class="cal-code" data-lang="claude code"><pre><code id="cmd-hero">/plugin marketplace add emdmed/calibrated
+/plugin install calibrated@calibrated</code></pre></div>
+        <p class="alt"><a class="gh" href="https://github.com/emdmed/calibrated"><svg aria-hidden="true"><use href="#i-gh"/></svg><span>emdmed/calibrated</span></a><a href="#get">other ways to install</a><a href="examples.html">see six finished pages</a></p>
       </div>
       <div class="switch"><span class="btn-pair" role="group" aria-label="Show examples as"><button class="cal-btn" type="button" data-view="plain" aria-pressed="false">plain</button><button class="cal-btn" type="button" data-view="cal" aria-pressed="true">calibrated</button></span><span class="mut" style="font-size:14px">Flip to plain, then click any example to calibrate it.</span></div>
     </div>
@@ -201,15 +329,17 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
 
   <div class="ba">
         <div class="layer plain" aria-label="The same page without Calibrated">
-          <div class="p-head"><b>Website Relaunch – Status Update</b><span>Week 44 · Updated Friday</span></div>
-          <div class="p-cards">
-            <div class="p-card"><small>Tasks complete</small><strong>11 / 15</strong><div class="p-bar"><i style="width:73%"></i></div></div>
-            <div class="p-card"><small>Budget spent</small><strong>€38,400</strong><small>of €52,000 (74%)</small></div>
-            <div class="p-card"><small>Markets live</small><strong>3 / 7</strong><small>On track</small></div>
+          <div class="p-top"><div><div class="p-eye">Website relaunch</div><div class="p-title">Week 44 status update</div><div class="p-sub">Updated Friday 31 Oct · 15 tasks · 7 markets</div></div><span class="p-badge warn">Budget near alert</span></div>
+          <div class="p-grid">
+            <div class="p-card p-kpi"><small>Tasks complete</small><strong>11 <em>/ 15</em></strong><small>73% · 4 remaining</small><div class="p-bar"><i style="width:73%"></i></div></div>
+            <div class="p-card p-kpi"><small>Budget spent</small><strong>€38,400</strong><small>of €52,000 · alert at 80%</small><div class="p-bar"><i class="warn" style="width:74%"></i><b style="left:80%"></b></div></div>
+            <div class="p-card p-kpi"><small>Markets live</small><strong>3 <em>/ 7</em></strong><small>DE, FR, NL</small><div class="p-bar"><i style="width:43%"></i></div></div>
           </div>
-          <h4>Team progress</h4>
-          <ul><li>Design: complete (4 weeks)</li><li>Development: complete (5 weeks)</li><li>Content migration: in progress (6.5 weeks so far)</li></ul>
-          <p>Next up: content migration is the current focus. Budget is approaching the 80% alert level.</p>
+          <table class="p-table"><thead><tr><th>Workstream</th><th>Status</th><th class="n">Duration</th></tr></thead><tbody>
+            <tr><td>Design</td><td><span class="p-badge ok">Complete</span></td><td class="n">4 weeks</td></tr>
+            <tr><td>Development</td><td><span class="p-badge ok">Complete</span></td><td class="n">5 weeks</td></tr>
+            <tr><td>Content migration</td><td><span class="p-badge acc">In progress</span></td><td class="n">6.5 weeks so far</td></tr></tbody></table>
+          <div class="p-callout"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8 15 14H1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 6.2v3.6M8 11.4v.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><div><b>Budget is at 74%.</b> The alert triggers at 80% (€41,600). Content migration is the current focus.</div></div>
         </div>
         <div class="layer art cal-theme">
           <header class="cal-mast">
@@ -219,31 +349,38 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
             <span class="sp"></span>
             <span class="lg up fnt">updated fri 31 oct</span>
           </header>
-          <h2 class="hd">11 of 15 tasks done. <span class="live">Content</span> is the one still running.</h2>
+          <h2 class="hd">11 of 15 tasks done. <span class="live" data-tip="task 12 · 6.5 wk so far" tabindex="0">Content</span> is the one still running.</h2>
           <div class="grid2">
             <div><div class="cell-h">tasks</div><cal-progress done="11" total="15" live="12" live-label="12 · content migration" done-label="11 done · 6 weeks"></cal-progress></div>
             <div><div class="cell-h">budget</div><cal-meter value="38400" max="52000" warn="41600" label="spent €" width="300"></cal-meter></div>
           </div>
           <figure class="cal-figure mt"><svg id="f-cover"></svg><figcaption><b>Teams</b>Weeks on one ruler. Content is still going.</figcaption></figure>
+          <div class="notes-row mt">
+            <div><div class="cell-h">markets live</div><cal-position index="3" count="7" label="markets"></cal-position></div>
+            <div class="cal-callout"><div class="cal-gl">notes</div><ol><li>Budget alert at 80% · €41 600. Spend is at 74%.</li><li>Live: DE, FR, NL. The other four follow content.</li></ol></div>
+          </div>
         </div>
       </div>
   <p class="ask"><span class="cal-legend">ask claude</span><q>Make a status page for our website relaunch in the Calibrated style.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
 
   <section class="cal-sec" id="report">
-    <div class="cal-sec-h"><b>1 · Status report</b><span>limits, budgets, what is running</span><span>sheet 1/8</span></div>
+    <div class="cal-sec-h"><b>1 · Status report</b><span>limits, budgets, what is running</span><span>sheet 1/9</span></div>
     <div class="ba">
         <div class="layer plain" aria-label="The same page without Calibrated">
-          <div class="p-head"><b>Spring Campaign – Monthly Report</b><span>Day 19 of 30</span></div>
-          <div class="p-cards">
-            <div class="p-card"><small>Ad spend</small><strong>€612k</strong><small>of €1M budget</small><div class="p-bar"><i style="width:61%"></i></div></div>
-            <div class="p-card"><small>Projected</small><strong>€900k</strong><small>by day 30</small></div>
+          <div class="p-top"><div><div class="p-eye">Spring campaign</div><div class="p-title">Monthly report</div><div class="p-sub">Day 19 of 30 · 3 channels</div></div><span class="p-badge warn">Pacing over plan</span></div>
+          <div class="p-grid">
+            <div class="p-card p-kpi"><small>Ad spend</small><strong>€612k</strong><small>of €1M budget · 61%</small><div class="p-bar"><i style="width:61%"></i><b style="left:80%"></b><b style="left:95%"></b></div></div>
+            <div class="p-card p-kpi"><small>Projected by day 30</small><strong>€900k</strong><small>at the current daily pace</small></div>
+            <div class="p-card p-kpi"><small>Days remaining</small><strong>11</strong><small>of a 30-day flight</small></div>
           </div>
-          <table><thead><tr><th>Channel</th><th>Ran</th><th>Status</th></tr></thead><tbody>
-            <tr><td>Search</td><td>12 days</td><td><span class="pill g">Done</span></td></tr>
-            <tr><td>Social</td><td>16 days</td><td><span class="pill g">Done</span></td></tr>
-            <tr><td>Email</td><td>19 days</td><td><span class="pill">Running</span></td></tr></tbody></table>
+          <div class="p-callout"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8 15 14H1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 6.2v3.6M8 11.4v.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><div><b>Heads up:</b> at this pace spend crosses the 80% alert (€800k) on day 25.</div></div>
+          <table class="p-table"><thead><tr><th>Channel</th><th class="n">Spend</th><th class="n">Days ran</th><th>Status</th></tr></thead><tbody>
+            <tr><td>Search</td><td class="n">€214k</td><td class="n">12</td><td><span class="p-badge ok">Done</span></td></tr>
+            <tr><td>Social</td><td class="n">€268k</td><td class="n">16</td><td><span class="p-badge ok">Done</span></td></tr>
+            <tr><td>Email</td><td class="n">€130k</td><td class="n">19</td><td><span class="p-badge acc">Running</span></td></tr></tbody></table>
         </div>
         <div class="layer art cal-theme">
+          <div class="head-row"><nav class="cal-crumbs" aria-label="Breadcrumb"><ol><li><a href="#report">marketing</a></li><li><a href="#report">campaigns</a></li><li aria-current="page">spring · day 19</li></ol></nav><span class="cal-badge" data-ink="fault"><span class="cal-dot fault"></span>pacing over plan</span></div>
           <h2 class="hd">€612k spent. At this pace we cross the <span class="live">80% alert</span> on day 25.</h2>
           <figure class="cal-figure"><svg id="f-budget"></svg><figcaption><b>Budget</b>Spend so far, the alert lines and where today's pace lands.</figcaption></figure>
           <figure class="cal-figure mt"><svg id="f-lanes"></svg><figcaption><b>Channels</b>Days each channel ran, on one ruler.</figcaption></figure>
@@ -251,46 +388,66 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
             <tr><td>01</td><td>Search</td><td class="num">€214k</td><td class="st" data-ink="ok">done</td></tr>
             <tr><td>02</td><td>Social</td><td class="num">€268k</td><td class="st" data-ink="ok">done</td></tr>
             <tr><td>03</td><td>Email</td><td class="num">€130k</td><td class="st" data-ink="live"><span>running</span></td></tr></tbody></table>
+          <div class="dets mt">
+            <details class="cal-details"><summary><span class="bl">A</span><b>how the pace is projected</b><span class="ld"></span><span class="tg"></span></summary><div class="bd"><div class="inset"><div class="cal-gl">detail A</div>The average daily spend of the last 7 days, carried to day 30.</div></div></details>
+            <details class="cal-details"><summary><span class="bl">B</span><b>what the alerts do</b><span class="ld"></span><span class="tg"></span></summary><div class="bd"><div class="inset"><div class="cal-gl">detail B</div>At 80% each channel owner gets an email. At 95% new ads pause.</div></div></details>
+          </div>
         </div>
       </div>
     <p class="ask"><span class="cal-legend">ask claude</span><q>Make a monthly report for our spring campaign in the Calibrated style. Here are the numbers: …</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
   </section>
 
   <section class="cal-sec" id="review">
-    <div class="cal-sec-h"><b>2 · Review board</b><span>keep or drop, with a tally · the buttons work</span><span>sheet 2/8</span></div>
+    <div class="cal-sec-h"><b>2 · Review board</b><span>keep, rework or drop, with a tally · the buttons work</span><span>sheet 2/9</span></div>
     <div class="ba">
         <div class="layer plain" aria-label="The same page without Calibrated">
-          <div class="p-head"><b>Homepage Redesign – Proposals</b><span>2 changes for review</span></div>
-          <div class="p-card" style="margin-bottom:12px"><h4>1. Show pricing on a scale</h4><p>Currently: “Plans: Basic €9, Team €29, Business €79.” Proposal: show the plans on a price scale with Team highlighted.</p><span class="p-btn">Approve</span><span class="p-btn ghost">Reject</span></div>
-          <div class="p-card"><h4>2. Sign-up steps as progress</h4><p>Currently: “Step 3 of 5: billing details.” Proposal: show all five steps with the current one marked.</p><span class="p-btn">Approve</span><span class="p-btn ghost">Reject</span></div>
+          <div class="p-top"><div><div class="p-eye">Homepage redesign</div><div class="p-title">Proposals for review</div><div class="p-sub">2 changes · requested by the web team</div></div><span class="p-badge">0 of 2 reviewed</span></div>
+          <div class="p-card"><div class="p-h">1. Show pricing on a scale <span class="p-badge acc">Pricing</span></div>
+            <div class="p-cmp"><div><small>Current</small>Plans: Basic €9, Team €29, Business €79</div><div class="new"><small>Proposed</small><div class="p-plans"><span>Basic €9</span><span class="on">Team €29</span><span>Business €79</span></div></div></div>
+            <div class="p-btns"><span class="p-btn">Approve</span><span class="p-btn ghost">Request changes</span><span class="p-btn ghost">Reject</span></div></div>
+          <div class="p-card"><div class="p-h">2. Sign-up steps as progress <span class="p-badge acc">Sign-up</span></div>
+            <div class="p-cmp"><div><small>Current</small>Step 3 of 5: billing details</div><div class="new"><small>Proposed</small><div class="p-dots"><i class="done"></i><i class="done"></i><i class="on"></i><i></i><i></i><span>&nbsp;Billing</span></div></div></div>
+            <div class="p-btns"><span class="p-btn">Approve</span><span class="p-btn ghost">Request changes</span><span class="p-btn ghost">Reject</span></div></div>
+          <div class="p-field"><small>Note for the web team</small><div class="p-area">Ship pricing first. Sign-up can wait for the billing copy.</div><span class="p-hint">Sent with your review · 280 characters max</span></div>
         </div>
         <div class="layer art cal-theme">
-          <h2 class="hd">Two changes. Keep or drop each one.</h2>
+          <h2 class="hd">Two changes. Keep, rework or drop each one.</h2>
           <article class="cal-card">
             <div class="info"><h3>Pricing on a scale</h3><p class="why">Plans read as positions on one price ruler, with the one most people pick lit.</p><div class="id"><span class="no">01</span>pricing<span class="end">rev A</span></div></div>
             <div class="cal-compare"><div><div class="cal-tag">today</div><div class="stage"><div class="cal-note">Plans: Basic €9, Team €29, Business €79</div></div></div><div><div class="cal-tag on">drawn</div><div class="stage"><cal-ruler min="0" max="80" step="5" every="2" unit="€" value="29" width="300" up></cal-ruler></div></div></div>
-            <div class="cal-sign" role="group" aria-label="Sign off 01"><button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button><button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="false">drop</button></div>
+            <div class="cal-sign" role="group" aria-label="Sign off 01"><label class="note" hidden>rework<input class="cal-input" placeholder="what isn’t good enough yet?"></label><button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button><button class="cal-btn" data-ink="live" data-v="rework" aria-pressed="false">rework</button><button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="false">drop</button></div>
           </article>
           <article class="cal-card">
             <div class="info"><h3>Sign-up as steps</h3><p class="why">All five steps visible, the current one lit.</p><div class="id"><span class="no">02</span>sign-up<span class="end">rev A</span></div></div>
             <div class="cal-compare"><div><div class="cal-tag">today</div><div class="stage"><div class="cal-note">Step 3 of 5: billing details</div></div></div><div><div class="cal-tag on">drawn</div><div class="stage"><cal-progress done="2" total="5" live="3" live-label="3 · billing" step="34"></cal-progress></div></div></div>
-            <div class="cal-sign" role="group" aria-label="Sign off 02"><button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button><button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="false">drop</button></div>
+            <div class="cal-sign" role="group" aria-label="Sign off 02"><label class="note" hidden>rework<input class="cal-input" placeholder="what isn’t good enough yet?"></label><button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button><button class="cal-btn" data-ink="live" data-v="rework" aria-pressed="false">rework</button><button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="false">drop</button></div>
           </article>
+          <div class="cal-field note-field"><label for="rv-note">note for the web team</label>
+            <div class="cal-term" data-max="280">
+              <textarea class="cal-textarea" id="rv-note" spellcheck="false" aria-describedby="rv-note-h">Ship pricing first. Sign-up can wait for the billing copy.</textarea>
+              <div class="bar" aria-hidden="true"><span class="mode">-- normal --</span><span class="sp"></span><span class="pos">ln 1, col 1</span><span class="cal-count"><b>000</b><span>/ 280</span></span></div>
+            </div>
+            <span class="hint" id="rv-note-h">Sent with your sign-off.</span>
+          </div>
           <div class="cal-tally"><span data-tally>0 of 2 signed</span><span class="sp"></span><span class="lg mut">try the buttons</span></div>
         </div>
       </div>
-    <p class="ask"><span class="cal-legend">ask claude</span><q>Make a Calibrated review board for these homepage changes, with keep / drop sign-off.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+    <p class="ask"><span class="cal-legend">ask claude</span><q>Make a Calibrated review board for these homepage changes, with keep / rework / drop sign-off.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
   </section>
 
   <section class="cal-sec" id="explainer">
-    <div class="cal-sec-h"><b>3 · Explainer</b><span>a process as a cycle, a team as a tree</span><span>sheet 3/8</span></div>
+    <div class="cal-sec-h"><b>3 · Explainer</b><span>a process as a cycle, a team as a tree</span><span>sheet 3/9</span></div>
     <div class="ba">
         <div class="layer plain" aria-label="The same page without Calibrated">
-          <div class="p-head"><b>How Support Tickets Work</b><span>A quick overview</span></div>
-          <h4>The process</h4>
-          <ul><li><strong>Received</strong> – an automatic reply is sent</li><li><strong>Triaged</strong> – tagged and assigned</li><li><strong>Working</strong> – an agent replies (current stage)</li><li><strong>Resolved</strong> – the customer confirms</li></ul>
-          <h4>Who's on it right now</h4>
-          <ul><li>Ana – refund request (working, 12 min)</li><li>Ravi – login problem (next)</li><li>Mei – shipping question (resolved, 8 min)</li></ul>
+          <div class="p-top"><div><div class="p-eye">Support handbook</div><div class="p-title">How support tickets work</div><div class="p-sub">Every ticket moves through four stages · 14 open right now</div></div></div>
+          <div class="p-steps"><div class="done"><b>Received</b><span>Auto-reply sent</span></div><div class="done"><b>Triaged</b><span>Tagged and assigned</span></div><div class="on"><b>Working</b><span>An agent replies</span></div><div><b>Resolved</b><span>Customer confirms</span></div></div>
+          <div class="p-card"><div class="p-h">Who's on it now <span class="p-mute">· 9 more resolved today</span></div>
+            <div class="p-people">
+              <div><span class="p-av">AN</span><span class="who"><b>Ana</b> · Refund request, order 4471</span><span class="p-badge acc">Working · 12 min</span></div>
+              <div><span class="p-av">RA</span><span class="who"><b>Ravi</b> · Login problem</span><span class="p-badge">Next</span></div>
+              <div><span class="p-av">ME</span><span class="who"><b>Mei</b> · Shipping question</span><span class="p-badge ok">Resolved · 8 min</span></div>
+            </div></div>
+          <div class="p-faq"><div class="open"><b>When does a ticket count as resolved?</b><p>When the customer confirms, or after 3 days with no reply.</p></div><div><b>What if a ticket is reopened?</b></div></div>
         </div>
         <div class="layer art cal-theme">
           <h2 class="hd">Every ticket goes round the same four stations.</h2>
@@ -298,20 +455,27 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
             <figure class="cal-figure"><svg id="f-loop"></svg><figcaption><b>Cycle</b>The live station is lit.</figcaption></figure>
             <figure class="cal-figure"><svg id="f-fan"></svg><figcaption><b>Team</b>Who is working on what.</figcaption></figure>
           </div>
+          <div class="dets mt">
+            <details class="cal-details" open><summary><span class="bl">A</span><b>when a ticket counts as resolved</b><span class="ld"></span><span class="tg"></span></summary><div class="bd"><div class="inset"><div class="cal-gl">detail A</div>When the customer confirms, or after 3 days with no reply.</div></div></details>
+            <details class="cal-details"><summary><span class="bl">B</span><b>what happens when one is reopened</b><span class="ld"></span><span class="tg"></span></summary><div class="bd"><div class="inset"><div class="cal-gl">detail B</div>It goes back to <b>working</b> with the same agent, and its clock keeps running.</div></div></details>
+          </div>
         </div>
       </div>
     <p class="ask"><span class="cal-legend">ask claude</span><q>Explain how our support tickets move, as a Calibrated explainer page.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
   </section>
 
   <section class="cal-sec" id="spec">
-    <div class="cal-sec-h"><b>4 · Spec sheet</b><span>rules and boundaries · hatched means closed</span><span>sheet 4/8</span></div>
+    <div class="cal-sec-h"><b>4 · Spec sheet</b><span>rules and boundaries · hatched means closed</span><span>sheet 4/9</span></div>
     <div class="ba">
         <div class="layer plain" aria-label="The same page without Calibrated">
-          <div class="p-head"><b>Customer Data – Access Policy</b><span>Version B · 31 Oct 2026</span></div>
-          <h4>Access rules</h4>
-          <ul><li>Restricted area: only approved staff</li><li>Staff tools can read and write customer records</li><li>Payments and passwords are locked, even for staff</li><li>Exports are temporary</li><li>Batch jobs are not covered by this policy</li></ul>
-          <h4>Changes</h4>
-          <ul><li>A – First version (12 Oct)</li><li>B – Exports made temporary (31 Oct)</li></ul>
+          <div class="p-top"><div><div class="p-eye">Policy POL-012</div><div class="p-title">Customer data access policy</div><div class="p-sub">Version B · 31 Oct 2026 · owner: security team</div></div><span class="p-badge ok">Approved</span></div>
+          <table class="p-table"><thead><tr><th>Area</th><th>Who</th><th>Access</th></tr></thead><tbody>
+            <tr><td>Restricted area</td><td>Approved staff only</td><td><span class="p-badge bad">Closed</span></td></tr>
+            <tr><td>Customer records</td><td>Staff tools</td><td><span class="p-badge ok">Read &amp; write</span></td></tr>
+            <tr><td>Payments, passwords</td><td>No one, including staff</td><td><span class="p-badge bad">Locked</span></td></tr>
+            <tr><td>Exports</td><td>Staff tools</td><td><span class="p-badge warn">Temporary · 7 days</span></td></tr></tbody></table>
+          <div class="p-callout info"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.2v4M8 4.6v.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><div><b>Not covered:</b> batch jobs are outside this policy and need their own review.</div></div>
+          <div class="p-log"><div class="p-h">Changelog</div><div><code>B</code>Exports made temporary<time>31 Oct</time></div><div><code>A</code>First version<time>12 Oct</time></div></div>
         </div>
         <div class="layer art cal-theme">
           <h2 class="hd">Who can see what. Hatched means closed.</h2>
@@ -326,41 +490,158 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
               <tr><td><span class="cal-rev" data-rev="A"></span></td><td>First version.</td></tr>
               <tr><td><span class="cal-rev" data-rev="B"></span></td><td>Exports made temporary.</td></tr></tbody></table>
           </div>
+          <div class="stamp-row mt">
+            <div class="cal-callout" style="flex:1 1 320px"><div class="cal-gl">notes</div><ol><li>Exports expire after 7 days. <span class="cal-rev" data-rev="B"></span></li><li>Batch jobs are outside this policy and need their own review.</li></ol></div>
+            <span class="cal-stamp">approved for use</span>
+          </div>
         </div>
       </div>
     <p class="ask"><span class="cal-legend">ask claude</span><q>Turn our customer data access policy into a Calibrated spec sheet.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
   </section>
 
   <section class="cal-sec" id="screen">
-    <div class="cal-sec-h"><b>5 · App screen</b><span>the same look for the screens of a tool</span><span>sheet 5/8</span></div>
+    <div class="cal-sec-h"><b>5 · App screen</b><span>the same look for the screens of a tool · every control works</span><span>sheet 5/9</span></div>
     <div class="ba">
         <div class="layer plain" aria-label="The same page without Calibrated">
-          <div class="p-head"><b>Plan &amp; Usage</b><span>Team plan</span></div>
-          <div class="p-cards">
-            <div class="p-card"><small>Messages this month</small><strong>46,000</strong><small>of 100,000</small><div class="p-bar"><i style="width:46%"></i></div></div>
-            <div class="p-card"><small>Storage</small><strong>128 GB</strong><small>of 150 GB</small><div class="p-bar"><i style="width:85%;background:#ef4444"></i></div></div>
+          <div class="p-top"><div><div class="p-eye">Settings</div><div class="p-title">Plan &amp; usage</div><div class="p-sub">Team plan · resets on the 1st</div></div><span class="p-btn ghost">Actions ▾</span></div>
+          <div class="p-tabs"><span class="on">Usage</span><span>Members <em>12</em></span><span>Billing</span></div>
+          <div class="p-grid">
+            <div class="p-card p-kpi"><small>Messages this month</small><strong>46,000</strong><small>of 100,000 · 46%</small><div class="p-bar"><i style="width:46%"></i><b style="left:80%"></b></div></div>
+            <div class="p-card p-kpi"><small>Storage</small><strong>128 <em>GB</em></strong><small>of 150 GB · 85%, over the alert</small><div class="p-bar"><i class="bad" style="width:85%"></i><b style="left:80%"></b></div></div>
           </div>
-          <div class="p-card"><h4>Monthly limit</h4><p>150,000 messages</p><p><input type="checkbox" checked disabled> Pause at the limit</p><span class="p-btn">Save</span><span class="p-btn ghost">Cancel</span></div>
+          <div class="p-card"><div class="p-h">Limits <span class="p-mute">· applies to every region</span></div>
+            <div class="p-form">
+              <div class="p-field"><small>Monthly limit</small><div class="p-input">150,000<em>messages</em></div></div>
+              <div class="p-field"><small>Alert at · 80%</small><div class="p-slider"><i style="width:80%"></i><b style="left:80%"></b></div><span class="p-hint">Email the owner at this level</span></div>
+              <div class="p-field"><small>Region</small><div class="p-input">EU West<em>▾</em></div></div>
+              <div class="p-field"><small>Reset every</small><div class="p-seg"><span>Day</span><span>Week</span><span class="on">Month</span></div></div>
+            </div>
+            <div class="p-toggle" style="margin-top:16px">Pause new messages at the limit<i></i></div>
+          </div>
+          <div class="p-foot"><span class="p-btn danger">Reset usage</span><div class="p-btns"><span class="p-btn ghost">Cancel</span><span class="p-btn">Save changes</span></div></div>
         </div>
         <div class="layer art cal-theme">
+          <nav class="cal-crumbs" aria-label="Breadcrumb"><ol><li><a href="#screen">settings</a></li><li><a href="#screen">team</a></li><li aria-current="page">plan &amp; usage</li></ol></nav>
           <div class="cal-tabs mt" role="tablist" aria-label="Settings"><button role="tab" aria-selected="true">usage<span class="cal-cnt">02</span></button><button role="tab" aria-selected="false">members<span class="cal-cnt">12</span></button><button role="tab" aria-selected="false">billing</button></div>
           <div class="grid2" style="border-top:0">
             <div><div class="cell-h">messages this month</div><cal-meter value="46000" max="100000" warn="80000" label="messages" width="300"></cal-meter></div>
             <div><div class="cell-h">storage</div><cal-meter value="128" max="150" warn="120" label="storage" format="raw" unit=" GB" width="300"></cal-meter></div>
           </div>
-          <div class="form mt">
-            <div class="cal-field"><label for="lim">monthly limit</label><input class="cal-input" id="lim" value="150 000"></div>
-            <label class="cal-check"><input type="checkbox" checked> <span>Pause at the limit</span></label>
+          <fieldset class="cal-group mt"><legend><b>1 · Limits</b><span>applies to every region</span></legend>
+            <div class="limits">
+              <div class="cal-field"><label for="lim">monthly limit</label>
+                <div class="cal-affixed cal-num"><input class="cal-input" id="lim" inputmode="numeric" value="150 000" data-step="10000" aria-describedby="lim-h"><span class="cal-affix">msg / month</span></div>
+                <span class="hint focus-only" id="lim-h">↑ ↓ step 10 000 · shift ×10</span></div>
+              <div class="cal-field"><label for="region">region</label>
+                <select class="cal-select" id="region"><option><span class="v">us-east</span></option><option selected><span class="v">eu-west</span></option><option><span class="v">ap-south</span></option></select></div>
+              <div class="cal-field"><span class="lbl" id="rs-l">reset every</span>
+                <div class="cal-detent" role="radiogroup" aria-labelledby="rs-l"><i class="mk" aria-hidden="true"></i>
+                  <label><input type="radio" name="rs" value="day"><span>day</span></label>
+                  <label><input type="radio" name="rs" value="week"><span>week</span></label>
+                  <label><input type="radio" name="rs" value="month" checked><span>month</span></label></div></div>
+            </div>
+            <div class="limits">
+              <div class="cal-field"><label for="alert">alert at</label>
+                <div class="cal-range" data-unit="%"><output for="alert"></output><input type="range" id="alert" min="0" max="100" step="5" value="80">
+                  <div class="nums"><span>0</span><span>50%</span><span>100%</span></div></div></div>
+              <label class="cal-switch"><span class="txt">Pause new messages at the limit</span><span class="o off">off</span><input type="checkbox" role="switch" checked><span class="o on">on</span></label>
+            </div>
+          </fieldset>
+          <div class="btns">
+            <button class="cal-btn" type="button" popovertarget="usage-menu">actions ▼</button>
+            <div popover id="usage-menu" class="cal-menu" role="menu" aria-label="Usage actions">
+              <button class="it" role="menuitem" type="button" data-toast="Usage exported · usage-oct.csv"><span class="n">01</span><span class="v">export usage</span><kbd class="cal-kbd">e</kbd></button>
+              <button class="it" role="menuitem" type="button" data-toast="Invite link copied"><span class="n">02</span><span class="v">invite member</span><kbd class="cal-kbd">i</kbd></button>
+              <hr><button class="it" role="menuitem" type="button" data-ink="fault" data-dialog="reset-usage"><span class="n">03</span><span class="v">reset usage</span><kbd class="cal-kbd">⌫</kbd></button>
+            </div>
+            <span class="sp" style="flex:1"></span>
+            <button class="cal-btn quiet" type="button">cancel</button><button class="cal-btn primary" type="button" id="save-limits">save</button>
           </div>
-          <div class="btns"><button class="cal-btn quiet" type="button">cancel</button><button class="cal-btn primary" type="button">save</button></div>
         </div>
       </div>
     <p class="ask"><span class="cal-legend">ask claude</span><q>Build a plan and usage screen for our app in the Calibrated style.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+    <dialog class="cal-dialog" id="reset-usage" aria-labelledby="reset-usage-t"><form method="dialog">
+      <header><b id="reset-usage-t">reset usage</b><span class="sp"></span><kbd class="cal-kbd">esc</kbd></header>
+      <div class="bd"><p>This month’s counters go back to zero. Billing is not changed.</p><dl class="cal-kv"><dt>messages</dt><dd>46 000 → 0</dd><dt>storage</dt><dd>kept · 128 GB</dd></dl></div>
+      <footer><button class="cal-btn" value="cancel" autofocus>cancel</button><button class="cal-btn primary" data-ink="fault" value="reset">reset usage</button></footer>
+    </form></dialog>
+  </section>
+
+  <section class="cal-sec" id="form">
+    <div class="cal-sec-h"><b>6 · Form</b><span>choices, dates, files and notes · fill it in</span><span>sheet 6/9</span></div>
+    <div class="ba">
+        <div class="layer plain" aria-label="The same page without Calibrated">
+          <div class="p-top"><div><div class="p-eye">Support · refunds</div><div class="p-title">Refund request</div><div class="p-sub">Order 4471 · Ana Ruiz · €64.00 · placed 22 Oct</div></div><span class="p-badge">Draft</span></div>
+          <div class="p-dots"><i class="done"></i><i class="on"></i><i></i><i></i><span>&nbsp;Step 2 of 4 · What went wrong</span></div>
+          <div class="p-card"><div class="p-h">What went wrong</div>
+            <div class="p-opts"><span class="on">Damaged on arrival</span><span>Wrong item</span><span>Arrived late</span><span>Something else</span></div>
+            <div class="p-form" style="margin-top:16px">
+              <div class="p-field"><small>Received on</small><div class="p-input">27/10/2026<em>▾</em></div></div>
+              <div class="p-field"><small>Photos</small><div class="p-drop">Drag photos here or <b>browse</b></div><div class="p-file">box-corner.jpg<em>2.1 MB</em></div></div>
+            </div>
+            <div class="p-field" style="margin-top:16px"><small>What happened</small><div class="p-area">The box arrived crushed on one corner and the left speaker rattles.</div></div>
+          </div>
+          <div class="p-card"><div class="p-h">Refund <span class="p-mute">· over €50 goes to a lead for approval</span></div>
+            <div class="p-form">
+              <div class="p-field"><small>Refund to</small><div class="p-input">Original card · Visa 4242<em>▾</em></div></div>
+              <div class="p-field"><small>Amount</small><div class="p-input">€64.00<em>EUR</em></div><span class="p-hint">Up to the order total</span></div>
+              <div class="p-field"><small>Notify</small><div class="p-chips"><span>support-eu</span><span>warehouse</span></div></div>
+            </div>
+          </div>
+          <div class="p-foot"><span class="p-btn ghost">Back</span><span class="p-btn">Send for approval</span></div>
+        </div>
+        <div class="layer art cal-theme">
+          <div class="head-row"><nav class="cal-crumbs" aria-label="Breadcrumb"><ol><li><a href="#form">support</a></li><li><a href="#form">refunds</a></li><li aria-current="page">order 4471</li></ol></nav><span class="cal-badge" id="rf-badge"><span class="cal-dot"></span>draft</span></div>
+          <h2 class="hd">Refund for order 4471: what went wrong, and how much goes back.</h2>
+          <ol class="cal-steps" id="rf-steps" aria-label="Refund steps">
+            <li class="done"><span class="s">01</span>order</li>
+            <li aria-current="step"><span class="s">02</span>problem</li>
+            <li><span class="s">03</span>refund</li>
+            <li><span class="s">04</span>send</li>
+          </ol>
+          <form class="rf mt" id="rf" novalidate>
+            <fieldset class="cal-group" data-step="2"><legend><b>2 · Problem</b><span>pick the closest</span></legend>
+              <div class="cal-stack">
+                <div role="radiogroup" aria-label="What went wrong" class="cal-stack" style="gap:9px">
+                  <label class="cal-radio"><input type="radio" name="rf-why" value="damaged" checked><span>Damaged on arrival</span><span class="meta">photos needed</span></label>
+                  <label class="cal-radio"><input type="radio" name="rf-why" value="wrong"><span>Wrong item</span><span class="meta">swap or refund</span></label>
+                  <label class="cal-radio"><input type="radio" name="rf-why" value="late"><span>Arrived late</span><span class="meta">over 7 days</span></label>
+                  <label class="cal-radio"><input type="radio" name="rf-why" value="other"><span>Something else</span></label>
+                </div>
+                <div class="pair">
+                  <div class="cal-field"><label for="rf-date">received on</label><input type="date" class="cal-input cal-date" id="rf-date" value="2026-10-27" min="2026-10-22" max="2026-11-01"></div>
+                  <div class="cal-field"><span class="lbl">photos</span>
+                    <label class="cal-drop" data-list="rf-files" data-max="10000000"><input type="file" accept="image/*" multiple><span class="lead">drop photos · or <u>browse</u></span><span class="hint">jpg or png · up to 10 MB each</span></label></div>
+                </div>
+                <div class="cal-rows" id="rf-files"><div class="file"><span>box-corner.jpg</span><span class="lg mut">2.1 MB</span></div></div>
+                <div class="cal-field"><label for="rf-note">what happened</label>
+                  <div class="cal-term" data-max="400">
+                    <textarea class="cal-textarea" id="rf-note" spellcheck="false">The box arrived crushed on one corner and the left speaker rattles.</textarea>
+                    <div class="bar" aria-hidden="true"><span class="mode">-- normal --</span><span class="sp"></span><span class="pos">ln 1, col 1</span><span class="cal-count"><b>000</b><span>/ 400</span></span></div>
+                  </div></div>
+              </div>
+            </fieldset>
+            <fieldset class="cal-group" data-step="3"><legend><b>3 · Refund</b><span>over €50 goes to a lead</span></legend>
+              <div class="cal-stack">
+                <div class="cal-field"><label for="rf-to">refund to</label>
+                  <select class="cal-select" id="rf-to"><option selected><span class="v">original card · visa 4242</span></option><option><span class="v">store credit · +10%</span></option></select></div>
+                <div class="cal-field"><label for="rf-amt">amount</label>
+                  <div class="cal-affixed cal-num"><span class="cal-affix">€</span><input class="cal-input" id="rf-amt" inputmode="numeric" value="64" data-step="1" data-max="64" aria-describedby="rf-amt-h"></div>
+                  <span class="hint" id="rf-amt-h">Up to €64, the order total. ↑ ↓ steps by 1.</span></div>
+                <div class="cal-field"><span class="lbl" id="rf-who-l">notify</span>
+                  <div class="cal-chips" aria-labelledby="rf-who-l"><span class="chip">support-eu<button type="button" aria-label="Remove support-eu">×</button></span><span class="chip">warehouse<button type="button" aria-label="Remove warehouse">×</button></span><input aria-label="Add a team" placeholder="add a team, then enter"></div></div>
+              </div>
+            </fieldset>
+          </form>
+          <div class="btns"><span class="mut" style="font-size:13px;margin-right:auto">Step 04 lights when you send.</span><button class="cal-btn quiet" type="button" id="rf-reset">start over</button><button class="cal-btn primary" type="button" id="rf-send">send for approval</button></div>
+        </div>
+      </div>
+    <p class="ask"><span class="cal-legend">ask claude</span><q>Make a refund request form for our support team in the Calibrated style: reason, date, photos, a note, and the refund.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
   </section>
 
   <section class="cal-sec" id="parts">
-    <div class="cal-sec-h"><b>6 · Parts</b><span>what every page above is built from</span><span>sheet 6/8</span></div>
-    <div class="cal-specimens parts" style="--cols:3">
+    <div class="cal-sec-h"><b>7 · Parts</b><span>what every page above is built from</span><span>sheet 7/9</span></div>
+    <div class="cal-specimens parts">
       <div class="cal-spec"><div><cal-meter value="46000" max="1000000" warn="800000" label="requests today" width="280"></cal-meter></div><h4>Meter</h4><p>How full something is, against its limit.</p></div>
       <div class="cal-spec"><div><cal-progress done="6" total="10" live="7" live-label="7 · review" step="24"></cal-progress></div><h4>Progress</h4><p>How far along a list of steps, and which one is live.</p></div>
       <div class="cal-spec"><div><cal-position index="3" count="7" label="markets"></cal-position></div><h4>Position</h4><p>Which one of a set you are looking at.</p></div>
@@ -368,12 +649,24 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
       <div class="cal-spec"><div><cal-ruler min="0" max="150" step="10" every="5" unit="k" value="94" width="280" up></cal-ruler></div><h4>Ruler</h4><p>Where one value sits on a scale.</p></div>
       <div class="cal-spec"><div><cal-diff added="184" removed="20" label="edits"></cal-diff></div><h4>Change</h4><p>What was added and what was removed.</p></div>
     </div>
-    <div class="cal-gl" style="margin:28px 0 12px">the eight marks</div>
-    <div class="cal-specimens" style="--cols:4" id="marks"></div>
+    <div class="cal-gl marks-h">the eight marks</div>
+    <div class="cal-specimens" id="marks"></div>
+    <div class="cal-gl marks-h">the controls</div>
+    <div class="cal-specimens" id="controls">
+      <div class="cal-spec"><div><div class="cal-field"><label for="pt-lim">daily limit</label><div class="cal-affixed cal-num"><input class="cal-input" id="pt-lim" inputmode="numeric" value="150 000" data-step="10000"><span class="cal-affix">req / day</span></div></div></div><h4>Number with units</h4><p>Arrow keys step it. Shift steps by ten.</p></div>
+      <div class="cal-spec"><div><div class="cal-field"><label for="pt-reg">region</label><select class="cal-select" id="pt-reg"><option><span class="v">us-east</span></option><option selected><span class="v">eu-west</span></option><option><span class="v">ap-south</span></option></select></div></div><h4>Select</h4><p>A write-in line that opens a ruled list.</p></div>
+      <div class="cal-spec"><div><div class="cal-field"><span class="lbl" id="pt-rg-l">time range</span><div class="cal-detent" role="radiogroup" aria-labelledby="pt-rg-l"><i class="mk" aria-hidden="true"></i><label><input type="radio" name="pt-rg" value="1h"><span>1h</span></label><label><input type="radio" name="pt-rg" value="24h" checked><span>24h</span></label><label><input type="radio" name="pt-rg" value="7d"><span>7d</span></label></div></div></div><h4>Detent</h4><p>A few ordered choices, as ticks on a ruler.</p></div>
+      <div class="cal-spec"><div><div class="cal-field"><label for="pt-at">alert at</label><div class="cal-range" data-unit="%"><output for="pt-at"></output><input type="range" id="pt-at" min="0" max="100" step="5" value="60"><div class="nums"><span>0</span><span>50%</span><span>100%</span></div></div></div></div><h4>Range</h4><p>A slider set on its own scale.</p></div>
+      <div class="cal-spec"><div><label class="cal-switch"><span class="txt">Pause at limit</span><span class="o off">off</span><input type="checkbox" role="switch" checked><span class="o on">on</span></label><label class="cal-check"><input type="checkbox" checked> <span>Email the owner</span></label><label class="cal-radio"><input type="radio" name="pt-ro" checked><span>Canary</span><span class="meta">5% → 100%</span></label></div><h4>Switch, check, radio</h4><p>Square for a box, round for one of many.</p></div>
+      <div class="cal-spec"><div><div class="cal-chips"><span class="chip">payments<button type="button" aria-label="Remove payments">×</button></span><span class="chip">search<button type="button" aria-label="Remove search">×</button></span><input aria-label="Add a team" placeholder="add a team"></div></div><h4>Tags</h4><p>Enter adds one. A repeat lights the one already there.</p></div>
+      <div class="cal-spec"><div><ol class="cal-steps"><li class="done"><span class="s">01</span>source</li><li aria-current="step"><span class="s">02</span>limits</li><li><span class="s">03</span>review</li></ol></div><h4>Steps</h4><p>Where you are in a form of several parts.</p></div>
+      <div class="cal-spec"><div><div class="row"><span class="cal-badge" data-ink="ok">✓ shipped</span><span class="cal-badge" data-ink="fault"><span class="cal-dot fault"></span>failed</span><span class="cal-badge"><span class="cal-dot"></span>queued</span></div><div class="row"><cal-spin size="sm" label="Loading"></cal-spin><span class="cal-scan" role="status" aria-label="Loading"><i></i></span><span class="cal-wait" role="status" aria-label="Loading"><i></i><i></i><i></i><i></i></span></div></div><h4>Status and waiting</h4><p>Boxed words for state. Drawn spinners for the wait.</p></div>
+    </div>
+    <p class="ask"><span class="cal-legend">ask claude</span><q>Add a Calibrated meter for our API quota: 46 000 of 1 000 000 requests, alert at 80%.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
   </section>
 
   <section class="cal-sec" id="motion">
-    <div class="cal-sec-h"><b>7 · Motion</b><span>numbers glide to their new value · figures replay · try the buttons</span><span>sheet 7/8</span></div>
+    <div class="cal-sec-h"><b>8 · Motion</b><span>numbers glide to their new value · figures replay · try the buttons</span><span>sheet 8/9</span></div>
     <div class="ba">
         <div class="layer art cal-theme">
           <h2 class="hd">When a number changes, the drawing <span class="live">moves</span> to it.</h2>
@@ -397,7 +690,7 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
   </section>
 
   <section class="cal-sec" id="finishes">
-    <div class="cal-sec-h"><b>8 · Finishes</b><span>same drawings, your colours · every example re-inks</span><span>sheet 8/8</span></div>
+    <div class="cal-sec-h"><b>9 · Finishes</b><span>same drawings, your colours · every example re-inks</span><span>sheet 9/9</span></div>
     <div class="finish-row" role="group" aria-label="Finish" id="finishes-row"></div>
     <div class="ba">
         <div class="layer art cal-theme">
@@ -417,14 +710,13 @@ main > .cal-sec .cal-spec { background: none; padding: 0; }
     <div class="cal-sec-h"><b>Get it</b><span>free and open source · mit</span><span>emdmed/calibrated</span></div>
     <div class="cal-tiers get">
       <div><div class="tt">1 · Claude Code plugin</div><p>Paste both lines into Claude Code. The skills show up as <code>calibrated:…</code></p>
-        <pre class="cal-pre" id="cmd-plugin">/plugin marketplace add emdmed/calibrated
-/plugin install calibrated@calibrated</pre>
+        <div class="cal-code" data-lang="claude code"><pre><code id="cmd-plugin">/plugin marketplace add emdmed/calibrated
+/plugin install calibrated@calibrated</code></pre></div>
         <div class="acts"><button class="cal-btn primary" type="button" data-copy-from="#cmd-plugin">copy</button></div></div>
       <div><div class="tt">2 · Or copy the skills</div><p>Into <code>~/.claude/skills/</code> for every project, or <code>.claude/skills/</code> for one.</p>
-        <pre class="cal-pre" id="cmd-hand">git clone https://github.com/emdmed/calibrated
-cp -r calibrated/skills/* ~/.claude/skills/</pre>
+        <div class="cal-code" data-lang="shell"><pre><code id="cmd-hand"><span class="ln">git clone https://github.com/emdmed/calibrated</span><span class="ln">cp -r calibrated/skills/* ~/.claude/skills/</span></code></pre></div>
         <div class="acts"><button class="cal-btn" type="button" data-copy-from="#cmd-hand">copy</button></div></div>
-      <div><div class="tt">3 · Ask for any page</div><p>Say “in the Calibrated style”. Claude picks the right drawing for each number. The examples show five whole pages and the requests that made them. Building by hand? The reference has every part and its code.</p>
+      <div><div class="tt">3 · Ask for any page</div><p>Say “in the Calibrated style”. Claude picks the right drawing for each number. The examples show six whole pages and the requests that made them. Building by hand? The reference has every part and its code.</p>
         <div class="acts"><a class="gh" href="https://github.com/emdmed/calibrated"><svg aria-hidden="true"><use href="#i-gh"/></svg><span>github</span></a><a class="cal-btn" href="examples.html" style="text-decoration:none">examples</a><a class="cal-btn" href="reference.html" style="text-decoration:none">reference</a><button class="cal-btn" type="button" id="share">share this page</button><span class="mut" id="share-msg" role="status" style="font-size:13px"></span></div></div>
     </div>
   </section>
@@ -585,8 +877,6 @@ cp -r calibrated/skills/* ~/.claude/skills/</pre>
     const f = FIN.find((x) => x[0] === id), vars = f && f[3];
     $$('.ba .art.cal-theme').forEach((el) => { KEYS.forEach((k) => el.style.removeProperty(k)); if (vars) Object.entries(vars).forEach(([k, v]) => el.style.setProperty(k, v)); });
     $$('[data-fin]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.fin === id)));
-    const own = id === (html.dataset.theme === 'night' ? 'night' : 'film');
-    $$('.ba').forEach((ba) => ba.classList.toggle('tinted', !own));
     Calibrated.redraw && Calibrated.redraw();
   }
   row.addEventListener('click', (e) => { const b = e.target.closest('[data-fin]'); if (b) applyFinish(b.dataset.fin); });
@@ -602,17 +892,64 @@ cp -r calibrated/skills/* ~/.claude/skills/</pre>
   setTheme(html.dataset.theme);
   themeBtn.addEventListener('click', () => setTheme(html.dataset.theme === 'night' ? 'film' : 'night'));
 
-  /* ── review board sign-off */
+  /* ── review board sign-off: keep, rework (with a note) or drop */
   const cards = $$('#review .cal-card');
   const tally = () => { $('[data-tally]').textContent = `${cards.filter((c) => c.dataset.v).length} of ${cards.length} signed`; };
   $$('#review .cal-sign .cal-btn').forEach((b) => b.addEventListener('click', () => {
     const card = b.closest('.cal-card'), on = b.getAttribute('aria-pressed') !== 'true';
     card.querySelectorAll('.cal-sign .cal-btn').forEach((x) => x.setAttribute('aria-pressed', 'false'));
     b.setAttribute('aria-pressed', String(on));
-    if (on) { card.dataset.v = b.dataset.v; card.dataset.state = b.dataset.v === 'drop' ? 'dropped' : 'ok'; }
+    if (on) { card.dataset.v = b.dataset.v; card.dataset.state = { drop: 'dropped', rework: 'rework' }[b.dataset.v] || 'ok'; }
     else { delete card.dataset.v; delete card.dataset.state; }
+    const note = card.querySelector('.cal-sign .note');
+    if (note) { note.hidden = card.dataset.state !== 'rework'; if (!note.hidden) note.querySelector('input').focus(); }
     tally();
   }));
+
+  /* ── app screen: save reports with a toast; menu items toast; the reset dialog reports its choice */
+  $('#save-limits').addEventListener('click', () => Calibrated.toast(`Limits saved · ${$('#lim').value} a month`, { ink: 'ok', action: 'undo', onAction: () => Calibrated.toast('Limits restored') }));
+  $$('#usage-menu [data-toast]').forEach((b) => b.addEventListener('click', () => Calibrated.toast(b.dataset.toast, { ink: 'ok' })));
+  $('#reset-usage').addEventListener('close', (e) => { if (e.target.returnValue === 'reset') Calibrated.toast('Usage reset · messages at 0', { ink: 'ok' }); });
+
+  /* ── a note pane past its limit swaps its hint for an error that says how much to cut */
+  $$('.cal-term[data-max]').forEach((t) => {
+    const hint = t.parentElement.querySelector('.hint'); if (!hint) return;
+    const was = hint.textContent;
+    t.addEventListener('cal-count', (e) => {
+      const { length, max, over } = e.detail;
+      hint.classList.toggle('err', over);
+      hint.textContent = over ? `${length - max} over. Trim it to ${max} characters.` : was;
+    });
+  });
+
+  /* ── form: the steps follow the fieldset being filled; send lights step 04 */
+  const rf = $('#rf'), rfChips = $('#rf .cal-chips'), rfChipsWas = rfChips.innerHTML, rfSteps = $$('#rf-steps li'), rfBadge = $('#rf-badge'), rfSend = $('#rf-send');
+  const markStep = (n) => rfSteps.forEach((li, i) => {
+    li.classList.toggle('done', i + 1 < n);
+    if (i + 1 === n) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+  });
+  rf.addEventListener('focusin', (e) => { const fs = e.target.closest('fieldset[data-step]'); if (fs && !rf.inert) markStep(+fs.dataset.step); });
+  const setBadge = (ink, mark, word) => { rfBadge.dataset.ink = ink; rfBadge.innerHTML = mark + word; if (!ink) delete rfBadge.dataset.ink; };
+  rfSend.addEventListener('click', () => {
+    const amt = $('#rf-amt');
+    if (!(parseInt(amt.value.replace(/\D/g, ''), 10) > 0)) { amt.setAttribute('aria-invalid', 'true'); amt.focus(); return; }
+    amt.removeAttribute('aria-invalid');
+    markStep(4);
+    rfSend.disabled = true;
+    rfSend.innerHTML = 'sending <span class="cal-wait" aria-hidden="true"><i></i><i></i><i></i><i></i></span>';
+    setTimeout(() => {
+      rfSend.textContent = 'sent';
+      rfSteps.forEach((li) => { li.classList.add('done'); li.removeAttribute('aria-current'); });
+      setBadge('ok', '', '✓ sent to a lead');
+      Calibrated.toast(`Refund of €${amt.value} sent for approval · order 4471`, { ink: 'ok' });
+    }, 1400);
+  });
+  $('#rf-reset').addEventListener('click', () => {
+    rf.reset(); rfChips.innerHTML = rfChipsWas; $('#rf-files').innerHTML = '<div class="file"><span>box-corner.jpg</span><span class="lg mut">2.1 MB</span></div>';
+    markStep(2); setBadge('', '<span class="cal-dot"></span>', 'draft');
+    rfSend.disabled = false; rfSend.textContent = 'send for approval';
+    Calibrated.controls(rf);
+  });
 
   /* ── motion: new values for every instrument; step the train; resize the bucket */
   const rnd = (a, b) => Math.round(a + Math.random() * (b - a));
@@ -651,7 +988,9 @@ cp -r calibrated/skills/* ~/.claude/skills/</pre>
     setTimeout(() => { btn.textContent = 'copy'; }, 1600);
   };
   $$('[data-copy]').forEach((b) => b.addEventListener('click', () => copy(b, b.parentElement.querySelector('q').textContent)));
-  $$('[data-copy-from]').forEach((b) => b.addEventListener('click', () => copy(b, $(b.dataset.copyFrom).textContent)));
+  /* a code block copies its .ln lines without the prompt; anything else copies its text */
+  const codeText = (el) => { const ln = $$('.ln', el); return ln.length ? ln.map((l) => l.textContent).join('\n') : el.textContent; };
+  $$('[data-copy-from]').forEach((b) => b.addEventListener('click', () => copy(b, codeText($(b.dataset.copyFrom)))));
   const msg = $('#share-msg');
   $('#share').addEventListener('click', async () => {
     const data = { title: 'Calibrated', text: 'Technical drawings for everything Claude makes.', url: location.href.split('#')[0] };

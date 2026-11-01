@@ -14,8 +14,9 @@
 /* The site chrome matches the catalog (index.html). Everything inside .page is a
    finished page as Claude would hand it back: panels on the desk, kit parts only. */
 html { scroll-behavior: smooth; scroll-padding-top: 76px; }
-html, body { background: var(--bg); }
-.top { position: sticky; top: 0; z-index: 20; background: var(--bg); }
+html, body { background: var(--gutter); }
+.top { position: sticky; top: 0; z-index: 20; background: var(--gutter); }
+@media (max-width: 640px) { html { scroll-padding-top: 104px; } }
 .top .cal-mast { padding: 12px 0 10px; }
 .top .word.ruled { font-size: 20px; }
 .top a.word { text-decoration: none; }
@@ -48,13 +49,21 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
 .brief .cal-kv code { white-space: nowrap; }
 
 /* a finished page: the desk, and the page's own wrap inside it */
-.page.cal-theme { background: var(--gutter); padding: clamp(6px, 2vw, 22px) clamp(12px, 2.6vw, 34px) 4px; overflow: hidden; }
+/* the site sits on the desk like the catalog; each finished page is a sheet set into it:
+   a deeper desk tone inside a hairline frame, so it reads as one whole page */
+.page.cal-theme { --gutter: color-mix(in srgb, var(--bg), var(--shade) calc(var(--desk-depth, 24%) + 9%)); background: var(--gutter); border: var(--line-thin) solid var(--edge-strong); padding: clamp(6px, 2vw, 22px) clamp(12px, 2.6vw, 34px) 4px; overflow: hidden; }
 .page .cal-intro { padding-top: clamp(20px, 2.6vw, 32px); }
 .page .cal-intro h1 { font-size: clamp(22px, 2.4vw, 32px); }
 .page .cal-sec { margin-top: clamp(28px, 3vw, 40px); }
 .page .cal-foot { padding: 26px 0 22px; }
 .page .cal-figure > svg { max-width: calc(100% - 36px); }
 .page .cal-card + .cal-card { margin-top: var(--gap); }
+
+/* examples: a chapter break well over twice the gap between a page's own sections */
+main > .cal-sec { margin-top: clamp(72px, 9vw, 128px); }
+main > .cal-sec > .cal-sec-h { margin-bottom: 26px; }
+@media (min-width: 641px) { main > .cal-sec > .cal-sec-h b { font-size: 13px; } }
+main > .cal-sec > .brief { margin-bottom: 26px; }
 
 /* small layout helpers used inside the pages */
 .now { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: 26px 48px; padding: 18px 20px 20px; }
@@ -79,6 +88,30 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
 .app .panel-h { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
 .app .panel-h .sp { flex: 1; }
 .app .cal-table { background: none; }
+.app .panel-h .cal-search { width: min(100%, 240px); }
+.app .form .wide { grid-column: 1 / -1; }
+.app .cal-table tr.none td { padding: 0; border: 0; }
+.app .cal-table mark { background: var(--select-bg); color: var(--select-fg); }
+.app .cal-table tr.none .cal-empty { min-height: 120px; }
+.app .cal-dialog .bd { display: grid; gap: 16px; }
+.pager-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+.pager-row .sp { flex: 1; }
+
+/* example 6 · a form in steps */
+.wiz { display: grid; grid-template-columns: minmax(0, 1fr) 270px; gap: var(--gap); margin-top: 18px; align-items: start; }
+.wiz .cal-panel { padding: 18px 22px 20px; min-width: 0; }
+.wiz .cal-steps { margin: 4px 0 26px; }
+.wiz .step { display: grid; gap: 18px; }
+.wiz .step[hidden] { display: none; }
+.wiz .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 18px 32px; align-items: start; }
+.wiz .radios { display: grid; gap: 10px; }
+.wiz .cal-rows:empty { display: none; }
+.wiz .btns { display: flex; gap: 10px; align-items: center; margin-top: 24px; padding-top: 14px; border-top: var(--line-thin) solid var(--edge); flex-wrap: wrap; }
+.wiz .btns .sp { flex: 1; }
+.wiz .done-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.wiz aside { display: grid; gap: var(--gap); }
+.wiz aside .cal-panel { padding: 14px 16px 16px; }
+@media (max-width: 900px) { .wiz { grid-template-columns: 1fr; } }
 .finish-row { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin: 0 0 14px; }
 .finish-row .chip { width: 22px; height: 12px; border: var(--line-thin) solid currentColor; display: inline-grid; grid-template-columns: 1fr 1fr 1fr; margin: 0 7px 0 3px; vertical-align: -2px; }
 
@@ -89,6 +122,7 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
   .top .cal-mast { gap: 10px; }
   .toc th:nth-child(3), .toc td:nth-child(3) { display: none; }
 }
+@media (max-width: 520px) { .cal-steps li { font-size: 10px; letter-spacing: .02em; padding-right: 4px; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 </style>
 <script>
@@ -124,9 +158,9 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
 <main class="wrap">
   <section class="cal-intro">
     <div class="lead">
-      <h1>Five finished pages, start to end</h1>
-      <p>The catalog shows one drawing per page type. These are whole pages: the kind of report, review board, explainer, spec sheet and app screen a team would share. Each starts with the request that made it and the numbers pasted with it, and lists the skill and parts it is built from.</p>
-      <p class="mut">All figures and instruments are live. Buttons work. Every number is example data.</p>
+      <h1>Six finished pages, start to end</h1>
+      <p>The catalog shows one drawing per page type. These are whole pages: the kind of report, review board, explainer, spec sheet, app screen and form a team would share. Each starts with the request that made it and the numbers pasted with it, and lists the skill and parts it is built from.</p>
+      <p class="mut">All figures and instruments are live. Buttons and forms work. Every number is example data.</p>
     </div>
     <table class="cal-table toc">
       <thead><tr><th>no</th><th>page</th><th>type</th></tr></thead>
@@ -136,13 +170,14 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
         <tr><td>03</td><td><a href="#upload">How a photo upload works</a></td><td>explainer</td></tr>
         <tr><td>04</td><td><a href="#api">Orders API · v3</a></td><td>spec sheet</td></tr>
         <tr><td>05</td><td><a href="#app">Workspace settings, in your brand</a></td><td>app screen</td></tr>
+        <tr><td>06</td><td><a href="#supplier">New supplier sign-up</a></td><td>form in steps</td></tr>
       </tbody>
     </table>
   </section>
 
   <!-- ════ 1 · status report ════ -->
   <section class="cal-sec" id="ops">
-    <div class="cal-sec-h"><b>1 · Weekly ops report</b><span>status report · instruments, budget, lanes, roll-up</span><span>example 1/5</span></div>
+    <div class="cal-sec-h"><b>1 · Weekly ops report</b><span>status report · instruments, budget, lanes, roll-up</span><span>example 1/6</span></div>
     <div class="brief">
       <div>
         <p class="ask"><span class="cal-legend">ask claude</span><q>Make this week's platform ops report as a Calibrated artifact. Lead with what needs attention.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
@@ -185,8 +220,8 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
       </section>
 
       <section class="cal-sec">
-        <div class="cal-sec-h"><b>3 · Roll-up</b><span>every deploy this week</span><span>sheet 3/3</span></div>
-        <table class="cal-table">
+        <div class="cal-sec-h"><b>3 · Roll-up</b><span>every deploy, a week per page</span><span>sheet 3/3</span></div>
+        <table class="cal-table" id="ops-roll">
           <thead><tr><th>no</th><th>service</th><th>change</th><th>diff</th><th class="num">ci min</th><th>status</th></tr></thead>
           <tbody>
             <tr><td>01</td><td>checkout-api</td><td>rate-limit login attempts</td><td><cal-diff added="212" removed="38" density="compact"></cal-diff></td><td class="num">1 840</td><td class="st" data-ink="live">rolling</td></tr>
@@ -195,6 +230,7 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
             <tr><td>04</td><td>e2e suite</td><td>checkout tests, 3 browsers</td><td><cal-diff added="2310" removed="0" density="compact"></cal-diff></td><td class="num">6 900</td><td class="st" data-ink="fault">over ci budget</td></tr>
           </tbody>
         </table>
+        <div class="pager-row"><span class="cal-legend" id="ops-wk">week 44 · 4 deploys</span><span class="sp"></span><nav id="ops-pages" aria-label="Weeks"></nav></div>
       </section>
       <footer class="cal-foot"><span>platform · ops-044</span><span>source: grafana, github actions · fri 17:00</span></footer>
     </div>
@@ -202,13 +238,13 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
 
   <!-- ════ 2 · review board ════ -->
   <section class="cal-sec" id="release">
-    <div class="cal-sec-h"><b>2 · Release go / no-go</b><span>review board · cards, sign-off, revisions</span><span>example 2/5</span></div>
+    <div class="cal-sec-h"><b>2 · Release go / no-go</b><span>review board · cards, sign-off, revisions</span><span>example 2/6</span></div>
     <div class="brief">
       <div>
         <p class="ask"><span class="cal-legend">ask claude</span><q>Turn the release 2.4 checklist into a Calibrated go / no-go board. One card per gate, with go / hold, and a sign-off I can paste into Slack.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
         <p class="data"><b>pasted with it</b><code>git log</code> of release/2.4 (5 commits, main 1 ahead) · migration log, 10 steps · the 6 PRs and the services each one touches</p>
       </div>
-      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>merge</code> · <code>timeline</code> · <code>matrix</code></dd><dt>parts</dt><dd>cards with today / drawn · keep-drop sign-off · revision triangles · sticky tally</dd></dl>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>merge</code> · <code>timeline</code> · <code>matrix</code></dd><dt>parts</dt><dd>cards with today / drawn · keep-drop sign-off · revision triangles · note pane · sticky tally</dd></dl>
     </div>
     <div class="page cal-theme" data-density="full">
       <header class="cal-mast">
@@ -224,7 +260,7 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
       </section>
 
       <section class="cal-sec">
-        <div class="cal-sec-h"><b>1 · Gates</b><span>today · drawn</span><span>sheet 1/2</span></div>
+        <div class="cal-sec-h"><b>1 · Gates</b><span>today · drawn</span><span>sheet 1/3</span></div>
         <article class="cal-card">
           <div class="info">
             <div class="id"><span class="no">01</span>merge plan<span class="end">rev A</span></div>
@@ -267,7 +303,7 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
       </section>
 
       <section class="cal-sec">
-        <div class="cal-sec-h"><b>2 · Revisions</b><span>what changed since the first round</span><span>sheet 2/2</span></div>
+        <div class="cal-sec-h"><b>2 · Revisions</b><span>what changed since the first round</span><span>sheet 2/3</span></div>
         <table class="cal-revs" style="width:100%">
           <thead><tr><th>rev</th><th>change</th><th>date</th></tr></thead>
           <tbody>
@@ -276,6 +312,17 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
           </tbody>
         </table>
       </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>3 · Note</b><span>goes out with the sign-off</span><span>sheet 3/3</span></div>
+        <div class="cal-field" style="max-width:720px"><label for="rel-note">note for #release</label>
+          <div class="cal-term" data-max="280">
+            <textarea class="cal-textarea" id="rel-note" spellcheck="false" aria-describedby="rel-note-h">Backfill runs mon 02:00. Tomás is on call until 03:00; ping him before touching orders.</textarea>
+            <div class="bar" aria-hidden="true"><span class="mode">-- normal --</span><span class="sp"></span><span class="pos">ln 1, col 1</span><span class="cal-count"><b>000</b><span>/ 280</span></span></div>
+          </div>
+          <span class="hint" id="rel-note-h">Slack cuts the preview at 280 characters.</span>
+        </div>
+      </section>
       <div class="cal-tally sticky" id="rel-tally"><span data-n>0 of 3 signed</span><span class="sp"></span><span class="mut" data-msg role="status"></span><button class="cal-btn" type="button" data-copy-signoff>copy sign-off</button></div>
       <footer class="cal-foot"><span>release 2.4 · rel-024 · rev B</span><span>source: git, migrate --dry-run, github prs</span></footer>
     </div>
@@ -283,7 +330,7 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
 
   <!-- ════ 3 · explainer ════ -->
   <section class="cal-sec" id="upload">
-    <div class="cal-sec-h"><b>3 · How a photo upload works</b><span>explainer · one worked example, measured</span><span>example 3/5</span></div>
+    <div class="cal-sec-h"><b>3 · How a photo upload works</b><span>explainer · one worked example, measured</span><span>example 3/6</span></div>
     <div class="brief">
       <div>
         <p class="ask"><span class="cal-legend">ask claude</span><q>Explain what happens after a customer taps upload, for the support team, as a Calibrated explainer. Use one real photo as the example.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
@@ -352,13 +399,13 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
 
   <!-- ════ 4 · spec sheet ════ -->
   <section class="cal-sec" id="api">
-    <div class="cal-sec-h"><b>4 · Orders API · v3</b><span>spec sheet · drawing frame, title block, stamp</span><span>example 4/5</span></div>
+    <div class="cal-sec-h"><b>4 · Orders API · v3</b><span>spec sheet · drawing frame, title block, stamp</span><span>example 4/6</span></div>
     <div class="brief">
       <div>
         <p class="ask"><span class="cal-legend">ask claude</span><q>Write the spec sheet for Orders API v3 in the Calibrated style, as an engineering drawing with a title block. Partners read this.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
         <p class="data"><b>pasted with it</b>the OpenAPI file · network diagram notes · rate limits and timeouts · key rotation runbook · change log</p>
       </div>
-      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>section</code> · <code>loop</code></dd><dt>instruments</dt><dd><code>&lt;cal-ruler&gt;</code> · <code>&lt;cal-meter&gt;</code></dd><dt>parts</dt><dd>sheet with zones · title block · stamp · revision table · parameters table</dd></dl>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>section</code> · <code>loop</code></dd><dt>instruments</dt><dd><code>&lt;cal-ruler&gt;</code> · <code>&lt;cal-meter&gt;</code></dd><dt>parts</dt><dd>sheet with zones · title block · stamp · code block · revision table · parameters table</dd></dl>
     </div>
     <div class="page cal-theme" data-density="full">
       <div class="cal-sheet" data-zones="8x6">
@@ -394,10 +441,7 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
             <figure class="cal-figure"><svg id="f-api-loop"></svg><figcaption><b>Cycle</b>Old keys work for 14 days after a new one is issued.</figcaption></figure>
             <div class="cal-panel" style="padding:16px 18px">
               <div class="cal-gl">rotate a key</div>
-              <pre class="cal-pre" style="margin-top:10px">orders keys create --partner acme
-orders keys deploy --partner acme --to prod
-orders keys revoke --partner acme --older-than 14d
-orders audit --partner acme --since 90d</pre>
+              <div class="cal-code" data-lang="shell" style="margin-top:10px"><button class="cal-btn" type="button" data-copy-from="#rot-cmd">copy</button><pre><code id="rot-cmd"><span class="cm"># once every 90 days · about 10 min</span><span class="ln">orders keys create --partner acme</span><span class="ln">orders keys deploy --partner acme --to prod</span><span class="cm"># wait 14 days, then</span><span class="ln">orders keys revoke --partner acme --older-than 14d</span><span class="ln">orders audit --partner acme --since 90d</span></code></pre></div>
             </div>
           </div>
         </section>
@@ -437,13 +481,13 @@ orders audit --partner acme --since 90d</pre>
 
   <!-- ════ 5 · app screen in a brand finish ════ -->
   <section class="cal-sec" id="app">
-    <div class="cal-sec-h"><b>5 · Workspace settings</b><span>app screen · your colours · the form works</span><span>example 5/5</span></div>
+    <div class="cal-sec-h"><b>5 · Workspace settings</b><span>app screen · your colours · the form works</span><span>example 5/6</span></div>
     <div class="brief">
       <div>
         <p class="ask"><span class="cal-legend">ask claude</span><q>Build the usage and limits screen for our app with the Calibrated components, in our brand: navy page, white ink, cyan lamp.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
         <p class="data"><b>pasted with it</b>brand colours · the current settings page · the usage API response</p>
       </div>
-      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-tokens</code> · <code>calibrated-components</code></dd><dt>instruments</dt><dd><code>&lt;cal-meter&gt;</code> · <code>&lt;cal-position&gt;</code> · <code>&lt;cal-durations&gt;</code></dd><dt>parts</dt><dd>tabs with counts · rows · form fields with an error · checkbox · table · buttons</dd><dt>theme</dt><dd>three seed colours: <code>--bg</code> <code>--fg</code> <code>--live</code></dd></dl>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-tokens</code> · <code>calibrated-components</code></dd><dt>instruments</dt><dd><code>&lt;cal-meter&gt;</code> · <code>&lt;cal-position&gt;</code> · <code>&lt;cal-durations&gt;</code></dd><dt>parts</dt><dd>tabs with counts · rows · number with units · range · tag input · a field with an error · checkbox · search with an empty state · dialog with radio and date · toasts</dd><dt>theme</dt><dd>three seed colours: <code>--bg</code> <code>--fg</code> <code>--live</code></dd></dl>
     </div>
     <div class="finish-row" role="group" aria-label="Brand finish" id="app-fin"></div>
     <div class="page cal-theme" id="app-page" data-density="full">
@@ -487,35 +531,140 @@ orders audit --partner acme --since 90d</pre>
           <div class="cal-panel">
             <div class="panel-h"><span class="cal-legend" style="color:var(--fg)">limits</span></div>
             <form class="form" id="limits" novalidate>
-              <div class="cal-field"><label for="cap">monthly event cap</label><input class="cal-input" id="cap" value="3 000 000" inputmode="numeric"><span class="hint">Events past the cap are dropped, not billed.</span></div>
-              <div class="cal-field"><label for="alert">alert email</label><input class="cal-input" id="alert" value="ops@acme" aria-describedby="alert-e" aria-invalid="true"><span class="err" id="alert-e">Enter a full address, like ops@acme.com.</span></div>
-              <div class="cal-field"><label for="at">alert at</label><input class="cal-input" id="at" value="80 %"></div>
-              <label class="cal-check" style="margin-top:18px"><input type="checkbox" checked> <span>Pause exports at the cap</span></label>
+              <div class="cal-field"><label for="cap">monthly event cap</label>
+                <div class="cal-affixed cal-num"><input class="cal-input" id="cap" value="3 000 000" inputmode="numeric" data-step="100000" data-min="100000" aria-describedby="cap-h"><span class="cal-affix">events / mo</span></div>
+                <span class="hint" id="cap-h">Events past the cap are dropped, not billed.</span></div>
+              <div class="cal-field"><label for="at">alert at</label>
+                <div class="cal-range" data-unit="%"><output for="at"></output><input type="range" id="at" min="0" max="100" step="5" value="80">
+                  <div class="nums"><span>0</span><span>50%</span><span>100%</span></div></div></div>
+              <div class="cal-field"><label for="alert">alert email</label><input class="cal-input" id="alert" type="email" value="ops@acme" aria-describedby="alert-e" aria-invalid="true"><span class="err" id="alert-e">Enter a full address, like ops@acme.com.</span></div>
+              <div class="cal-field"><span class="lbl" id="cc-l">also tell</span>
+                <div class="cal-chips" id="cc" aria-labelledby="cc-l"><span class="chip">#mobile<button type="button" aria-label="Remove #mobile">×</button></span><span class="chip">#ops<button type="button" aria-label="Remove #ops">×</button></span><input aria-label="Add a channel" placeholder="add a channel"></div></div>
+              <label class="cal-check wide"><input type="checkbox" checked> <span>Pause exports at the cap</span></label>
             </form>
-            <div class="btns"><span class="mut lg" id="save-msg" role="status"></span><button class="cal-btn quiet" type="button" id="reset">cancel</button><button class="cal-btn primary" type="submit" form="limits">save</button></div>
+            <div class="btns"><button class="cal-btn quiet" type="button" id="reset">cancel</button><button class="cal-btn primary" type="submit" form="limits" id="save">save</button></div>
           </div>
           <div class="cal-panel">
-            <div class="panel-h"><span class="cal-legend" style="color:var(--fg)">api keys</span><span class="sp"></span><button class="cal-btn" type="button">new key</button></div>
-            <table class="cal-table">
+            <div class="panel-h"><span class="cal-legend" style="color:var(--fg)">api keys</span><span class="cal-count" id="key-n"><b>04</b><span>keys</span></span><span class="sp"></span>
+              <div class="cal-affixed cal-search"><kbd class="cal-kbd">/</kbd><input class="cal-input" id="key-q" placeholder="search keys" aria-label="Search keys" autocomplete="off"><button class="cal-btn" type="button" aria-label="Clear search" hidden>×</button></div>
+              <button class="cal-btn" type="button" data-dialog="new-key">new key</button></div>
+            <table class="cal-table" id="keys">
               <thead><tr><th>no</th><th>name</th><th>key</th><th>last used</th><th>status</th></tr></thead>
               <tbody>
                 <tr><td>01</td><td>ios release</td><td><code>nw_live_…8f2c</code></td><td class="lg">2 min ago</td><td class="st" data-ink="ok">active</td></tr>
                 <tr><td>02</td><td>android release</td><td><code>nw_live_…a71e</code></td><td class="lg">just now</td><td class="st" data-ink="live">sending</td></tr>
-                <tr><td>03</td><td>old sdk</td><td><code>nw_live_…03b9</code></td><td class="lg">41 days ago</td><td class="st">revoked</td></tr>
+                <tr><td>03</td><td>ci · read only</td><td><code>nw_read_…5d10</code></td><td class="lg">yesterday</td><td class="st" data-ink="ok">active</td></tr>
+                <tr><td>04</td><td>old sdk</td><td><code>nw_live_…03b9</code></td><td class="lg">41 days ago</td><td class="st">revoked</td></tr>
+                <tr class="none" hidden><td colspan="5"><div class="cal-empty"><div><span class="ttl">no keys match</span><p>Nothing is named “<b id="key-miss"></b>”.</p><button class="cal-btn quiet" type="button" id="key-clear">clear search</button></div></div></td></tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
+      <dialog class="cal-dialog" id="new-key" aria-labelledby="new-key-t"><form method="dialog">
+        <header><b id="new-key-t">new api key</b><span class="sp"></span><kbd class="cal-kbd">esc</kbd></header>
+        <div class="bd">
+          <div class="cal-field"><label for="nk-name">name</label><input class="cal-input" id="nk-name" placeholder="like web checkout" aria-describedby="nk-name-e"><span class="err" id="nk-name-e" hidden>Give the key a name so you can find it later.</span></div>
+          <div class="cal-field"><span class="lbl" id="nk-scope-l">can</span>
+            <div role="radiogroup" aria-labelledby="nk-scope-l" style="display:grid;gap:9px">
+              <label class="cal-radio"><input type="radio" name="nk-scope" value="live" checked><span>Send and read events</span><span class="meta">nw_live_</span></label>
+              <label class="cal-radio"><input type="radio" name="nk-scope" value="read"><span>Read only</span><span class="meta">nw_read_ · for ci and dashboards</span></label>
+            </div></div>
+          <div class="cal-field"><label for="nk-exp">expires on</label><input type="date" class="cal-input cal-date" id="nk-exp" value="2027-01-30" min="2026-11-02"><span class="hint">90 days is the default. Rotate before then.</span></div>
+        </div>
+        <footer><button class="cal-btn" value="cancel" formnovalidate>cancel</button><button class="cal-btn primary" value="create" id="nk-go">create key</button></footer>
+      </form></dialog>
       <footer class="cal-foot"><span>northwind · settings</span><span>seats are full · add one in billing</span></footer>
+    </div>
+  </section>
+
+  <!-- ════ 6 · a form in steps ════ -->
+  <section class="cal-sec" id="supplier">
+    <div class="cal-sec-h"><b>6 · New supplier sign-up</b><span>form in steps · every field works</span><span>example 6/6</span></div>
+    <div class="brief">
+      <div>
+        <p class="ask"><span class="cal-legend">ask claude</span><q>Make the sign-up form for new suppliers as a Calibrated page, in steps: company, documents, terms, then a review before they send it.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+        <p class="data"><b>pasted with it</b>the paper form suppliers fill in today · the payment terms we offer · the documents food safety asks for</p>
+      </div>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-components</code></dd><dt>parts</dt><dd>steps · fields with an error · select · tag input · file drop · radio · date and time · note pane · key/value review · checkbox · stamp · status badge · node row while sending</dd></dl>
+    </div>
+    <div class="page cal-theme" data-density="full">
+      <header class="cal-mast">
+        <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
+        <span class="word">Harbourline</span>
+        <span class="cal-caption lg">suppliers · sign-up</span>
+        <span class="sp"></span>
+        <span class="cal-badge" id="sp-badge"><span class="cal-dot"></span>draft</span>
+      </header>
+      <section class="cal-intro">
+        <h1>Supply Harbourline kitchens in four short steps.</h1>
+        <div><p>Tell us who you are, add two documents and pick your payment terms. It takes about six minutes. Procurement replies within two working days.</p></div>
+      </section>
+      <div class="wiz">
+        <div class="cal-panel">
+          <ol class="cal-steps" id="sp-steps" aria-label="Sign-up steps">
+            <li aria-current="step"><span class="s">01</span>company</li>
+            <li><span class="s">02</span>documents</li>
+            <li><span class="s">03</span>terms</li>
+            <li><span class="s">04</span>review</li>
+          </ol>
+          <form id="sp" novalidate>
+            <fieldset class="cal-group step" data-step="1"><legend><b>1 · Company</b><span>as on your invoices</span></legend>
+              <div class="pair">
+                <div class="cal-field"><label for="sp-name">legal name</label><input class="cal-input" id="sp-name" autocomplete="organization" placeholder="like Fjord Dairy AS" aria-describedby="sp-name-e"><span class="err" id="sp-name-e" hidden>Enter the name on your invoices.</span></div>
+                <div class="cal-field"><label for="sp-vat">vat number</label><input class="cal-input" id="sp-vat" value="NO 914 778 271" autocomplete="off"></div>
+                <div class="cal-field"><label for="sp-country">country</label>
+                  <select class="cal-select" id="sp-country"><option><span class="v">denmark</span></option><option><span class="v">germany</span></option><option selected><span class="v">norway</span></option><option><span class="v">sweden</span></option></select></div>
+                <div class="cal-field"><label for="sp-mail">orders go to</label><input class="cal-input" id="sp-mail" type="email" value="orders@fjorddairy.no" autocomplete="email"></div>
+              </div>
+              <div class="cal-field"><span class="lbl" id="sp-cat-l">you supply</span>
+                <div class="cal-chips" id="sp-cat" aria-labelledby="sp-cat-l"><span class="chip">dairy<button type="button" aria-label="Remove dairy">×</button></span><span class="chip">eggs<button type="button" aria-label="Remove eggs">×</button></span><input aria-label="Add a category" placeholder="add a category, then enter"></div>
+                <span class="hint">Kitchens search suppliers by these words.</span></div>
+            </fieldset>
+            <fieldset class="cal-group step" data-step="2" hidden><legend><b>2 · Documents</b><span>pdf or a clear photo</span></legend>
+              <div class="cal-callout"><div class="cal-gl">we need</div><ol><li>A food safety certificate, issued in the last 12 months.</li><li>Proof of product liability insurance.</li></ol></div>
+              <label class="cal-drop" data-list="sp-files" data-max="10000000"><input type="file" multiple accept=".pdf,image/*"><span class="lead">drop both files here · or <u>browse</u></span><span class="hint">pdf, jpg or png · up to 10 MB each</span></label>
+              <div class="cal-rows" id="sp-files"></div>
+            </fieldset>
+            <fieldset class="cal-group step" data-step="3" hidden><legend><b>3 · Terms</b><span>you can change these once a year</span></legend>
+              <div class="cal-field"><span class="lbl" id="sp-pay-l">we pay you</span>
+                <div class="radios" role="radiogroup" aria-labelledby="sp-pay-l">
+                  <label class="cal-radio"><input type="radio" name="sp-pay" value="net 30" checked><span>30 days after delivery</span><span class="meta">standard</span></label>
+                  <label class="cal-radio"><input type="radio" name="sp-pay" value="net 60"><span>60 days after delivery</span><span class="meta">+2% on your price</span></label>
+                  <label class="cal-radio"><input type="radio" name="sp-pay" value="on delivery"><span>On delivery</span><span class="meta">orders under 5 000 kr</span></label>
+                </div></div>
+              <div class="pair">
+                <div class="cal-field"><label for="sp-first">first delivery</label><input type="date" class="cal-input cal-date" id="sp-first" value="2026-11-17" min="2026-11-03"></div>
+                <div class="cal-field"><label for="sp-time">deliveries arrive by</label><input type="time" class="cal-input cal-date" id="sp-time" value="06:30" step="900"><span class="hint">Kitchens open at 07:00.</span></div>
+              </div>
+              <div class="cal-field"><label for="sp-note">anything we should know</label>
+                <div class="cal-term" data-max="500">
+                  <textarea class="cal-textarea" id="sp-note" spellcheck="false" placeholder="minimum orders, holidays, cold-chain notes">Minimum order 40 kg. We do not deliver on Norwegian public holidays.</textarea>
+                  <div class="bar" aria-hidden="true"><span class="mode">-- normal --</span><span class="sp"></span><span class="pos">ln 1, col 1</span><span class="cal-count"><b>000</b><span>/ 500</span></span></div>
+                </div></div>
+            </fieldset>
+            <fieldset class="cal-group step" data-step="4" hidden><legend><b>4 · Review</b><span>check it, then send</span></legend>
+              <dl class="cal-kv" id="sp-sum"></dl>
+              <label class="cal-check"><input type="checkbox" id="sp-ok"> <span>The information above is correct</span></label>
+              <div class="done-row" id="sp-done" hidden><span class="cal-stamp">received</span><p class="mut" style="font-size:13px;max-width:46ch">Procurement has it and replies within two working days.</p></div>
+            </fieldset>
+          </form>
+          <div class="btns"><button class="cal-btn" type="button" id="sp-back" disabled>back</button><span class="sp"></span><span class="mut" style="font-size:12.5px" id="sp-msg" role="status"></span><button class="cal-btn primary" type="button" id="sp-next">next · documents</button></div>
+        </div>
+        <aside>
+          <div class="cal-callout"><div class="cal-gl">before you start</div><ol><li>Your VAT number.</li><li>Two documents, as pdf or photos.</li><li>About six minutes.</li></ol></div>
+          <div class="cal-panel"><div class="cal-gl">questions</div><dl class="cal-kv" style="margin-top:8px"><dt>email</dt><dd>suppliers@harbourline.no</dd><dt>phone</dt><dd>+47 22 41 80 00</dd><dt>hours</dt><dd>mon–fri · 08–16</dd></dl></div>
+        </aside>
+      </div>
+      <footer class="cal-foot"><span>harbourline · supplier sign-up</span><span>form sup-01 · 4 steps</span></footer>
     </div>
   </section>
 
   <section class="cal-sec" id="next">
     <div class="cal-sec-h"><b>Make your own</b><span>install once, then ask in plain words</span><span>emdmed/calibrated</span></div>
     <div class="cal-tiers" style="border:0">
-      <div style="padding:0;background:none"><div class="tt">1 · Install</div><p>Paste both lines into Claude Code.</p><pre class="cal-pre" id="cmd" style="white-space:pre;overflow-x:auto;margin:8px 0 10px">/plugin marketplace add emdmed/calibrated
-/plugin install calibrated@calibrated</pre><button class="cal-btn primary" type="button" data-copy-from="#cmd">copy</button></div>
+      <div style="padding:0;background:none"><div class="tt">1 · Install</div><p>Paste both lines into Claude Code.</p><div class="cal-code" data-lang="claude code" style="margin:8px 0 10px"><pre><code id="cmd">/plugin marketplace add emdmed/calibrated
+/plugin install calibrated@calibrated</code></pre></div><button class="cal-btn primary" type="button" data-copy-from="#cmd">copy</button></div>
       <div style="padding:0;background:none"><div class="tt">2 · Ask</div><p>Copy any request above, paste your own numbers after it, and say “in the Calibrated style”.</p></div>
       <div style="padding:0;background:none"><div class="tt">3 · Look closer</div><p>The catalog flips every page type between plain and calibrated. The reference has every part and its code.</p><p style="margin-top:10px"><a class="cal-btn" href="index.html" style="text-decoration:none">catalog</a> <a class="cal-btn" href="reference.html" style="text-decoration:none">reference</a></p></div>
     </div>
@@ -611,7 +760,8 @@ orders audit --partner acme --since 90d</pre>
     const lines = cards.map((c) => `${$('.no', c).textContent} ${$('h3', c).textContent}: ${c.dataset.v || 'not signed'}`);
     const holds = cards.filter((c) => c.dataset.v === 'hold').length, open = cards.filter((c) => !c.dataset.v).length;
     const verdict = holds ? `NO-GO · ${holds} on hold` : open ? `pending · ${open} not signed` : 'GO for Monday';
-    const text = `Release 2.4 · ${verdict}\n` + lines.join('\n');
+    const note = $('#rel-note').value.trim();
+    const text = `Release 2.4 · ${verdict}\n` + lines.join('\n') + (note ? `\n\n${note}` : '');
     const msg = $('[data-msg]', tallyEl);
     try { await navigator.clipboard.writeText(text); msg.textContent = 'copied · ' + verdict.toLowerCase(); } catch { msg.textContent = 'copy failed'; }
   });
@@ -644,11 +794,142 @@ orders audit --partner acme --since 90d</pre>
   }));
   $$('#app-page [role="tab"]').forEach((t, _, all) => t.addEventListener('click', () => all.forEach((x) => x.setAttribute('aria-selected', String(x === t)))));
 
-  const form = $('#limits'), alertIn = $('#alert'), err = $('#alert-e'), saveMsg = $('#save-msg');
+  const wait = '<span class="cal-wait" aria-hidden="true"><i></i><i></i><i></i><i></i></span>';
+  const form = $('#limits'), alertIn = $('#alert'), err = $('#alert-e'), saveBtn = $('#save'), cc = $('#cc'), ccWas = cc.innerHTML;
   const check = () => { const ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(alertIn.value.trim()); alertIn.setAttribute('aria-invalid', String(!ok)); err.hidden = ok; return ok; };
-  alertIn.addEventListener('input', () => { check(); saveMsg.textContent = ''; });
-  form.addEventListener('submit', (e) => { e.preventDefault(); if (check()) saveMsg.textContent = 'saved'; else { saveMsg.textContent = ''; alertIn.focus(); } });
-  $('#reset').addEventListener('click', () => { form.reset(); check(); saveMsg.textContent = ''; });
+  alertIn.addEventListener('input', check);
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!check()) { alertIn.focus(); Calibrated.toast('Not saved · the alert email needs a full address', { ink: 'fault' }); return; }
+    saveBtn.disabled = true; saveBtn.innerHTML = 'saving ' + wait;
+    setTimeout(() => {
+      saveBtn.disabled = false; saveBtn.textContent = 'save';
+      Calibrated.toast(`Limits saved · cap ${$('#cap').value} · alert at ${$('#at').value}%`, { ink: 'ok' });
+    }, 900);
+  });
+  $('#reset').addEventListener('click', () => { form.reset(); cc.innerHTML = ccWas; check(); Calibrated.controls(form); });
+
+  /* api keys: search names, an empty state when nothing matches, and a dialog that adds a key */
+  const keyQ = $('#key-q'), keyClr = keyQ.nextElementSibling, keyBody = $('#keys tbody'), keyNone = $('tr.none', keyBody), keyN = $('#key-n b');
+  const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const filterKeys = () => {
+    const raw = keyQ.value.trim(), q = raw.toLowerCase(); let n = 0;
+    $$('tr:not(.none)', keyBody).forEach((tr) => {
+      const cell = tr.children[1], name = cell.dataset.name ??= cell.textContent;
+      const i = q ? name.toLowerCase().indexOf(q) : -1, hit = !q || i >= 0;
+      tr.hidden = !hit; if (hit) n++;
+      cell.innerHTML = i >= 0 ? esc(name.slice(0, i)) + '<mark>' + esc(name.slice(i, i + q.length)) + '</mark>' + esc(name.slice(i + q.length)) : esc(name);
+    });
+    keyNone.hidden = n > 0; $('#key-miss').textContent = raw;
+    keyN.textContent = String(n).padStart(2, '0'); keyClr.hidden = !q;
+  };
+  keyQ.addEventListener('input', filterKeys);
+  const clearKeys = () => { keyQ.value = ''; filterKeys(); keyQ.focus(); };
+  keyClr.addEventListener('click', clearKeys);
+  $('#key-clear').addEventListener('click', clearKeys);
+  /* "/" jumps to the search while the app screen is on screen */
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== '/' || e.target.closest('input, textarea, select, [contenteditable]')) return;
+    const r = appPage.getBoundingClientRect();
+    if (r.top < innerHeight && r.bottom > 0) { e.preventDefault(); keyQ.focus(); }
+  });
+  const nk = $('#new-key'), nkName = $('#nk-name'), nkErr = $('#nk-name-e');
+  const nkClear = () => { nkErr.hidden = true; nkName.removeAttribute('aria-invalid'); };
+  $('#nk-go').addEventListener('click', (e) => { if (!nkName.value.trim()) { e.preventDefault(); nkErr.hidden = false; nkName.setAttribute('aria-invalid', 'true'); nkName.focus(); } });
+  nkName.addEventListener('input', nkClear);
+  /* Enter in the name creates the key (the first button in the form is cancel) */
+  nkName.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('#nk-go').click(); } });
+  nk.addEventListener('close', () => {
+    if (nk.returnValue === 'create') {
+      const scope = $('input[name="nk-scope"]:checked', nk).value, tail = Math.random().toString(16).slice(2, 6);
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${String($$('tr:not(.none)', keyBody).length + 1).padStart(2, '0')}</td><td></td><td><code>nw_${scope}_…${tail}</code></td><td class="lg">never</td><td class="st" data-ink="ok">active</td>`;
+      tr.children[1].textContent = nkName.value.trim();
+      keyNone.before(tr);
+      keyQ.value = ''; filterKeys();
+      Calibrated.toast(`Key created · nw_${scope}_…${tail} · expires ${$('#nk-exp').value}`, { ink: 'ok' });
+    }
+    nk.returnValue = ''; $('form', nk).reset(); nkClear();
+  });
+
+  /* ── example 1 · the roll-up, a week per page (weeks 41–43 are example data) */
+  const WEEKS = {
+    41: [['gateway', 'http/3 for mobile', 58, 9, 300, 'ok', 'live'], ['auth', 'passkeys, beta', 820, 64, 1480, 'ok', 'live'], ['search', 'faster facet counts', 210, 190, 690, 'ok', 'live']],
+    42: [['checkout-api', 'address autocomplete', 96, 40, 610, 'ok', 'live'], ['email', 'order emails in 6 languages', 1240, 310, 450, 'ok', 'live']],
+    43: [['search', 'synonyms for “oat milk”', 140, 22, 520, 'ok', 'live'], ['payments', '3-D Secure 2.2', 388, 141, 1210, 'ok', 'live'], ['cart', 'save cart across devices', 602, 75, 980, 'fault', 'rolled back']],
+  };
+  const roll = $('#ops-roll tbody'), wk44 = roll.innerHTML, wkLabel = $('#ops-wk');
+  const group = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  Calibrated.pager($('#ops-pages'), { page: 4, pages: 4, onChange: (p) => {
+    const wk = 40 + p, rows = WEEKS[wk];
+    roll.innerHTML = rows ? rows.map(([svc, chg, add, rem, ci, ink, st], i) => `<tr><td>${String(i + 1).padStart(2, '0')}</td><td>${svc}</td><td>${chg}</td><td><cal-diff added="${add}" removed="${rem}" density="compact"></cal-diff></td><td class="num">${group(ci)}</td><td class="st" data-ink="${ink}">${st}</td></tr>`).join('') : wk44;
+    wkLabel.textContent = `week ${wk} · ${roll.rows.length} deploys`;
+  } });
+
+  /* ── a note pane past its limit swaps its hint for an error that says how much to cut */
+  $$('.cal-term[data-max]').forEach((t) => {
+    const hint = t.parentElement.querySelector('.hint'); if (!hint) return;
+    const was = hint.textContent;
+    t.addEventListener('cal-count', (e) => {
+      const { length, max, over } = e.detail;
+      hint.classList.toggle('err', over);
+      hint.textContent = over ? `${length - max} over. Trim it to ${max} characters.` : was;
+    });
+  });
+
+  /* ── example 6 · the form in steps */
+  const sp = $('#sp'), spSteps = $$('#sp-steps li'), spFs = $$('#sp .step'), spBack = $('#sp-back'), spNext = $('#sp-next'), spMsg = $('#sp-msg');
+  const NEXT = ['next · documents', 'next · terms', 'next · review', 'send to procurement'];
+  let spAt = 1, spSent = false;
+  const chipsOf = (box) => $$('.chip', box).map((c) => c.firstChild.textContent.trim());
+  const spGo = (n, focus = true) => {
+    spAt = n;
+    spFs.forEach((f) => { f.hidden = +f.dataset.step !== n; });
+    spSteps.forEach((li, i) => {
+      li.classList.toggle('done', i + 1 < n || spSent);
+      if (i + 1 === n && !spSent) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
+    });
+    spBack.disabled = n === 1 || spSent;
+    spNext.textContent = NEXT[n - 1]; spMsg.textContent = '';
+    if (n === 4) spSummary();
+    Calibrated.controls(sp);
+    if (focus) $('input:not([type="file"]), select, textarea', spFs[n - 1])?.focus({ preventScroll: true });
+  };
+  const fmtDate = (v) => new Date(v + 'T12:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }).toLowerCase();
+  function spSummary() {
+    const files = $$('#sp-files .file:not(.bad) span:first-child').map((f) => f.textContent);
+    const note = $('#sp-note').value.trim();
+    const facts = [
+      ['company', `${$('#sp-name').value.trim()} · ${$('#sp-country').selectedOptions[0].textContent}`],
+      ['vat', $('#sp-vat').value.trim() || 'not given'],
+      ['orders to', $('#sp-mail').value.trim()],
+      ['supplies', chipsOf($('#sp-cat')).join(', ') || 'nothing listed yet'],
+      ['documents', files.length ? files.join(', ') : 'none yet · you can email them later'],
+      ['paid', $('input[name="sp-pay"]:checked').closest('label').children[1].textContent.toLowerCase()],
+      ['first delivery', `${fmtDate($('#sp-first').value)} · by ${$('#sp-time').value}`],
+      ['note', note ? (note.length > 90 ? note.slice(0, 88) + '…' : note) : 'none'],
+    ];
+    const dl = $('#sp-sum'); dl.replaceChildren();
+    facts.forEach(([k, v]) => { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = k; dd.textContent = v; dl.append(dt, dd); });
+  }
+  const spName = $('#sp-name'), spNameErr = $('#sp-name-e');
+  spName.addEventListener('input', () => { spNameErr.hidden = true; spName.removeAttribute('aria-invalid'); });
+  spBack.addEventListener('click', () => spGo(spAt - 1));
+  spNext.addEventListener('click', () => {
+    if (spAt === 1 && !spName.value.trim()) { spNameErr.hidden = false; spName.setAttribute('aria-invalid', 'true'); spName.focus(); return; }
+    if (spAt === 2 && !$('#sp-files .file')) spMsg.textContent = 'No files yet. You can email them later.';
+    if (spAt < 4) { const m = spMsg.textContent; spGo(spAt + 1); if (spAt === 3) spMsg.textContent = m; return; }
+    if (!$('#sp-ok').checked) { spMsg.textContent = 'Tick the box to confirm, then send.'; $('#sp-ok').focus(); return; }
+    spNext.disabled = true; spBack.disabled = true; spNext.innerHTML = 'sending ' + wait; spMsg.textContent = '';
+    setTimeout(() => {
+      spSent = true; spGo(4, false);
+      spNext.disabled = true; spNext.textContent = 'sent'; $('#sp-ok').disabled = true;
+      $('#sp-done').hidden = false;
+      const b = $('#sp-badge'); b.dataset.ink = 'ok'; b.textContent = '✓ sent · sup-1187';
+      Calibrated.toast('Sent to procurement · reference sup-1187', { ink: 'ok' });
+    }, 1500);
+  });
+  spGo(1, false);
 
   /* ── copy */
   const copy = async (btn, text) => {
@@ -657,7 +938,8 @@ orders audit --partner acme --since 90d</pre>
     setTimeout(() => { btn.textContent = was; }, 1600);
   };
   $$('[data-copy]').forEach((b) => b.addEventListener('click', () => copy(b, b.parentElement.querySelector('q').textContent)));
-  $$('[data-copy-from]').forEach((b) => b.addEventListener('click', () => copy(b, $(b.dataset.copyFrom).textContent)));
+  const codeText = (el) => { const ln = $$('.ln', el); return ln.length ? ln.map((l) => l.textContent).join('\n') : el.textContent; };
+  $$('[data-copy-from]').forEach((b) => b.addEventListener('click', () => copy(b, codeText($(b.dataset.copyFrom)))));
 })();
 </script>
 </body>
