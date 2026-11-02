@@ -7,7 +7,7 @@
       "name": "calibrated",
       "source": "./",
       "description": "Skills for building pure CSS + vanilla JS components and Claude artifacts in the Calibrated technical-drawing style.",
-      "version": "0.8.0"
+      "version": "0.9.0"
     }
   ]
 }
