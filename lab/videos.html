@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="night">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calibrated · Video lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&family=Inter:wght@400;500;600;700&display=swap">
+<!-- The kit, loaded live: edits to these files show up on reload. -->
+<link rel="stylesheet" href="../skills/calibrated-tokens/assets/calibrated.css">
+<link rel="stylesheet" href="../skills/calibrated-components/assets/calibrated-components.css">
+<!--
+  Video lab: short films for social media, one per real use case of a component.
+  Each film is a 1080×1350 (4:5) stage, and film.render(t) is a pure function of
+  seconds, so video/render.mjs can step it frame by frame:
+
+    node video/render.mjs --page "lab/videos.html?film=loop-agent"      → video/out/calibrated-loop-agent-4x5.mp4
+    node video/render.mjs --page "lab/videos.html?film=loop-agent" --still 4
+
+  ?film=<id> shows one film at full size; add &theme=film for the light theme.
+-->
+<style>
+/* ── lab chrome only. The kit's look lives inside .stage. */
+:root {
+  --l-bg: #0d0d0e; --l-fg: #ececee; --l-muted: #a2a6ad; --l-line: #26272a; --l-soft: #161618;
+  --l-sans: Inter, ui-sans-serif, system-ui, sans-serif;
+  --l-mono: "Chivo Mono", ui-monospace, Menlo, monospace;
+}
+html, body { margin: 0; background: var(--l-bg); }
+body.lab { font: 400 14px/1.5 var(--l-sans); color: var(--l-fg); }
+.lab button { font: inherit; color: inherit; background: var(--l-soft); border: 1px solid var(--l-line); border-radius: 6px; padding: 3px 10px; cursor: pointer; }
+.lab button:hover { border-color: var(--l-muted); }
+.bar { position: sticky; top: 0; z-index: 10; display: flex; flex-wrap: wrap; align-items: center; gap: 18px; padding: 10px 20px; background: var(--l-bg); border-bottom: 1px solid var(--l-line); }
+.bar h1 { font: 600 15px/1 var(--l-sans); margin: 0 8px 0 0; }
+.bar .mut { color: var(--l-muted); font-size: 13px; }
+.bar .sp { flex: 1; }
+.bar select { font: inherit; color: inherit; background: var(--l-soft); border: 1px solid var(--l-line); border-radius: 6px; padding: 3px 8px; }
+main { padding: 24px 28px 80px; }
+main h2 { font: 600 13px/1 var(--l-sans); color: var(--l-muted); text-transform: uppercase; letter-spacing: .05em; margin: 0 0 14px; }
+.reel { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 28px; }
+.card { border: 1px solid var(--l-line); border-radius: 10px; overflow: hidden; background: var(--l-soft); }
+.card header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--l-line); }
+.card header h3 { font: 600 14px/1 var(--l-sans); margin: 0; }
+.card header .id { font: 500 11px/1 var(--l-mono); color: var(--l-muted); }
+.card header .sp { flex: 1; }
+.card header a { color: var(--l-muted); font-size: 13px; }
+.view { position: relative; overflow: hidden; background: #000; }
+.ctl { display: flex; align-items: center; gap: 10px; padding: 8px 14px; border-top: 1px solid var(--l-line); }
+.ctl input { flex: 1; }
+.ctl output { font: 500 12px/1 var(--l-mono); color: var(--l-muted); min-width: 11ch; text-align: right; }
+.cmd { padding: 8px 14px; border-top: 1px dashed var(--l-line); font: 400 11px/1.5 var(--l-mono); color: var(--l-muted); user-select: all; word-break: break-all; }
+html.solo main { padding-top: 20px; }
+html.solo .reel { grid-template-columns: minmax(0, 560px); justify-content: center; }
+html.render body { background: transparent; }
+html.render .bar, html.render .card header, html.render .ctl, html.render .cmd { display: none; }
+html.render main { padding: 0; }
+html.render main h2 { display: none; }
+html.render .reel { display: block; }
+html.render .card { border: 0; border-radius: 0; width: 1080px; }
+html.render .view { width: 1080px !important; height: 1350px !important; }
+
+/* ── the film stage: 1080×1350, drawn with the kit's tokens.
+   Two panels on the desk, separated by tone and a gap: the loop, then the
+   readout that belongs to this example (tests, trains, latency, the close). */
+.stage { position: absolute; left: 0; top: 0; width: 1080px; height: 1350px; overflow: hidden; transform-origin: 0 0;
+  background: var(--gutter); color: var(--fg); font-family: var(--font-body); }
+.stage .band { position: absolute; left: 64px; right: 64px; top: 58px; }
+.stage .meta { display: flex; justify-content: space-between; align-items: center; font: 400 20px/1 var(--font-legend); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.stage .meta b { color: var(--live); font-weight: 400; border: 1.5px solid color-mix(in srgb, var(--live) 50%, var(--edge-strong)); padding: 2px 6px; margin-right: 6px; }
+.stage .head { margin-top: 24px; font-family: var(--font-display); font-size: 88px; font-weight: 400; line-height: 1; letter-spacing: .03em; text-transform: uppercase; color: var(--title); white-space: nowrap; }
+.stage .head em { font-style: normal; color: var(--live); }
+.stage .panel { position: absolute; left: 40px; right: 40px; background: var(--panel, var(--bg)); }
+.stage .loop { top: 206px; height: 566px; }
+.stage .loop svg { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) scale(var(--zoom, 2.2)); transform-origin: 50% 50%; overflow: visible; }
+.stage .ro { top: 786px; height: 340px; padding: 26px 34px 0; box-sizing: border-box; }
+.stage .now { display: grid; grid-template-columns: 112px 200px 1fr; align-items: baseline; height: 40px; font: 400 27px/1 var(--font-legend); color: var(--fg); white-space: nowrap; border-bottom: 1.5px solid var(--edge); }
+.stage .now .at { color: var(--muted); }
+.stage .now .s { text-transform: uppercase; letter-spacing: .04em; color: var(--live); }
+.stage .now[data-ink="ok"], .stage .now[data-ink="ok"] .s { color: var(--ok); }
+.stage .now[data-ink="fault"], .stage .now[data-ink="fault"] .s { color: var(--fault); }
+.stage .ro svg { display: block; width: 932px; height: auto; margin: 22px -6px 0; overflow: visible; }
+.stage .ask { position: absolute; left: 64px; right: 64px; bottom: 60px; }
+.stage .ask .lg { font: 400 18px/1 var(--font-legend); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; }
+.stage .ask q { display: block; margin-top: 14px; font: 400 30px/1.3 var(--font-body); color: var(--fg); quotes: "“" "”"; text-wrap: balance; }
+
+/* ── neon · the Kabukichō cut. Videos only: the kit has no neon theme.
+   Seeds alone re-colour every panel, hairline and figure (the kit derives the
+   rest); the film treatment below (tube-lit headline, scanlines, glitch on
+   landing) lives in the stage and is driven by render(t), never by CSS clocks. */
+html[data-theme="neon"] {
+  --bg: #120a1c; --fg: #ece4ff; --muted: #a99cc4; --title: #f6f0ff;
+  --live: #19f0ff; --ok: #b8ff3c; --fault: #ff2d78;
+  --shade: #05020a; --desk-depth: 62%;
+  color-scheme: dark;
+}
+.neon .head { font-family: var(--font-legend); font-weight: 300; letter-spacing: .07em; color: var(--title);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--title) 28%, transparent); }
+.neon .head em { color: color-mix(in srgb, var(--live) 70%, #fff);
+  text-shadow: 0 0 4px var(--live), 0 0 14px var(--live), 0 0 42px color-mix(in srgb, var(--live) 70%, transparent), 0 0 90px color-mix(in srgb, var(--live) 40%, transparent); }
+.neon .meta b { box-shadow: 0 0 10px color-mix(in srgb, var(--live) 45%, transparent); }
+/* the lamp and the verdict inks glow like tubes; ink and hairlines stay crisp */
+.neon svg [style*="var(--live)"] { filter: drop-shadow(0 0 1.5px var(--live)) drop-shadow(0 0 5px color-mix(in srgb, var(--live) 70%, transparent)); }
+.neon svg [style*="var(--fault)"] { filter: drop-shadow(0 0 1.5px var(--fault)) drop-shadow(0 0 4px color-mix(in srgb, var(--fault) 60%, transparent)); }
+.neon svg [style*="var(--ok)"] { filter: drop-shadow(0 0 3px color-mix(in srgb, var(--ok) 55%, transparent)); }
+.neon .now .s, .neon .now[data-ink] { text-shadow: 0 0 12px currentColor; }
+/* registration marks on each panel's corners, lit in the lamp */
+.neon .panel::before { content: ""; position: absolute; inset: -9px; pointer-events: none; --m: color-mix(in srgb, var(--live) 75%, transparent);
+  background:
+    linear-gradient(var(--m), var(--m)) left top / 26px 2px no-repeat, linear-gradient(var(--m), var(--m)) left top / 2px 26px no-repeat,
+    linear-gradient(var(--m), var(--m)) right top / 26px 2px no-repeat, linear-gradient(var(--m), var(--m)) right top / 2px 26px no-repeat,
+    linear-gradient(var(--m), var(--m)) left bottom / 26px 2px no-repeat, linear-gradient(var(--m), var(--m)) left bottom / 2px 26px no-repeat,
+    linear-gradient(var(--m), var(--m)) right bottom / 26px 2px no-repeat, linear-gradient(var(--m), var(--m)) right bottom / 2px 26px no-repeat;
+  filter: drop-shadow(0 0 4px var(--live)); }
+.neon .ask .cur { display: inline-block; width: .55em; height: 1.05em; margin-left: 2px; vertical-align: -.16em; background: var(--live); box-shadow: 0 0 10px var(--live); }
+/* the screen: scanlines, a slow refresh bar, the tube's vignette, glitch slices and the power-on line */
+.stage .fx { position: absolute; inset: 0; pointer-events: none; display: none; }
+.neon .fx { display: block; }
+.neon .scan { background: repeating-linear-gradient(180deg, rgba(0, 0, 0, .2) 0 1px, transparent 1px 4px); z-index: 20; }
+.neon .roll { height: 220px; inset: auto 0 auto 0; z-index: 21; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--live) 5%, transparent) 50%, transparent); }
+.neon .vig { z-index: 22; background: radial-gradient(ellipse 75% 65% at 50% 48%, transparent 55%, rgba(0, 0, 0, .55)); }
+.neon .tint { z-index: 19; background: var(--fault); mix-blend-mode: screen; opacity: 0; }
+.neon .slice { inset: auto 0 auto 0; z-index: 18; mix-blend-mode: screen; opacity: 0; }
+.neon .boot { inset: auto 0 auto 0; top: 674px; height: 2px; z-index: 30; background: #fff; box-shadow: 0 0 24px 6px var(--live); opacity: 0; }
+</style>
+</head>
+<body class="lab">
+
+<div class="bar">
+  <h1>Video lab</h1>
+  <span class="mut">4:5 films for social · 1080×1350 · each one renders with video/render.mjs</span>
+  <span class="sp"></span>
+  <label class="mut">theme <select id="theme"><option value="night">night</option><option value="film">film</option><option value="neon">neon</option></select></label>
+  <button type="button" id="play-all">play all</button>
+</div>
+<main><h2>Loop · real use cases</h2><div class="reel" id="reel"></div></main>
+
+<script src="../skills/calibrated-figures/assets/calibrated-figures.js"></script>
+<script src="../skills/calibrated-figures/assets/calibrated-recipes.js"></script>
+<script>
+(() => {
+  'use strict';
+  const R = Calibrated.recipes.loop;
+
+  const { K } = Calibrated;
+
+  /* ── the films. Each starts on `start` (entry: the done edges trace in), then
+     each beat steps one station forward; a beat with fault: true halts the live
+     station in red instead. A beat's line shows in the readout panel, and its
+     `set` updates what the readout draws (merged into the film's running state).
+     ro(state, prev, k) draws the readout: k runs 0 → 1 over the beat's landing. */
+  const FILMS = [
+    {
+      id: 'loop-agent', name: 'Agent loop', head: 'Agent <em>loop</em>',
+      ask: 'Show what the coding agent is doing, step by step, as a Calibrated loop.',
+      data: { n: 1, title: 'agent · fix flaky retry test', center: (lap) => `pass ${lap}`, at: 0, lap: 1, stations: [
+        { name: 'read', cmd: 'rg retry src/' },
+        { name: 'plan', cmd: 'patch backoff' },
+        { name: 'edit', cmd: 'src/queue.ts' },
+        { name: 'test', cmd: 'npm test' },
+      ] },
+      start: { at: '00:02', st: 'read', msg: '6 files match “retry”', set: { tests: 'none', add: 0, del: 0, files: 0 } },
+      beats: [
+        { at: '00:09', st: 'plan', msg: 'await the backoff timer' },
+        { at: '00:21', st: 'edit', msg: 'src/queue.ts  +14 −3', set: { add: 14, del: 3, files: 1 } },
+        { at: '00:48', st: 'test', msg: '2 failing · queue.spec.ts', ink: 'fault', set: { tests: 'fail' } },
+        { at: '00:51', st: 'read', msg: 'stack trace · line 88' },
+        { at: '00:58', st: 'plan', msg: 'fake timers in the test' },
+        { at: '01:06', st: 'edit', msg: 'queue.spec.ts  +4 −1', set: { add: 18, del: 4, files: 2 } },
+        { at: '01:31', st: 'test', msg: '48 passing', ink: 'ok', set: { tests: 'pass' } },
+      ],
+      /* 48 tests as a grid that fills in as the run lands; failures in red, a pass in green */
+      ro(s, p, k) {
+        const N = 48, per = 24, x0 = 8, step = 19.5, FAIL = [13, 38];
+        const fill = s.tests === p.tests ? N : Math.floor(k * N);
+        let g = K.tag(6, 'tests · queue.spec.ts');
+        for (let i = 0; i < N; i++) {
+          const x = x0 + (i % per) * step, y = 34 + Math.floor(i / per) * 19;
+          const st = i < fill ? s.tests : p.tests;
+          g += st === 'none' ? K.node(x, y, 'todo', 9)
+            : st === 'fail' ? K.rect(x - 4.5, y - 4.5, 9, 9, FAIL.includes(i) ? 'ft' : 'fg', 'none')
+            : K.rect(x - 4.5, y - 4.5, 9, 9, 'ok', 'none');
+        }
+        if (s.tests === 'fail' && fill === N) {
+          const fx = x0 + (FAIL[1] % per) * step, bw = K.boxWidth('failing', '2 of 48 · line 88');
+          g += K.leader([[fx, 53], [fx, 82], [x0 - 4.5 + bw, 82]]) + K.box(x0 - 4.5, 66, 0, 'failing', '2 of 48 · line 88', 'ft', 'ft');
+        } else if (s.tests === 'pass' && fill === N) {
+          g += K.box(x0 - 4.5, 66, 0, 'passing', '48 of 48', 'ok', 'ok');
+        } else {
+          g += K.box(x0 - 4.5, 66, 0, 'tests', s.tests === p.tests && s.tests === 'none' ? 'not run yet' : 'running…', 'mu');
+        }
+        const diff = s.files ? `+${s.add} −${s.del} · ${s.files} file${s.files > 1 ? 's' : ''}` : 'no changes yet';
+        g += K.box(316, 66, 150, 'diff', diff, s.files ? 'fg' : 'mu');
+        return g;
+      },
+    },
+    {
+      id: 'loop-release', name: 'Release train', head: 'Release <em>train</em>',
+      ask: 'Draw our release train as a Calibrated figure, with the command each station runs.',
+      data: { n: 2, title: 'release train · v2.4', center: (lap) => `train ${lap} of 9`, at: 1, lap: 4, laps: 9, stations: [
+        { name: 'build', cmd: 'make release' },
+        { name: 'test', cmd: 'make test-e2e' },
+        { name: 'stage', cmd: 'deploy staging' },
+        { name: 'canary', cmd: 'deploy prod 5%' },
+        { name: 'ship', cmd: 'deploy prod' },
+      ] },
+      start: { at: '09:14', st: 'test', msg: '412 e2e specs running', set: { train: 4, status: 'in test · 412 specs' } },
+      beats: [
+        { at: '09:31', st: 'stage', msg: 'staging green · 10m soak', set: { status: 'on staging · soak 10m' } },
+        { at: '09:44', st: 'canary', msg: '5% of traffic · p99 212 ms', set: { status: 'canary · 5% of traffic' } },
+        { at: '10:15', st: 'ship', msg: 'v2.4.0 at 100%', ink: 'ok', set: { status: 'shipped · 100%', shipped: 4 } },
+        { at: '10:16', st: 'build', msg: 'train 5 · v2.5.0 boarding', set: { train: 5, status: 'building' } },
+        { at: '10:22', st: 'test', msg: '418 e2e specs running', set: { status: 'in test · 418 specs' } },
+      ],
+      /* the quarter's nine trains: shipped in green, the one on the tracks boxed in lamp */
+      ro(s) {
+        const N = 9, x0 = 14, step = 55, y = 40, X = (i) => x0 + i * step;
+        const shipped = s.shipped || s.train - 1;
+        let g = K.tag(6, 'trains this quarter · one a week');
+        g += K.line(X(0), y, X(N - 1), y, 'e1');
+        for (let i = 0; i < N; i++) {
+          const n = i + 1, live = n === s.train && n > shipped;
+          g += n <= shipped ? K.rect(X(i) - 4.5, y - 4.5, 9, 9, 'ok', 'none')
+            : live ? K.rect(X(i) - 6, y - 6, 12, 12, 'pn', 'lv', { w: 1.4 }) + K.rect(X(i) - 2, y - 2, 4, 4, 'lv', 'none')
+            : K.node(X(i), y, 'todo', 9);
+          g += K.t(X(i), y + 21, `v2.${n}`, n <= shipped ? 'ok' : live ? 'lv' : 'fa', 'middle');
+        }
+        g += K.dim(X(0), X(shipped - 1), y - 18, `${shipped} shipped`);
+        const ti = s.train - 1, bx = Math.min(X(ti) - 6, 476 - 170);
+        const on = s.train > shipped;
+        g += K.leader([[X(ti), y + 28], [X(ti), 80], [bx + 2, 80]], false);
+        g += K.box(bx, 72, 170, `train ${s.train} · v2.${s.train}.0`, s.status, on ? 'lv' : 'ok', on ? 'lv' : 'ok');
+        return g;
+      },
+    },
+    {
+      id: 'loop-incident', name: 'Incident response', head: 'Incident <em>#212</em>',
+      ask: 'Turn our incident runbook into a Calibrated loop we can follow live.',
+      data: { n: 3, title: 'incident #212 · checkout latency', center: (lap) => `attempt ${lap}`, at: 0, lap: 1, w: 440, stations: [
+        { name: 'detect', cmd: 'p99 > 800 ms' },
+        { name: 'triage', cmd: 'checkout-api' },
+        { name: 'mitigate', cmd: 'rollback v2.4.1' },
+        { name: 'verify', cmd: 'watch p99 15m' },
+      ] },
+      start: { at: '14:02', st: 'detect', msg: 'p99 840 ms · on-call paged', set: { p99: 840, min: 0 } },
+      beats: [
+        { at: '14:06', st: 'triage', msg: 'checkout-api · 4% errors', set: { min: 4 } },
+        { at: '14:11', st: 'mitigate', msg: 'rollback to v2.4.1', set: { min: 9, p99: 860 } },
+        { at: '14:19', st: 'verify', msg: 'watching p99', set: { min: 17, p99: 880 } },
+        { at: '14:26', st: 'verify', msg: 'p99 still 910 ms', ink: 'fault', fault: true, set: { min: 24, p99: 910 } },
+        { at: '14:27', st: 'detect', msg: 'alert still firing', set: { min: 25 } },
+        { at: '14:31', st: 'triage', msg: 'db pool at 100%', set: { min: 29 } },
+        { at: '14:34', st: 'mitigate', msg: 'pool size 40 → 120', set: { min: 32, p99: 460 } },
+        { at: '14:49', st: 'verify', msg: 'p99 210 ms · resolved', ink: 'ok', set: { min: 47, p99: 210, resolved: true } },
+      ],
+      /* p99 on a ruler against the alert line; the value glides between readings */
+      ro(s, p, k) {
+        const x0 = 8, x1 = 468, y = 50, X = K.scale(x0, x1, 0, 1200);
+        const e = 1 - Math.pow(1 - k, 3), v = p.p99 + (s.p99 - p.p99) * e;
+        const over = v > 800, ink = s.resolved && k >= 1 ? 'ok' : over ? 'ft' : 'fg';
+        let g = K.tag(6, 'p99 latency · checkout-api');
+        g += K.ruler(x0, x1, y, 1200, 100, 2, (m) => (m === 1200 ? '1.2 s' : m === 0 ? '0' : m));
+        g += K.threshold(X(800), 26, y, 'alert 800 ms', 'middle', 'ft');
+        g += K.line(x0, y - 6, X(v), y - 6, ink, { w: 3 });
+        const bx = Math.min(Math.max(X(v) - 20, x0 - 4), 476 - 160 - 14 - 100);
+        g += K.leader([[X(v), y - 6], [X(v), 84], [bx + 2, 84]], true);
+        g += K.box(bx, 76, 100, 'p99', `${Math.round(v)} ms`, ink, ink === 'fg' ? 'ed' : ink);
+        const lab = s.resolved && k >= 1 ? 'resolved' : 'open · sev-2';
+        g += K.box(476 - 160, 76, 160, 'elapsed', `${s.min} min · ${lab}`, s.resolved && k >= 1 ? 'ok' : 'mu');
+        return g;
+      },
+    },
+    {
+      id: 'loop-close', name: 'Month-end close', head: 'Month-end <em>close</em>',
+      ask: 'Show the finance team where the month-end close stands, as a Calibrated loop.',
+      data: { n: 4, title: 'finance · month-end close', center: (lap) => `${['march', 'april'][lap - 1] || 'may'} close`, at: 0, lap: 1, laps: 12, w: 440, stations: [
+        { name: 'collect', cmd: '1 204 invoices' },
+        { name: 'reconcile', cmd: '3 bank accounts' },
+        { name: 'accrue', cmd: 'payroll · rent' },
+        { name: 'review', cmd: 'controller' },
+        { name: 'approve', cmd: 'cfo sign-off' },
+        { name: 'report', cmd: 'board pack' },
+      ] },
+      start: { at: 'day 1', st: 'collect', msg: '1 204 invoices in', set: { day: 1, month: 'march', open: '—', flags: '—', approved: null } },
+      beats: [
+        { at: 'day 1', st: 'reconcile', msg: '3 accounts · 2 open items', set: { open: 2 } },
+        { at: 'day 2', st: 'accrue', msg: 'payroll €184k · rent', set: { day: 2, open: 0 } },
+        { at: 'day 3', st: 'review', msg: '2 entries flagged', set: { day: 3, flags: 2 } },
+        { at: 'day 3', st: 'approve', msg: 'cfo signed 16:40', ink: 'ok', set: { flags: 0, approved: 'cfo · day 3 · 16:40' } },
+        { at: 'day 4', st: 'report', msg: 'board pack sent', ink: 'ok', set: { day: 4 } },
+        { at: 'day 1', st: 'collect', msg: 'april invoices open', set: { day: 1, month: 'april', open: '—', flags: '—', approved: null } },
+      ],
+      /* the close calendar: today on a ruler of five working days, the open counts, and the sign-off plate */
+      ro(s) {
+        const x0 = 14, x1 = 300, y = 48, X = K.scale(x0, x1, 1, 5);
+        let g = K.tag(6, `${s.month} close · working days`);
+        g += K.ruler(x0, x1, y, 5, 1, 1, (d) => 'day ' + d, false, 1);
+        g += K.line(x0, y - 5, X(s.day), y - 5, 'fg', { w: 3 });
+        g += K.line(X(s.day), y - 22, X(s.day), y, 'lv', { w: 1.4 }) + K.t(X(s.day) + (s.day === 1 ? -2 : 0), y - 26, 'today', 'lv', s.day === 1 ? 'start' : 'middle');
+        g += K.threshold(X(5), 26, y, 'deadline', 'end', 'fa');
+        const cnt = (x, label, v) => K.box(x, 76, 0, label, String(v), v === '—' ? 'fa' : v ? 'lv' : 'ok', v && v !== '—' ? 'lv' : 'ed');
+        g += cnt(x0 - 4, 'open items', s.open) + cnt(x0 + 100, 'flagged', s.flags);
+        g += s.approved ? K.plate(328, 30, 140, 'approved', s.approved, 'ok')
+          : K.plate(328, 30, 140, 'sign-off', 'awaiting cfo', 'fa');
+        return g;
+      },
+    },
+  ];
+
+  /* ── the timeline, in seconds */
+  const ENTRY = 0.5;            // the figure starts tracing in
+  const FIRST = 1.6;            // hold on the first state before the first step
+  const BEAT = 1.35;            // one step
+  const STEP = 0.42;            // the recipe's step length (LOOP.step)
+  const SETTLE = 0.6;           // the readout settles on a beat's new state
+  const OUTRO = 2.6;            // hold on the last state
+  const OFF = 0.045;            // landing blink: two offs, long enough to survive 30 fps
+  const RO = { w: 476, h: 118 };
+
+  const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+  const prog = (t, a, d) => clamp((t - a) / d);
+  const quintOut = (x) => 1 - Math.pow(1 - x, 5);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const hash = (a, b) => { const x = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return x - Math.floor(x); };
+  const blinkAt = (q) => (q < 0 || q >= 4 * OFF ? 1 : Math.floor(q / OFF) % 2 === 0 ? 0.15 : 1);
+
+  /* the static form of a step-form loop, with the live station halted */
+  const faulted = (d) => ({
+    n: d.n, title: d.title, w: d.w, center: typeof d.center === 'function' ? d.center(d.lap) : d.center,
+    stations: d.stations.map((s, i) => ({ ...s, state: i < d.at ? 'done' : i === d.at ? 'fault' : 'todo' })),
+  });
+
+  /* ── a film: builds its stage once, then render(t) draws any moment */
+  function film(def, mountEl) {
+    const seq = [];
+    let d = { ...def.data }, state = { ...def.start.set };
+    seq.push({ t0: ENTRY, land: ENTRY + R.duration(d) / 1000, data: d, log: def.start, state, prev: state });
+    let t0 = ENTRY + FIRST;
+    def.beats.forEach((b) => {
+      const prev = state;
+      state = { ...state, ...b.set };
+      if (b.fault) seq.push({ t0, land: t0, data: faulted(d), log: b, state, prev });
+      else { d = R.step(d, 1); seq.push({ t0, land: t0 + STEP, data: d, log: b, state, prev }); }
+      t0 += b.hold || BEAT;
+    });
+    const duration = seq[seq.length - 1].land + OUTRO;
+
+    const el = document.createElement('div');
+    el.className = 'stage';
+    el.innerHTML = `
+      <div class="band">
+        <div class="meta"><span><b>${String(def.data.n).padStart(2, '0')}</b> / ${String(FILMS.length).padStart(2, '0')} · loop</span><span>example data</span></div>
+        <div class="head">${def.head}</div>
+      </div>
+      <div class="panel loop"><svg></svg></div>
+      <div class="panel ro"><div class="now"></div><svg></svg></div>
+      <div class="ask"><div class="lg"><span>ask claude</span><span>github.com/emdmed/calibrated</span></div><q>${esc(def.ask)}</q></div>
+      <div class="fx slice"></div><div class="fx slice"></div><div class="fx tint"></div>
+      <div class="fx scan"></div><div class="fx roll"></div><div class="fx vig"></div><div class="fx boot"></div>`;
+    mountEl.appendChild(el);
+    /* the loop as large as its panel allows (1000×566, less a margin) */
+    el.querySelector('.loop').style.setProperty('--zoom', Math.min(2.25, 940 / (def.data.w || 420), 536 / 250).toFixed(3));
+    const svg = el.querySelector('.loop svg'), ro = el.querySelector('.ro svg'), now = el.querySelector('.now');
+    const band = el.querySelector('.band'), panels = [...el.querySelectorAll('.panel')], ask = el.querySelector('.ask');
+    const q$ = el.querySelector('.ask q'), em = el.querySelector('.head em');
+    const fx = { slices: [...el.querySelectorAll('.slice')], tint: el.querySelector('.tint'), roll: el.querySelector('.roll'), boot: el.querySelector('.boot') };
+    const neon = document.documentElement.dataset.theme === 'neon';
+    if (neon) el.classList.add('neon');
+
+    function render(t) {
+      /* the band, the panels and the ask rise in, one after another */
+      [band, ...panels, ask].forEach((n, i) => {
+        const p = quintOut(prog(t, 0.04 + i * 0.08, 0.6));
+        n.style.opacity = p; n.style.translate = `0 ${(1 - p) * 26}px`;
+      });
+
+      /* the loop: the latest beat that has started, at its own clock */
+      let k = 0;
+      seq.forEach((s, i) => { if (t >= s.t0) k = i; });
+      const s = seq[k];
+      const ms = t < s.t0 ? 0 : s.data.stations[0].state ? Infinity : (t - s.t0) * 1000;
+      Calibrated.mount(svg, R({ ...s.data, t: ms }));
+      const op = blinkAt(t - s.land);
+      svg.querySelectorAll('[data-land]').forEach((g) => { g.style.opacity = op === 1 ? '' : op; });
+
+      /* the readout: the latest landed beat, settling from the state before it */
+      let j = 0;
+      seq.forEach((x, i) => { if (t >= x.land) j = i; });
+      const b = seq[j], landed = t >= b.land, q = landed ? prog(t, b.land, SETTLE) : 1;
+      const cur = landed ? b.state : b.prev;
+      Calibrated.mount(ro, { w: RO.w, h: RO.h, markup: def.ro(cur, landed ? b.prev : b.prev, q), label: `${b.log.st}: ${b.log.msg}` });
+
+      /* the line for the beat: what just happened, blinking as it lands */
+      const line = landed ? b.log : null;
+      now.dataset.ink = line && line.ink ? line.ink : '';
+      now.style.opacity = line ? blinkAt(t - b.land) : 0;
+      const dec = (str, d) => (neon ? scramble(str, t - b.land - d, t) : str);
+      now.innerHTML = line ? `<span class="at">${esc(dec(line.at, 0))}</span><span class="s">${esc(dec(line.st, 0.04))}</span><span>${esc(dec(line.msg, 0.08))}</span>` : '';
+      if (neon) { now.style.opacity = line ? 1 : 0; screen(t, seq[j], landed); }
+    }
+
+    /* ── the neon screen: everything here is a function of t */
+    function screen(t, b, landed) {
+      const f = Math.floor(t * 30);
+      /* power on: a white line opens into the picture, like a tube warming */
+      const on = quintOut(prog(t, 0.1, 0.34));
+      el.style.clipPath = t < 0.44 ? `inset(${((1 - on) * 50).toFixed(2)}% 0)` : '';
+      fx.boot.style.opacity = t < 0.5 ? (1 - prog(t, 0.2, 0.3)) * prog(t, 0, 0.06) : 0;
+      fx.boot.style.transform = `scaleX(${quintOut(prog(t, 0, 0.14)).toFixed(3)})`;
+      /* the headline's lamp word strikes like a neon tube, then holds with rare stutters */
+      const tube = [[0.5, 1], [0.56, 0.1], [0.62, 1], [0.66, 0.2], [0.74, 0.7], [0.86, 1]];
+      let lit = 0.06; tube.forEach(([a, v]) => { if (t >= a) lit = v; });
+      if (t > 1 && hash(f, 7) > 0.985) lit = 0.35;
+      if (em) em.style.opacity = lit;
+      /* the ask types itself out behind a block cursor */
+      const typed = Math.floor(prog(t, 0.9, 1.7) * def.ask.length);
+      q$.innerHTML = esc(def.ask.slice(0, typed)) + (Math.floor(t * 2.2) % 2 === 0 || typed < def.ask.length ? '<span class="cur"></span>' : '<span class="cur" style="opacity:0"></span>');
+      /* glitch on landing: a chromatic split, a jolt and two lit slices; a fault hits harder */
+      const fault = b.log.ink === 'fault', g = landed ? t - b.land : 1;
+      const k = g >= 0 && g < (fault ? 0.3 : 0.16) ? 1 - g / (fault ? 0.3 : 0.16) : 0;
+      const amp = (fault ? 9 : 4) * k, jolt = (hash(f, 1) - 0.5) * 14 * k;
+      panels.forEach((p, i) => {
+        p.style.filter = k ? `drop-shadow(${amp.toFixed(1)}px 0 0 color-mix(in srgb, var(--fault) 70%, transparent)) drop-shadow(${(-amp).toFixed(1)}px 0 0 color-mix(in srgb, var(--live) 70%, transparent))` : '';
+        p.style.translate = k ? `${(i ? -jolt : jolt).toFixed(1)}px 0` : '';
+      });
+      fx.slices.forEach((sl, i) => {
+        sl.style.opacity = k ? 0.5 * k : 0;
+        sl.style.top = (220 + hash(f, 3 + i) * 900).toFixed(0) + 'px';
+        sl.style.height = (4 + hash(f, 5 + i) * 18).toFixed(0) + 'px';
+        sl.style.background = fault || i ? 'var(--fault)' : 'var(--live)';
+      });
+      fx.tint.style.opacity = fault && k ? 0.1 * k : 0;
+      /* a slow refresh bar rolls down the screen */
+      fx.roll.style.top = (((t / 4.5) % 1) * 1600 - 220).toFixed(0) + 'px';
+    }
+    function scramble(str, d, t) {
+      if (d >= 0.34) return str;
+      if (d < 0) return '';
+      const done = Math.floor((d / 0.34) * str.length), f = Math.floor(t * 30), G = '░▒▓<>/\\|_=+*#01';
+      return [...str].map((c, i) => (i < done || c === ' ' ? c : G[Math.floor(hash(f, i) * G.length)])).join('');
+    }
+    return { def, el, render, duration };
+  }
+
+  /* ── page: the reel, one film solo (?film=id), or the renderer's hooks (&render=1) */
+  const q = new URLSearchParams(location.search);
+  const solo = q.get('film'), rendering = q.get('render') === '1';
+  const theme = q.get('theme') || 'night';
+  document.documentElement.dataset.theme = theme;
+  document.getElementById('theme').value = theme;
+  document.getElementById('theme').onchange = (e) => { q.set('theme', e.target.value); location.search = q; };
+  if (solo) document.documentElement.classList.add('solo');
+  if (rendering) document.documentElement.classList.add('render');
+
+  const reel = document.getElementById('reel');
+  const players = FILMS.filter((f) => !solo || f.id === solo).map((def) => {
+    const card = document.createElement('section');
+    card.className = 'card';
+    const href = `?film=${def.id}${theme !== 'night' ? '&theme=' + theme : ''}`;
+    card.innerHTML = `<header><h3>${esc(def.name)}</h3><span class="id">${def.id}</span><span class="sp"></span>${solo ? '<a href="?">all films</a>' : `<a href="${href}">open</a>`}</header>
+      <div class="view"></div>
+      <div class="ctl"><button type="button">play</button><input type="range" min="0" step="0.0333" value="0"><output></output></div>
+      <div class="cmd">node video/render.mjs --page "lab/videos.html?film=${def.id}${theme !== 'night' ? '&theme=' + theme : ''}"</div>`;
+    reel.appendChild(card);
+    const view = card.querySelector('.view'), f = film(def, view);
+    const btn = card.querySelector('button'), scrub = card.querySelector('input'), out = card.querySelector('output');
+    scrub.max = f.duration;
+
+    /* scale the stage to the card */
+    const fit = () => {
+      if (rendering) { f.el.style.transform = ''; return; }
+      const sc = view.clientWidth / 1080;
+      view.style.height = 1350 * sc + 'px';
+      f.el.style.transform = `scale(${sc})`;
+    };
+    new ResizeObserver(fit).observe(view);
+
+    let t = solo ? +(q.get('t') ?? 0) : f.duration - OUTRO, playing = false, prev = 0;
+    const show = () => { f.render(t); scrub.value = t; out.textContent = `${t.toFixed(2)} / ${f.duration.toFixed(1)}`; btn.textContent = playing ? 'pause' : 'play'; };
+    const tick = (now) => {
+      if (!playing) return;
+      t += (now - prev) / 1000; prev = now;
+      if (t >= f.duration) { t = f.duration; playing = false; }
+      show();
+      if (playing) requestAnimationFrame(tick);
+    };
+    const play = (on = !playing) => {
+      playing = on;
+      if (playing) { if (t >= f.duration) t = 0; prev = performance.now(); requestAnimationFrame(tick); }
+      show();
+    };
+    btn.onclick = () => play();
+    scrub.oninput = () => { playing = false; t = +scrub.value; show(); };
+    show();
+    return { f, play, set: (x) => { t = x; show(); } };
+  });
+
+  document.getElementById('play-all').onclick = () => players.forEach((p) => { p.set(0); p.play(true); });
+  if (solo) addEventListener('keydown', (e) => { if (e.code === 'Space' && players[0]) { e.preventDefault(); players[0].play(); } });
+
+  /* the renderer's hooks (video/render.mjs) */
+  if (solo && players[0]) {
+    const f = players[0].f;
+    window.__duration = +f.duration.toFixed(3);
+    window.__size = [1080, 1350];
+    window.__render = (t) => f.render(t);
+    window.__ready = () => document.fonts.ready;
+    document.fonts.ready.then(() => players[0].set(+(q.get('t') ?? 0)));
+  }
+})();
+</script>
+</body>
+</html>

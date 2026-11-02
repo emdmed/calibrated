@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="cyanotype">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calibrated · component sheet · cyanotype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&display=swap">
+<!-- The kit, loaded live: edits to these files show up on reload. -->
+<link rel="stylesheet" href="../skills/calibrated-tokens/assets/calibrated.css">
+<link rel="stylesheet" href="../skills/calibrated-components/assets/calibrated-components.css">
+<!--
+  Blueprint lab, component sheet: every Calibrated component re-seeded as a
+  cyanotype and laid out like a drawing sheet, one part per cell. The seeds
+  below repaint the kit; the rest of this sheet is the print finish and the
+  specimen layout. Nothing in the kit is overridden. Example data, illustrative.
+-->
+<style>
+/* ── seeds: Prussian-blue panels, pale linework, drafting yellow, red pencil */
+html[data-theme="cyanotype"] {
+  --bg: #13407a; --fg: #e9f2ff; --muted: #b0c8e8; --title: #ffffff;
+  --live: #ffd54f; --ok: #a6ecbf; --fault: #ffa293;
+  --shade: #020a1a; --desk-depth: 60%;
+  --faint: color-mix(in srgb, var(--fg) 58%, var(--bg));
+  --swipe: color-mix(in srgb, var(--live) 14%, transparent);
+  --select-bg: color-mix(in srgb, var(--live) 40%, transparent);
+  color-scheme: dark;
+  scrollbar-color: color-mix(in srgb, var(--fg) 30%, var(--bg)) var(--gutter);
+}
+::selection { background: var(--select-bg); color: var(--title); }
+body { caret-color: var(--live);
+  /* the desk is drafting film: a 5 mm grid with a heavier line every 25 mm */
+  background-color: var(--gutter);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--fg) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--fg) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--fg) 4%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--fg) 4%, transparent) 1px, transparent 1px);
+  background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
+  background-position: -1px -1px; }
+:focus-visible { outline: 1px solid var(--live); outline-offset: 3px; }
+
+/* ── the print: mottle and fibre, fixed, never in the way */
+.print { position: fixed; inset: 0; pointer-events: none; z-index: 40; mix-blend-mode: soft-light; opacity: .55;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Cfilter id='m'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.004' numOctaves='3' seed='7' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .6 0 0 0 0 .8 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='600' height='600' filter='url(%23m)'/%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' seed='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E"); }
+/* the one authored moment: the sheet develops, from a pale wash to deep blue */
+.develop { position: fixed; inset: 0; pointer-events: none; z-index: 41; background: #dff0f4; mix-blend-mode: screen; opacity: 0;
+  animation: develop 1600ms cubic-bezier(.16, 1, .3, 1); }
+@keyframes develop { from { opacity: .72; } to { opacity: 0; } }
+
+/* ── the sheet: a drawing frame with zones on the drafting film */
+.cal-sheet { background: transparent; }
+.cal-mast .word { font-family: var(--font-legend); font-weight: 500; letter-spacing: .22em; text-transform: uppercase; }
+.cal-intro p { max-width: 62ch; }
+
+/* ── parts: one component per cell, numbered like a parts list */
+.parts { display: grid; grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr)); gap: var(--gap); align-items: start; }
+.parts.c3 { --cols: 3; }
+.parts.c1 { --cols: 1; }
+.part { background: var(--panel); padding: 0 var(--pad) 20px; min-width: 0; }
+.part.wide { grid-column: 1 / -1; }
+.part { overflow-x: auto; }
+.part.tip { overflow-x: clip; overflow-y: visible; }
+.ph { display: flex; gap: 10px; align-items: baseline; padding: 10px 0 9px; margin-bottom: 16px; border-bottom: 1px solid var(--edge); }
+.ph { flex-wrap: wrap; }
+.ph b { flex-shrink: 0; white-space: nowrap; }
+.parts.c3 .ph code, .ph.two code { flex-basis: 100%; margin-left: 0; order: 3; white-space: normal; }
+.ph b { font: 400 var(--fs-legend)/1 var(--font-legend); letter-spacing: var(--track-legend); color: var(--fg); border: 1px solid var(--edge-strong); padding: 3px 5px 2px; }
+.ph h3 { margin: 0; font: 500 14px/1.3 var(--font-body); color: var(--title); }
+.ph code { margin-left: auto; font: 11px var(--font-legend); color: var(--faint); background: none; padding: 0; white-space: nowrap; }
+.part > p.note { margin: 14px 0 0; color: var(--muted); font-size: var(--fs-small); max-width: 60ch; }
+.row { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: center; }
+.row.top { align-items: flex-start; }
+.stack { display: grid; gap: 14px; }
+.parts .cal-field { margin: 0; }
+.parts cal-meter, .parts cal-durations, .parts cal-progress { max-width: 100%; }
+.scroll { overflow-x: auto; }
+.fig svg { display: block; max-width: 100%; height: auto; }
+
+/* the closing block: revisions beside the title block, like the corner of a drawing */
+.close { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: var(--gap); margin-top: clamp(36px, 4vw, 52px); align-items: end; }
+.close .part { padding-top: 6px; }
+
+@media (max-width: 1100px) { .parts.c3 { --cols: 2; } }
+@media (max-width: 760px) {
+  .parts, .parts.c3 { --cols: 1; }
+  .close { grid-template-columns: minmax(0, 1fr); }
+  .part { padding-inline: 14px; }
+  .ph code { display: none; }
+  .cal-sec-h span:not(:last-child) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .develop { animation: none; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="cal-mark" viewBox="4 8 40 32">
+    <path d="M4 38 H44" stroke="currentColor" stroke-width="2.4"/>
+    <path d="M5.2 38 V10 M24 38 V10 M42.8 38 V10 M11.5 38 V27 M17.75 38 V27 M36.5 38 V27" stroke="currentColor" stroke-width="2"/>
+    <path d="M30 38 V8" stroke="var(--live, #ffd54f)" stroke-width="3"/>
+  </symbol>
+</svg>
+<div class="print" aria-hidden="true"></div>
+<div class="develop" aria-hidden="true"></div>
+
+<div class="wrap">
+<div class="cal-sheet" data-zones="8x12">
+
+  <header class="cal-mast">
+    <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
+    <span class="word">Calibrated</span>
+    <span class="lg up mut">component sheet · cyanotype</span>
+    <span class="sp"></span>
+    <span class="lg up fnt">sheet 1 / 1 · rev C</span>
+  </header>
+
+  <section class="cal-intro">
+    <h1>Every part of the kit, printed as a blueprint.</h1>
+    <div>
+      <p>The same components as the reference page, re-seeded with seven colours: Prussian-blue panels, pale linework, drafting yellow for the one live thing and red pencil for limits and faults. Nothing in the kit is overridden.</p>
+      <p>The labels come from a tunnel drive, so each part reads as it would on a real job. Every control works.</p>
+    </div>
+  </section>
+
+  <!-- ── 1 · Instruments -->
+  <section class="cal-sec" id="instruments">
+    <div class="cal-sec-h"><b>1 · Instruments</b><span>custom elements that draw a quantity</span><span>zone A–B</span></div>
+    <div class="parts">
+      <div class="part"><div class="ph"><b>I-01</b><h3>Meter</h3><code>&lt;cal-meter&gt;</code></div>
+        <div class="stack">
+          <cal-meter value="612" max="900" warn="820" label="rings built" format="raw"></cal-meter>
+          <cal-meter value="142" max="160" warn="135" label="spoil skip" unit=" m³" format="raw"></cal-meter>
+        </div>
+        <p class="note">A value against its limit. Past <code>warn</code> the fill and the reading turn red.</p>
+      </div>
+      <div class="part"><div class="ph"><b>I-02</b><h3>Progress</h3><code>&lt;cal-progress&gt;</code></div>
+        <div class="stack">
+          <cal-progress done="4" total="6" live="5" live-label="segment 5 · key" done-label="4 placed · 22 min"></cal-progress>
+          <cal-progress done="2" total="6" fault="3" fault-label="segment 3 · damaged"></cal-progress>
+        </div>
+        <p class="note">Ring 613 is built from six segments. The live one is lit; a failed one stops the run in red.</p>
+      </div>
+      <div class="part"><div class="ph"><b>I-03</b><h3>Durations</h3><code>&lt;cal-durations&gt;</code></div>
+        <div class="scroll"><cal-durations max="45" unit="m">
+          <cal-span name="excavate" value="1800"></cal-span>
+          <cal-span name="build ring" value="840"></cal-span>
+          <cal-span name="this push" live></cal-span>
+        </cal-durations></div>
+        <p class="note">Spans on one ruler. A live span ticks every second.</p>
+      </div>
+      <div class="part"><div class="ph two"><b>I-04</b><h3>Position, diff and ruler</h3><code>&lt;cal-position&gt; &lt;cal-diff&gt; &lt;cal-ruler&gt;</code></div>
+        <div class="stack">
+          <div class="row top"><cal-position index="3" count="7" label="settlement · points"></cal-position><cal-position index="612" count="900" label="drive · rings"></cal-position></div>
+          <div class="stack" style="gap:6px">
+            <cal-diff added="184" removed="20" label="rev C"></cal-diff>
+            <cal-diff added="12" removed="3" label="rev B"></cal-diff>
+          </div>
+          <div class="scroll"><cal-ruler min="0" max="1080" step="20" every="10" unit=" m" value="734" width="380"></cal-ruler></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 2 · Figures -->
+  <section class="cal-sec" id="figures">
+    <div class="cal-sec-h"><b>2 · Figures</b><span>recipes from the figures kit</span><span>zone C</span></div>
+    <div class="parts c3">
+      <div class="part"><div class="ph"><b>F-01</b><h3>Lanes</h3><code>recipes.lanes</code></div><div class="fig scroll"><svg id="f-lanes"></svg></div></div>
+      <div class="part"><div class="ph"><b>F-02</b><h3>Loop</h3><code>recipes.loop</code></div><div class="fig scroll"><svg id="f-loop"></svg></div></div>
+      <div class="part"><div class="ph"><b>F-03</b><h3>Timeline</h3><code>recipes.timeline</code></div><div class="fig scroll"><svg id="f-timeline"></svg></div></div>
+    </div>
+  </section>
+
+  <!-- ── 3 · Sheets and lists -->
+  <section class="cal-sec" id="lists">
+    <div class="cal-sec-h"><b>3 · Cards and tables</b><span>panels, parts lists and sign-off</span><span>zone D–E</span></div>
+    <div class="parts">
+      <div class="part wide"><div class="ph"><b>L-01</b><h3>Card and sign-off</h3><code>.cal-card .cal-tally</code></div>
+        <article class="cal-card">
+          <div class="info">
+            <h3>Ring cycles as lanes on one ruler</h3>
+            <p class="why">The cab logs each ring as a line of text. Drawn on one time ruler, the slow ring and the one still being pushed read before any number does.</p>
+            <dl class="cal-kv"><dt>where</dt><dd>shift report</dd><dt>replaces</dt><dd>three log lines</dd><dt>data</dt><dd>push start, ring built</dd></dl>
+            <div class="id"><span class="no">01</span>drive 2 · night shift<span class="end">rev C</span></div>
+          </div>
+          <div class="cal-compare">
+            <div><div class="cal-tag">today</div><div class="stage"><div class="cal-note">
+              <div class="cal-gl">ring cycles · last three</div>
+              <div class="r"><span class="k">ring 611</span><span>built · 48 min</span></div>
+              <div class="r"><span class="k">ring 612</span><span>built · 46 min</span></div>
+              <div class="r"><span class="k">ring 613</span><span>pushing · 19 min</span></div>
+            </div></div></div>
+            <div><div class="cal-tag on">drawn</div><div class="stage"><svg id="f-card"></svg></div></div>
+          </div>
+          <div class="cal-sign" role="group" aria-label="Sign off 01">
+            <button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button>
+            <button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="false">drop</button>
+          </div>
+        </article>
+        <div class="cal-tally"><span id="tally-n">0 of 1 signed</span><span class="sp"></span><span id="tally-msg" class="mut" role="status"></span><button class="cal-btn primary" id="tally-copy">copy sign-off</button></div>
+      </div>
+
+      <div class="part wide"><div class="ph"><b>L-02</b><h3>Table</h3><code>.cal-table</code></div>
+        <div class="scroll"><table class="cal-table">
+          <thead><tr><th>no</th><th>reach</th><th>ground</th><th>drawing changes</th><th>effort</th><th>status</th></tr></thead>
+          <tbody>
+            <tr><td>01</td><td>Shaft A → canal</td><td>clay</td><td><cal-diff added="212" removed="38"></cal-diff></td><td class="effort" aria-label="effort 2 of 3"><span class="cal-dot done"></span><span class="cal-dot done"></span><span class="cal-dot"></span></td><td class="st" data-ink="live"><span>boring</span></td></tr>
+            <tr><td>02</td><td>Under Ashby Cut</td><td>sand and gravel</td><td><cal-diff added="84" removed="12"></cal-diff></td><td class="effort" aria-label="effort 3 of 3"><span class="cal-dot done"></span><span class="cal-dot done"></span><span class="cal-dot done"></span></td><td class="st">to do</td></tr>
+            <tr><td>03</td><td>Canal → Shaft B</td><td>chalk</td><td><cal-diff added="9" removed="140"></cal-diff></td><td class="effort" aria-label="effort 1 of 3"><span class="cal-dot done"></span><span class="cal-dot"></span><span class="cal-dot"></span></td><td class="st" data-ink="ok">approved</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <div class="part"><div class="ph"><b>L-03</b><h3>Counts and tabs</h3><code>.cal-count .cal-tabs</code></div>
+        <div class="stack">
+          <div class="row">
+            <span class="cal-count" data-n="612" data-noun="rings"></span>
+            <span class="cal-count" data-n="7" data-noun="points"></span>
+            <span class="cal-count" data-n="1" data-noun="over trigger" data-ink="fault"></span>
+          </div>
+          <div class="cal-tabs" role="tablist" id="tabs">
+            <button role="tab" aria-selected="true">rings<span class="cal-cnt">12</span></button>
+            <button role="tab" aria-selected="false">alerts<span class="cal-cnt">1</span></button>
+            <button role="tab" aria-selected="false">surveys</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="part"><div class="ph"><b>L-04</b><h3>Key / value and rows</h3><code>.cal-kv .cal-rows</code></div>
+        <div class="stack">
+          <dl class="cal-kv"><dt>face pressure</dt><dd>1.8 bar · clay</dd><dt>thrust</dt><dd>3,850 kN</dd><dt>line and level</dt><dd>+6 mm, −3 mm</dd></dl>
+          <div class="cal-rows">
+            <div><span class="v">SP-23 · towpath</span><div class="meta lg">read 22:00 · 0.4 mm</div></div>
+            <div class="sel"><span class="v">SP-24 · canal bank</span><div class="meta lg">read 22:00 · 0.6 mm</div></div>
+            <div><span class="v">SP-25 · towpath</span><div class="meta lg">read 22:00 · 0.3 mm</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="part wide"><div class="ph"><b>L-05</b><h3>Tiers and marks in text</h3><code>.cal-tiers .cal-dot .live</code></div>
+        <div class="stack">
+          <div class="cal-tiers">
+            <div><div class="tt">Draw next</div><p>Lists that are really quantities: ring cycles as lanes, settlement readings against the trigger, spoil volume as a meter.</p></div>
+            <div><div class="tt">Leave alone</div><p>The cab's free-text log, the permit to dig and the call list. Drawing over them adds lines and measures nothing.</p></div>
+          </div>
+          <div class="lg up row" style="gap:16px">
+            <span><span class="cal-dot on"></span> boring</span>
+            <span><span class="cal-dot done"></span> built</span>
+            <span><span class="cal-dot"></span> next</span>
+            <span><span class="cal-dot ok"></span> passed</span>
+            <span><span class="cal-dot fault"></span> over trigger</span>
+            <span><span class="cal-rev" data-rev="C"></span> revised</span>
+          </div>
+          <p style="margin:0">Of the three reaches, only <span class="live">Shaft A → canal</span> is being bored tonight.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 4 · Form controls -->
+  <section class="cal-sec" id="controls" data-mode="app">
+    <div class="cal-sec-h"><b>4 · Form controls</b><span>native elements on write-in lines</span><span>zone F–H</span></div>
+    <div class="parts c3">
+      <div class="part"><div class="ph"><b>C-01</b><h3>Fields</h3><code>.cal-field .cal-input</code></div>
+        <div class="stack">
+          <div class="cal-field"><label for="f1">ring number</label><input class="cal-input" id="f1" value="613"></div>
+          <div class="cal-field"><label for="f2">grout volume</label><input class="cal-input" id="f2" placeholder="0.9 m³" aria-describedby="f2h"><span class="hint" id="f2h">Per ring, from the pump counter.</span></div>
+          <div class="cal-field"><label for="f3">surveyor</label><input class="cal-input" id="f3" value="#" aria-invalid="true" aria-describedby="f3e"><span class="err" id="f3e">Enter a name, like J. Okafor.</span></div>
+          <label class="cal-check"><input type="checkbox" checked> <span>Log the reading to the shift report</span></label>
+        </div>
+      </div>
+      <div class="part"><div class="ph"><b>C-02</b><h3>Radio, switch, detent</h3><code>.cal-radio .cal-switch .cal-detent</code></div>
+        <div class="stack">
+          <div role="radiogroup" aria-label="Face support" style="display:grid;gap:8px">
+            <label class="cal-radio"><input type="radio" name="sup"><span>Open face</span><span class="meta">clay only</span></label>
+            <label class="cal-radio"><input type="radio" name="sup" checked><span>Earth pressure</span><span class="meta">1.6 – 2.6 bar</span></label>
+            <label class="cal-radio"><input type="radio" name="sup" disabled><span>Slurry</span><span class="meta">needs a plant</span></label>
+          </div>
+          <label class="cal-switch"><span class="txt">Cutter check at ring 619</span><span class="o off">off</span><input type="checkbox" role="switch" checked><span class="o on">on</span></label>
+          <label class="cal-switch"><span class="txt">Hourly towpath readings</span><span class="o off">off</span><input type="checkbox" role="switch"><span class="o on">on</span></label>
+          <div class="cal-field"><span class="lbl" id="rg">reading interval</span>
+            <div class="cal-detent" role="radiogroup" aria-labelledby="rg"><i class="mk" aria-hidden="true"></i>
+              <label><input type="radio" name="rg"><span>15m</span></label><label><input type="radio" name="rg" checked><span>1h</span></label><label><input type="radio" name="rg"><span>4h</span></label><label><input type="radio" name="rg"><span>shift</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="part"><div class="ph"><b>C-03</b><h3>Range, number, search</h3><code>.cal-range .cal-num .cal-search</code></div>
+        <div class="stack">
+          <div class="cal-field"><label for="r1">face pressure</label>
+            <div class="cal-range" data-unit=" bar"><output for="r1"></output><input type="range" id="r1" min="1.6" max="3" step="0.1" value="2.2">
+              <div class="nums"><span>1.6</span><span>2.3</span><span>3.0</span></div></div>
+          </div>
+          <div class="cal-field"><label for="n1">shift target</label>
+            <div class="cal-affixed cal-num"><input class="cal-input" id="n1" inputmode="numeric" value="12" data-step="1" aria-describedby="n1h"><span class="cal-affix">rings</span></div>
+            <span class="hint focus-only" id="n1h">↑ ↓ step 1 · shift ×10</span>
+          </div>
+          <div class="row" style="gap:12px">
+            <div class="cal-affixed cal-search"><kbd class="cal-kbd">/</kbd><input class="cal-input" placeholder="search rings" aria-label="Search rings"></div>
+            <span class="cal-count"><b>12</b><span>rings</span></span>
+          </div>
+        </div>
+      </div>
+      <div class="part"><div class="ph"><b>C-04</b><h3>Select and option list</h3><code>.cal-select .cal-list</code></div>
+        <div class="row top">
+          <div class="cal-field"><label for="s1">shift</label>
+            <select class="cal-select" id="s1"><option>day</option><option selected>night</option><option>weekend</option></select>
+          </div>
+          <div class="cal-list">
+            <div><span class="v">clay</span> <span class="lg">rings 1–619</span></div>
+            <div class="sel"><span class="v">sand and gravel</span> <span class="lg">620–650</span></div>
+            <div><span class="v">chalk</span> <span class="lg">651–900</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="part"><div class="ph"><b>C-05</b><h3>Textarea</h3><code>.cal-term .cal-textarea</code></div>
+        <div class="cal-field"><label for="t1">handover note</label>
+          <div class="cal-term" data-max="200" data-status="editor">
+            <textarea class="cal-textarea" id="t1" spellcheck="false">Ring 612 built in 46 min. Cutters worn 2 mm past plan.
+Raise the face before ring 620.</textarea>
+            <div class="bar" aria-hidden="true"><span class="mode">-- normal --</span><span class="sp"></span><span class="pos">ln 1, col 1</span><span class="cal-count"><b>000</b><span>/ 200</span></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="part"><div class="ph"><b>C-06</b><h3>Group, tags, date, file drop</h3><code>.cal-group .cal-chips .cal-drop</code></div>
+        <fieldset class="cal-group"><legend><b>1 · Notify</b><span>when a trigger is hit</span></legend>
+          <div class="cal-field"><label for="tg">teams</label>
+            <div class="cal-chips"><span class="chip">canal trust<button type="button" aria-label="Remove canal trust">×</button></span><span class="chip">client<button type="button" aria-label="Remove client">×</button></span><input id="tg" placeholder="add, then enter"></div>
+          </div>
+          <div class="row" style="gap:18px">
+            <div class="cal-field"><label for="d1">from</label><input type="date" class="cal-input cal-date" id="d1" value="2026-11-06"></div>
+            <div class="cal-field"><label for="d2">at</label><input type="time" class="cal-input cal-date" id="d2" value="02:00" style="min-width:110px"></div>
+          </div>
+        </fieldset>
+        <div style="display:grid;gap:8px;margin-top:14px">
+          <label class="cal-drop" data-list="files" data-max="20000000"><input type="file" multiple><span class="lead">drop survey files · or <u>browse</u></span><span class="hint">csv · up to 20 MB each</span></label>
+          <div class="cal-rows" id="files"><div class="file"><span>sp-21-27-2026-11-05.csv</span><span class="lg mut">184 KB</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 5 · Actions and feedback -->
+  <section class="cal-sec" id="feedback" data-mode="app">
+    <div class="cal-sec-h"><b>5 · Actions and overlays</b><span>buttons, popovers, dialogs, toasts</span><span>zone I–J</span></div>
+    <div class="parts c3">
+      <div class="part"><div class="ph"><b>A-01</b><h3>Buttons</h3><code>.cal-btn</code></div>
+        <div class="row" style="gap:8px">
+          <button class="cal-btn primary">Issue to shift</button>
+          <button class="cal-btn">Call the cab</button>
+          <button class="cal-btn" disabled>Export</button>
+          <button class="cal-btn inline">copy</button>
+          <button class="cal-btn quiet">details</button>
+        </div>
+        <p class="note">One primary per view, filled with ink. Inline is a bracketed word; quiet is an underline.</p>
+      </div>
+      <div class="part"><div class="ph"><b>A-02</b><h3>Menu</h3><code>.cal-menu[popover]</code></div>
+        <div style="min-height:150px">
+          <button class="cal-btn" popovertarget="m1">ring 613 ▼</button>
+          <div popover id="m1" class="cal-menu" role="menu" aria-label="Ring actions">
+            <button class="it" role="menuitem"><span class="n">01</span><span class="v">log a reading</span><kbd class="cal-kbd">r</kbd></button>
+            <button class="it" role="menuitem"><span class="n">02</span><span class="v">photo of the ring</span><kbd class="cal-kbd">p</kbd></button>
+            <button class="it" role="menuitem"><span class="n">03</span><span class="v">copy link</span><kbd class="cal-kbd">l</kbd></button>
+            <hr><button class="it" role="menuitem" data-ink="fault"><span class="n">04</span><span class="v">reject the ring</span><kbd class="cal-kbd">⌫</kbd></button>
+          </div>
+        </div>
+      </div>
+      <div class="part"><div class="ph"><b>A-03</b><h3>Dialog and toast</h3><code>.cal-dialog Calibrated.toast()</code></div>
+        <div class="row" style="gap:8px">
+          <button class="cal-btn primary" data-ink="fault" data-dialog="dlg">Stop the drive</button>
+          <button class="cal-btn" id="toast">Send a toast</button>
+        </div>
+        <dialog class="cal-dialog" id="dlg" aria-labelledby="dlg-t"><form method="dialog">
+          <header><b id="dlg-t">Stop drive 2?</b><span class="sp"></span><kbd class="cal-kbd">esc</kbd></header>
+          <div class="bd"><p>Maud stops pushing and holds the face. The canal trust is told.</p><dl class="cal-kv"><dt>held at</dt><dd>ring 613</dd><dt>face</dt><dd>1.8 bar</dd></dl></div>
+          <footer><button class="cal-btn" value="cancel" autofocus>Keep boring</button><button class="cal-btn primary" data-ink="fault" value="stop">Stop the drive</button></footer>
+        </form></dialog>
+      </div>
+      <div class="part tip"><div class="ph"><b>A-04</b><h3>Tooltip and callout</h3><code>[data-tip] .cal-callout</code></div>
+        <div class="stack">
+          <p style="padding-top:30px;margin:0">Settlement at SP-24: <span data-tip="predicted at 2.2 bar · trigger 10 mm" tabindex="0" class="show">8 mm</span>, cover <span data-tip="canal bed to crown" tabindex="0">8.1 m</span>.</p>
+          <div class="cal-callout" data-ink="fault"><div class="cal-gl">warning</div><ol><li>Over 2.6 bar the face can blow out through the cover into the canal.</li></ol></div>
+        </div>
+      </div>
+      <div class="part"><div class="ph"><b>A-05</b><h3>Detail callout</h3><code>.cal-details</code></div>
+        <details class="cal-details" open><summary><span class="bl">A</span><b>what the trigger means</b><span class="ld"></span><span class="tg"></span></summary><div class="bd"><div class="inset"><div class="cal-gl">detail A</div>The canal trust's consent caps settlement at 10 mm under the bank.</div></div></details>
+        <details class="cal-details"><summary><span class="bl">B</span><b>who signs a restart</b><span class="ld"></span><span class="tg"></span></summary><div class="bd"><div class="inset"><div class="cal-gl">detail B</div>The shift engineer and the cab, together.</div></div></details>
+      </div>
+      <div class="part"><div class="ph"><b>A-06</b><h3>Empty state and spinners</h3><code>.cal-empty &lt;cal-spin&gt;</code></div>
+        <div class="stack">
+          <div class="cal-empty" style="min-height:110px"><div><span class="ttl">no readings yet</span><p>Towpath readings show up here from 02:00.</p><button class="cal-btn">Add a reading</button></div></div>
+          <div class="row" style="gap:28px">
+            <cal-spin></cal-spin>
+            <span class="cal-scan" role="status" aria-label="Loading"><i></i></span>
+            <span class="cal-scan det" style="--p:.68" role="img" aria-label="612 of 900 rings"><i></i></span>
+            <span class="cal-wait" role="status" aria-label="Loading"><i></i><i></i><i></i><i></i></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 6 · Navigation and labels -->
+  <section class="cal-sec" id="nav">
+    <div class="cal-sec-h"><b>6 · Navigation</b><span>where you are, and labels for running text</span><span>zone K</span></div>
+    <div class="parts">
+      <div class="part"><div class="ph"><b>N-01</b><h3>Breadcrumb, pager, steps</h3><code>.cal-crumbs .cal-pager .cal-steps</code></div>
+        <div class="stack">
+          <nav class="cal-crumbs" aria-label="Breadcrumb"><ol><li><a href="#nav">Wexmoor</a></li><li><a href="#nav">drive 2</a></li><li aria-current="page">ring 613</li></ol></nav>
+          <nav class="cal-pager" id="pager" aria-label="Pages"></nav>
+          <ol class="cal-steps"><li class="done"><span class="s">01</span>survey</li><li aria-current="step"><span class="s">02</span>pressure</li><li><span class="s">03</span>sign</li><li><span class="s">04</span>issue</li></ol>
+        </div>
+      </div>
+      <div class="part"><div class="ph"><b>N-02</b><h3>Badges, code and keys</h3><code>.cal-badge .cal-code .cal-kbd</code></div>
+        <div class="stack">
+          <div class="row" style="gap:8px"><span class="cal-badge" data-ink="live"><span class="star"></span>boring</span><span class="cal-badge" data-ink="ok">✓ approved</span><span class="cal-badge" data-ink="fault"><span class="cal-dot fault"></span>over trigger</span><span class="cal-badge"><span class="cal-dot"></span>planned</span></div>
+          <div class="cal-code" data-lang="shell"><button class="cal-btn">copy</button><pre><code><span class="cm"># pull tonight's settlement readings</span><span class="ln">survey pull --points SP-21..SP-27</span><span class="ln">survey plot --trigger 10mm</span></code></pre></div>
+          <p style="margin:0">Press <kbd class="cal-kbd">i</kbd> to issue, <kbd class="cal-kbd">esc</kbd> to close.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── the corner of the drawing -->
+  <div class="close">
+    <div class="part"><div class="ph"><b>S-01</b><h3>Revisions and stamp</h3><code>.cal-revs .cal-stamp</code></div>
+      <table class="cal-revs">
+        <thead><tr><th>rev</th><th>description</th><th>date</th></tr></thead>
+        <tbody>
+          <tr><td><span class="cal-rev" data-rev="A"></span></td><td>First issue: components on film.</td><td class="lg">2026-10-12</td></tr>
+          <tr><td><span class="cal-rev" data-rev="B"></span></td><td>Tiered buttons and UX rules.</td><td class="lg">2026-11-01</td></tr>
+          <tr><td><span class="cal-rev" data-rev="C"></span></td><td>Re-seeded as a cyanotype.</td><td class="lg">2026-11-02</td></tr>
+        </tbody>
+      </table>
+      <p style="margin:18px 0 0"><span class="cal-stamp" data-ink="ok">approved for use</span></p>
+    </div>
+    <dl class="cal-titleblock" style="--tb-cols:4">
+      <div class="name"><dt>title</dt><dd>Calibrated · component sheet</dd></div>
+      <div><dt>dwg no.</dt><dd>CAL-CMP-01</dd></div>
+      <div><dt>scale</dt><dd>1:1</dd></div>
+      <div><dt>sheet</dt><dd>1 / 1</dd></div>
+      <div><dt>rev</dt><dd>C <span class="cal-rev" data-rev="C"></span></dd></div>
+      <div class="wide"><dt>process</dt><dd>cyanotype · 7 seeds</dd></div>
+      <div class="wide"><dt>example data</dt><dd>illustrative</dd></div>
+    </dl>
+  </div>
+
+  <footer class="cal-foot"><span>calibrated · cal-cmp-01</span><span>example data · illustrative</span></footer>
+</div>
+</div>
+
+<script src="../skills/calibrated-figures/assets/calibrated-figures.js"></script>
+<script src="../skills/calibrated-figures/assets/calibrated-recipes.js"></script>
+<script src="../skills/calibrated-components/assets/calibrated-components.js"></script>
+<script>
+(() => {
+  const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const R = Calibrated.recipes;
+
+  /* the live push started 19 minutes ago */
+  $$('cal-span[live]').forEach((s) => s.setAttribute('start', Date.now() - 19 * 60000));
+  Calibrated.pager($('#pager'), { page: 3, pages: 12 });
+  /* on a phone the open tooltip would hang past the edge; it opens on focus instead */
+  if (matchMedia('(max-width: 760px)').matches) $$('[data-tip].show').forEach((t) => t.classList.remove('show'));
+
+  const lanes = { n: 1, title: 'ring cycles · last three', max: 60, lanes: [
+    { name: 'ring 611', end: 48, label: '48 min', box: ['slowest', 'worn cutters'] },
+    { name: 'ring 612', end: 46, label: '46 min' },
+    { name: 'ring 613', end: 19, label: '19 min', live: true, box: ['pushing', '760 of 1,200 mm'] },
+  ] };
+  Calibrated.ready(() => {
+    Calibrated.mount('#f-lanes', R.lanes(lanes));
+    Calibrated.mount('#f-card', R.lanes({ ...lanes, n: 2 }));
+    Calibrated.mount('#f-loop', R.loop({ n: 3, title: 'ring cycle · ring 613', center: 'ring 613 of 900', stations: [
+      { name: 'excavate', cmd: 'push 1,200 mm', state: 'live' },
+      { name: 'build', cmd: '6 segments', state: 'todo' },
+      { name: 'grout', cmd: '0.9 m³', state: 'todo' },
+      { name: 'survey', cmd: 'line and level', state: 'todo' },
+    ] }));
+    Calibrated.mount('#f-timeline', R.timeline({ n: 4, title: 'ring 612 · cycle · 6 steps', steps: [420, 960, 300, 540, 240, 300], slowLabel: 'slowest · push' }));
+    Calibrated.counts && Calibrated.counts();
+  });
+
+  /* tabs */
+  const tabs = $$('#tabs [role="tab"]');
+  tabs.forEach((t) => t.addEventListener('click', () => tabs.forEach((x) => x.setAttribute('aria-selected', String(x === t)))));
+
+  /* toast */
+  $('#toast').addEventListener('click', () => Calibrated.toast('Issued · 2.2 bar · clears Sat 10:59', { ink: 'ok', action: 'undo' }));
+
+  /* sign-off */
+  const cards = $$('.cal-card'), msg = $('#tally-msg');
+  const tally = () => { $('#tally-n').textContent = `${cards.filter((c) => c.dataset.v).length} of ${cards.length} signed`; };
+  $$('.cal-sign .cal-btn').forEach((b) => b.addEventListener('click', () => {
+    const card = b.closest('.cal-card'), on = b.getAttribute('aria-pressed') !== 'true';
+    card.querySelectorAll('.cal-sign .cal-btn').forEach((x) => x.setAttribute('aria-pressed', 'false'));
+    b.setAttribute('aria-pressed', String(on));
+    if (on) { card.dataset.v = b.dataset.v; card.dataset.state = b.dataset.v === 'drop' ? 'dropped' : 'ok'; }
+    else { delete card.dataset.v; delete card.dataset.state; }
+    tally();
+  }));
+  $('#tally-copy').addEventListener('click', async () => {
+    const lines = cards.map((c) => `${c.querySelector('.no').textContent} ${c.querySelector('h3').textContent}: ${c.dataset.v || 'not signed'}`);
+    try { await navigator.clipboard.writeText(lines.join('\n')); msg.textContent = 'copied'; }
+    catch { msg.textContent = 'copy blocked: select the text and copy it by hand'; }
+  });
+  tally();
+})();
+</script>
+</body>
+</html>

@@ -14,6 +14,24 @@
         "value": "inter",
         "createdAt": "2026-10-31T12:36:01.117Z",
         "reason": "canon docs direction (user picked D, Radix/Tailwind bar); Inter is the category-standard chrome face recorded in the demo-index-html direction contract"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "lab/videos.html"
+        ],
+        "createdAt": "2026-11-01T13:40:38.850Z",
+        "reason": "user confirmed: chose the 'Full film treatment' cyberpunk option, which named a neon-glow signage headline; glow is limited to the videos-only neon theme in the lab"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "lab/cyberpunk.html"
+        ],
+        "createdAt": "2026-11-01T20:49:24.796Z",
+        "reason": "user asked for a cyberpunk aesthetic in this lab page; glow limited to the lamp (tube-lit headline time, lamp strokes, powered panel corners)"
       }
     ]
   }

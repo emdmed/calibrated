@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="neon">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nightjar Dispatch · run 7F</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&display=swap">
+<!-- The kit, loaded live: edits to these files show up on reload. -->
+<link rel="stylesheet" href="../skills/calibrated-tokens/assets/calibrated.css">
+<link rel="stylesheet" href="../skills/calibrated-components/assets/calibrated-components.css">
+<!--
+  Cyberpunk lab: Calibrated re-seeded for a night city. The seeds below repaint
+  every panel, hairline and figure; the rest of this sheet is the neon finish.
+  Neon means "this needs you": it lights the drone, the countdown to the next
+  jump and the panel where you decide, and a late arrival. Nothing else glows.
+  The run plays in real time from 23:41:07. Add ?t=60 to start 60 s later
+  (past the gate, holding). Example data, illustrative.
+-->
+<style>
+/* ── seeds: violet-black panels, cyan lamp, magenta markup, acid green */
+html[data-theme="neon"] {
+  --bg: #130b1f; --fg: #ece4ff; --muted: #ab9fc8; --title: #f7f2ff;
+  --live: #1df2ff; --ok: #b8ff3c; --fault: #ff3d86;
+  --shade: #040108; --desk-depth: 64%;
+  --faint: color-mix(in srgb, var(--fg) 56%, var(--bg));
+  color-scheme: dark;
+  scrollbar-color: color-mix(in srgb, var(--fg) 26%, var(--bg)) var(--gutter);
+}
+body { caret-color: var(--live); }
+:focus-visible { outline: 1px solid var(--live); outline-offset: 3px; }
+
+/* ── the screen: faint scanlines and a vignette, never in the way */
+.screen { position: fixed; inset: 0; pointer-events: none; z-index: 40;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 40%, transparent 60%, rgba(0, 0, 0, .4)),
+    repeating-linear-gradient(180deg, rgba(0, 0, 0, .1) 0 1px, transparent 1px 3px); }
+
+/* ── masthead */
+.cal-mast .word { font-family: var(--font-legend); font-weight: 400; letter-spacing: .22em; }
+.clock { font-family: var(--font-legend); font-size: var(--fs-control); letter-spacing: .08em; color: var(--fg); font-variant-numeric: tabular-nums; }
+.clock s { text-decoration: none; color: var(--faint); }
+
+/* ── headline: thin tracked mono. Inside the window it's plain green; late, it burns. */
+.cal-intro h1 { font-family: var(--font-legend); font-weight: 300; letter-spacing: .05em; }
+.cal-intro h1 .t { color: var(--ok); }
+.cal-intro h1 .t[data-ink="fault"] { color: color-mix(in srgb, var(--fault) 78%, #fff);
+  text-shadow: 0 0 3px var(--fault), 0 0 14px var(--fault), 0 0 40px color-mix(in srgb, var(--fault) 55%, transparent); }
+.cal-intro h1 .t[data-ink="abort"] { color: var(--fault); }
+/* the one authored moment: a re-measure splits the headline for a beat */
+.cal-intro h1.split { animation: split 260ms steps(4, end); }
+@keyframes split {
+  0%   { text-shadow: -3px 0 var(--fault), 3px 0 var(--live); transform: translateX(2px); }
+  50%  { text-shadow: 2px 0 var(--fault), -2px 0 var(--live); transform: translateX(-1px); clip-path: inset(10% 0 35% 0); }
+  100% { text-shadow: none; transform: none; clip-path: none; }
+}
+
+/* ── layout: the route runs full width; below it, the decision and what it carries */
+.cal-panel { position: relative; padding: 16px var(--pad) 18px; }
+.cal-panel > h2 { font: 500 var(--fs-h2)/1.2 var(--font-body); color: var(--title); margin: 0 0 4px; display: flex; gap: 10px; align-items: baseline; }
+.cal-panel > h2 .sp { flex: 1; }
+.cal-panel > .sub { color: var(--muted); font-size: var(--fs-small); margin: 0 0 14px; }
+.row { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1fr); gap: var(--gap); margin-top: var(--gap); align-items: start; }
+
+/* the panel that needs you is powered: lit registration marks on its corners */
+.cal-panel.pwr::before { content: ""; position: absolute; inset: -5px; pointer-events: none; --m: color-mix(in srgb, var(--live) 85%, transparent); --l: 22px;
+  background:
+    linear-gradient(var(--m), var(--m)) left top / var(--l) 1px no-repeat, linear-gradient(var(--m), var(--m)) left top / 1px var(--l) no-repeat,
+    linear-gradient(var(--m), var(--m)) right top / var(--l) 1px no-repeat, linear-gradient(var(--m), var(--m)) right top / 1px var(--l) no-repeat,
+    linear-gradient(var(--m), var(--m)) left bottom / var(--l) 1px no-repeat, linear-gradient(var(--m), var(--m)) left bottom / 1px var(--l) no-repeat,
+    linear-gradient(var(--m), var(--m)) right bottom / var(--l) 1px no-repeat, linear-gradient(var(--m), var(--m)) right bottom / 1px var(--l) no-repeat;
+  filter: drop-shadow(0 0 3px var(--live)); }
+.cal-panel.pwr.late::before { --m: color-mix(in srgb, var(--fault) 85%, transparent); filter: drop-shadow(0 0 3px var(--fault)); }
+
+/* ── the route drawing: drawn at the panel's width, so 1 unit is 1 px. Only what needs you glows. */
+.route { overflow-x: auto; }
+.route svg { display: block; height: auto; }
+.route svg [style*="var(--live)"] { filter: drop-shadow(0 0 1.5px var(--live)) drop-shadow(0 0 5px color-mix(in srgb, var(--live) 65%, transparent)); }
+.route svg .hot [style*="var(--fault)"] { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--fault) 60%, transparent)); }
+.route.off svg { opacity: .45; }
+.legs-wrap { margin-top: 14px; overflow-x: auto; }
+.legs td.t { font-family: var(--font-legend); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.legs .late, .legs .st.hold { color: var(--fault); }
+
+/* ── next jump */
+.lanes { display: grid; gap: 4px; margin: 2px 0 14px; }
+.lane { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 4px 10px; align-items: baseline; padding: 10px; border: 1px solid transparent; cursor: pointer; }
+.lane:hover { background: var(--hover); }
+.lane:has(input:checked) { border-color: var(--edge-strong); background: var(--current); }
+.lane:has(input:focus-visible) { border-color: var(--live); }
+.lane:has(input:disabled) { cursor: default; opacity: .55; }
+.lane input { accent-color: var(--fg); margin: 0; translate: 0 2px; }
+.lane input:focus-visible { outline: none; }
+.lane .nm { color: var(--fg); display: flex; gap: 8px; align-items: baseline; }
+.lane .nm .cal-kbd { margin-left: auto; }
+.lane .eta { font-family: var(--font-legend); font-size: var(--fs-control); font-variant-numeric: tabular-nums; text-align: right; }
+.lane .facts { grid-column: 2; display: grid; grid-template-columns: 7ch 6ch minmax(0, 1fr); gap: 8px; color: var(--muted); font-size: var(--fs-small); }
+.lane .margin { font-family: var(--font-legend); font-size: var(--fs-legend); letter-spacing: var(--track-legend); text-align: right; white-space: nowrap; }
+.lane [data-ink="fault"] { color: var(--fault); }
+.lane [data-ink="ok"] { color: var(--ok); }
+.lane .plan { font-family: var(--font-legend); font-size: var(--fs-legend); text-transform: uppercase; letter-spacing: var(--track-legend); color: var(--faint); }
+.jump .cal-switch { display: flex; padding: 10px 0; }
+.jump .cal-switch .txt { flex: 1; }
+.jump .hint { display: block; color: var(--muted); font-size: var(--fs-small); margin: 0; }
+.jump .err { display: block; color: var(--fault); font-size: var(--fs-small); margin: 6px 0 0; }
+.jump .err[hidden] { display: none; }
+.acts { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--edge); }
+.acts .sp { flex: 1; }
+.acts .cd { flex-basis: 100%; margin-bottom: 2px; }
+.acts .cal-btn { min-height: 40px; }
+.jump .cal-btn.primary:disabled { background: transparent; border-color: var(--edge-strong); color: var(--faint); }
+.acts .why { flex-basis: 100%; color: var(--muted); font-size: var(--fs-small); margin: 0; text-align: right; }
+.acts .why[data-ink="fault"] { color: var(--fault); }
+.acts .why:empty { display: none; }
+/* the countdown: the lamp of this panel */
+.cd { font-family: var(--font-legend); font-size: var(--fs-control); color: var(--muted); letter-spacing: var(--track-legend); text-transform: uppercase; }
+.cd b { font-weight: 400; font-size: 22px; letter-spacing: .04em; margin-right: 6px; font-variant-numeric: tabular-nums; vertical-align: -2px;
+  color: color-mix(in srgb, var(--live) 75%, #fff); text-shadow: 0 0 3px var(--live), 0 0 12px var(--live), 0 0 30px color-mix(in srgb, var(--live) 50%, transparent); }
+.cd[data-ink="fault"] b { color: color-mix(in srgb, var(--fault) 80%, #fff); text-shadow: 0 0 3px var(--fault), 0 0 12px var(--fault); }
+.cd[data-ink="ok"] b { color: var(--ok); text-shadow: none; }
+.cd[data-ink="off"] b { color: var(--muted); text-shadow: none; }
+.abort { margin-top: 16px; display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  background: repeating-linear-gradient(-45deg, color-mix(in srgb, var(--fault) 14%, transparent) 0 1px, transparent 1px 7px); }
+.abort[hidden] { display: none; }
+.abort p { margin: 0; flex: 1; color: var(--muted); font-size: var(--fs-small); }
+.abort .cal-btn { min-height: 36px; color: var(--fault); }
+
+/* ── cargo and courier */
+.temp svg { display: block; width: 100%; max-width: 320px; height: auto; }
+.cal-block + .cal-block { margin-top: 18px; }
+
+/* ── comms: sender over message, ruled apart, no frame */
+.feed { list-style: none; margin: 0; padding: 0; }
+.feed li { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 2px 10px; padding: 9px 0; border-top: 1px solid var(--edge); }
+.feed li:first-child { border-top: 0; padding-top: 2px; }
+.feed .tm { font-family: var(--font-legend); font-size: var(--fs-legend); color: var(--faint); font-variant-numeric: tabular-nums; padding-top: 2px; }
+.feed .who { display: block; font-family: var(--font-legend); font-size: var(--fs-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--key); }
+.feed .msg { display: block; color: var(--fg); font-size: var(--fs-small); }
+.feed .new .tm { color: var(--fg); }
+
+@media (max-width: 1100px) {
+  .row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .row .jump { grid-column: 1 / -1; }
+}
+@media (max-width: 700px) {
+  .row { grid-template-columns: minmax(0, 1fr); }
+  .cal-panel { padding-inline: 14px; }
+  .cal-mast .cal-caption { display: none; }
+  /* on a phone the decision comes first, the drawing after */
+  .page { display: flex; flex-direction: column; }
+  .row { display: contents; }
+  .row > * { margin-top: var(--gap); }
+  .jump { order: -1; }
+  .lane { grid-template-columns: auto minmax(0, 1fr); }
+  .lane .eta, .lane .margin { grid-column: 2; text-align: left; }
+  .lane .facts { display: flex; flex-wrap: wrap; gap: 2px 12px; }
+  .lane .nm .cal-kbd, .jump .sub .keys { display: none; }
+  .legs th:nth-child(3), .legs td:nth-child(3) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cal-intro h1.split { animation: none; }
+}
+</style>
+</head>
+<body data-mode="app">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="cal-mark" viewBox="4 8 40 32">
+    <path d="M4 38 H44" stroke="currentColor" stroke-width="2.4"/>
+    <path d="M5.2 38 V10 M24 38 V10 M42.8 38 V10 M11.5 38 V27 M17.75 38 V27 M36.5 38 V27" stroke="currentColor" stroke-width="2"/>
+    <path d="M30 38 V8" stroke="var(--live, #1df2ff)" stroke-width="3"/>
+  </symbol>
+</svg>
+<div class="screen" aria-hidden="true"></div>
+
+<div class="wrap">
+  <header class="cal-mast">
+    <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
+    <span class="word">Nightjar</span>
+    <span class="cal-caption lg up mut">courier dispatch · Saltwell sector</span>
+    <span class="sp"></span>
+    <span class="clock" id="clock" aria-label="Local time">23:41<s>:07</s></span>
+  </header>
+
+  <section class="cal-intro">
+    <h1 id="headline" aria-live="polite"><span id="h-a">Run 7F lands at</span> <span class="t" id="h-arr">00:03</span><span id="h-b">, 4 minutes inside the window.</span></h1>
+    <div>
+      <p>Raven-7 is past the Ninth Ring with a cryo case for Meridian Eye Clinic, two minutes behind plan. It reaches Copperline gate at 23:42 and holds there until you confirm the next jump. Every minute held is a minute later at the clinic.</p>
+    </div>
+  </section>
+
+  <div class="page">
+    <section class="cal-panel" aria-labelledby="route-h">
+      <h2 id="route-h">Route</h2>
+      <p class="sub" id="route-sub">Saltwell Docks to Spire 4, on the clock. The window closes at 00:07.</p>
+      <div class="route" id="route-box"><svg id="route"></svg></div>
+
+      <div class="legs-wrap"><table class="cal-table legs">
+        <thead><tr><th>leg</th><th>route</th><th class="num">plan</th><th class="num">actual / eta</th><th>status</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>Saltwell Docks → Ninth Ring</td><td class="num t">6 min</td><td class="num t late">8 min · 2 late</td><td class="st" data-ink="ok">done</td></tr>
+          <tr><td>2</td><td>Ninth Ring → Copperline gate</td><td class="num t">7 min</td><td class="num t" id="l2-t">eta 23:42</td><td class="st" id="l2-st">in flight</td></tr>
+          <tr><td>3</td><td id="l3">Copperline gate → Old Meridian · toll lane</td><td class="num t">9 min</td><td class="num t" id="l3-t">9 min</td><td class="st" id="l3-st">next</td></tr>
+          <tr><td>4</td><td>Old Meridian → Spire 4 · drop</td><td class="num t">12 min</td><td class="num t" id="l4-t">eta 00:03</td><td class="st" id="l4-st">planned</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <div class="row">
+      <section class="cal-panel jump pwr" id="jump" aria-labelledby="jump-h">
+        <h2 id="jump-h">Next jump</h2>
+        <p class="sub">Copperline gate to Old Meridian.<span class="keys"> Keys: <kbd class="cal-kbd">1</kbd>–<kbd class="cal-kbd">3</kbd> pick a lane, <kbd class="cal-kbd">c</kbd> confirms.</span></p>
+
+        <div class="lanes" role="radiogroup" aria-label="Lane for the next jump" aria-describedby="dark-e">
+          <label class="lane"><input type="radio" name="lane" value="toll" checked><span class="nm">Copperline toll lane <span class="plan">plan</span><kbd class="cal-kbd">1</kbd></span><span class="eta" data-for="toll"></span>
+            <span class="facts"><span>9 min</span><span>¥40</span><span>cameras at the gate</span></span><span class="margin" data-for="toll"></span></label>
+          <label class="lane"><input type="radio" name="lane" value="sky"><span class="nm">Arcology skyway<kbd class="cal-kbd">2</kbd></span><span class="eta" data-for="sky"></span>
+            <span class="facts"><span>6 min</span><span>¥120</span><span>tracked traffic only</span></span><span class="margin" data-for="sky"></span></label>
+          <label class="lane"><input type="radio" name="lane" value="duct"><span class="nm">Undercity duct<kbd class="cal-kbd">3</kbd></span><span class="eta" data-for="duct"></span>
+            <span class="facts"><span>14 min</span><span>free</span><span>no cameras</span></span><span class="margin" data-for="duct"></span></label>
+        </div>
+
+        <label class="cal-switch"><span class="txt">Fly dark (transponder off)</span><span class="o off">off</span><input type="checkbox" role="switch" id="dark" aria-describedby="dark-h dark-e"><span class="o on">on</span></label>
+        <p class="hint" id="dark-h">Keeps Raven-7 off the city's traffic logs. The skyway turns away dark traffic.</p>
+        <span class="err" id="dark-e" role="alert" hidden>The skyway only admits tracked traffic. Turn the transponder on, or pick another lane.</span>
+
+        <div class="acts">
+          <span class="cd" id="cd"><b>0:53</b>to departure</span>
+          <span class="sp"></span>
+          <button class="cal-btn" id="ping">Ping courier</button>
+          <button class="cal-btn primary" id="confirm">Confirm jump</button>
+          <p class="why" id="why"></p>
+        </div>
+
+        <div class="abort" id="abort">
+          <p>Aborting sends Raven-7 and the case back to Saltwell Docks.</p>
+          <button class="cal-btn quiet" data-dialog="abort-d">Abort run</button>
+        </div>
+      </section>
+
+      <section class="cal-panel" aria-labelledby="cargo-h">
+        <h2 id="cargo-h">Cargo and courier</h2>
+        <p class="sub">Cryo case · cultured retinal grafts, on Raven-7</p>
+        <div class="cal-block"><div class="cal-block-h">case temperature<span>hold −20 to −16 °C</span></div>
+          <div class="temp"><svg id="temp"></svg></div>
+          <dl class="cal-kv"><dt>coolant left</dt><dd>62% · about 3 h</dd><dt>seal</dt><dd>7F-221 · intact</dd><dt>mass</dt><dd>4.2 kg</dd><dt>for</dt><dd>Meridian Eye Clinic, bay 62</dd></dl>
+        </div>
+        <div class="cal-block"><div class="cal-block-h">Raven-7<span>AV drone, cargo class</span></div>
+          <dl class="cal-kv"><dt>charge left</dt><dd>39% · about 50 min of flight</dd><dt>altitude</dt><dd>40 m</dd><dt>speed</dt><dd>112 km/h</dd><dt>signal</dt><dd>strong · relay 9R</dd></dl>
+        </div>
+      </section>
+
+      <section class="cal-panel" aria-labelledby="log-h">
+        <h2 id="log-h">Comms<span class="sp"></span><span class="cal-count" data-n="5" data-noun="messages" id="log-n"></span></h2>
+        <ol class="feed" id="log" aria-live="polite">
+          <li><span class="tm">23:41</span><div><span class="who">Raven-7</span><span class="msg">Crosswind at Ninth Ring, holding 40 m.</span></div></li>
+          <li><span class="tm">23:38</span><div><span class="who">Copperline gate</span><span class="msg">Lane 3 open, toll ¥40.</span></div></li>
+          <li><span class="tm">23:35</span><div><span class="who">Meridian Eye Clinic</span><span class="msg">Receiving bay 62 ready at Spire 4.</span></div></li>
+          <li><span class="tm">23:30</span><div><span class="who">Raven-7</span><span class="msg">Case sealed, seal 7F-221 checked.</span></div></li>
+          <li><span class="tm">23:27</span><div><span class="who">Saltwell Docks</span><span class="msg">Pickup done, two minutes late.</span></div></li>
+        </ol>
+      </section>
+    </div>
+  </div>
+
+  <footer class="cal-foot"><span>nightjar · run 7F</span><span>example data · illustrative</span></footer>
+</div>
+
+<dialog class="cal-dialog" id="abort-d" aria-labelledby="abort-t" data-mode="app"><form method="dialog">
+  <header><b id="abort-t">Abort run 7F?</b><span class="sp"></span><kbd class="cal-kbd">esc</kbd></header>
+  <div class="bd"><p>Raven-7 turns back and returns the case to Saltwell Docks. The clinic is told the delivery is cancelled.</p>
+    <dl class="cal-kv"><dt>cargo</dt><dd>Cryo case · seal 7F-221</dd><dt>back at dock</dt><dd>about 23:55</dd><dt>coolant left</dt><dd>62%, enough for 3 h</dd></dl></div>
+  <footer><button class="cal-btn" value="cancel" autofocus>Keep flying</button><button class="cal-btn primary" data-ink="fault" value="abort">Abort run</button></footer>
+</form></dialog>
+
+<script src="../skills/calibrated-figures/assets/calibrated-figures.js"></script>
+<script src="../skills/calibrated-components/assets/calibrated-components.js"></script>
+<script>
+(() => {
+  const { K, draw, ready } = Calibrated;
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const $ = (s) => document.querySelector(s);
+
+  /* ── the run, in minutes from pickup at 23:27. It plays in real time from 23:41:07. */
+  const START = 23 * 60 + 27, WINDOW = 40, GATE = 15, LAST = 12, MAX = 48;
+  const T0 = performance.now() - (Number(new URLSearchParams(location.search).get('t')) || 0) * 1000;
+  const minutes = () => 14 + (7 + (performance.now() - T0) / 1000) / 60;
+  const LANES = {
+    toll: { name: 'Copperline toll lane', short: 'toll lane', min: 9 },
+    sky:  { name: 'Arcology skyway', short: 'skyway', min: 6, tracked: true },
+    duct: { name: 'Undercity duct', short: 'duct', min: 14 },
+  };
+  const pad = (n) => String(n).padStart(2, '0');
+  const clock = (m) => { const t = (START + Math.floor(m + 1e-6) + 1440) % 1440; return pad(Math.floor(t / 60)) + ':' + pad(t % 60); };
+  const mins = (n) => `${n} minute${n === 1 ? '' : 's'}`;
+
+  /* ── state */
+  const S = { lane: 'toll', confirmed: false, confirmAt: null, aborted: false, abortAt: null };
+  let shownJ = LANES.toll.min, anim = 0;
+  /* the jump leaves at the gate time, or when it's confirmed after that; until then the drone holds */
+  const depart = (n) => Math.max(GATE, S.confirmed ? S.confirmAt : n);
+  const arrival = (j, n) => Math.ceil(depart(n) + j + LAST - 1e-6);
+  const departed = (n) => S.confirmed && n >= depart(n);
+
+  /* ── the route on the clock: one scale, stations as nodes, the lamp where Raven-7 is now */
+  function route(j, n, w) {
+    const x0 = 24, x1 = w - 24, y = 116, X = K.scale(x0, x1, 0, MAX);
+    const d = depart(n), arr = d + j + LAST, arrR = arrival(j, n), late = arrR > WINDOW, jr = Math.round(j);
+    const held = d - GATE, pos = S.aborted ? S.abortAt : Math.min(n, arr);
+    const st = [
+      { n: 'Saltwell Docks', t: 0, a: 'start' },
+      { n: 'Ninth Ring', t: 8 },
+      { n: 'Copperline gate', t: GATE },
+      { n: 'Old Meridian', t: d + j },
+      { n: 'Spire 4 · drop', t: arr, drop: true },
+    ];
+    const H = K.hatch('ft', 4, 0.5);
+    let g = H.def + `<rect x="${X(WINDOW)}" y="${y - 6}" width="${X(MAX) - X(WINDOW)}" height="12" fill="${H.url}"/>`;
+    g += K.threshold(X(WINDOW), 22, y + 8, 'window closes ' + clock(WINDOW), 'end');
+
+    /* flown in ink, the leg in progress in lamp, the plan dashed; a hold at the gate in red */
+    const passed = st.filter((s) => s.t <= pos + 1e-6).pop();
+    const next = st.find((s) => s.t > pos + 1e-6);
+    if (passed.t > 0) g += K.line(X(0) + 4, y, X(passed.t) - 4, y, 'fg', { w: 2 });
+    const holding = !S.aborted && pos > GATE && pos <= d + 1e-6;
+    if (holding) g += `<g class="hot">${K.line(X(GATE) + 4, y, X(pos), y, 'ft', { w: 2, dash: '2 2' })}</g>`;
+    else if (pos > passed.t) g += K.line(X(passed.t) + 4, y, X(pos), y, S.aborted ? 'fg' : 'lv', { w: 2 });
+    if (next) {
+      g += K.line(X(pos), y, X(next.t) - 4, y, S.aborted ? 'mu' : 'lv', { dash: '4 3' });
+      if (next.t < arr) g += K.line(X(next.t) + 4, y, X(arr) - 4, y, 'mu', { dash: '4 3', w: 1.3 });
+    }
+
+    /* leg lengths over the line */
+    const legs = [[0, 8, '8 min · 2 late', 'ft'], [8, GATE, '7 min', 'mu']];
+    if (held >= 0.5) legs.push([GATE, d, `held ${Math.round(held)} min`, 'ft']);
+    legs.push([d, d + j, `${jr} min · ${LANES[S.lane].short}`, 'fg'], [d + j, arr, LAST + ' min', 'mu']);
+    legs.forEach(([a, b, l, c]) => { g += K.dim(X(a), X(b), 46, l, c); });
+
+    /* stations: the drop's label steps away from the window line when they meet */
+    st.forEach((s) => {
+      let a = s.a || 'middle';
+      if (s.drop && Math.abs(s.t - WINDOW) < 4) a = s.t > WINDOW ? 'start' : 'end';
+      const dx = a === 'start' && s.drop ? 8 : a === 'end' && s.drop ? -8 : 0;
+      const done = s.t <= pos + 1e-6, bad = s.drop && late;
+      const node = K.node(X(s.t), y, bad ? 'fault' : done ? 'done' : 'todo', 9);
+      const ink = bad ? 'ft' : done ? 'fg' : 'mu';
+      const lab = K.t(X(s.t) + dx, 80, s.n, ink, a) + K.t(X(s.t) + dx, 94, clock(s.t), 'fa', a);
+      g += bad ? `<g class="hot">${node}${lab}</g>` : node + lab;
+    });
+    if (!S.aborted) {
+      g += K.node(X(pos), y, 'live', 10);
+      g += K.t(X(pos), 146, (holding ? 'holding ' : 'now ') + clock(n), 'lv', 'middle');
+    } else g += K.t(X(pos), 146, 'turned back ' + clock(pos), 'ft', 'middle');
+
+    /* the margin left in the window, or how far past it */
+    const mx = X(Math.min(arrR, WINDOW)), MX = X(Math.max(arrR, WINDOW));
+    if (!S.aborted && arrR !== WINDOW) g += late ? `<g class="hot">${K.dim(mx, MX, 142, `${arrR - WINDOW} min late`, 'ft')}</g>` : K.dim(mx, MX, 142, `${WINDOW - arrR} min spare`, 'ok');
+    g += K.ruler(x0, x1, 170, MAX, 1, 5, (v) => clock(v));
+
+    const label = S.aborted ? `Route for run 7F: aborted at ${clock(pos)}, returning to Saltwell Docks.`
+      : `Route for run 7F. Picked up at Saltwell Docks at 23:27; first leg took 8 minutes, 2 over plan. Now ${clock(n)}`
+      + (holding ? `, holding at Copperline gate for ${Math.round(held)} minutes. ` : '. ')
+      + `Next jump by ${LANES[S.lane].name}, ${jr} minutes, then 12 minutes to Spire 4. Arrives ${clock(arrR)}; the window closes at ${clock(WINDOW)}, `
+      + (late ? `${mins(arrR - WINDOW)} late.` : `${mins(WINDOW - arrR)} to spare.`);
+    return { w, h: 196, markup: g, label };
+  }
+
+  /* ── case temperature: one scale, the hold band, the reading */
+  function temp() {
+    const w = 320, x0 = 12, x1 = 300, y = 76, X = K.scale(x0, x1, -24, -12), now = -18.4;
+    const H = K.hatch('ft', 4, 0.45);
+    let g = H.def + `<rect x="${X(-16)}" y="${y - 16}" width="${X(-12) - X(-16)}" height="10" fill="${H.url}"/>`;
+    g += K.rect(X(-20), y - 16, X(-16) - X(-20), 10, 'none', 'ok');
+    g += K.t(X(-20), y - 22, 'hold', 'ok') + K.t(X(-16) + 4, y - 22, 'too warm', 'ft');
+    g += K.line(X(now), y - 4, X(now), 22, 'fg') + K.rect(X(now) - 3, y - 14, 6, 6, 'fg', 'none');
+    g += K.box(X(now) + 6, 4, null, 'case now', '−18.4 °C', 'fg');
+    g += K.ruler(x0, x1, y, 12, 1, 4, (v) => (v === 24 ? '' : '−') + Math.abs(v - 24) + '°', false, 0);
+    return { w, h: 100, markup: g, label: 'Case temperature −18.4 °C, inside the hold band of −20 to −16 °C. Above −16 °C is too warm.' };
+  }
+
+  const routeBox = $('#route-box'), routeSvg = $('#route');
+  let scrolled = false;
+  function paint(n = minutes()) {
+    const w = Math.max(860, Math.floor(routeBox.clientWidth));
+    const r = route(shownJ, n, w);
+    routeSvg.setAttribute('viewBox', `0 0 ${r.w} ${r.h}`);
+    routeSvg.setAttribute('width', r.w); routeSvg.setAttribute('height', r.h);
+    draw(routeSvg, r.markup, r.label);
+    /* on a narrow screen, start the scroll at the drone */
+    if (!scrolled && routeBox.scrollWidth > routeBox.clientWidth + 4) {
+      routeBox.scrollLeft = Math.max(0, 24 + (r.w - 48) * (n / MAX) - routeBox.clientWidth / 3); scrolled = true;
+    }
+  }
+
+  /* ── everything that isn't the drawing */
+  const dark = $('#dark'), confirmBtn = $('#confirm'), why = $('#why'), cd = $('#cd'), jump = $('#jump');
+  const set = (el, txt) => { if (el.textContent !== txt) el.textContent = txt; };
+  const ink = (el, v) => { if (v) el.dataset.ink = v; else delete el.dataset.ink; };
+
+  function words(n) {
+    const lane = LANES[S.lane], arr = arrival(lane.min, n), dd = arr - WINDOW;
+    if (S.aborted) return ['Run 7F turned back at', clock(S.abortAt), ', heading back to Saltwell Docks for about 23:55.', 'abort'];
+    return ['Run 7F lands at', clock(arr), dd > 0 ? `, ${mins(dd)} after the window closes.` : `, ${mins(-dd)} inside the window.`, dd > 0 ? 'fault' : 'ok'];
+  }
+
+  let lastHead = '';
+  function refresh(n = minutes(), animate = false) {
+    const lane = LANES[S.lane], arr = arrival(lane.min, n), late = arr > WINDOW, gone = departed(n);
+    /* headline: only touch it when it changes, so the live region speaks once */
+    const [a, t, b, k] = words(n), head = a + t + b + k;
+    if (head !== lastHead) {
+      set($('#h-a'), a); set($('#h-arr'), t); set($('#h-b'), b); ink($('#h-arr'), k);
+      if (animate && !still) { const h1 = $('#headline'); h1.classList.remove('split'); void h1.offsetWidth; h1.classList.add('split'); }
+      lastHead = head;
+    }
+    /* each lane shows the arrival it would give right now */
+    document.querySelectorAll('.lane').forEach((el) => {
+      const key = el.querySelector('input').value, la = arrival(LANES[key].min, n), dd = la - WINDOW;
+      const eta = el.querySelector('.eta'), m = el.querySelector('.margin');
+      set(eta, 'arrives ' + clock(la)); set(m, dd > 0 ? `${dd} min late` : `${-dd} min spare`);
+      ink(eta, dd > 0 ? 'fault' : 'ok'); ink(m, dd > 0 ? 'fault' : 'ok');
+      el.querySelector('input').disabled = S.aborted || gone;
+    });
+    /* legs table */
+    const d = depart(n), hold = !S.confirmed && n > GATE;
+    set($('#l2-t'), n < GATE ? 'eta ' + clock(GATE) : '7 min'); const l2s = S.aborted && S.abortAt < GATE ? 'turned back' : n < GATE ? 'in flight' : 'done';
+    set($('#l2-st'), l2s); ink($('#l2-st'), l2s === 'done' ? 'ok' : l2s === 'turned back' ? 'fault' : null);
+    set($('#l3'), `Copperline gate → Old Meridian · ${lane.short}`);
+    set($('#l3-t'), (d - GATE >= 0.5 ? `held ${Math.round(d - GATE)} + ` : '') + `${lane.min} min`);
+    const l3 = $('#l3-st'), l3s = S.aborted ? 'cancelled' : hold ? 'holding' : gone ? (n < d + lane.min ? 'in flight' : 'done') : S.confirmed ? 'confirmed' : 'next';
+    set(l3, l3s); ink(l3, l3s === 'confirmed' || l3s === 'done' ? 'ok' : l3s === 'cancelled' ? 'fault' : null); l3.classList.toggle('hold', hold);
+    set($('#l4-t'), 'eta ' + clock(arr)); set($('#l4-st'), S.aborted ? 'cancelled' : 'planned');
+    /* the skyway refuses dark traffic */
+    const blocked = lane.tracked && dark.checked;
+    $('#dark-e').hidden = !blocked; dark.setAttribute('aria-invalid', blocked ? 'true' : 'false');
+    dark.disabled = S.aborted || gone;
+    /* the countdown is the lamp of this panel; holding past the gate turns it red */
+    const secs = Math.round((GATE - n) * 60);
+    if (S.aborted) { cd.innerHTML = '<b>—</b>run aborted'; ink(cd, 'off'); }
+    else if (gone) { cd.innerHTML = `<b>${clock(d)}</b>left the gate`; ink(cd, 'ok'); }
+    else if (S.confirmed) { cd.innerHTML = `<b>${Math.floor(secs / 60)}:${pad(secs % 60)}</b>to departure · confirmed`; ink(cd, 'ok'); }
+    else if (secs > 0) { cd.innerHTML = `<b>${Math.floor(secs / 60)}:${pad(secs % 60)}</b>to departure`; ink(cd, null); }
+    else { const h = -secs; cd.innerHTML = `<b>${Math.floor(h / 60)}:${pad(h % 60)}</b>held at the gate`; ink(cd, 'fault'); }
+    /* the main action says what it will do, and a late jump says so in red */
+    confirmBtn.disabled = blocked || S.confirmed || S.aborted;
+    set(confirmBtn, S.confirmed ? 'Jump confirmed' : late ? 'Confirm late jump' : 'Confirm jump');
+    if (late && !S.confirmed && !blocked) confirmBtn.dataset.ink = 'fault'; else delete confirmBtn.dataset.ink;
+    set(why, S.aborted ? '' : blocked ? 'Turn the transponder on to confirm the skyway.'
+      : late && !S.confirmed ? `Arrives ${clock(arr)}, ${mins(arr - WINDOW)} after the window closes. The clinic is told.` : '');
+    ink(why, late && !blocked ? 'fault' : null);
+    $('#ping').disabled = S.aborted;
+    $('#abort').hidden = S.aborted || gone;
+    /* power: the jump panel is lit while it needs you */
+    jump.classList.toggle('pwr', !S.aborted && !S.confirmed);
+    jump.classList.toggle('late', !S.confirmed && (late || hold));
+    routeBox.classList.toggle('off', S.aborted);
+    set($('#route-sub'), S.aborted ? `Aborted at ${clock(S.abortAt)}. Raven-7 is returning to Saltwell Docks.` : 'Saltwell Docks to Spire 4, on the clock. The window closes at 00:07.');
+    /* the drawing re-measures when the lane changes: downstream stations glide to their new times */
+    cancelAnimationFrame(anim);
+    const to = lane.min, from = shownJ;
+    if (!animate || still || from === to) { shownJ = to; paint(n); return; }
+    let t0 = null;
+    const step = (ts) => {
+      if (t0 === null) t0 = ts;
+      const p = Math.max(0, Math.min(1, (ts - t0) / 520));
+      shownJ = p === 1 ? to : from + (to - from) * (1 - Math.pow(2, -10 * p));
+      paint();
+      if (p < 1) anim = requestAnimationFrame(step); else { shownJ = to; paint(); }
+    };
+    anim = requestAnimationFrame(step);
+  }
+
+  /* ── comms log */
+  let logN = 5;
+  function log(who, msg) {
+    const li = document.createElement('li'); li.className = 'new';
+    li.innerHTML = '<span class="tm"></span><div><span class="who"></span><span class="msg"></span></div>';
+    li.querySelector('.tm').textContent = clock(minutes());
+    li.querySelector('.who').textContent = who;
+    li.querySelector('.msg').textContent = msg;
+    const box = $('#log'); box.querySelectorAll('.new').forEach((r) => r.classList.remove('new'));
+    box.prepend(li);
+    const c = $('#log-n'); c.dataset.n = ++logN; c.innerHTML = ''; Calibrated.counts(c.parentNode);
+  }
+
+  /* ── actions */
+  document.querySelectorAll('input[name="lane"]').forEach((r) => r.addEventListener('change', () => {
+    if (S.confirmed) log('Dispatch', `Jump changed to ${LANES[r.value].name}. Not confirmed yet.`);
+    S.lane = r.value; S.confirmed = false; S.confirmAt = null; refresh(minutes(), true);
+  }));
+  dark.addEventListener('change', () => {
+    if (S.confirmed) log('Dispatch', 'Transponder setting changed. Jump not confirmed yet.');
+    S.confirmed = false; S.confirmAt = null; refresh();
+  });
+
+  function confirmJump() {
+    if (confirmBtn.disabled) return;
+    const n = minutes(), lane = LANES[S.lane];
+    S.confirmed = true; S.confirmAt = n;
+    const arr = arrival(lane.min, n);
+    log('Dispatch', `Jump confirmed: ${lane.name}, arriving ${clock(arr)}.` + (arr > WINDOW ? ' Clinic told it will be late.' : ''));
+    Calibrated.toast(`Jump confirmed · ${lane.short} · arrives ${clock(arr)}`, { ink: arr > WINDOW ? 'fault' : 'ok' });
+    refresh(n);
+  }
+  confirmBtn.addEventListener('click', confirmJump);
+
+  function ping() {
+    const b = $('#ping'); if (b.disabled) return;
+    b.disabled = true; log('Dispatch', 'Ping sent to Raven-7.');
+    setTimeout(() => { log('Raven-7', 'Ack. 40 m, 112 km/h, case at −18.4 °C.'); b.disabled = S.aborted; }, 1400);
+  }
+  $('#ping').addEventListener('click', ping);
+
+  $('#abort-d').addEventListener('close', (e) => {
+    if (e.target.returnValue !== 'abort') return;
+    S.aborted = true; S.abortAt = minutes();
+    log('Dispatch', 'Run aborted. Raven-7 returning to Saltwell Docks.');
+    refresh(minutes(), true);
+    Calibrated.toast('Run 7F aborted · returning to dock', { ink: 'fault', action: 'undo', onAction: () => {
+      S.aborted = false; S.abortAt = null; log('Dispatch', 'Abort cancelled. Run 7F continues.'); refresh(minutes(), true);
+    } });
+  });
+
+  /* keys: 1–3 pick a lane, c confirms, p pings */
+  document.addEventListener('keydown', (e) => {
+    if (e.metaKey || e.ctrlKey || e.altKey || document.querySelector('dialog[open]')) return;
+    if (e.target.matches('input[type="text"], textarea, select')) return;
+    const r = document.querySelectorAll('input[name="lane"]')[Number(e.key) - 1];
+    if (r && !r.disabled) { r.checked = true; r.focus(); r.dispatchEvent(new Event('change')); e.preventDefault(); }
+    else if (e.key === 'c') { confirmJump(); e.preventDefault(); }
+    else if (e.key === 'p') { ping(); e.preventDefault(); }
+  });
+
+  /* ── the clock runs; the drawing and the countdown follow it every second */
+  const ck = $('#clock');
+  const tick = () => {
+    const n = minutes(), s = Math.floor(((n - Math.floor(n)) * 60) + 1e-6);
+    ck.innerHTML = `${clock(n)}<s>:${pad(s)}</s>`;
+    if (!anim || shownJ === LANES[S.lane].min) refresh(n);
+  };
+  setInterval(tick, 1000);
+  new ResizeObserver(() => paint()).observe(routeBox);
+
+  ready(() => {
+    const t = temp(); const ts = $('#temp'); ts.setAttribute('viewBox', `0 0 ${t.w} ${t.h}`); draw(ts, t.markup, t.label);
+    refresh();
+    tick();
+  });
+})();
+</script>
+</body>
+</html>
