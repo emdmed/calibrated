@@ -30,11 +30,12 @@ body.docs { font: 400 15px/1.65 var(--d-sans); color: var(--d-fg); font-stretch:
 body.docs ::selection { background: var(--select-bg); color: var(--select-fg); }
 body.docs * { scrollbar-color: var(--d-line-2) transparent; }
 .docs a { text-decoration: none; color: inherit; }
-.docs :focus-visible { outline: 2px solid var(--d-fg); outline-offset: 2px; border-radius: 4px; }
+/* docs chrome only: inside previews the kit draws its own focus */
+.docs :focus-visible:not(.ex-prev *) { outline: 2px solid var(--d-fg); outline-offset: 2px; border-radius: 4px; }
 
 /* top bar */
 .top { position: sticky; top: 0; z-index: 30; height: var(--d-top); display: flex; align-items: center; gap: 14px; padding: 0 20px; background: var(--d-bg); border-bottom: 1px solid var(--d-line); }
-.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--title); }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--d-fg); }
 .brand .cal-mark { width: 26px; height: 21px; }
 .brand .word { font-size: 20px; }
 .ver { font: 500 12px/1 var(--d-sans); color: var(--d-muted); border: 1px solid var(--d-line-2); border-radius: 999px; padding: 4px 8px; }
@@ -88,7 +89,7 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
 .copy { display: inline-flex; align-items: center; gap: 6px; font: 500 13px/1 var(--d-sans); color: var(--d-muted); background: none; border: 1px solid transparent; border-radius: 6px; padding: 7px 9px; cursor: pointer; transition: color .12s ease-out, background-color .12s ease-out; }
 .copy:hover { color: var(--d-fg); background: var(--d-soft); }
 .copy svg { width: 14px; height: 14px; }
-.ex-prev { padding: 30px 28px; overflow-x: auto; }
+.ex-prev { padding: 30px 28px; overflow-x: auto; font: 400 var(--fs-body)/1.6 var(--font-body); color: var(--fg); letter-spacing: normal; }
 /* the docs column is narrower than a page: always use the card's stacked layout */
 .ex-prev .tb6 { --tb-cols: 6; }
 .ex-prev .cal-card { grid-template-columns: minmax(0, 1fr); }
@@ -116,12 +117,13 @@ pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-
 .callout { border: 1px solid var(--d-line-2); background: var(--d-soft); border-radius: 10px; padding: 14px 16px; color: var(--d-muted); font-size: 14px; margin: 0 0 18px; max-width: 72ch; }
 .callout strong { color: var(--d-fg); font-weight: 600; }
 
-/* kit layout helpers inside previews */
-.row { display: flex; gap: 32px; flex-wrap: wrap; align-items: center; }
+/* layout for the seeds and density previews (their code tabs show the kit markup only) */
 .stack { display: grid; gap: 16px; }
 .seeds { display: flex; gap: 22px; align-items: end; flex-wrap: wrap; }
 .seeds input[type=color] { width: 52px; height: 26px; border: var(--line-thin) solid var(--edge-strong); background: var(--panel); padding: 2px; cursor: pointer; }
-.dens-ctl { margin-bottom: 18px; }
+.seeds label::first-letter { text-transform: none; }   /* the custom property names are case-sensitive */
+.seed-read { display: flex; gap: 8px; flex-wrap: wrap; }
+.dens-ctl { display: flex; gap: 8px; margin-bottom: 18px; }
 
 /* changelog */
 .log { list-style: none; border-left: 1px solid var(--d-line-2); margin-left: 6px; }
@@ -175,7 +177,7 @@ pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-
 <header class="top">
   <button class="icon-btn menu-btn" id="menu" aria-label="Open navigation" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 18 18"><path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
   <a class="brand" href="#intro" aria-label="Calibrated, back to top"><svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg><span class="word">Calibrated</span></a>
-  <span class="ver">v0.4.1</span>
+  <span class="ver" id="ver">Rev N</span>
   <span class="sp"></span>
   <a class="top-link" href="index.html">Catalog</a>
   <a class="top-link" href="#install">Install</a>
@@ -279,15 +281,15 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
       <div class="item" id="meter">
         <h3>Meter <a class="anchor" href="#meter" aria-label="Link to Meter">#</a></h3>
         <p>A value against its limit, with a red-hatched alert zone and a boxed reading. It sweeps to its value when it comes into view and glides when the value changes: the needle leads, the fill follows, and the reading blinks when it settles.</p>
-        <div class="ex"><template><div class="row">
+        <div class="ex"><template><div style="display:flex;flex-wrap:wrap;gap:32px;align-items:center">
   <cal-meter value="46000" max="1000000" warn="800000" label="requests today"></cal-meter>
   <cal-meter value="128" max="150" warn="120" label="build cache" unit=" GB" format="raw"></cal-meter>
 </div></template></div>
         <div class="props-wrap"><table class="props"><thead><tr><th>Attribute</th><th>Default</th><th>Description</th></tr></thead><tbody>
           <tr><td><code>value</code>, <code>max</code></td><td>0, 100</td><td>The reading and the full scale.</td></tr>
-          <tr><td><code>warn</code></td><td>0.8 × max</td><td>Start of the alert zone. The part of the fill past it turns red, and so does the reading.</td></tr>
+          <tr><td><code>warn</code></td><td>0.8 × max</td><td>Where the alert zone starts. Past it the fill and the reading turn red.</td></tr>
           <tr><td><code>label</code></td><td>value</td><td>Name in the box and in the spoken sentence.</td></tr>
-          <tr><td><code>format</code></td><td><code>k</code></td><td><code>k</code> (46k, 1M), <code>raw</code>, <code>pct</code> or <code>dur</code>.</td></tr>
+          <tr><td><code>format</code></td><td><code>k</code></td><td><code>k</code> (46k, 1M), <code>raw</code>, <code>pct</code> (value and max as fractions: 0.46 of 1) or <code>dur</code>.</td></tr>
           <tr><td><code>unit</code></td><td>none</td><td>Appended after <code>k</code> and <code>raw</code> values.</td></tr>
           <tr><td><code>width</code></td><td>420 / 144</td><td>Full and compact widths.</td></tr>
           <tr><td><code>still</code></td><td>off</td><td>No motion: draw the value at once. Reduced motion does the same.</td></tr>
@@ -297,7 +299,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
       <div class="item" id="position">
         <h3>Position <a class="anchor" href="#position" aria-label="Link to Position">#</a></h3>
         <p>Where you are in a set. Up to 24 items get one tick each; longer sets get a scale with a marker.</p>
-        <div class="ex"><template><div class="row">
+        <div class="ex"><template><div style="display:flex;flex-wrap:wrap;gap:32px;align-items:center">
   <cal-position index="3" count="7" label="diff · files"></cal-position>
   <cal-position index="12" count="140" label="search · matches"></cal-position>
 </div></template></div>
@@ -305,14 +307,14 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
           <tr><td><code>index</code></td><td>1</td><td>Current item, 1-based.</td></tr>
           <tr><td><code>count</code></td><td>1</td><td>Number of items.</td></tr>
           <tr><td><code>label</code></td><td>none</td><td>Shown above in full form.</td></tr>
-          <tr><td><code>width</code></td><td>auto</td><td>For long sets.</td></tr>
+          <tr><td><code>width</code></td><td>160</td><td>Scale width for sets over 24.</td></tr>
         </tbody></table></div>
       </div>
 
       <div class="item" id="progress">
         <h3>Progress <a class="anchor" href="#progress" aria-label="Link to Progress">#</a></h3>
         <p>Steps as nodes: done, live, to do and failed, with the finished run dimensioned.</p>
-        <div class="ex"><template><div class="stack">
+        <div class="ex"><template><div style="display:grid;gap:16px">
   <cal-progress done="11" total="15" live="12" live-label="step 12 · backfill" done-label="11 done · 1h 48m"></cal-progress>
   <cal-progress done="6" total="15" fault="7" fault-label="step 7 · needs review"></cal-progress>
 </div></template></div>
@@ -330,7 +332,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
       <div class="item" id="diff">
         <h3>Diff <a class="anchor" href="#diff" aria-label="Link to Diff">#</a></h3>
         <p>Added lines run right in green, removed lines left in red, from a shared centre. Linear up to the knee, logarithmic past it. Stacked diffs share the centre line.</p>
-        <div class="ex"><template><div class="stack" style="gap:6px">
+        <div class="ex"><template><div style="display:grid;gap:6px">
   <cal-diff added="184" removed="20" label="release"></cal-diff>
   <cal-diff added="147000" removed="3000" label="vendored"></cal-diff>
   <cal-diff added="12" removed="3" label="config"></cal-diff>
@@ -345,18 +347,18 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
 
       <div class="item" id="durations">
         <h3>Durations <a class="anchor" href="#durations" aria-label="Link to Durations">#</a></h3>
-        <p>Spans on one shared ruler. A live span with a <code>start</code> time ticks every second.</p>
+        <p>Spans on one shared ruler. A live span with a <code>start</code> time ticks every second; this one starts two minutes before the page loads.</p>
         <div class="ex"><template><cal-durations max="15" unit="m">
   <cal-span name="lint" value="252"></cal-span>
   <cal-span name="unit tests" value="760"></cal-span>
-  <cal-span name="e2e" live start="1793448000000"></cal-span>
+  <cal-span name="e2e" live value="125"></cal-span>
 </cal-durations></template></div>
         <div class="props-wrap"><table class="props"><thead><tr><th>Attribute</th><th>Default</th><th>Description</th></tr></thead><tbody>
-          <tr><td><code>max</code></td><td>auto</td><td>On <code>&lt;cal-durations&gt;</code>. Rounded up to 5.</td></tr>
+          <tr><td><code>max</code></td><td>auto</td><td>On <code>&lt;cal-durations&gt;</code>. The longest span, rounded up to a major tick.</td></tr>
           <tr><td><code>unit</code></td><td><code>m</code></td><td><code>s</code>, <code>m</code> or <code>h</code>.</td></tr>
           <tr><td><code>width</code></td><td>480</td><td>Ruler width.</td></tr>
           <tr><td><code>name</code></td><td>none</td><td>On <code>&lt;cal-span&gt;</code>.</td></tr>
-          <tr><td><code>value</code></td><td>none</td><td>Seconds. Or give <code>start</code> and <code>end</code> in epoch ms.</td></tr>
+          <tr><td><code>value</code></td><td>none</td><td>Seconds. Or give <code>start</code> (and <code>end</code>) in epoch ms; a live span with only <code>start</code> ticks.</td></tr>
           <tr><td><code>live</code></td><td>off</td><td>Lights the span with the lamp and ends it in a live star.</td></tr>
         </tbody></table></div>
       </div>
@@ -366,11 +368,11 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
         <p>A scale on its own, with an optional marked value.</p>
         <div class="ex"><template><cal-ruler min="0" max="150" step="10" every="5" unit="k" value="88" width="380"></cal-ruler></template></div>
         <div class="props-wrap"><table class="props"><thead><tr><th>Attribute</th><th>Default</th><th>Description</th></tr></thead><tbody>
-          <tr><td><code>min</code>, <code>max</code>, <code>step</code></td><td>0, 100, 10</td><td>Range and tick spacing.</td></tr>
+          <tr><td><code>min</code>, <code>max</code>, <code>step</code></td><td>0, 100, range ÷ 10</td><td>Range and tick spacing.</td></tr>
           <tr><td><code>every</code></td><td>5</td><td>Number every nth tick.</td></tr>
-          <tr><td><code>unit</code>, <code>width</code></td><td>none, auto</td><td>Label suffix and drawn width.</td></tr>
+          <tr><td><code>unit</code>, <code>width</code></td><td>none, 320</td><td>Label suffix and drawn width.</td></tr>
           <tr><td><code>up</code></td><td>off</td><td>Labels above the line.</td></tr>
-          <tr><td><code>value</code></td><td>none</td><td>A lamp marker.</td></tr>
+          <tr><td><code>value</code></td><td>none</td><td>A marker with its value boxed on a leader.</td></tr>
         </tbody></table></div>
       </div>
     </section>
@@ -378,16 +380,16 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
     <!-- ── Figures -->
     <section class="group" id="figures">
       <h2>Figures</h2>
-      <p>Recipes take data and return a whole figure as an SVG string. Mount it into an empty <code>&lt;svg&gt;</code> with <code>Calibrated.mount()</code>, or use <code>Calibrated.play(svg, recipe, data)</code> to replay it when it comes into view (lanes, budget, merge, fan-out, loop, measured and timeline move). Example data on this page is illustrative.</p>
+      <p>Recipes take data and return a whole figure as an SVG string. Mount it into an empty <code>&lt;svg&gt;</code> with <code>Calibrated.mount()</code>, or use <code>Calibrated.play(svg, recipe, data)</code> to replay it when it comes into view, as every figure here does (lanes, budget, merge, fan-out, loop, measured and timeline move; matrix and section just draw). Needs <code>calibrated-figures.js</code> and <code>calibrated-recipes.js</code>. Example data on this page is illustrative.</p>
       <div class="item" id="lanes"><h3>Lanes <a class="anchor" href="#lanes" aria-label="Link to Lanes">#</a></h3><p>Runs on one time ruler; the live one is lit by the lamp.</p><div class="ex" data-recipe="lanes"><div class="ex-prev cal-theme"><svg id="r-lanes"></svg></div></div></div>
       <div class="item" id="budget"><h3>Budget <a class="anchor" href="#budget" aria-label="Link to Budget">#</a></h3><p>A limit, its alerts, and today's pace to the end of the period.</p><div class="ex" data-recipe="budget"><div class="ex-prev cal-theme"><svg id="r-budget"></svg></div></div></div>
       <div class="item" id="merge"><h3>Merge <a class="anchor" href="#merge" aria-label="Link to Merge">#</a></h3><p>A branch with the exact command at each node.</p><div class="ex" data-recipe="merge"><div class="ex-prev cal-theme"><svg id="r-merge"></svg></div></div></div>
-      <div class="item" id="fanout"><h3>Fan-out <a class="anchor" href="#fanout" aria-label="Link to Fan-out">#</a></h3><p>One parent; live and finished children.</p><div class="ex" data-recipe="fanout"><div class="ex-prev cal-theme"><svg id="r-fanout"></svg></div></div></div>
+      <div class="item" id="fanout"><h3>Fan-out <a class="anchor" href="#fanout" aria-label="Link to Fan-out">#</a></h3><p>One parent; its children running, queued and done.</p><div class="ex" data-recipe="fanout"><div class="ex-prev cal-theme"><svg id="r-fanout"></svg></div></div></div>
       <div class="item" id="loop"><h3>Loop <a class="anchor" href="#loop" aria-label="Link to Loop">#</a></h3><p>Stations on a cycle with what each one runs.</p><div class="ex" data-recipe="loop"><div class="ex-prev cal-theme"><svg id="r-loop"></svg></div></div></div>
       <div class="item" id="measured"><h3>Measured <a class="anchor" href="#measured" aria-label="Link to Measured">#</a></h3><p>A long scale, a detail at 20:1, and boxed parts.</p><div class="ex" data-recipe="measured"><div class="ex-prev cal-theme"><svg id="r-measured"></svg></div></div></div>
       <div class="item" id="timeline"><h3>Timeline <a class="anchor" href="#timeline" aria-label="Link to Timeline">#</a></h3><p>Consecutive steps; the slowest is called out.</p><div class="ex" data-recipe="timeline"><div class="ex-prev cal-theme"><svg id="r-timeline"></svg></div></div></div>
       <div class="item" id="matrix"><h3>Matrix <a class="anchor" href="#matrix" aria-label="Link to Matrix">#</a></h3><p>Which releases touch which services.</p><div class="ex" data-recipe="matrix"><div class="ex-prev cal-theme"><svg id="r-matrix"></svg></div></div></div>
-      <div class="item" id="section"><h3>Section <a class="anchor" href="#section" aria-label="Link to Section">#</a></h3><p>Nested regions: hatched is closed, clear is open.</p><div class="ex" data-recipe="section"><div class="ex-prev cal-theme"><svg id="r-section"></svg></div></div></div>
+      <div class="item" id="section"><h3>Section <a class="anchor" href="#section" aria-label="Link to Section">#</a></h3><p>Nested regions: hatched is closed, clear is open. The one figure without a scale: it shows what contains what, not how much.</p><div class="ex" data-recipe="section"><div class="ex-prev cal-theme"><svg id="r-section"></svg></div></div></div>
     </section>
 
     <!-- ── Components -->
@@ -397,13 +399,13 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
 
       <div class="item" id="card">
         <h3>Card and sign-off <a class="anchor" href="#card" aria-label="Link to Card and sign-off">#</a></h3>
-        <p>A proposed figure beside the text it replaces, with keep and drop buttons. The tally counts the sign-offs and copies them.</p>
+        <p>A proposed figure beside the text it replaces, signed off as keep, rework (with a note on what isn’t good enough yet) or drop. <code>calibrated-components.js</code> wires the buttons; the tally counts the sign-offs and copies them, one line per card.</p>
         <div class="ex"><template><article class="cal-card">
   <div class="info">
+    <div class="id"><span class="no">01</span>load test · v2.4<span class="end">rev B</span></div>
     <h3>Load test as lanes on one ruler</h3>
     <p class="why">Three regions ran the same test. Drawn on one time ruler, the slow region and the one still running read before any number does.</p>
     <dl class="cal-kv"><dt>where</dt><dd>release checklist</dd><dt>replaces</dt><dd>three status lines</dd><dt>data</dt><dd>start, end, p99, errors</dd></dl>
-    <div class="id"><span class="no">01</span>load test · v2.4<span class="end">rev B</span></div>
   </div>
   <div class="cal-compare">
     <div><div class="cal-tag">today</div><div class="stage"><div class="cal-note">
@@ -415,38 +417,69 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
     <div><div class="cal-tag on">drawn</div><div class="stage"><svg id="r-lanes-2"></svg></div></div>
   </div>
   <div class="cal-sign" role="group" aria-label="Sign off 01">
+    <label class="note" hidden>rework<input class="cal-input" placeholder="what isn’t good enough yet?"></label>
     <button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button>
+    <button class="cal-btn" data-ink="live" data-v="rework" aria-pressed="false">rework</button>
     <button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="false">drop</button>
   </div>
 </article>
-<div class="cal-tally"><span id="tally-n">0 of 1 signed</span><span class="sp"></span><span id="tally-msg" class="mut" role="status"></span><button class="cal-btn primary" id="tally-copy">copy sign-off</button></div></template></div>
+<!-- two cards already signed: rework (with its note) and drop -->
+<article class="cal-card" data-verdict="rework" data-state="rework">
+  <div class="info">
+    <div class="id"><span class="no">02</span>error budget · checkout<span class="end">rev A</span></div>
+    <h3>Error budget as a ruler with pace</h3>
+    <p class="why">The budget, its alerts and today's pace on one scale.</p>
+  </div>
+  <div class="cal-sign" role="group" aria-label="Sign off 02">
+    <label class="note">rework<input class="cal-input" placeholder="what isn’t good enough yet?" value="label the pace box in days"></label>
+    <button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button>
+    <button class="cal-btn" data-ink="live" data-v="rework" aria-pressed="true">rework</button>
+    <button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="false">drop</button>
+  </div>
+</article>
+<article class="cal-card" data-verdict="drop" data-state="dropped">
+  <div class="info">
+    <div class="id"><span class="no">03</span>network · prod vpc<span class="end">rev A</span></div>
+    <h3>Network rules as a section</h3>
+    <p class="why">Which subnets are closed, and what lies outside the proxy.</p>
+  </div>
+  <div class="cal-sign" role="group" aria-label="Sign off 03">
+    <button class="cal-btn" data-ink="ok" data-v="keep" aria-pressed="false">keep</button>
+    <button class="cal-btn" data-ink="live" data-v="rework" aria-pressed="false">rework</button>
+    <button class="cal-btn" data-ink="fault" data-v="drop" aria-pressed="true">drop</button>
+  </div>
+</article>
+<div class="cal-tally"><span data-tally="n">2 of 3 signed</span><span class="sp"></span><span data-tally="msg" class="mut" role="status"></span><button class="cal-btn primary" data-tally="copy">copy sign-off</button></div></template></div>
       </div>
 
       <div class="item" id="counts">
         <h3>Counts <a class="anchor" href="#counts" aria-label="Link to Counts">#</a></h3>
-        <p>A number in a box with its noun; <code>data-pad="2"</code> zero-pads one that changes live. <code>Calibrated.counts()</code> fills them from <code>data-n</code>.</p>
-        <div class="ex"><template><div class="row" style="gap:18px">
-  <span class="cal-count" data-n="3" data-noun="regions"></span>
-  <span class="cal-count" data-n="2" data-noun="running"></span>
-  <span class="cal-count" data-n="73" data-noun="files"></span>
-  <span class="cal-count" data-n="1" data-noun="failing" data-ink="fault"></span>
+        <p>A number in a box with its noun, written into the markup so it reads without JS. <code>Calibrated.counts()</code> redraws each from <code>data-n</code> when the number changes; <code>data-pad="2"</code> zero-pads one that changes live.</p>
+        <div class="ex"><template><div style="display:flex;flex-wrap:wrap;gap:18px;align-items:center">
+  <span class="cal-count" data-n="3" data-noun="regions"><b>3</b><span>regions</span></span>
+  <span class="cal-count" data-n="2" data-noun="running"><b>2</b><span>running</span></span>
+  <span class="cal-count" data-n="73" data-noun="files"><b>73</b><span>files</span></span>
+  <span class="cal-count" data-n="1" data-noun="failing" data-ink="fault"><b>1</b><span>failing</span></span>
 </div></template></div>
       </div>
 
       <div class="item" id="tabs">
         <h3>Tabs <a class="anchor" href="#tabs" aria-label="Link to Tabs">#</a></h3>
-        <p>Ruled tabs with boxed counts.</p>
-        <div class="ex"><template><div class="cal-tabs" role="tablist">
-  <button role="tab" aria-selected="true">runs<span class="cal-cnt">4</span></button>
-  <button role="tab">alerts<span class="cal-cnt">1</span></button>
-  <button role="tab">history</button>
-</div></template></div>
+        <p>Ruled tabs with boxed counts. <code>calibrated-components.js</code> selects on click, ← → and Home / End, and shows the panel each tab's <code>aria-controls</code> names.</p>
+        <div class="ex"><template><div class="cal-tabs" role="tablist" aria-label="Run views">
+  <button type="button" role="tab" id="x-tab1" aria-controls="x-pan1" aria-selected="true">runs<span class="cal-cnt">4</span></button>
+  <button type="button" role="tab" id="x-tab2" aria-controls="x-pan2" aria-selected="false">alerts<span class="cal-cnt">1</span></button>
+  <button type="button" role="tab" id="x-tab3" aria-controls="x-pan3" aria-selected="false">history</button>
+</div>
+<div role="tabpanel" id="x-pan1" aria-labelledby="x-tab1" style="padding-top:14px">Four runs today; ap-south is still going.</div>
+<div role="tabpanel" id="x-pan2" aria-labelledby="x-tab2" style="padding-top:14px" hidden>Errors over 1% in ap-south since 09:40.</div>
+<div role="tabpanel" id="x-pan3" aria-labelledby="x-tab3" style="padding-top:14px" hidden>Runs from the last 30 days.</div></template></div>
       </div>
 
       <div class="item" id="buttons">
         <h3>Buttons <a class="anchor" href="#buttons" aria-label="Link to Buttons">#</a></h3>
         <p>Tiers, so the main action leads: primary is filled with ink (one per view), the default is a hairline box, inline is a bracketed word for small actions in text, quiet is an underline.</p>
-        <div class="ex"><template><div class="row" style="gap:8px;align-items:center">
+        <div class="ex"><template><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
   <button class="cal-btn primary">run again</button>
   <button class="cal-btn">preview</button>
   <button class="cal-btn" disabled>export</button>
@@ -458,7 +491,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
       <div class="item" id="inline">
         <h3>Marks in text <a class="anchor" href="#inline" aria-label="Link to Marks in text">#</a></h3>
         <p>Status dots, revision triangles and the lamp, used inside running text.</p>
-        <div class="ex"><template><div class="stack">
+        <div class="ex"><template><div style="display:grid;gap:16px">
   <div class="lg up" style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
     <span><span class="cal-dot on"></span> live</span>
     <span><span class="cal-dot done"></span> done</span>
@@ -473,8 +506,8 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
 
       <div class="item" id="form">
         <h3>Form <a class="anchor" href="#form" aria-label="Link to Form">#</a></h3>
-        <p>Write-in lines with caps labels, hints and errors.</p>
-        <div class="ex"><template><div class="stack" style="max-width:360px">
+        <p>Write-in lines with sentence-case labels, hints and errors.</p>
+        <div class="ex"><template><div style="display:grid;gap:16px;max-width:360px">
   <div class="cal-field"><label for="f1">daily limit</label><input class="cal-input" id="f1" value="150 000"></div>
   <div class="cal-field"><label for="f2">alert at</label><input class="cal-input" id="f2" placeholder="80 %" aria-describedby="f2h"><span class="hint" id="f2h">Percent of the daily limit.</span></div>
   <div class="cal-field"><label for="f3">owner</label><input class="cal-input" id="f3" value="#" aria-invalid="true" aria-describedby="f3e"><span class="err" id="f3e">Enter a team name, like payments.</span></div>
@@ -484,16 +517,16 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
 
       <div class="item" id="rows">
         <h3>Rows <a class="anchor" href="#rows" aria-label="Link to Rows">#</a></h3>
-        <p>A list with a selected row: its label is boxed, and hovering another row moves the box there.</p>
+        <p>A list with a chosen row, marked with <code>aria-current</code>: its label is boxed in ink. The row under the pointer or holding focus takes a lighter box.</p>
         <div class="ex"><template><div class="cal-rows" style="max-width:420px">
-  <div><span class="v">Resize product images</span><div class="meta lg">worker 3 · 1 204 jobs · 1m 02s</div></div>
-  <div class="sel"><span class="v">Rebuild search index</span><div class="meta lg">worker 1 · 88 jobs · 0m 41s</div></div>
+  <div tabindex="0"><span class="v">Resize product images</span><div class="meta lg">worker 3 · 1 204 jobs · 1m 02s</div></div>
+  <div tabindex="0" aria-current="true"><span class="v">Rebuild search index</span><div class="meta lg">worker 1 · 88 jobs · 0m 41s</div></div>
 </div></template></div>
       </div>
 
       <div class="item" id="table">
         <h3>Table <a class="anchor" href="#table" aria-label="Link to Table">#</a></h3>
-        <p>A parts list. Instruments fit in cells in compact form.</p>
+        <p>A parts list. Instruments in a cell draw in compact form, and on phones the table scrolls sideways.</p>
         <div class="ex"><template><table class="cal-table">
   <thead><tr><th>no</th><th>figure</th><th>where</th><th>diff</th><th>effort</th><th>status</th></tr></thead>
   <tbody>
@@ -512,7 +545,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
   <div><dt>dwg no.</dt><dd>CHK-044</dd></div>
   <div><dt>scale</dt><dd>1:1</dd></div>
   <div><dt>sheet</dt><dd>1 / 3</dd></div>
-  <div><dt>rev</dt><dd>B <span class="cal-rev" data-rev="B"></span></dd></div>
+  <div><dt>rev</dt><dd>B <span class="cal-rev" data-rev="B" aria-hidden="true"></span></dd></div>
   <div><dt>units</dt><dd>ms</dd></div>
   <div><dt>date</dt><dd>2026-10-31</dd></div>
   <div class="wide"><dt>drawn</dt><dd>release bot</dd></div>
@@ -550,20 +583,21 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
 
       <div class="item" id="textarea">
         <h3>Textarea <a class="anchor" href="#textarea" aria-label="Link to Textarea">#</a></h3>
-        <p>A recessed editor pane with a block caret and a terminal-style status line: the mode, the caret's line and column, and the count, which turns red past <code>data-max</code>.</p>
+        <p>A recessed editor pane with a block caret and a terminal-style status line: the mode, the caret's line and column, and the count, which turns red past <code>data-max</code>. The status line is hidden from screen readers, so a hint states the limit.</p>
         <div class="ex"><template><div class="cal-field" style="max-width:480px"><label for="x-notes">release notes</label>
   <div class="cal-term" data-max="200" data-status="editor">
-    <textarea class="cal-textarea" id="x-notes" spellcheck="false">Rate-limit login to 10 attempts a minute per account.
+    <textarea class="cal-textarea" id="x-notes" spellcheck="false" aria-describedby="x-notes-h">Rate-limit login to 10 attempts a minute per account.
 Lockouts now clear after 15 minutes instead of an hour.</textarea>
     <div class="bar" aria-hidden="true"><span class="mode">-- normal --</span><span class="sp"></span><span class="pos">ln 1, col 1</span><span class="cal-count"><b>000</b><span>/ 200</span></span></div>
   </div>
+  <span class="hint" id="x-notes-h">Up to 200 characters.</span>
 </div></template></div>
       </div>
 
       <div class="item" id="select">
         <h3>Select and option list <a class="anchor" href="#select" aria-label="Link to Select">#</a></h3>
         <p>A native select ending in a ▼; in browsers with styled pickers the open list is a hairline panel. The option list is the same list, always open. Hover moves the box.</p>
-        <div class="ex"><template><div class="row" style="gap:28px;align-items:flex-start;flex-wrap:wrap">
+        <div class="ex"><template><div style="display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start">
   <div class="cal-field"><label for="x-region">region</label>
     <select class="cal-select" id="x-region"><option><span class="v">us-east</span></option><option selected><span class="v">eu-west</span></option><option><span class="v">ap-south</span></option></select>
   </div>
@@ -577,22 +611,22 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
 
       <div class="item" id="choices">
         <h3>Radio, switch and detent <a class="anchor" href="#choices" aria-label="Link to Radio, switch and detent">#</a></h3>
-        <p>Radios are balloons, not squares. A switch is a small pill whose knob slides right and turns ink when it is on. A detent is a short ruler for a few ordered values, with the lamp ▼ over the chosen tick.</p>
-        <div class="ex"><template><div class="row" style="gap:40px;align-items:flex-start;flex-wrap:wrap">
+        <p>Radios are balloons, not squares. A switch is a small pill whose knob slides right and turns ink when it is on; its OFF/ON words are drawn, not read (<code>aria-hidden</code>), since the switch already says its state. A detent is a short ruler for a few ordered values, with the lamp ▼ over the chosen tick.</p>
+        <div class="ex"><template><div style="display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start">
   <div role="radiogroup" aria-label="Rollout" style="display:grid;gap:8px">
     <label class="cal-radio"><input type="radio" name="x-ro"><span>All at once</span><span class="meta">1 step</span></label>
     <label class="cal-radio"><input type="radio" name="x-ro" checked><span>Canary</span><span class="meta">5% → 50% → 100%</span></label>
     <label class="cal-radio"><input type="radio" name="x-ro" disabled><span>By region</span><span class="meta">needs 2+ regions</span></label>
   </div>
   <div style="display:grid;gap:10px">
-    <div class="row" style="gap:22px"><label class="cal-switch caps"><span class="txt">Index</span><input type="checkbox" role="switch"></label><label class="cal-switch caps"><span class="txt">Sandbox</span><input type="checkbox" role="switch" checked></label></div>
-    <label class="cal-switch"><span class="txt">Pause at the limit</span><span class="o off">off</span><input type="checkbox" role="switch" checked><span class="o on">on</span></label>
-    <label class="cal-switch"><span class="txt">Email the owner</span><span class="o off">off</span><input type="checkbox" role="switch"><span class="o on">on</span></label>
-    <label class="cal-switch"><span class="txt">Retry failed steps</span><span class="o off">off</span><input type="checkbox" role="switch" checked disabled><span class="o on">on</span></label>
+    <div style="display:flex;flex-wrap:wrap;gap:22px"><label class="cal-switch caps"><span class="txt">Index</span><input type="checkbox" role="switch"></label><label class="cal-switch caps"><span class="txt">Sandbox</span><input type="checkbox" role="switch" checked></label></div>
+    <label class="cal-switch"><span class="txt">Pause at the limit</span><span class="o off" aria-hidden="true">off</span><input type="checkbox" role="switch" checked><span class="o on" aria-hidden="true">on</span></label>
+    <label class="cal-switch"><span class="txt">Email the owner</span><span class="o off" aria-hidden="true">off</span><input type="checkbox" role="switch"><span class="o on" aria-hidden="true">on</span></label>
+    <label class="cal-switch"><span class="txt">Retry failed steps</span><span class="o off" aria-hidden="true">off</span><input type="checkbox" role="switch" checked disabled><span class="o on" aria-hidden="true">on</span></label>
   </div>
   <div class="cal-field"><span class="lbl" id="x-rg">time range</span>
     <div class="cal-detent" role="radiogroup" aria-labelledby="x-rg"><i class="mk" aria-hidden="true"></i>
-      <label><input type="radio" name="x-rg"><span>1h</span></label><label><input type="radio" name="x-rg" checked><span>24h</span></label><label><input type="radio" name="x-rg"><span>7d</span></label><label><input type="radio" name="x-rg"><span>30d</span></label>
+      <label><input type="radio" name="x-rg" aria-label="1 hour"><span>1h</span></label><label><input type="radio" name="x-rg" aria-label="24 hours" checked><span>24h</span></label><label><input type="radio" name="x-rg" aria-label="7 days"><span>7d</span></label><label><input type="radio" name="x-rg" aria-label="30 days"><span>30d</span></label>
     </div>
   </div>
 </div></template></div>
@@ -600,23 +634,23 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
 
       <div class="item" id="range">
         <h3>Range on a ruler <a class="anchor" href="#range" aria-label="Link to Range on a ruler">#</a></h3>
-        <p>Ticks on the slider's own line, the run to the value drawn heavier, a handle with grip lines and the reading boxed on a leader.</p>
+        <p>Ticks on the slider's own line, the run to the value drawn heavier, a handle with grip lines and the reading boxed on a leader. The slider speaks its value with the unit, so the drawn box and scale are hidden from screen readers.</p>
         <div class="ex"><template><div class="cal-field" style="max-width:380px"><label for="x-alert">alert threshold</label>
-  <div class="cal-range" data-unit="%"><output for="x-alert"></output><input type="range" id="x-alert" min="0" max="100" step="5" value="80">
-    <div class="nums"><span>0</span><span>50%</span><span>100%</span></div></div>
+  <div class="cal-range" data-unit="%"><output aria-hidden="true"></output><input type="range" id="x-alert" min="0" max="100" step="5" value="80">
+    <div class="nums" aria-hidden="true"><span>0%</span><span>50%</span><span>100%</span></div></div>
 </div></template></div>
       </div>
 
       <div class="item" id="number">
         <h3>Number, units and search <a class="anchor" href="#number" aria-label="Link to Number, units and search">#</a></h3>
-        <p>The value and its unit on one line: ↑ ↓ step it, Shift ×10, and the hint shows only while focused. Search adds a <kbd class="cal-kbd">/</kbd> hint and a count; the filtering is the page's own.</p>
-        <div class="ex"><template><div class="row" style="gap:32px;align-items:flex-start;flex-wrap:wrap">
+        <p>The value and its unit on one line: ↑ ↓ step it, Shift ×10, and the hint shows only while focused. Search with <code>data-key="/"</code> takes focus when <kbd class="cal-kbd">/</kbd> is pressed outside a field, and its × clears it; the count and the filtering are the page's own.</p>
+        <div class="ex"><template><div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">
   <div class="cal-field"><label for="x-lim">daily limit</label>
-    <div class="cal-affixed cal-num"><input class="cal-input" id="x-lim" inputmode="numeric" value="150 000" data-step="10000" aria-describedby="x-lim-h"><span class="cal-affix">req / day</span></div>
+    <div class="cal-affixed cal-num"><input class="cal-input" id="x-lim" inputmode="numeric" value="150 000" data-step="10000" aria-describedby="x-lim-u x-lim-h"><span class="cal-affix" id="x-lim-u">req / day</span></div>
     <span class="hint focus-only" id="x-lim-h">↑ ↓ step 10 000 · shift ×10</span>
   </div>
-  <div class="row" style="gap:12px">
-    <div class="cal-affixed cal-search"><kbd class="cal-kbd">/</kbd><input class="cal-input" placeholder="search runs" aria-label="Search runs"></div>
+  <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+    <div class="cal-affixed cal-search"><kbd class="cal-kbd" aria-hidden="true">/</kbd><input class="cal-input" placeholder="search runs" aria-label="Search runs" data-key="/" aria-keyshortcuts="/"><button type="button" class="cal-btn" aria-label="Clear search" hidden>×</button></div>
     <span class="cal-count"><b>05</b><span>runs</span></span>
   </div>
 </div></template></div>
@@ -624,12 +658,13 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
 
       <div class="item" id="group">
         <h3>Field group, tags and date <a class="anchor" href="#group" aria-label="Link to Field group, tags and date">#</a></h3>
-        <p>A fieldset whose legend sits on a rule. Tags are boxed words on a write-in line: Enter adds, Backspace removes. Dates use the browser's picker.</p>
+        <p>A fieldset whose legend sits on a rule. Tags are boxed words on a write-in line: Enter adds, Backspace removes, and each change is announced. Dates use the browser's picker.</p>
         <div class="ex"><template><fieldset class="cal-group" style="max-width:520px"><legend><b>1 · Limits</b><span>applies to every region</span></legend>
   <div class="cal-field"><label for="x-tags">notify teams</label>
-    <div class="cal-chips"><span class="chip">payments<button type="button" aria-label="Remove payments">×</button></span><span class="chip">checkout<button type="button" aria-label="Remove checkout">×</button></span><input id="x-tags" placeholder="add a team, then enter"></div>
+    <div class="cal-chips"><span class="chip">payments<button type="button" aria-label="Remove payments">×</button></span><span class="chip">checkout<button type="button" aria-label="Remove checkout">×</button></span><input id="x-tags" placeholder="add a team" aria-describedby="x-tags-h"></div>
+    <span class="hint" id="x-tags-h">Enter adds a team, Backspace removes the last.</span>
   </div>
-  <div class="row" style="gap:22px">
+  <div style="display:flex;flex-wrap:wrap;gap:22px">
     <div class="cal-field"><label for="x-d">starts</label><input type="date" class="cal-input cal-date" id="x-d" value="2026-11-02"></div>
     <div class="cal-field"><label for="x-t">at</label><input type="time" class="cal-input cal-date" id="x-t" value="09:30" style="min-width:120px"></div>
   </div>
@@ -638,9 +673,9 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
 
       <div class="item" id="drop">
         <h3>File drop <a class="anchor" href="#drop" aria-label="Link to File drop">#</a></h3>
-        <p>Drop files or click to browse. They are listed into the rows named by <code>data-list</code>; a file over <code>data-max</code> bytes is flagged. Nothing is uploaded.</p>
+        <p>Drop files or click to browse. They are listed, and announced, into the rows named by <code>data-list</code>; a file over <code>data-max</code> bytes or outside the input's <code>accept</code> is flagged. Nothing is uploaded.</p>
         <div class="ex"><template><div style="display:grid;gap:8px;max-width:440px">
-  <label class="cal-drop" data-list="x-files" data-max="20000000"><input type="file" multiple><span class="lead">drop files here · or <u>browse</u></span><span class="hint">csv or json · up to 20 MB each</span></label>
+  <label class="cal-drop" data-list="x-files" data-max="20000000"><input type="file" multiple accept=".csv,.json"><span class="lead">drop files here · or <u>browse</u></span><span class="hint">csv or json · up to 20 MB each</span></label>
   <div class="cal-rows" id="x-files"><div class="file"><span>orders-2026-10.csv</span><span class="lg mut">4.2 MB</span></div></div>
 </div></template></div>
       </div>
@@ -652,9 +687,9 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
 
       <div class="item" id="menus">
         <h3>Menu <a class="anchor" href="#menus" aria-label="Link to Menu">#</a></h3>
-        <p>A popover under its button: numbered items, key caps, the destructive one in red below a rule. The item under the pointer is boxed.</p>
+        <p>A popover under its button: numbered items, key caps, the destructive one in red below a rule. The item under the pointer or focus is boxed. ↓ on the button opens it, ↑ ↓ Home End move, a key cap picks its item, and Tab or Esc closes it.</p>
         <div class="ex"><template><div style="min-height:170px">
-  <button class="cal-btn primary" popovertarget="x-menu">actions ▼</button>
+  <button class="cal-btn primary" popovertarget="x-menu">actions <span aria-hidden="true">▼</span></button>
   <div popover id="x-menu" class="cal-menu" role="menu" aria-label="Run actions">
     <button class="it" role="menuitem"><span class="n">01</span><span class="v">rerun</span><kbd class="cal-kbd">r</kbd></button>
     <button class="it" role="menuitem"><span class="n">02</span><span class="v">duplicate</span><kbd class="cal-kbd">d</kbd></button>
@@ -668,17 +703,17 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
         <h3>Dialog <a class="anchor" href="#dialog" aria-label="Link to Dialog">#</a></h3>
         <p>A panel over the shaded desk with a ruled head. <code>data-dialog</code> opens it; <code>form method="dialog"</code> closes it.</p>
         <div class="ex"><template><button class="cal-btn primary" data-ink="fault" data-dialog="x-del">delete run</button>
-<dialog class="cal-dialog" id="x-del" aria-labelledby="x-del-t"><form method="dialog">
+<dialog class="cal-dialog" id="x-del" aria-labelledby="x-del-t" aria-describedby="x-del-d"><form method="dialog">
   <header><b id="x-del-t">delete run 0412</b><span class="sp"></span><kbd class="cal-kbd">esc</kbd></header>
-  <div class="bd"><p>The run and its logs are removed. Its results stay in the weekly roll-up.</p><dl class="cal-kv"><dt>jobs</dt><dd>1 204</dd><dt>logs</dt><dd>38 MB</dd></dl></div>
+  <div class="bd"><p id="x-del-d">The run and its logs are removed. Its results stay in the weekly roll-up.</p><dl class="cal-kv"><dt>jobs</dt><dd>1 204</dd><dt>logs</dt><dd>38 MB</dd></dl></div>
   <footer><button class="cal-btn" value="cancel" autofocus>cancel</button><button class="cal-btn primary" data-ink="fault" value="delete">delete run</button></footer>
 </form></dialog></template></div>
       </div>
 
       <div class="item" id="tooltip">
         <h3>Tooltip and notes <a class="anchor" href="#tooltip" aria-label="Link to Tooltip and notes">#</a></h3>
-        <p>A leader up to a boxed value, on hover and focus. A callout is a drawing's NOTES block; the warning keys its legend with the alert hatch.</p>
-        <div class="ex"><template><div class="stack" style="max-width:460px">
+        <p>A leader up to a boxed value, on hover, focus or tap; the pointer can move onto the box, and Esc hides it. A callout is a drawing's NOTES block; the warning keys its legend with the alert hatch.</p>
+        <div class="ex"><template><div style="display:grid;gap:16px;max-width:460px">
   <p style="padding-top:30px">Checkout: <span data-tip="p99 · 212 ms · 3 regions" tabindex="0" class="show">212 ms</span> at p99, <span data-tip="41 of 204 816 requests" tabindex="0">0.02%</span> errors.</p>
   <div class="cal-callout" data-ink="fault"><div class="cal-gl">warning</div><ol><li>Lowering the limit below today’s use (128 400) pauses runs at once.</li></ol></div>
 </div></template></div>
@@ -686,20 +721,20 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
 
       <div class="item" id="separators">
         <h3>Separators <a class="anchor" href="#separators" aria-label="Link to Separators">#</a></h3>
-        <p>Rules in drafting line types, so the split says what it is: solid for the next topic, dashed for an aside, the centre line for two halves, the break line where lines were skipped. A labelled rule names the break; the lamp rule marks what's new.</p>
+        <p>Rules in drafting line types, so the split says what it is: solid for the next topic, dashed for an aside, the centre line for two halves, the break line where lines were skipped. A labelled rule names the break and is read as text, so it takes no <code>separator</code> role (that role hides its words); the lamp rule marks what's new.</p>
         <div class="ex"><template><div style="max-width:480px">
   <p>Deploys run in three regions, one after the other.</p>
   <hr class="cal-rule">
   <p>Rollback is one command and takes about a minute.</p>
   <hr class="cal-rule" data-line="dashed">
-  <p style="font-size:12.5px;color:var(--muted)">eu-west is behind a feature flag this week.</p>
-  <div class="cal-rule" role="separator">or</div>
+  <p style="font-size:var(--fs-small);color:var(--muted)">eu-west is behind a feature flag this week.</p>
+  <div class="cal-rule">or</div>
   <p>Ship from the release branch.</p>
-  <div class="cal-rule" role="separator" data-align="start">build log<span>checkout · v2.14.0</span></div>
-  <p style="font-size:12.5px">12:04:01 build started</p>
+  <div class="cal-rule" data-align="start">build log<span>checkout · v2.14.0</span></div>
+  <p style="font-size:var(--fs-small)">12:04:01 build started</p>
   <hr class="cal-rule" data-line="break" data-space="tight" aria-label="38 lines skipped">
-  <p style="font-size:12.5px">12:09:44 build finished</p>
-  <div class="cal-rule" role="separator" data-ink="live">new since 09:00</div>
+  <p style="font-size:var(--fs-small)">12:09:44 build finished</p>
+  <div class="cal-rule" data-ink="live">new since 09:00</div>
   <p>Two deploys finished overnight.</p>
   <hr class="cal-rule">
   <ul class="cal-meta"><li>v2.14.0</li><li>3 regions</li><li>2026-10-31</li><li>checkout team</li></ul>
@@ -708,14 +743,14 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
 
       <div class="item" id="zones">
         <h3>Zones and brackets <a class="anchor" href="#zones" aria-label="Link to Zones and brackets">#</a></h3>
-        <p>A zone is a named region with its name set into the edge, and no fill, so it sits on any surface. Dashed means not decided yet; red holds destructive settings. A bracket binds a few lines into one idea without a box.</p>
-        <div class="ex"><template><div class="stack" style="max-width:560px;gap:18px">
+        <p>A zone is a named region with its name set into the edge, and no fill, so it sits on any surface. Dashed means not decided yet; red holds destructive settings. A bracket binds a few lines into one idea without a box. Name each zone by its head (<code>aria-labelledby</code>); a hidden comma keeps the head and its note apart when read.</p>
+        <div class="ex"><template><div style="display:grid;gap:18px;max-width:560px">
   <div class="cal-zones">
-    <section class="cal-zone"><div class="cal-zone-h">today</div><p>Three status lines, one per region.</p></section>
-    <section class="cal-zone" data-line="dashed"><div class="cal-zone-h">proposed<span>not decided</span></div><p>One ruler with three lanes.</p></section>
+    <section class="cal-zone" aria-labelledby="x-z1"><div class="cal-zone-h" id="x-z1">today</div><p>Three status lines, one per region.</p></section>
+    <section class="cal-zone" data-line="dashed" aria-labelledby="x-z2"><div class="cal-zone-h" id="x-z2">proposed<span class="cal-sr">, </span><span>not decided</span></div><p>One ruler with three lanes.</p></section>
   </div>
-  <section class="cal-zone" data-ink="fault"><div class="cal-zone-h">danger zone<span class="end">owner only</span></div><div class="row" style="gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap"><p>Deleting the project removes every run and its logs.</p><button class="cal-btn primary" data-ink="fault">delete project</button></div></section>
-  <div class="cal-bracket"><div class="cal-bracket-h">before you deploy<span>3 checks</span></div><p>Tests pass on main.</p><p>The changelog names the release.</p><p>Someone on call knows it's going out.</p></div>
+  <section class="cal-zone" data-ink="fault" aria-labelledby="x-z3"><div class="cal-zone-h" id="x-z3">danger zone<span class="cal-sr">, </span><span class="end">owner only</span></div><div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between"><p>Deleting the project removes every run and its logs.</p><button class="cal-btn primary" data-ink="fault">delete project</button></div></section>
+  <div class="cal-bracket"><div class="cal-bracket-h">before you deploy<span class="cal-sr">, </span><span>3 checks</span></div><p>Tests pass on main.</p><p>The changelog names the release.</p><p>Someone on call knows it's going out.</p></div>
 </div></template></div>
       </div>
 
@@ -730,20 +765,20 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
 
       <div class="item" id="toast">
         <h3>Toast and empty state <a class="anchor" href="#toast" aria-label="Link to Toast and empty state">#</a></h3>
-        <p><code>Calibrated.toast()</code> reports in the corner and goes. An empty state is a hatched zone with one way forward.</p>
-        <div class="ex"><template><div class="row" style="gap:24px;align-items:center;flex-wrap:wrap">
+        <p><code>Calibrated.toast()</code> reports in the corner. A plain toast goes after 5 s; one with an action, like this undo, stays until it is used or hidden, and its timer pauses under the pointer or focus. An empty state is a dashed frame with one way forward.</p>
+        <div class="ex"><template><div style="display:flex;flex-wrap:wrap;gap:24px;align-items:center">
   <button class="cal-btn primary" onclick="Calibrated.toast('Limit saved · 150 000 a day', { ink: 'ok', action: 'undo' })">send a toast</button>
-  <div class="cal-empty" style="max-width:320px;min-height:120px"><div><span class="ttl">no runs yet</span><p>Runs show up here as they start.</p><button class="cal-btn primary">start a run</button></div></div>
+  <div class="cal-empty" style="max-width:320px;min-height:120px"><div><p class="ttl" role="heading" aria-level="3">no runs yet</p><p>Runs show up here as they start.</p><button class="cal-btn primary">start a run</button></div></div>
 </div></template></div>
       </div>
 
       <div class="item" id="spinners">
         <h3>Spinners <a class="anchor" href="#spinners" aria-label="Link to Spinners">#</a></h3>
-        <p>The loop dial, the measured bar (sliding, or filled to a known amount) and the node row for text and buttons.</p>
-        <div class="ex"><template><div class="row" style="gap:36px;align-items:center;flex-wrap:wrap">
+        <p>The loop dial, the measured bar (sliding, or <code>.det</code> filled to <code>--p</code> on a scale of tenths) and the node row for text and buttons. A busy button takes <code>aria-disabled</code>, so it keeps focus while it works.</p>
+        <div class="ex"><template><div style="display:flex;flex-wrap:wrap;gap:36px;align-items:center">
   <cal-spin></cal-spin>
   <span class="cal-scan" role="status" aria-label="Loading"><i></i></span>
-  <span class="cal-scan det" style="--p:.375" role="img" aria-label="3 of 8 loaded"><i></i></span>
+  <span class="cal-scan det" style="--p:.4" role="img" aria-label="4 of 10 loaded"><i></i></span>
   <span class="cal-wait" role="status" aria-label="Loading"><i></i><i></i><i></i><i></i></span>
   <button class="cal-btn primary" aria-disabled="true"><span class="cal-wait" aria-hidden="true"><i></i><i></i><i></i><i></i></span> saving</button>
 </div></template></div>
@@ -756,20 +791,21 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
 
       <div class="item" id="pager">
         <h3>Breadcrumb, pager and steps <a class="anchor" href="#pager" aria-label="Link to Breadcrumb, pager and steps">#</a></h3>
-        <p>Underlined means pressable; boxed means where you are. The pager is drawn by <code>Calibrated.pager(nav, { page: 3, pages: 12 })</code>.</p>
-        <div class="ex"><template><div class="stack" style="max-width:480px">
+        <p>Underlined means pressable; boxed means where you are. The pager is drawn by <code>Calibrated.pager(nav, { page: 3, pages: 12 })</code>; give it <code>href</code> to draw links instead of buttons. A done step is read as "done".</p>
+        <div class="ex"><template><div style="display:grid;gap:16px;max-width:480px">
   <nav class="cal-crumbs" aria-label="Breadcrumb"><ol><li><a href="#pager">checkout</a></li><li><a href="#pager">deploys</a></li><li aria-current="page">v2.14.0</li></ol></nav>
   <nav class="cal-pager" id="x-pager" aria-label="Pages"></nav>
   <ol class="cal-steps"><li class="done"><span class="s">01</span>source</li><li aria-current="step"><span class="s">02</span>limits</li><li><span class="s">03</span>owners</li><li><span class="s">04</span>review</li></ol>
-</div></template></div>
+</div>
+<script>Calibrated.pager(document.getElementById('x-pager'), { page: 3, pages: 12 });</script></template></div>
       </div>
 
       <div class="item" id="badges">
         <h3>Badges, code and keys <a class="anchor" href="#badges" aria-label="Link to Badges, code and keys">#</a></h3>
-        <p>A status as a boxed word, a plain code block with a faint prompt, and key caps.</p>
-        <div class="ex"><template><div class="stack" style="max-width:480px">
-  <div class="row" style="gap:8px;flex-wrap:wrap"><span class="cal-badge" data-ink="live"><span class="star"></span>running</span><span class="cal-badge" data-ink="ok">✓ shipped</span><span class="cal-badge" data-ink="fault"><span class="cal-dot fault"></span>failed</span><span class="cal-badge"><span class="cal-dot"></span>queued</span></div>
-  <div class="cal-code" data-lang="shell"><button class="cal-btn">copy</button><pre><code><span class="cm"># deploy checkout to eu-west, about 6 min</span><span class="ln">git switch main</span><span class="ln">make deploy REGION=eu-west</span></code></pre></div>
+        <p>A status as a boxed word, a plain code block with a faint prompt, and key caps. The code block's copy button is the page's own to wire; this page copies the command lines.</p>
+        <div class="ex"><template><div style="display:grid;gap:16px;max-width:480px">
+  <div style="display:flex;flex-wrap:wrap;gap:8px"><span class="cal-badge" data-ink="live"><span class="star"></span>running</span><span class="cal-badge" data-ink="ok">✓ shipped</span><span class="cal-badge" data-ink="fault">✕ failed</span><span class="cal-badge"><span class="cal-dot"></span>queued</span></div>
+  <div class="cal-code" data-lang="shell"><button type="button" class="cal-btn">copy</button><pre tabindex="0"><code><span class="cm"># deploy checkout to eu-west, about 6 min</span><span class="ln">git switch main</span><span class="ln">make deploy REGION=eu-west</span></code></pre></div>
   <p>Press <kbd class="cal-kbd">ctrl</kbd> <kbd class="cal-kbd">k</kbd> to search, <kbd class="cal-kbd">esc</kbd> to close.</p>
 </div></template></div>
       </div>
@@ -782,25 +818,26 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
 
       <div class="item" id="seeds">
         <h3>Seeds <a class="anchor" href="#seeds" aria-label="Link to Seeds">#</a></h3>
-        <p>Three colours; every surface, line and wash derives from them with <code>color-mix()</code>. Changing a seed here re-colours every preview on the page.</p>
+        <p>Three colours; every surface, line, wash and supporting ink (title, muted, ok, fault) derives from them. Ink on panel needs 11:1 and the lamp on panel 4.5:1; the boxed readings turn red below that. Changing a seed here re-colours every preview on the page until you switch theme, reset or reload.</p>
         <div class="ex" data-code="seeds"><div class="ex-prev cal-theme"><div class="stack">
           <div class="seeds">
             <div class="cal-field"><label for="s-bg">--bg · panel</label><input type="color" id="s-bg" data-seed="--bg" value="#f4f2ec"></div>
             <div class="cal-field"><label for="s-fg">--fg · ink</label><input type="color" id="s-fg" data-seed="--fg" value="#262b2e"></div>
-            <div class="cal-field"><label for="s-live">--live · lamp</label><input type="color" id="s-live" data-seed="--live" value="#9c6a06"></div>
-            <button class="cal-btn" id="seed-reset">reset seeds</button>
+            <div class="cal-field"><label for="s-live">--live · lamp</label><input type="color" id="s-live" data-seed="--live" value="#8a5d05"></div>
+            <button type="button" class="cal-btn" id="seed-reset">reset seeds</button>
           </div>
+          <div class="seed-read" id="seed-read" role="status"></div>
           <cal-progress done="11" total="15" live="12" live-label="step 12 · backfill"></cal-progress>
         </div></div></div>
       </div>
 
       <div class="item" id="density">
         <h3>Density <a class="anchor" href="#density" aria-label="Link to Density">#</a></h3>
-        <p>Full form prints scales, boxes and labels. Compact keeps only the marks, for tables and tight rows.</p>
+        <p>Full form prints scales, boxes and labels. Compact keeps the marks and at most a short reading (the meter keeps 46k / 1M), for tables and tight rows: put the numbers in a neighbouring cell. Every instrument still speaks all its numbers.</p>
         <div class="ex" data-code="density"><div class="ex-prev cal-theme">
-          <div class="cal-tabs dens-ctl" role="tablist" aria-label="Density">
-            <button role="tab" data-density-set="full" aria-selected="true">full</button>
-            <button role="tab" data-density-set="compact" aria-selected="false">compact</button>
+          <div class="dens-ctl" role="group" aria-label="Density">
+            <button type="button" class="cal-btn" data-density-set="full" aria-pressed="true">full</button>
+            <button type="button" class="cal-btn" data-density-set="compact" aria-pressed="false">compact</button>
           </div>
           <div class="stack" id="dens" data-density="full">
             <cal-meter value="46000" max="1000000" warn="800000" label="requests today"></cal-meter>
@@ -962,9 +999,9 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
     merge: { n: 3, title: 'merge · release/2.4 → main', branch: 'release/2.4', commits: 5, baseAhead: 1,
       files: ['9 files', '+212 −38'], steps: ['git switch main', 'git merge --no-ff release/2.4', 'git tag v2.4.0'] },
     fanout: { n: 4, title: 'ingest · scheduler · 4 workers', root: ['scheduler', 'queue · 12m'], folded: '+1 finished earlier', children: [
-      { task: 'resize product images', meta: 'worker 3 · 1 204 jobs', time: '1m 02s', live: true },
-      { task: 'rebuild search index', meta: 'queued · 88 jobs', time: 'next' },
-      { task: 'expire stale sessions', meta: 'done · 9 340 rows', time: '2m 10s' },
+      { task: 'resize product images', meta: 'worker 3 · 1 204 jobs', time: '1m 02s', state: 'live' },
+      { task: 'rebuild search index', meta: 'queued · 88 jobs', time: 'next', state: 'todo' },
+      { task: 'expire stale sessions', meta: 'done · 9 340 rows', time: '2m 10s', state: 'done' },
     ] },
     loop: { n: 5, title: 'release train · v2.4', center: 'train 4 of 9', stations: [
       { name: 'build', cmd: 'make release', state: 'done' },
@@ -972,27 +1009,27 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
       { name: 'stage', cmd: 'deploy staging' },
       { name: 'ship', cmd: 'deploy prod --canary' },
     ] },
-    measured: { title: 'storage · bucket assets', max: 1e12, zoomMax: 5e10, factor: 20,
+    measured: { n: 6, title: 'storage · bucket assets', max: 1e12, zoomMax: 5e10, factor: 20,
       fmt: (v) => (v >= 1e12 ? v / 1e12 + ' TB' : Math.round(v / 1e9 * 10) / 10 + ' GB'),
       parts: [{ label: 'originals', value: 41.4e9, ink: 'fg' }, { label: 'thumbnails', value: 3.1e9, ink: 'mu' }, { label: 'uploads', value: 1.5e9, ink: 'lv' }],
       plate: ['DEDUP SAVED', '18% · 9.1 GB'] },
-    timeline: { n: 6, title: 'migration · orders db · 10 steps', steps: [61, 95, 120, 130, 88, 250, 140, 160, 110, 152], slowLabel: 'slowest · backfill' },
-    matrix: { n: 7, title: 'services by release', cols: ['gateway', 'auth', 'checkout', 'cart', 'search', 'billing', 'notify', 'catalog', 'admin'],
+    timeline: { n: 7, title: 'migration · orders db · 10 steps', steps: [61, 95, 120, 130, 88, 250, 140, 160, 110, 152], slowLabel: 'slowest · backfill' },
+    matrix: { n: 8, title: 'services by release', cols: ['gateway', 'auth', 'checkout', 'cart', 'search', 'billing', 'notify', 'catalog', 'admin'],
       rows: ['2.1', '2.2', '2.3', '2.4', '2.5', '2.6', '2.7', '2.8', '2.9', '3.0'], hits: [[0], [1], [1, 2, 3], [2, 3], [2, 7], [3, 4], [0, 5], [0, 6], [7, 2], [8, 3]],
       callout: { col: 0, l1: '3 releases touch gateway', l2: 'test 2.1, 2.7, 2.8 together' } },
-    section: { n: 8, title: 'network · prod vpc', boundary: { label: 'egress through proxy only' },
+    section: { n: 9, title: 'network · prod vpc', boundary: { label: 'egress through proxy only' },
       regions: [
-        { x: 20, y: 38, w: 360, h: 190, kind: 'hatch', label: 'restricted' },
+        { x: 20, y: 38, w: 340, h: 190, kind: 'hatch', label: 'restricted' },
         { x: 40, y: 70, w: 230, h: 146, kind: 'clear', label: 'app subnet' },
         { x: 132, y: 76, kind: 'island', label: 'secrets' }, { x: 194, y: 76, kind: 'island', label: 'kms' },
         { x: 56, y: 132, w: 196, h: 68, kind: 'strong', label: 'api service', sub: 'read-write · port 443' },
-        { x: 290, y: 132, w: 76, h: 52, kind: 'dotted', label: 'cache', sub: 'ephemeral' },
+        { x: 284, y: 172, w: 64, h: 50, kind: 'dotted', label: 'cache', sub: 'ephemeral' },
       ],
       callouts: [
         { at: [350, 56], l1: 'closed', l2: 'restricted, secrets' },
-        { at: [262, 110], l1: 'open', l2: 'app subnet, api' },
-        { l1: 'rotated', l2: 'credentials daily' },
-        { l1: 'outside', l2: 'batch jobs' },
+        { region: 2, l1: 'rotated', l2: 'credentials daily' },
+        { at: [262, 164], l1: 'open', l2: 'app subnet, api' },
+        { l1: 'outside', l2: 'batch jobs', live: true },
       ] },
   };
 
@@ -1000,14 +1037,13 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
   const liveStart = Date.now() - 125000;
   $$('.ex').forEach((ex) => {
     const r = ex.dataset.recipe, c = ex.dataset.code;
-    if (r) frame(ex, `<svg id="${r}"></svg>\n\n<script>\n  Calibrated.mount('#${r}', Calibrated.recipes.${r}(${ser(D[r], 1)}));\n<\/script>`, 'html');
+    if (r) frame(ex, `<script src="calibrated-figures.js"><\/script>\n<script src="calibrated-recipes.js"><\/script>\n\n<svg id="${r}"></svg>\n\n<script>\n  Calibrated.play('#${r}', Calibrated.recipes.${r}, ${ser(D[r], 1)});\n<\/script>`, 'html');
     else if (c === 'marks') frame(ex, marksCode, 'js');
-    else if (c === 'seeds') frame(ex, ":root {\n  --bg: #f4f2ec;   /* panel */\n  --fg: #262b2e;   /* ink */\n  --live: #9c6a06; /* lamp */\n}\n/* or scope a theme to one region */\n.cal-theme { --bg: #1b2225; --fg: #e5e0d3; --live: #dcb662; }", 'css');
-    else if (c === 'density') frame(ex, '<div data-density="compact">\n  <cal-meter value="46000" max="1000000" warn="800000" label="requests today"></cal-meter>\n  <cal-progress done="6" total="15" fault="7"></cal-progress>\n  <cal-diff added="184" removed="20" label="release"></cal-diff>\n</div>\n\n<!-- or per element -->\n<cal-diff added="184" removed="20"></cal-diff>', 'html');
+    else if (c === 'seeds') frame(ex, ":root {\n  --bg: #f4f2ec;   /* panel */\n  --fg: #262b2e;   /* ink, 11:1 or more on the panel */\n  --live: #8a5d05; /* lamp, 4.5:1 or more on the panel */\n}\n/* or scope a theme to one region: everything else derives again inside it */\n.cal-theme { --bg: #1b2225; --fg: #e5e0d3; --live: #dcb662; }", 'css');
+    else if (c === 'density') frame(ex, '<div data-density="compact">\n  <cal-meter value="46000" max="1000000" warn="800000" label="requests today"></cal-meter>\n  <cal-progress done="6" total="15" fault="7"></cal-progress>\n  <cal-diff added="184" removed="20" label="release"></cal-diff>\n</div>\n\n<!-- or per element -->\n<cal-diff added="184" removed="20" density="compact"></cal-diff>', 'html');
     else frame(ex);
   });
   $$('cal-span[live]').forEach((s) => s.setAttribute('start', liveStart));
-  if ($('#x-pager')) Calibrated.pager($('#x-pager'), { page: 3, pages: 12 });
   $$('pre.block').forEach((pre) => {
     const code = pre.querySelector('code'), raw = code.textContent, lang = pre.dataset.lang;
     code.innerHTML = lang === 'html' ? hlHTML(raw) : hlSH(raw);
@@ -1018,7 +1054,7 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
 
   function drawAll() {
     $('#specimens').innerHTML = specs.map(([h, p, f]) => `<div class="cal-spec">${Calibrated.svg(156, 70, f())}<h4>${h}</h4><p>${p}</p></div>`).join('');
-    Object.keys(D).forEach((k) => mount('#r-' + k, R[k](D[k])));
+    Object.keys(D).forEach((k) => Calibrated.play('#r-' + k, R[k], D[k]));
     mount('#r-lanes-2', R.lanes(D.lanes));
     if (Calibrated.counts) Calibrated.counts();
   }
@@ -1026,12 +1062,16 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
 
   /* ── theme: docs and kit switch together */
   const html = document.documentElement, themeBtn = $('#theme');
+  let onTheme = () => {};   /* the seeds section clears its seeds here: they belong to the theme they were picked on */
   const setTheme = (t) => {
     html.dataset.theme = t;
     themeBtn.setAttribute('aria-label', t === 'night' ? 'Switch to light theme' : 'Switch to dark theme');
     try { localStorage.setItem('cal-docs-theme', t); } catch {}
+    onTheme();
   };
   setTheme(html.dataset.theme);
+  /* the header names the latest revision in the changelog, so it never goes stale */
+  $('#ver').textContent = $('.log li b').textContent;
   themeBtn.addEventListener('click', () => setTheme(html.dataset.theme === 'night' ? 'film' : 'night'));
 
   /* ── mobile nav */
@@ -1058,34 +1098,42 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
     tabs.forEach((t) => t.addEventListener('click', () => tabs.forEach((x) => { const on = x === t; x.setAttribute('aria-selected', String(on)); document.getElementById(x.getAttribute('aria-controls')).hidden = !on; })));
   });
 
-  /* ── seeds */
-  const rs = html.style;
-  $$('[data-seed]').forEach((i) => i.addEventListener('input', () => { rs.setProperty(i.dataset.seed, i.value); Calibrated.redraw && Calibrated.redraw(); }));
-  $('#seed-reset').addEventListener('click', () => { ['--bg', '--fg', '--live'].forEach((v) => rs.removeProperty(v)); Calibrated.redraw && Calibrated.redraw(); });
+  /* ── seeds: set on the previews only (not the docs chrome), cleared by a theme switch or reset */
+  const seedCSS = document.head.appendChild(document.createElement('style')), seeds = {};
+  const seedProbe = $('#seed-read');
+  const rgb = (v) => { seedProbe.style.color = `var(${v})`; const m = getComputedStyle(seedProbe).color.match(/[\d.]+/g).map(Number); seedProbe.style.color = ''; return m.slice(0, 3); };
+  const hex = (c) => '#' + c.map((x) => Math.round(x).toString(16).padStart(2, '0')).join('');
+  const lum = (c) => { const [r, g, b] = c.map((x) => { x /= 255; return x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + 0.05) / (y + 0.05); };
+  const syncSeeds = () => {
+    const c = { '--bg': rgb('--bg'), '--fg': rgb('--fg'), '--live': rgb('--live') };
+    $$('[data-seed]').forEach((i) => { i.value = hex(c[i.dataset.seed]); });
+    const read = (name, a, b, min) => { const v = ratio(c[a], c[b]); return `<span class="cal-badge"${v < min ? ' data-ink="fault"' : ''}>${name} ${v.toFixed(1)}:1${v < min ? ` · under ${min}:1` : ''}</span>`; };
+    seedProbe.innerHTML = read('ink / panel', '--fg', '--bg', 11) + read('lamp / panel', '--live', '--bg', 4.5);
+  };
+  const applySeeds = () => {
+    seedCSS.textContent = Object.keys(seeds).length ? `.ex-prev.cal-theme { ${Object.entries(seeds).map(([k, v]) => `${k}: ${v};`).join(' ')} }` : '';
+    Calibrated.redraw(); syncSeeds();
+  };
+  const clearSeeds = () => { Object.keys(seeds).forEach((k) => delete seeds[k]); applySeeds(); };
+  $$('[data-seed]').forEach((i) => i.addEventListener('input', () => { seeds[i.dataset.seed] = i.value; applySeeds(); }));
+  $('#seed-reset').addEventListener('click', clearSeeds);
+  onTheme = clearSeeds;
+  syncSeeds();
 
   /* ── density */
   $$('[data-density-set]').forEach((b) => b.addEventListener('click', () => {
     $('#dens').dataset.density = b.dataset.densitySet;
-    $$('[data-density-set]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+    $$('[data-density-set]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
   }));
 
-  /* ── sign-off */
-  const cards = $$('.cal-card'), msg = $('#tally-msg');
-  const tally = () => { $('#tally-n').textContent = `${cards.filter((c) => c.dataset.v).length} of ${cards.length} signed`; };
-  $$('.cal-sign .cal-btn').forEach((b) => b.addEventListener('click', () => {
-    const card = b.closest('.cal-card'), on = b.getAttribute('aria-pressed') !== 'true';
-    card.querySelectorAll('.cal-sign .cal-btn').forEach((x) => x.setAttribute('aria-pressed', 'false'));
-    b.setAttribute('aria-pressed', String(on));
-    if (on) { card.dataset.v = b.dataset.v; card.dataset.state = b.dataset.v === 'drop' ? 'dropped' : 'ok'; }
-    else { delete card.dataset.v; delete card.dataset.state; }
-    tally();
-  }));
-  $('#tally-copy').addEventListener('click', async () => {
-    const lines = cards.map((c) => `${c.querySelector('.no').textContent} ${c.querySelector('h3').textContent}: ${c.dataset.v || 'not signed'}`);
-    try { await navigator.clipboard.writeText(lines.join('\n')); msg.textContent = 'copied'; }
-    catch { msg.textContent = 'copy blocked: select the text and copy it by hand'; }
+  /* ── code block copy: the kit draws the button, the page decides what it copies */
+  document.addEventListener('click', async (e) => {
+    const b = e.target.closest('.cal-code > .cal-btn'); if (!b) return;
+    const lines = [...b.parentElement.querySelectorAll('.ln')].map((l) => l.textContent).join('\n');
+    try { await navigator.clipboard.writeText(lines); b.textContent = 'copied'; } catch { b.textContent = 'blocked'; }
+    setTimeout(() => { b.textContent = 'copy'; }, 1600);
   });
-  tally();
 })();
 </script>
 </body>

@@ -902,7 +902,8 @@
   });
 
   /* ── sign-off · .cal-card > .cal-sign > .cal-btn[data-v="keep|rework|drop"][aria-pressed]. Pressing
-     one presses only it and sets the card's data-verdict and data-state (ok · rework · dropped);
+     one presses only it and sets the card's data-verdict and data-state (ok · rework · dropped; a
+     verdict with another name, like data-v="roll back", takes its state from data-ink: fault · live);
      rework shows the card's .note line. Every .cal-tally counts the signed cards into its
      [data-tally="n"] and its [data-tally="copy"] button copies one line per card, with the rework
      note; if the clipboard is blocked the lines appear in a selected text box under the tally.
@@ -918,7 +919,7 @@
     if (b.disabled || b.getAttribute('aria-disabled') === 'true') return;
     const card = b.closest('.cal-card'), v = b.dataset.v || VERDICT[b.dataset.ink] || 'keep', press = b.getAttribute('aria-pressed') !== 'true';
     card.querySelectorAll('.cal-sign .cal-btn[aria-pressed]').forEach((x) => x.setAttribute('aria-pressed', String(press && x === b)));
-    if (press) { card.dataset.verdict = v; card.dataset.state = STATE[v] || 'ok'; }
+    if (press) { card.dataset.verdict = v; card.dataset.state = STATE[v] || { fault: 'dropped', live: 'rework' }[b.dataset.ink] || 'ok'; }
     else { delete card.dataset.verdict; delete card.dataset.state; }
     const note = card.querySelector('.cal-sign .note');
     if (note) { note.hidden = card.dataset.state !== 'rework'; if (!note.hidden) note.querySelector('input')?.focus(); }
