@@ -170,7 +170,7 @@ The page centres on a 1240px wrap (`--wrap`) with `clamp(16px, 3vw, 32px)` side 
 
 Cards stack with a 14px gap (`--gap`). A card is a 290px info column beside a stage, or beside a today / drawn comparison split by a dashed hairline. The specimen grid is a hairline-ruled grid of 4 → 2 → 1 columns. Panel padding is 16–18px (`--pad`).
 
-Responsive: at ≤1100px cards stack and the specimen grid goes to 2 columns. At ≤700px the compare panes stack, tables scroll and the title block goes to 2 columns. At ≤520px the specimen grid goes to 1 column. Figures and instruments scroll horizontally (`overflow-x: auto`) instead of shrinking.
+Responsive: at ≤1100px cards stack and the specimen grid goes to 2 columns. At ≤700px the compare panes stack, tables scroll and the title block goes to 2 columns. At ≤520px the specimen grid goes to 1 column. Figures and instruments shrink to at most 80% (legends stay readable), then scroll horizontally with a dashed cut-edge cue and become a named Tab stop.
 
 ## Elevation & Depth
 
@@ -191,19 +191,19 @@ Four tiers in 12px legend caps, so the main action always leads.
 - **Default:** Every other action. Ink text in an `--edge-strong` hairline box that turns ink on hover.
 - **Inline:** A bracketed word, `[copy]`, for small actions in running text, toasts, fields and code blocks.
 - **Quiet:** An underlined word for cancel, back and navigation.
-- **Pressed toggles:** Unpressed is muted. `aria-pressed` turns text and box ink, or green / red when `data-ink` is `ok` / `fault` (the keep/drop sign-off).
+- **Pressed toggles:** Unpressed is muted. `aria-pressed` turns text and box ink, or green / lamp / red when `data-ink` is `ok` / `live` / `fault` (the keep / rework / drop sign-off).
 - **Disabled:** Faint text, faint box.
 
 ### Tabs
 Legend keys in a row. The open one turns ink with a 1px ink underline. Counts sit beside the key in a small outlined box.
 
 ### Counts
-A zero-padded number in a small hairline box, with its noun beside it in legend caps. Compact density shows only the box. A live count has a lamp number and a lamp-tinted outline; ok and fault counts recolour the same way.
+A number in a small hairline box, with its noun beside it in legend caps. Only counts that change live are zero-padded, so the layout doesn't jump. Compact density shows only the box. A live count has a lamp number and a lamp-tinted outline; ok and fault counts recolour the same way.
 
 ### Cards / Containers
 - **Corner Style:** Square.
 - **Background:** The panel (`--panel`), on the desk. No border.
-- **Card:** A 290px info column beside the stage. The info column opens with the `.id` line: an outlined lamp number badge, where it lives, and a status at the right (`rev A`, `✓ built`). Then the title, the *why*, and a key/value sheet (faint keys, muted values) under a hairline. A sign-off row of bracketed buttons closes the card. When kept, the badge turns green. When dropped, the card fades to 42% and is stamped SUPERSEDED (1px red outline, letter-spaced caps, set square).
+- **Card:** A 290px info column beside the stage. The info column opens with the `.id` line: an outlined number badge in ink (lamp only on the card in hand), where it lives, and a status at the right (`rev A`, `✓ built`). Then the title, the *why*, and a key/value sheet (faint keys, muted values) under a hairline. A sign-off row of keep / rework / drop buttons closes the card, wired by the kit. When kept, the badge turns green. Rework stamps the card REWORK in lamp and opens a one-line note. When dropped, the card fades to about 60%, is taped off with a band of oblique red stripes in its top padding and a solid red SUPERSEDED stamp, and takes a 1px red outline.
 - **Compare:** today (a note of the text the UI prints) beside drawn, split by a dashed hairline. The drawn tag carries a small lamp star.
 - **Figure:** The drawing with a caption under a hairline: a legend label and a muted line.
 - **Note:** The text a figure replaces, on a raised ground with an `--edge-strong` hairline.
@@ -228,10 +228,10 @@ The masthead holds the ruled mark, the wordmark and a caption. The mark is a sho
 A ruled grid of hairline cells, a small `--key` term over a mono value. The name spans the full row in title caps. Use it when a page needs drawing numbers, versions and approvals in one place.
 
 ### Tables, Rows, Revisions
-Tables work like parts lists on a panel: legend heads over an `--edge-strong` hairline, body rows over `--edge` hairlines, a muted mono number in the first column. Status cells are plain words: live statuses are lamp with a small star, shipped is green with a check, faults are red. The selected row in a list takes the 8% wash and a 2px lamp bar on its left edge. The revision table pairs each red triangle with a description and date.
+Tables work like parts lists on a panel: legend heads over an `--edge-strong` hairline, body rows over `--edge` hairlines, a muted mono number in the first column. Status cells are plain words: live statuses are lamp with a small star, shipped is green with a check, faults are red. The chosen row in a list boxes its label in an ink hairline (the boxed-value mark), with no wash and no lamp; hovering another row gives that one a faint box. The revision table pairs each red triangle with a description and date.
 
 ### Tally
-A panel strip at the foot of a sign-off page, under an `--edge-strong` hairline: "n of N signed" and a `[copy sign-off]` action. Add `.sticky` to pin it.
+A panel strip at the foot of a sign-off page, under an `--edge-strong` hairline: "n of N signed" and a copy sign-off action, both kept by the kit. If the clipboard is blocked, the lines appear selected in a text box under it. Add `.sticky` to pin it.
 
 ### Figures (signature)
 SVG drawn from the eight marks: leader + boxed value, ruler, dimension line, detail inset (dashed `2 3` projection with a scale like 20:1), hatch (45° lines = closed), nodes, numbered command, and a FIG. label, with long-dash-dot centre lines (`10 3 2 3`) for axes. One scale per figure. Live strokes, labels and box outlines take the lamp; the live node is the lamp star. Each figure states its facts in an `aria-label`.

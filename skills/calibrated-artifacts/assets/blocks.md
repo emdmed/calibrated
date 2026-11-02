@@ -81,7 +81,7 @@ For a page that needs the engineering-drawing look (drawing numbers, zones, appr
   </div>
 </article>
 ```
-The `.id` line opens `.info`: an outlined lamp number badge, where it lives, and a status on the right (`rev A`, or `✓ built` with `data-ink="ok"`). A kept card's badge turns green; a dropped card fades and is stamped SUPERSEDED; a card sent back for rework is stamped REWORK in lamp and opens its note line, so the reviewer can say what isn't good enough. Leave out the rework button and the note when there is no second round. For a report, drop `.cal-sign` and replace `.cal-compare` with `<div class="stage"><svg id="fig-3"></svg></div>`.
+The `.id` line opens `.info`: an outlined number badge in ink (lamp only while focus is in the card), where it lives, and a status on the right (`rev A`, or `✓ built` with `data-ink="ok"`). A kept card's badge turns green; a dropped card fades and is stamped SUPERSEDED; a card sent back for rework is stamped REWORK in lamp and opens its note line, so the reviewer can say what isn't good enough. Leave out the rework button and the note when there is no second round. For a report, drop `.cal-sign` and replace `.cal-compare` with `<div class="stage"><svg id="fig-3"></svg></div>`.
 
 ## Figure with caption (explainer)
 ```html
@@ -153,7 +153,7 @@ Each group gets a block with a head, so the panel reads as separate parts. `.cal
   </tbody>
 </table>
 ```
-A live status is lamp text with a small star, and an ok status gets its check from the CSS. Add `<td class="effort">■■□</td>` for an effort column.
+A live status is lamp text with a small star, and an ok status gets its check from the CSS. For an effort column add `<td class="effort" aria-label="effort 2 of 3"><span class="cal-dot done"></span><span class="cal-dot done"></span><span class="cal-dot"></span></td>`.
 
 ## Revisions
 ```html
@@ -176,9 +176,9 @@ Put the same `<span class="cal-rev" data-rev="B"></span>` beside whatever change
 ```
 
 ## Sign-off tally
-The template already wires this up: buttons set `data-v` on the card, the tally counts cards and `copy sign-off` copies `NN Title: keep|rework|drop` lines, with the rework note after a dash.
+The kit wires this up, no page script: a pressed button sets the card's `data-verdict` and `data-state`, the tally counts the cards and `copy sign-off` copies `NN Title: keep|rework|drop` lines, with the rework note after a dash. If the clipboard is blocked, the lines appear selected under the tally.
 ```html
-<div class="cal-tally"><span id="tally-n">0 of 6 signed</span><span class="sp"></span><span id="tally-msg" class="mut"></span><button class="cal-btn primary" id="tally-copy">copy sign-off</button></div>
+<div class="cal-tally sticky"><span data-tally="n">0 of 6 signed</span><span class="sp"></span><span data-tally="msg" class="mut" role="status"></span><button class="cal-btn primary" data-tally="copy">copy sign-off</button></div>
 ```
 
 ## Commands as text (beside a merge or steps figure)
