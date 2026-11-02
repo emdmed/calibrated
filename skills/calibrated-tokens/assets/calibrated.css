@@ -3,20 +3,17 @@
    lamp: an amber line, text or star that marks the one live thing. Red marks
    faults and limits; green marks what passed. Everything else stays ink.
 
-   Seeds: --bg (panel), --fg (ink), --live (lamp), --ok, --fault,
-   --muted, --title. Everything else is derived with color-mix(), so a new
-   theme is a handful of lines. See references/theming.md. */
+   Seeds: --bg (panel), --fg (ink), --live (lamp), plus --desk-depth.
+   --muted, --title, --ok, --fault, --shade and every other ink, line and
+   surface derive from them with color-mix(), so a theme is three colours and
+   a scoped region re-derives all of them. Any of the derived inks can still
+   be overridden after this file. See references/theming.md. */
 
 :root, [data-theme="film"], [data-theme="light"] {
   /* ── seeds · "film" (light, default) */
   --bg: #f4f2ec;            /* paper panel */
   --fg: #262b2e;            /* ink */
-  --muted: #646b68;
-  --title: #15191b;
-  --live: #9c6a06;          /* lamp, dark enough to read as text on paper */
-  --ok: #3b7449;            /* check green */
-  --fault: #b5402e;         /* markup red */
-  --shade: #6f746a;         /* the desk under the panels */
+  --live: #8a5d05;          /* lamp, dark enough to read as text on paper (≥4.5:1) */
   --desk-depth: 14%;
   color-scheme: light;
 }
@@ -25,20 +22,14 @@
 [data-theme="night"], [data-theme="dark"] {
   --bg: #1b2225;
   --fg: #e5e0d3;
-  --muted: #949c97;
-  --title: #eef0ec;
   --live: #dcb662;
-  --ok: #b2d49c;
-  --fault: #e3735f;
-  --shade: #000;
-  --desk-depth: 42%;
+  --desk-depth: 70%;
   color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {
   [data-theme="auto"] {
-    --bg: #1b2225; --fg: #e5e0d3; --muted: #949c97; --title: #eef0ec;
-    --live: #dcb662; --ok: #b2d49c; --fault: #e3735f; --shade: #000;
-    --desk-depth: 42%; color-scheme: dark;
+    --bg: #1b2225; --fg: #e5e0d3; --live: #dcb662;
+    --desk-depth: 70%; color-scheme: dark;
   }
 }
 
@@ -64,6 +55,17 @@
   --line-thick: 1.6px;
   --line-thin: 1px;
 
+  /* ── derived supporting inks: they follow --bg and --fg, so a region that
+     re-seeds only the panel and ink keeps readable titles, secondary text and
+     status colours. The title pushes the ink further from mid-grey; ok and
+     fault keep their hue and take the lightness of an ink-to-panel mix. All
+     hold 4.5:1 on panel, raised and well when --fg on --bg is 11:1. */
+  --title: oklch(from var(--fg) calc(l + (round(l) - l) * .35) calc(c * .5) h);
+  --muted: color-mix(in oklab, var(--fg) 70%, var(--bg));      /* secondary text */
+  --ok: oklch(from color-mix(in oklab, var(--fg) 75%, var(--bg)) l .09 148);
+  --fault: oklch(from color-mix(in oklab, var(--fg) 66%, var(--bg)) l .15 32);
+  --shade: color-mix(in srgb, var(--bg) 45%, black);   /* what the desk sinks towards */
+
   /* ── derived surfaces */
   --gutter: color-mix(in srgb, var(--bg), var(--shade) var(--desk-depth, 24%));   /* desk */
   --panel: var(--bg);
@@ -74,8 +76,8 @@
   --edge: color-mix(in srgb, var(--bg) 86%, var(--fg));
   --edge-strong: color-mix(in srgb, var(--bg) 70%, var(--fg));
   --legend: color-mix(in srgb, var(--fg) 86%, var(--bg));
-  --faint: color-mix(in srgb, var(--fg) 45%, var(--bg));      /* strokes, ticks, placeholders */
-  --key: color-mix(in srgb, var(--fg) 70%, var(--bg));        /* small label text: keys, terms, quiet tags (≥4.5:1) */
+  --faint: color-mix(in oklab, var(--fg) 52%, var(--bg));      /* marks, never text: ticks, leaders, open nodes, field lines (≥3:1) */
+  --key: color-mix(in oklab, var(--fg) 72%, var(--bg));        /* small text: keys, terms, scale numbers, quiet tags (≥4.5:1) */
   --glow: color-mix(in srgb, var(--live) 55%, transparent);     /* halo around the lamp star */
   --swipe: color-mix(in srgb, var(--live) 16%, transparent);    /* a faint lamp tint, for areas */
   --on-swipe: var(--fg);
@@ -147,9 +149,9 @@ svg { height: auto; }
 .word.ruled { display: inline-block; position: relative; padding-bottom: 12px; }
 .word.ruled::before,
 .word.ruled::after { content: ""; position: absolute; bottom: 0; }
-.word.ruled::before {          /* the live graduation: a lamp tick */
-  left: calc(70% - .5px); width: 1.6px; height: 9px; z-index: 1;
-  background: var(--live); box-shadow: 0 0 5px var(--glow);
+.word.ruled::before {          /* the live graduation: a lamp tick centred on the 7 (no glow: the star's is the only blur) */
+  left: calc((100% - .14em) * .7 - .3px); width: 1.6px; height: 9px; z-index: 1;
+  background: var(--live);
 }
 .word.ruled::after {           /* the scale: hairline, long ticks at 0/5/10, short ticks between */
   left: 0; right: .14em; height: 7px;
@@ -192,7 +194,7 @@ svg[data-cal] {
 .cal-dot {
   display: inline-block;
   width: 8px; height: 8px;
-  border: var(--line-thin) solid var(--edge-strong);
+  border: var(--line-thin) solid var(--faint);
   background: var(--panel);
   vertical-align: -1px;
 }
@@ -200,6 +202,25 @@ svg[data-cal] {
 .cal-dot.on { border: 0; background: var(--live); clip-path: var(--star); width: 11px; height: 11px; vertical-align: -2px; }
 .cal-dot.ok { background: var(--ok); border-color: var(--ok); }
 .cal-dot.fault { background: var(--fault); border-color: var(--fault); }
+
+/* ── forced colours: the inks become system colours, so figures (which paint
+   with var() fills and strokes the browser doesn't force) follow the user's
+   palette. !important outranks seeds set inline. Marks drawn as backgrounds
+   opt out of forcing so filled and open stay apart. */
+@media (forced-colors: active) {
+  :root, [data-theme], .cal-theme {
+    --bg: Canvas !important; --fg: CanvasText !important; --live: Highlight !important;
+    --title: CanvasText !important; --legend: CanvasText !important; --key: CanvasText !important;
+    --muted: CanvasText !important; --ok: CanvasText !important; --fault: CanvasText !important;
+    --edge-strong: CanvasText !important; --faint: GrayText !important; --edge: GrayText !important;
+    --panel: Canvas !important; --raised: Canvas !important; --well: Canvas !important; --gutter: Canvas !important;
+    --glow: transparent !important; --swipe: transparent !important;
+    --hover: transparent !important; --current: transparent !important;
+    --on-swipe: CanvasText !important; --select-fg: HighlightText !important; --select-bg: Highlight !important;
+  }
+  .cal-dot, .star, .word.ruled::before, .word.ruled::after { forced-color-adjust: none; }
+  .star { filter: none; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

@@ -4,19 +4,19 @@ description: A drawing grammar that sets quantities as small technical figures o
 colors:
   paper: "#f4f2ec"
   ink: "#262b2e"
-  ink-muted: "#646b68"
-  title-ink: "#15191b"
-  lamp: "#9c6a06"
-  check-green: "#3b7449"
-  markup-red: "#b5402e"
-  desk-shade: "#6f746a"
+  ink-muted: "#5d6061"
+  title-ink: "#111314"
+  lamp: "#8a5d05"
+  check-green: "#2f6439"
+  markup-red: "#ad3d2a"
+  desk-shade: "#6e6d6a"
   night-slate: "#1b2225"
   night-ink: "#e5e0d3"
-  night-muted: "#949c97"
-  night-title: "#eef0ec"
+  night-muted: "#a2a19a"
+  night-title: "#edebe4"
   night-lamp: "#dcb662"
-  night-check: "#b2d49c"
-  night-markup: "#e3735f"
+  night-check: "#84bb8b"
+  night-markup: "#e6715c"
 typography:
   display:
     fontFamily: "IBM Plex Mono, ui-monospace, SF Mono, Menlo, Consolas, monospace"
@@ -96,7 +96,7 @@ components:
 
 A Calibrated page is a bench of drawings under one lamp. Quiet panels sit on a darker desk, separated by gaps rather than frames. Inside each panel, the drawing is set in warm ink with hairline rules: rulers, leaders to boxed values, dimension lines, detail insets, hatching and nodes. One lamp lights the live thing: an amber line, an amber word, an amber-outlined box, or a small glowing star where the work is happening right now.
 
-Colour comes from meaning, not decoration. The lamp marks the one live thing. Red markup marks faults, limits and revisions, and green marks what passed. Everything else stays ink. Density is high but quiet: cells, strips and tables are separated by low-contrast hairlines. The identity has to survive re-seeding into another brand, so it lives in structure (panels on a desk, hairlines, monospace caps, numbered drawings, the lamp) rather than in a hue. Three seeds (`--bg`, `--fg`, `--live`) and four supporting inks derive every other surface and line through `color-mix()`.
+Colour comes from meaning, not decoration. The lamp marks the one live thing. Red markup marks faults, limits and revisions, and green marks what passed. Everything else stays ink. Density is high but quiet: cells, strips and tables are separated by low-contrast hairlines. The identity has to survive re-seeding into another brand, so it lives in structure (panels on a desk, hairlines, monospace caps, numbered drawings, the lamp) rather than in a hue. Three seeds (`--bg`, `--fg`, `--live`) derive every other ink, surface and line through `color-mix()`, including the supporting inks (title, muted, check green, markup red) and the desk shade.
 
 The engineering-drawing sheet (`.cal-sheet`: frame, zone markers, title block) is still in the kit as an optional extra for pages that want it. Most pages don't.
 
@@ -125,15 +125,17 @@ The base is warm ink on a paper or slate panel, plus three meaningful inks: lamp
 ### Neutral
 - **Paper** (`paper`): The panel (`--bg`, `--panel`) on film. At night: **Night Slate** (`night-slate`), a deep blue-grey.
 - **Ink Muted** (`ink-muted` / `night-muted`): Labels, section notes, captions, key/value values and secondary meta.
-- **Desk Shade** (`desk-shade`): Never painted directly. Mixed into the panel by `--desk-depth` (9% on film, 24% at night) to make the desk around the panels (`--gutter`), and at 10% for the recessed `--well`. At night it is pure black.
-- **Derived lines**: `--edge` (14% ink) for inner rules and `--edge-strong` (30% ink) for table heads, section rules and note borders. `--faint` (45% ink) is for scale ticks, inactive strokes and placeholders. `--key` (70% ink) is for small label text (keys, terms, quiet tags and statuses) so it holds 4.5:1 on both themes. `--hover` (5% ink) and `--current` (8% ink) are state washes.
+- **Desk Shade** (`desk-shade`): Never painted directly. Derived as the panel 45% of the way to black, then mixed into the panel by `--desk-depth` (14% on film, 70% at night) to make the desk around the panels (`--gutter`), and at 10% for the recessed `--well`.
+- **Derived inks**: title ink pushes the ink further from mid-grey; ink muted is 70% ink; check green and markup red keep their hue at the lightness of a 75% and 66% ink mix. All hold 4.5:1 on panel, raised and well whenever ink on panel is 11:1, so a region that re-seeds only `--bg`/`--fg`/`--live` stays readable.
+- **Derived lines**: `--edge` (14% ink) for inner rules and `--edge-strong` (30% ink) for table heads, section rules and note borders: structure only, never the one mark that carries a state. `--faint` (52% ink, at least 3:1) is for marks: scale ticks, leaders, open nodes, field lines and inactive strokes. It is never text. `--key` (72% ink) is for small text (keys, terms, scale numbers, quiet tags and statuses) so it holds 4.5:1 on both themes. `--hover` (5% ink) and `--current` (8% ink) are state washes.
+- **Forced colours**: every ink maps to a system colour (ink, title, muted, key, status and `--edge-strong` to CanvasText; `--faint` and `--edge` to GrayText; the lamp to Highlight; surfaces to Canvas; glow and washes off), so figures follow the user's palette. Meaning never rests on green or red alone.
 
 ### Named Rules
 **The One Lamp Rule.** Each figure, instrument and working view lights a single live item. Every recipe takes one `live` entry. Rarity is what makes the lamp readable.
 
 **The Line-Not-Fill Rule.** The lamp is a line, a word, an outline or a star. It never fills a box or a region. The faint tint is for the rare area that must read as live, never for emphasis.
 
-**The Seed Rule.** A theme is a handful of seeds. Every surface, edge and wash derives from `--bg`, `--fg`, `--live` and `--shade` through `color-mix()`, so theme work never adds a hard-coded hex.
+**The Seed Rule.** A theme is three seeds (`--bg`, `--fg`, `--live`) plus `--desk-depth`. Every ink, surface, edge and wash derives from them through `color-mix()`, so theme work never adds a hard-coded hex. A theme may still override a derived ink after the kit's CSS.
 
 ## Typography
 
