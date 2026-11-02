@@ -38,7 +38,7 @@ body.docs * { scrollbar-color: var(--d-line-2) transparent; }
 .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--d-fg); }
 .brand .cal-mark { width: 26px; height: 21px; }
 .brand .word { font-size: 20px; }
-.ver { font: 500 12px/1 var(--d-sans); color: var(--d-muted); border: 1px solid var(--d-line-2); border-radius: 999px; padding: 4px 8px; }
+.ver { font: 500 12px/1 var(--d-sans); color: var(--d-muted); border: 1px solid var(--d-line-2); border-radius: 999px; padding: 4px 8px; white-space: nowrap; }
 .top .sp { flex: 1; }
 .docs .top-link { font-size: 14px; color: var(--d-muted); padding: 6px 8px; border-radius: 6px; }
 .docs .top-link:hover { color: var(--d-fg); }
@@ -108,6 +108,7 @@ pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-
 .props td { padding: 10px 12px; border-bottom: 1px solid var(--d-line); vertical-align: top; color: var(--d-muted); }
 .props td:first-child { white-space: nowrap; }
 .props td:nth-child(2) { white-space: nowrap; }
+@media (max-width: 600px) { .props td:nth-child(2) { white-space: normal; } }
 
 /* install tabs */
 .seg { display: inline-flex; max-width: 100%; overflow-x: auto; gap: 2px; padding: 3px; background: var(--d-soft); border: 1px solid var(--d-line); border-radius: 8px; margin-bottom: 12px; }
@@ -177,7 +178,7 @@ pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-
 <header class="top">
   <button class="icon-btn menu-btn" id="menu" aria-label="Open navigation" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 18 18"><path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
   <a class="brand" href="#intro" aria-label="Calibrated, back to top"><svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg><span class="word">Calibrated</span></a>
-  <span class="ver" id="ver">Rev N</span>
+  <span class="ver" id="ver">Rev O</span>
   <span class="sp"></span>
   <a class="top-link" href="index.html">Catalog</a>
   <a class="top-link" href="#install">Install</a>
