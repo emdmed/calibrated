@@ -291,9 +291,10 @@ A circle with an ink dot, like a drawing's balloon, so it never reads as the squ
 
 ### Switch
 ```html
-<label class="cal-switch"><span class="txt">Pause new runs at the limit</span><span class="o off">off</span><input type="checkbox" role="switch" checked><span class="o on">on</span></label>
+<label class="cal-switch caps"><span class="txt">Sandbox</span><input type="checkbox" role="switch" checked></label>
+<label class="cal-switch"><span class="txt">Pause new runs at the limit</span><input type="checkbox" role="switch"></label>
 ```
-A lever on a short track: the square slides across and the word it lands on turns ink. No lamp: a setting being on is not the live thing. Give the label `display:flex` and `.txt` `flex:1` to line switches up in a list.
+A small hairline pill with a round knob. Off, a faint knob rests on the left; on, it slides right and turns ink, and the pill takes the faint wash. It is rounded, like the radio, so it never reads as the square checkbox. No lamp: a setting being on is not the live thing. `.caps` sets the label in legend caps for toolbars and status bars (`INDEX ( ●)`); leave it off in forms. OFF/ON words are optional: add `<span class="o off">off</span>` before the input and `<span class="o on">on</span>` after it, and the word for the current state turns ink. A `disabled` switch fades to 50%. The whole label is the hit area (24px tall). Give the label `display:flex` and `.txt` `flex:1` to line switches up in a list. Size it with `--sw-w`, `--sw-h` and `--sw-knob`.
 
 ### Detent choice
 ```html

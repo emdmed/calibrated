@@ -179,7 +179,7 @@ The system is flat. Depth comes from tone: panels (`--panel`) sit on a darker de
 
 ## Shapes
 
-All containers and controls are square (0px radius). Lines are hairlines: 1px `--edge` inside panels, `--edge-strong` for heads and note borders, dashed `--edge` between "today" and "drawn". A heavier 1.2px double rule is kept for the plate, the one headline result. Nodes are small squares and diamonds; the live node is a four-point star. The revision mark is a red-outlined triangle with its letter inside.
+All containers and controls are square (0px radius), except the radio balloon and the switch pill. Lines are hairlines: 1px `--edge` inside panels, `--edge-strong` for heads and note borders, dashed `--edge` between "today" and "drawn". A heavier 1.2px double rule is kept for the plate, the one headline result. Nodes are small squares and diamonds; the live node is a four-point star. The revision mark is a red-outlined triangle with its letter inside.
 
 ## Components
 
@@ -217,6 +217,7 @@ A zero-padded number in a small hairline box, with its noun beside it in legend 
 - **Focus:** The line turns lamp. No glow.
 - **Error:** The line turns markup red and a red hint appears below.
 - **Checkbox:** A 12px hairline square; checked shows a small ink square inside.
+- **Switch:** A 24×12px hairline pill with an 8px round knob. Off, the knob is faint and rests left; on, it slides right in ink over the faint wash. With the radio, the only rounded controls. No lamp.
 
 ### Navigation
 The masthead holds the ruled mark, the wordmark and a caption. The mark is a short scale with one graduation lit in lamp. Calibrated's own wordmark sets `.word.ruled`, which draws the same scale of ten under the name with a lamp tick at 7. Other products keep a plain `.word`.
