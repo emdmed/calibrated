@@ -13,8 +13,9 @@
 
    Colours are written as CSS variables (style="fill:var(--fg)"), so a theme
    switch recolours every figure without re-rendering. Pass a token name
-   ('fg', 'mu', 'fa', 'e1', 'ed', 'lv', 'ok', 'ft', 'pn', 'bg', 'well')
-   or any CSS colour.
+   ('fg', 'mu', 'ky', 'fa', 'e1', 'ed', 'lv', 'ok', 'ft', 'pn', 'bg', 'well')
+   or any CSS colour. 'ky' is for small text (scale numbers, FIG. numbers,
+   quiet names); 'fa' is for marks only (ticks, leaders, open nodes).
 
    Needs calibrated.css (the tokens) on the page. No dependencies.
    Load as a classic script; it defines window.Calibrated. */
@@ -23,7 +24,7 @@
 
   /* ── ink */
   const TOKENS = {
-    fg: '--fg', mu: '--muted', fa: '--faint', e1: '--edge', ed: '--edge-strong',
+    fg: '--fg', mu: '--muted', ky: '--key', fa: '--faint', e1: '--edge', ed: '--edge-strong',
     lv: '--live', ok: '--ok', ft: '--fault', pn: '--panel', bg: '--raised',
     well: '--well', title: '--title', swipe: '--swipe', on: '--on-swipe', glow: '--glow',
   };
@@ -110,7 +111,7 @@
     /* FIG. label · top-left of every figure; the number is stable */
     fig(n, title, x = 0, y = 11) {
       const w = textWidth(`FIG.${n}`) + 2 + CH * 1.5;
-      return K.t(x, y, `FIG.${n}`, 'fa', 'start', 0.5) + (title ? K.t(x + w, y, String(title).toUpperCase(), 'mu', 'start', 0.5) : '');
+      return K.t(x, y, `FIG.${n}`, 'ky', 'start', 0.5) + (title ? K.t(x + w, y, String(title).toUpperCase(), 'mu', 'start', 0.5) : '');
     },
 
     /* boxed value · name over value. w = null sizes to the text */
@@ -172,7 +173,7 @@
         case 'fault': return K.rect(x - h, y - h, size, size, 'ft', 'none');
         case 'merge': return `<path d="M${x} ${y - 6}L${x + 6} ${y}L${x} ${y + 6}L${x - 6} ${y}Z" stroke-width="1.3"${paint('pn', 'fg')}/>`;
         case 'started': return K.rect(x - h - 0.5, y - h - 0.5, size + 1, size + 1, 'pn', 'fg') + K.rect(x - 2, y - 2, 4, 4, 'fg', 'none');
-        default: return K.rect(x - h, y - h, size, size, 'pn', 'ed');
+        default: return K.rect(x - h, y - h, size, size, 'pn', 'fa');
       }
     },
     /* a row of nodes on a faint line */
@@ -195,18 +196,25 @@
           return x0 + (kx + Math.log10(v / o.knee) / Math.log10(max / o.knee) * (1 - kx)) * (x1 - x0);
         };
       }
-      return (v) => x0 + (v - min) / (max - min) * (x1 - x0);
+      /* an empty range maps everything to the start rather than to NaN */
+      return max > min ? (v) => x0 + (v - min) / (max - min) * (x1 - x0) : () => x0;
     },
 
     /* ruler · numbered at major ticks only. One scale per figure.
        ruler(x0, x1, y, max, step, labelEvery, fmt, up, min) */
     ruler(x0, x1, y, max, step, every = 5, fmt = (v) => String(v), up = false, min = 0) {
       let g = K.line(x0, y, x1, y, 'ed');
-      const X = K.scale(x0, x1, min, max), dir = up ? -1 : 1;
-      for (let v = min, i = 0; v <= max + 1e-9; v += step, i++) {
-        const x = X(v), M = i % every === 0;
+      /* no span or no step: the baseline alone (a bad step would loop forever) */
+      if (!(max > min) || !(step > 0) || !isFinite(max - min)) return g;
+      /* at most ~200 ticks: a fine step on a long scale coarsens by whole multiples */
+      step *= Math.max(1, Math.ceil((max - min) / step / 200));
+      every = Math.max(1, Math.round(every) || 1);
+      const X = K.scale(x0, x1, min, max), dir = up ? -1 : 1, n = Math.floor((max - min) / step + 1e-9);
+      for (let i = 0; i <= n; i++) {
+        /* each tick from its index, so float steps don't drift (0.30000000000000004) */
+        const v = Math.round((min + i * step) * 1e9) / 1e9, x = X(v), M = i % every === 0;
         g += K.line(x, y, x, y + dir * (M ? 6 : 3), M ? 'fa' : 'ed');
-        if (M) g += K.t(x, up ? y - 10 : y + 17, fmt(v), 'fa', i === 0 ? 'start' : 'middle');
+        if (M) g += K.t(x, up ? y - 10 : y + 17, fmt(v), 'ky', i === 0 ? 'start' : 'middle');
       }
       return g;
     },
@@ -261,7 +269,7 @@
     },
 
     /* side tag used to label rows of a comparison (FULL / COMPACT) */
-    tag(y, s, x = 0) { return K.t(x, y + 4, String(s).toUpperCase(), 'fa', 'start', 0.5); },
+    tag(y, s, x = 0) { return K.t(x, y + 4, String(s).toUpperCase(), 'ky', 'start', 0.5); },
   };
 
   /* ── mounting */
@@ -342,6 +350,41 @@
     return svg;
   }
 
+  /* scroll hosts · when a figure is wider than its box at 80%, the box it
+     scrolls in becomes a Tab stop, so the cut-off part can be reached from
+     the keyboard, and is named "figure, scrolls sideways" unless it has a
+     name already. data-cal-scroll lists what was added; it is removed again
+     once the figure fits. A host with its own tabindex is left alone. */
+  function scrollHost(host) {
+    if (!host || host.nodeType !== 1) return;
+    const over = host.scrollWidth > host.clientWidth + 1, marked = host.hasAttribute('data-cal-scroll');
+    if (over === marked) return;
+    if (over) {
+      if (host.hasAttribute('tabindex')) return;
+      const added = ['tabindex'];
+      host.tabIndex = 0;
+      if (!host.hasAttribute('aria-label') && !host.hasAttribute('aria-labelledby')) {
+        host.setAttribute('aria-label', 'figure, scrolls sideways'); added.push('aria-label');
+        /* a name needs a role to be read on a plain box */
+        if (!host.hasAttribute('role') && !/^(FIGURE|SECTION|ARTICLE|ASIDE|NAV|MAIN)$/.test(host.tagName)) { host.setAttribute('role', 'group'); added.push('role'); }
+      }
+      host.setAttribute('data-cal-scroll', added.join(' '));
+    } else {
+      host.getAttribute('data-cal-scroll').split(' ').forEach((a) => a && host.removeAttribute(a));
+      host.removeAttribute('data-cal-scroll');
+    }
+  }
+  /* both sides are watched: the host when it resizes, the svg when a remount changes its width */
+  const hosts = typeof ResizeObserver !== 'undefined'
+    ? new ResizeObserver((es) => es.forEach((e) => scrollHost(e.target.namespaceURI === SVG_NS ? e.target.parentElement : e.target)))
+    : null;
+  const watched = hosts ? new WeakSet() : null;
+  function watchHost(svg) {
+    const host = svg.parentElement;
+    if (!hosts || !host || host === document.body || host === document.documentElement) return;
+    [svg, host].forEach((el) => { if (!watched.has(el)) { watched.add(el); hosts.observe(el); } });
+  }
+
   /* draw(svg, markup, label) · fills an <svg>, marks it as a figure, sets role and label */
   function draw(svg, markup, label) {
     if (typeof svg === 'string') svg = document.querySelector(svg);
@@ -350,10 +393,12 @@
     if (!svg.getAttribute('viewBox') && svg.getAttribute('width')) {
       svg.setAttribute('viewBox', `0 0 ${svg.getAttribute('width')} ${svg.getAttribute('height')}`);
     }
-    /* never shrink below 90% of natural size: legends stay ≥ 10px; the container scrolls instead */
+    /* shrink to fit down to 80% of natural size (legends stay readable, as
+       the instruments do); past that the container scrolls and is named */
     const nw = parseFloat(svg.getAttribute('width'));
-    const minW = Math.round(nw * 0.9) + 'px';
+    const minW = Math.round(nw * 0.8) + 'px';
     if (nw > 200 && svg.style.minWidth !== minW) svg.style.minWidth = minW;
+    if (nw > 200) watchHost(svg);
     if (label) { attr(svg, 'role', 'img'); attr(svg, 'aria-label', label); }
     else if (!svg.hasAttribute('aria-label')) svg.setAttribute('aria-hidden', 'true');
     return patch(svg, markup);
@@ -375,6 +420,8 @@
   const fmt = {
     k(v, d = 1) {
       const a = Math.abs(v);
+      if (a >= 1e12) return (v / 1e12).toFixed(d).replace(/\.0$/, '') + 'T';
+      if (a >= 1e9) return (v / 1e9).toFixed(d).replace(/\.0$/, '') + 'G';
       if (a >= 1e6) return (v / 1e6).toFixed(d).replace(/\.0$/, '') + 'M';
       if (a >= 1e3) return (v / 1e3).toFixed(d).replace(/\.0$/, '') + 'k';
       return String(Math.round(v));

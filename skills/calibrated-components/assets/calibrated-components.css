@@ -272,7 +272,7 @@
 .cal-compare .stage { flex: 1; display: flex; flex-direction: column; align-items: safe center; justify-content: center; gap: 12px; min-height: 150px; overflow-x: auto; }
 /* ── scroll cue · a drawing wider than its box scrolls sideways; a dashed line at a cut edge says it
    goes on, and is covered once you reach that end. --under is the surface colour (panel by default). */
-.cal-card > .stage, .cal-stage, .cal-compare .stage,
+.cal-card > .stage, .cal-stage, .cal-compare .stage, .cal-figure, [data-cal-scroll],
 :is(cal-meter, cal-position, cal-progress, cal-diff, cal-durations, cal-ruler)[data-scroll] {
   background:
     linear-gradient(var(--under, var(--panel)), var(--under, var(--panel))) left / 6px 100% no-repeat local,
@@ -950,7 +950,7 @@ cal-spin[size="sm"]:empty { width: 24px; height: 24px; }
 /* ── custom elements host defaults (see calibrated-components.js) */
 cal-meter, cal-position, cal-progress, cal-diff, cal-durations, cal-ruler { display: inline-block; max-width: 100%; vertical-align: middle; overflow-x: auto; }
 :is(cal-meter, cal-position, cal-progress, cal-diff, cal-durations, cal-ruler) > svg { display: block; max-width: 100%; height: auto; }
-:is(cal-meter, cal-position, cal-progress, cal-diff, cal-durations, cal-ruler)[data-scroll]:focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: 2px; }
+[data-cal-scroll]:focus-visible, :is(cal-meter, cal-position, cal-progress, cal-diff, cal-durations, cal-ruler)[data-scroll]:focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: 2px; }
 cal-durations { display: block; }
 cal-span { display: none; }
 

@@ -39,15 +39,15 @@ Load as classic scripts (they work from `file://` and inside artifacts):
 Helpers: `K.t` (text), `K.line`, `K.path`, `K.rect`, `K.circle`, `K.star` (the lamp star), `K.highlight` (a faint lamp tint behind an area, rarely needed), `K.centre` (dash-dot centre line), `K.count` (boxed zero-padded count), `K.plate` (double-ruled headline result), `K.vdim`, `K.bracket`, `K.cross`, `K.threshold`, `K.nodes`/`K.states`, `K.scale` (linear, or linear then log past a knee), `K.tag`.
 
 ## Rules
-1. **Every figure on a document page has a FIG. label** top-left: `FIG.n` in faint, the title in muted uppercase. App screens and forms leave it out.
+1. **Every figure on a document page has a FIG. label** top-left: `FIG.n` in key, the title in muted uppercase. App screens and forms leave it out.
 2. **One scale per figure.** Number the major ticks only (every 5th). Put the unit on the numbers (`10m`, `50k`), never in a separate axis title.
-3. **Ink by role.** Measured things are `fg`. Scaffolding (ticks, leaders, grids) is `fa`/`ed`/`e1`. Secondary labels are `mu`. Axes and symmetry lines are centre lines (`K.centre`). **The lamp marks exactly one thing**: the running lane, the current step, the predicted value. Pass ink `lv` and the stroke, text or box outline turns lamp amber; a live node is a small glowing star. `ok`/`ft` only for results and thresholds.
+3. **Ink by role.** Measured things are `fg`. Scaffolding (ticks, leaders, grids) is `fa`/`ed`/`e1`. Secondary labels are `mu`, small text (scale numbers, quiet names) is `ky`; `fa` is never text. Axes and symmetry lines are centre lines (`K.centre`). **The lamp marks exactly one thing**: the running lane, the current step, the predicted value. Pass ink `lv` and the stroke, text or box outline turns lamp amber; a live node is a small glowing star. `ok`/`ft` only for results and thresholds.
 4. **Box the value, lead to it.** Values sit in boxes (`K.box`) attached by leaders, and never float next to a mark. The headline result gets a `K.plate`.
 5. **Lengths are lengths.** Durations and sizes are dimension lines or spans on the shared ruler. Don't use bars with numbers on top.
 6. **Hatch means "can't".** Read-only, locked, beyond a limit, unaccounted for. Clear means writable or available. Say it in words on the figure too ("hatched = closed"), since readers don't know the convention.
 7. **Commands are literal.** Show `$ exact command` beside the node it acts on, numbered in run order. Keep the selectable text version elsewhere in the UI too.
 8. **Full and compact.** Full prints scales, boxes and leaders. Compact keeps only the marks and moves the value into `aria-label`/`<title>`. Read the mode with `Calibrated.density(el)`.
-9. **Accessible.** Every figure gets `role="img"` and an `aria-label` sentence with the same facts (`draw()`/`mount()` set it). Decorative mini-figures get `aria-hidden`.
+9. **Accessible.** Every figure gets `role="img"` and an `aria-label` sentence with the same facts (`draw()`/`mount()` set it). Decorative mini-figures get `aria-hidden`. A figure shrinks to 80% of its width, then its box scrolls: `draw()` makes that box a Tab stop and, if it has no name, names it "figure, scrolls sideways" (marked `data-cal-scroll`, removed once it fits).
 10. **Legend type only**: 11px `--font-legend` (Chivo Mono), set by `svg[data-cal]`. No other sizes inside figures.
 11. **Leave alone**: terminals, prompt text, menus, pickers and command palettes. Only draw where there's a quantity to measure.
 12. **Measure, don't diagram.** Each figure reads off a scale or a count, with at least three values. Labelled rectangles joined by lines are a flowchart, not a figure: use the recipe that measures the structure. A box always holds a value.

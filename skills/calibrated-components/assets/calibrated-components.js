@@ -41,7 +41,7 @@
   const group = (n) => Math.round(n).toLocaleString('en-US').replace(/,/g, ' ');
   /* nice · the smallest 1, 2 or 5 × 10ⁿ at or above raw */
   const nice = (raw) => { const p = Math.pow(10, Math.floor(Math.log10(raw))); return [1, 2, 5, 10].map((m) => m * p).find((m) => m >= raw * (1 - 1e-9)); };
-  const KY = 'var(--key)';   /* small text: scale numbers and names (--faint is for marks only) */
+  const KY = 'ky';   /* small text in --key: scale numbers and names (--faint 'fa' is for marks only) */
   const warned = new Set();
   const warn = (el, msg) => { const k = el.localName + msg; if (!warned.has(k)) { warned.add(k); console.warn(`<${el.localName}> ${msg}`); } };
 
