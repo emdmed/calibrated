@@ -36,7 +36,7 @@ Load as classic scripts (they work from `file://` and inside artifacts):
 | numbered command | `K.cmd(x,y,'1','git switch main')` | a step number in a box, then the exact command |
 | FIG. label | `K.fig(1,'load test · 3 regions')` | top-left of every figure; a stable number |
 
-Helpers: `K.t` (text), `K.line`, `K.path`, `K.rect`, `K.circle`, `K.star` (the lamp star), `K.highlight` (a faint lamp tint behind an area, rarely needed), `K.centre` (dash-dot centre line), `K.count` (boxed zero-padded count), `K.plate` (double-ruled headline result), `K.vdim`, `K.bracket`, `K.cross`, `K.threshold`, `K.nodes`/`K.states`, `K.scale` (linear, or linear then log past a knee), `K.tag`.
+Helpers: `K.t` (text), `K.line`, `K.path`, `K.rect`, `K.circle`, `K.star` (the lamp star), `K.highlight` (a faint lamp tint behind the one live area, when the live thing is a region, not a line), `K.centre` (dash-dot centre line), `K.count` (boxed zero-padded count), `K.plate` (double-ruled headline result), `K.vdim`, `K.bracket`, `K.cross`, `K.threshold`, `K.nodes`/`K.states`, `K.scale` (linear, or linear then log past a knee), `K.tag`.
 
 ## Rules
 1. **Every figure on a document page has a FIG. label** top-left: `FIG.n` in key, the title in muted uppercase. App screens and forms leave it out.
@@ -48,7 +48,7 @@ Helpers: `K.t` (text), `K.line`, `K.path`, `K.rect`, `K.circle`, `K.star` (the l
 7. **Commands are literal.** Show `$ exact command` beside the node it acts on, numbered in run order. Keep the selectable text version elsewhere in the UI too.
 8. **Full and compact.** Full prints scales, boxes and leaders. Compact keeps only the marks and moves the value into `aria-label`/`<title>`. Read the mode with `Calibrated.density(el)`.
 9. **Accessible.** Every figure gets `role="img"` and an `aria-label` sentence with the same facts (`draw()`/`mount()` set it). Decorative mini-figures get `aria-hidden`. A figure shrinks to 80% of its width, then its box scrolls: `draw()` makes that box a Tab stop and, if it has no name, names it "figure, scrolls sideways" (marked `data-cal-scroll`, removed once it fits).
-10. **Legend type only**: 11px `--font-legend` (Chivo Mono), set by `svg[data-cal]`. No other sizes inside figures.
+10. **Legend type only**: 11px `--font-legend` (Chivo Mono), set by `svg[data-cal]`. No other sizes inside figures, and no headline face: figures stay monospace whatever the page's headings use.
 11. **Leave alone**: terminals, prompt text, menus, pickers and command palettes. Only draw where there's a quantity to measure.
 12. **Measure, don't diagram.** Each figure reads off a scale or a count, with at least three values. Labelled rectangles joined by lines are a flowchart, not a figure: use the recipe that measures the structure. A box always holds a value.
 13. **A lamp, not a paint.** The lamp lights one segment, node, label or value as a line, text or outline. Never fill a box or a region with it.

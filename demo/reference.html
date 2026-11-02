@@ -178,7 +178,7 @@ pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-
 <header class="top">
   <button class="icon-btn menu-btn" id="menu" aria-label="Open navigation" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 18 18"><path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
   <a class="brand" href="#intro" aria-label="Calibrated, back to top"><svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg><span class="word">Calibrated</span></a>
-  <span class="ver" id="ver">Rev P</span>
+  <span class="ver" id="ver">Rev Q</span>
   <span class="sp"></span>
   <a class="top-link" href="index.html">Catalog</a>
   <a class="top-link" href="#install">Install</a>
@@ -210,7 +210,7 @@ pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-
     <h4>Navigation and labels</h4>
     <ul><li><a href="#pager"><span>Crumbs, pager, steps</span></a></li><li><a href="#badges"><span>Badges, code, keys</span></a></li></ul>
     <h4>Theming</h4>
-    <ul><li><a href="#seeds"><span>Seeds</span></a></li><li><a href="#density"><span>Density</span></a></li></ul>
+    <ul><li><a href="#looks"><span>Looks</span></a></li><li><a href="#seeds"><span>Seeds</span></a></li><li><a href="#density"><span>Density</span></a></li></ul>
     <h4>Project</h4>
     <ul><li><a href="#changelog"><span>Changelog</span></a></li></ul>
   </nav>
@@ -260,6 +260,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
         <li>Ink in quiet hairlines on panels. The lamp marks <strong>the one live thing</strong> with an amber line, text or star; red marks faults and limits; green marks what passed. Hatch means you can't.</li>
         <li>Full form prints the scale and boxes; compact keeps only the marks.</li>
         <li>Leave terminals, prompts and menus alone.</li>
+        <li>The grammar is fixed; <strong>the look is chosen per page</strong>. Palette, headline face, frame, layout and spacing come from the subject, so two pages about different things don't look the same. See <a href="#looks">Looks</a>.</li>
       </ul>
     </section>
 
@@ -819,7 +820,23 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
     <!-- ── Theming -->
     <section class="group" id="theming">
       <h2>Theming</h2>
-      <p>Two themes, <code>film</code> and <code>night</code>, set with <code>data-theme</code>. The theme button at the top switches both the docs and every preview.</p>
+      <p>Two default themes, <code>film</code> and <code>night</code>, set with <code>data-theme</code>, and a look chosen per page on top. The theme button at the top switches both the docs and every preview.</p>
+
+      <div class="item" id="looks">
+        <h3>Looks <a class="anchor" href="#looks" aria-label="Link to Looks">#</a></h3>
+        <p>Film and night are the defaults, not the only look. Before building a page, Claude chooses five settings from the subject and changes at least two of them, unless you ask for the default look. The marks, one scale per figure, the one lamp, the red and green meanings and the monospace labels never change. The guide is <code>skills/calibrated-tokens/references/looks.md</code>; the <a href="examples.html">examples</a> show six pages, each in its own look.</p>
+        <div class="props-wrap"><table class="props"><thead><tr><th>Setting</th><th>Default</th><th>Options</th></tr></thead><tbody>
+          <tr><td>Palette</td><td>film / night</td><td>Seeds from the subject: a brand's ink and accent, or a material or place (blueprint for a network, steel for hardware, clean white for a lab). The lamp is never red or green.</td></tr>
+          <tr><td>Headline face</td><td>IBM Plex Mono caps</td><td>One grotesk or condensed sans for headings only: Barlow Condensed, IBM Plex Sans Condensed, Space Grotesk, Archivo, Chivo. Set <code>--font-display</code>, <code>--display-case</code> and <code>--display-weight</code>. Never serif, script or italic.</td></tr>
+          <tr><td>Frame</td><td>panels on a desk</td><td><code>&lt;html data-frame="paper"&gt;</code> sets panels flush on the paper, ruled on top. <code>.cal-sheet</code> is the bordered drawing sheet with zones and a title block.</td></tr>
+          <tr><td>Layout</td><td>cards with an info column</td><td>A full-width <code>.cal-figure</code>, figures side by side in <code>.cal-grid</code> (<code>--cal-grid-min</code> sets the column width), or one large drawing with notes beside it.</td></tr>
+          <tr><td>Space</td><td>dense</td><td><code>&lt;html data-space="open"&gt;</code> doubles the gaps and the space between sections.</td></tr>
+        </tbody></table></div>
+        <pre class="ex-code block" data-lang="css"><code>/* look: blueprint · Barlow Condensed · paper · full-width figures · open */
+:root, :root[data-theme] { --bg: #eef3f7; --fg: #12324d; --live: #0a6f83;
+  --font-display: "Barlow Condensed", sans-serif; --display-case: none; --display-weight: 600; --track-title: 0; }
+:root[data-theme="dark"], :root[data-theme="night"] { --bg: #0f2a44; --fg: #dbeaf5; --live: #f2c14e; --desk-depth: 70%; color-scheme: dark; }</code></pre>
+      </div>
 
       <div class="item" id="seeds">
         <h3>Seeds <a class="anchor" href="#seeds" aria-label="Link to Seeds">#</a></h3>
@@ -857,6 +874,7 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
     <section class="group" id="changelog">
       <h2>Changelog</h2>
       <ol class="log">
+        <li><b>Rev Q</b><time datetime="2026-11-02">2026-11-02</time><p>Defaults, not a uniform. The grammar stays fixed (the eight marks, one scale, one lamp, red and green meanings, monospace labels), and the look is now chosen per page from five settings: a palette taken from the subject, a headline face, a frame, a layout and a spacing. Headings may use one grotesk or condensed sans (<code>--font-display</code>, <code>--display-case</code>, <code>--display-weight</code>). New: <code>data-frame="paper"</code> drops the desk, <code>data-space="open"</code> opens up the gaps, and <code>.cal-grid</code> sets figures side by side. The lamp tint may mark the one live region of a figure. See <a href="#looks">Looks</a> and <code>looks.md</code>. On this site, the six examples each take their own look (with a switch to compare against the default), and the catalog's Finishes became Looks.</p></li>
         <li><b>Rev P</b><time datetime="2026-11-02">2026-11-02</time><p>Terminal spinners. They step in whole frames, like a terminal redraw, with the lamp dot as the head. <code>&lt;cal-spin&gt;</code> is now a 3×3 braille dot ring, and <code>.cal-wait</code> is a braille row, four dots by two, with the same four-<code>&lt;i&gt;</code> markup as before. New: <code>.cal-readout</code>, a waiting line with a dotted leader and a <code>&lt;cal-elapsed&gt;</code> clock that resolves in place to a green or red result. <code>.cal-scan</code> still renders but is no longer shown.</p></li>
         <li><b>Rev O</b><time datetime="2026-11-02">2026-11-02</time><p>A review of every component on this page. A theme is now three colours: title, muted, green, red and the desk derive from <code>--bg</code>, <code>--fg</code> and <code>--live</code>, so a re-seeded region stays readable, and every mark holds up in forced-colours mode. Small text reads at 4.5:1 and state marks at 3:1, and the film lamp is darker. Sign-off and tabs are wired by the kit (<code>Calibrated.signoff()</code>, <code>Calibrated.tabs()</code>). The lamp lights only what is live: a meter needle is ink unless set <code>live</code>, a wizard step is an ink star. Values past the end of a scale break off in red and state the real number, the ruler writes its value, and recipes report bad data in <code>r.warnings</code>. Toasts with an action stay until dismissed, tooltips close on Esc, the menu finishes its keyboard pattern, the pager can draw links, the empty state drops its hatch, and drawings shrink before they scroll on phones.</p></li>
         <li><b>Rev N</b><time datetime="2026-11-02">2026-11-02</time><p>A redrawn switch: a small hairline pill whose knob slides right and turns ink when on. OFF/ON words are now optional, <code>.caps</code> sets the label in legend caps for toolbars, the whole label is a 24px hit area, and it holds up in forced-colours mode and with reduced motion.</p></li>

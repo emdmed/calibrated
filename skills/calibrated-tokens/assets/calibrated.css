@@ -33,12 +33,20 @@
   }
 }
 
+/* ── page settings, set on <html> (see references/looks.md)
+   data-frame="paper": no desk; panels sit flush on the paper, split by rules.
+   data-space="open": wider gaps and section spacing, for one big figure per screen. */
+html:root[data-frame="paper"] { --desk-depth: 0%; }   /* beats a page's own dark-mode seed block */
+:root[data-space="open"] { --gap: 28px; --pad: 26px; }
+
 /* Derived tokens are declared on every theme root, so a section with its own
    data-theme (or .cal-theme plus seed overrides) recomputes them. */
 :root, [data-theme], .cal-theme {
   /* ── type: a typewriter mono for words, a tighter mono for legends and figures */
   --font-body: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-  --font-display: var(--font-body);
+  --font-display: var(--font-body);   /* headings only: may be a non-mono face (references/looks.md) */
+  --display-case: uppercase;          /* none with a sans headline face */
+  --display-weight: 500;              /* up to 700 with a sans headline face; mono titles stay 500 */
   --font-legend: "Chivo Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --fs-body: 14px;
   --fs-small: 12.5px;
@@ -129,8 +137,8 @@ svg { height: auto; }
 .up { text-transform: uppercase; }
 .title {                       /* titles: typewriter caps, medium weight, tracked */
   font-family: var(--font-display);
-  font-weight: 500;
-  text-transform: uppercase;
+  font-weight: var(--display-weight);
+  text-transform: var(--display-case);
   letter-spacing: var(--track-title);
   line-height: 1.2;
   color: var(--title);

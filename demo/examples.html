@@ -7,7 +7,7 @@
 <meta name="description" content="Five finished pages made with Calibrated: an ops report, a release go/no-go board, an explainer, an API spec sheet and a branded app screen. Each one with the request that made it and the parts it uses.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&family=Chivo:wght@700&family=Space+Grotesk:wght@500;600&family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&family=Archivo:wdth,wght@112..125,600&display=swap">
 <link rel="stylesheet" href="../skills/calibrated-tokens/assets/calibrated.css">
 <link rel="stylesheet" href="../skills/calibrated-components/assets/calibrated-components.css">
 <style>
@@ -115,6 +115,27 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
 .finish-row { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin: 0 0 14px; }
 .finish-row .chip { width: 22px; height: 12px; border: var(--line-thin) solid currentColor; display: inline-grid; grid-template-columns: 1fr 1fr 1fr; margin: 0 7px 0 3px; vertical-align: -2px; }
 
+/* ── looks: each finished page takes its look from its subject (skills/calibrated-tokens/references/looks.md).
+   html.looks-off shows them all in the default look, for comparison. */
+.looks-sw { display: inline-flex; gap: 6px; margin-left: 6px; vertical-align: baseline; }
+html:not(.looks-off) .page[data-look="ops"] { --bg: #eef0f2; --fg: #1b2026; --live: #a8430a;
+  --font-display: "Chivo", "Helvetica Neue", sans-serif; --display-weight: 700; --track-title: .04em; }
+html:not(.looks-off)[data-theme="night"] .page[data-look="ops"] { --bg: #16191c; --fg: #e3e6e8; --live: #ff9d4d; }
+html:not(.looks-off) .page[data-look="upload"] { --bg: #f4f3f0; --fg: #23262a; --live: #6a3fb5; --gutter: var(--bg); --gap: 28px;
+  --font-display: "Space Grotesk", "Helvetica Neue", sans-serif; --display-case: none; --display-weight: 600; --track-title: -.01em; }
+html:not(.looks-off)[data-theme="night"] .page[data-look="upload"] { --bg: #1c1b21; --fg: #e7e4ec; --live: #c4a8ff; }
+html:not(.looks-off) .page[data-look="upload"] :is(.cal-card, .cal-figure, .cal-panel) { border-top: var(--line-thin) solid var(--edge-strong); }
+html:not(.looks-off) .page[data-look="upload"] .cal-sec { margin-top: clamp(44px, 5vw, 68px); }
+html:not(.looks-off) .page[data-look="api"] { --bg: #eaf1f7; --fg: #12324d; --live: #0a6f83;
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif; --display-case: none; --display-weight: 600; --track-title: 0; }
+html:not(.looks-off)[data-theme="night"] .page[data-look="api"] { --bg: #0f2a44; --fg: #dbeaf5; --live: #f2c14e; }
+html:not(.looks-off) .page[data-look="api"] .cal-intro h1 { font-size: clamp(28px, 3vw, 40px); }
+html:not(.looks-off) .page[data-look="app"] { --font-display: "IBM Plex Sans Condensed", "Arial Narrow", sans-serif; --display-case: none; --display-weight: 600; --track-title: 0; }
+html:not(.looks-off) .page[data-look="supplier"] { --bg: #f6f4ef; --fg: #2a2722; --live: #2f5f8a;
+  --font-display: "Archivo", "Helvetica Neue", sans-serif; --display-weight: 600; --track-title: .04em; }
+html:not(.looks-off)[data-theme="night"] .page[data-look="supplier"] { --bg: #1e1d1a; --fg: #e9e5dc; --live: #8fb8e0; }
+html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3, .word) { font-stretch: 118%; }
+
 @media (max-width: 1100px) { .brief { grid-template-columns: 1fr; } }
 @media (max-width: 820px) { .app { grid-template-columns: 1fr; } }
 @media (max-width: 640px) {
@@ -160,6 +181,7 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
     <div class="lead">
       <h1>Six finished pages, start to end</h1>
       <p>The catalog shows one drawing per page type. These are whole pages: the kind of report, review board, explainer, spec sheet, app screen and form a team would share. Each starts with the request that made it and the numbers pasted with it, and lists the skill and parts it is built from.</p>
+      <p>Each page also chooses its own look from its subject: the palette, the headline face, the frame and the spacing. The drawings follow the same rules on every page. <span class="btn-pair looks-sw" role="group" aria-label="Looks"><button class="cal-btn" type="button" data-looks="on" aria-pressed="true">chosen looks</button><button class="cal-btn" type="button" data-looks="off" aria-pressed="false">all default</button></span></p>
       <p class="mut">All figures and instruments are live. Buttons and forms work. Every number is example data.</p>
     </div>
     <table class="cal-table toc">
@@ -183,9 +205,9 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
         <p class="ask"><span class="cal-legend">ask claude</span><q>Make this week's platform ops report as a Calibrated artifact. Lead with what needs attention.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
         <p class="data"><b>pasted with it</b>error budget 612 of 1000 min on day 19 · CI 41.2k of 50k min · release 2.14 canary: 4 of 6 regions, ap-south rolling · this week's 4 deploys with diffs</p>
       </div>
-      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>budget</code> · <code>lanes</code></dd><dt>instruments</dt><dd><code>&lt;cal-meter&gt;</code> · <code>&lt;cal-progress&gt;</code> · <code>&lt;cal-durations&gt;</code> · <code>&lt;cal-diff&gt;</code></dd><dt>parts</dt><dd>mast · intro · sections · counts · table · foot</dd></dl>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>budget</code> · <code>lanes</code></dd><dt>instruments</dt><dd><code>&lt;cal-meter&gt;</code> · <code>&lt;cal-progress&gt;</code> · <code>&lt;cal-durations&gt;</code> · <code>&lt;cal-diff&gt;</code></dd><dt>parts</dt><dd>mast · intro · sections · counts · table · foot</dd><dt>look</dt><dd>control room: cool grey, orange lamp · Chivo bold caps</dd></dl>
     </div>
-    <div class="page cal-theme" data-density="full">
+    <div class="page cal-theme" data-look="ops" data-density="full">
       <header class="cal-mast">
         <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
         <span class="word">Platform</span>
@@ -244,9 +266,9 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
         <p class="ask"><span class="cal-legend">ask claude</span><q>Turn the release 2.4 checklist into a Calibrated go / no-go board. One card per gate, with go / hold, and a sign-off I can paste into Slack.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
         <p class="data"><b>pasted with it</b><code>git log</code> of release/2.4 (5 commits, main 1 ahead) · migration log, 10 steps · the 6 PRs and the services each one touches</p>
       </div>
-      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>merge</code> · <code>timeline</code> · <code>matrix</code></dd><dt>parts</dt><dd>cards with today / drawn · keep-drop sign-off · revision triangles · note pane · sticky tally</dd></dl>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>merge</code> · <code>timeline</code> · <code>matrix</code></dd><dt>parts</dt><dd>cards with today / drawn · keep-drop sign-off · revision triangles · note pane · sticky tally</dd><dt>look</dt><dd>the defaults: film / night · Plex Mono caps · desk · cards</dd></dl>
     </div>
-    <div class="page cal-theme" data-density="full">
+    <div class="page cal-theme" data-look="release" data-density="full">
       <header class="cal-mast">
         <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
         <span class="word">Release 2.4</span>
@@ -336,9 +358,9 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
         <p class="ask"><span class="cal-legend">ask claude</span><q>Explain what happens after a customer taps upload, for the support team, as a Calibrated explainer. Use one real photo as the example.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
         <p class="data"><b>pasted with it</b>trace of one 12 MB photo through the pipeline · the resizer's job list · the account's storage breakdown</p>
       </div>
-      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>timeline</code> · <code>fanout</code> · <code>measured</code></dd><dt>parts</dt><dd>cards without compare · key/value facts · tiers</dd></dl>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>timeline</code> · <code>fanout</code> · <code>measured</code></dd><dt>parts</dt><dd>cards without compare · key/value facts · tiers</dd><dt>look</dt><dd>darkroom: graphite, violet lamp · Space Grotesk · paper · open</dd></dl>
     </div>
-    <div class="page cal-theme" data-density="full">
+    <div class="page cal-theme" data-look="upload" data-density="full">
       <header class="cal-mast">
         <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
         <span class="word">Photos</span>
@@ -405,9 +427,9 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
         <p class="ask"><span class="cal-legend">ask claude</span><q>Write the spec sheet for Orders API v3 in the Calibrated style, as an engineering drawing with a title block. Partners read this.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
         <p class="data"><b>pasted with it</b>the OpenAPI file · network diagram notes · rate limits and timeouts · key rotation runbook · change log</p>
       </div>
-      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>section</code> · <code>loop</code></dd><dt>instruments</dt><dd><code>&lt;cal-ruler&gt;</code> · <code>&lt;cal-meter&gt;</code></dd><dt>parts</dt><dd>sheet with zones · title block · stamp · code block · revision table · parameters table</dd></dl>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>section</code> · <code>loop</code></dd><dt>instruments</dt><dd><code>&lt;cal-ruler&gt;</code> · <code>&lt;cal-meter&gt;</code></dd><dt>parts</dt><dd>sheet with zones · title block · stamp · code block · revision table · parameters table</dd><dt>look</dt><dd>blueprint · Barlow Condensed · drawing sheet</dd></dl>
     </div>
-    <div class="page cal-theme" data-density="full">
+    <div class="page cal-theme" data-look="api" data-density="full">
       <div class="cal-sheet" data-zones="8x6">
         <header class="cal-mast">
           <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
@@ -487,10 +509,10 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
         <p class="ask"><span class="cal-legend">ask claude</span><q>Build the usage and limits screen for our app with the Calibrated components, in our brand: navy page, white ink, cyan lamp.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
         <p class="data"><b>pasted with it</b>brand colours · the current settings page · the usage API response</p>
       </div>
-      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-tokens</code> · <code>calibrated-components</code></dd><dt>instruments</dt><dd><code>&lt;cal-meter&gt;</code> · <code>&lt;cal-position&gt;</code> · <code>&lt;cal-durations&gt;</code></dd><dt>parts</dt><dd>tabs with counts · rows · number with units · range · tag input · a field with an error · checkbox · search with an empty state · dialog with radio and date · toasts</dd><dt>theme</dt><dd>three seed colours: <code>--bg</code> <code>--fg</code> <code>--live</code></dd></dl>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-tokens</code> · <code>calibrated-components</code></dd><dt>instruments</dt><dd><code>&lt;cal-meter&gt;</code> · <code>&lt;cal-position&gt;</code> · <code>&lt;cal-durations&gt;</code></dd><dt>parts</dt><dd>tabs with counts · rows · number with units · range · tag input · a field with an error · checkbox · search with an empty state · dialog with radio and date · toasts</dd><dt>theme</dt><dd>three seed colours: <code>--bg</code> <code>--fg</code> <code>--live</code></dd><dt>look</dt><dd>the brand’s colours (pick below) · IBM Plex Sans Condensed</dd></dl>
     </div>
     <div class="finish-row" role="group" aria-label="Brand finish" id="app-fin"></div>
-    <div class="page cal-theme" id="app-page" data-density="full" data-mode="app">
+    <div class="page cal-theme" data-look="app" id="app-page" data-density="full" data-mode="app">
       <header class="cal-mast">
         <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
         <span class="word">Northwind</span>
@@ -597,9 +619,9 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
         <p class="ask"><span class="cal-legend">ask claude</span><q>Make the sign-up form for new suppliers as a Calibrated page, in steps: company, documents, terms, then a review before they send it.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
         <p class="data"><b>pasted with it</b>the paper form suppliers fill in today · the payment terms we offer · the documents food safety asks for</p>
       </div>
-      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-components</code></dd><dt>parts</dt><dd>steps · fields with an error · select · tag input · file drop · radio · date and time · note pane · key/value review · checkbox · stamp · status badge · node row while sending</dd></dl>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-components</code></dd><dt>parts</dt><dd>steps · fields with an error · select · tag input · file drop · radio · date and time · note pane · key/value review · checkbox · stamp · status badge · node row while sending</dd><dt>look</dt><dd>ledger: warm paper, ink-blue lamp · Archivo wide caps</dd></dl>
     </div>
-    <div class="page cal-theme" data-density="full" data-mode="app">
+    <div class="page cal-theme" data-look="supplier" data-density="full" data-mode="app">
       <header class="cal-mast">
         <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
         <span class="word">Harbourline</span>
@@ -952,6 +974,18 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
   $$('[data-copy]').forEach((b) => b.addEventListener('click', () => copy(b, b.parentElement.querySelector('q').textContent)));
   const codeText = (el) => { const ln = $$('.ln', el); return ln.length ? ln.map((l) => l.textContent).join('\n') : el.textContent; };
   $$('[data-copy-from]').forEach((b) => b.addEventListener('click', () => copy(b, codeText($(b.dataset.copyFrom)))));
+})();
+</script>
+<script>
+/* looks: chosen per page, or all in the default look */
+(() => {
+  const btns = [...document.querySelectorAll('[data-looks]')];
+  btns.forEach((b) => b.addEventListener('click', () => {
+    const off = b.dataset.looks === 'off';
+    document.documentElement.classList.toggle('looks-off', off);
+    btns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    window.Calibrated && Calibrated.redraw && Calibrated.redraw();
+  }));
 })();
 </script>
 </body>

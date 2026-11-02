@@ -7,7 +7,7 @@
 <meta name="description" content="Calibrated makes the reports, reviews, explainers and screens Claude builds look like precision technical documentation. Numbers become gauges, rulers and dimension lines.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&family=Chivo:wght@700&family=Space+Grotesk:wght@500;600&family=Barlow+Condensed:wght@500;600&family=Archivo:wdth,wght@112..125,600&display=swap">
 <link rel="stylesheet" href="../skills/calibrated-tokens/assets/calibrated.css">
 <link rel="stylesheet" href="../skills/calibrated-components/assets/calibrated-components.css">
 <style>
@@ -64,7 +64,7 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
 .ba.sweep::after { opacity: 1; }
 .art .cal-mast { padding: 2px 0 12px; gap: 10px; }
 .art .cal-mast .word { font-size: 19px; }
-.art h2.hd { font-family: var(--font-display); font-weight: 500; letter-spacing: var(--track-title); text-transform: uppercase; color: var(--title); font-size: clamp(20px, 2vw, 26px); line-height: 1.2; margin: 6px 0 20px; text-wrap: balance; max-width: 32ch; }
+.art h2.hd { font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: var(--track-title); text-transform: var(--display-case); color: var(--title); font-size: clamp(20px, 2vw, 26px); line-height: 1.2; margin: 6px 0 20px; text-wrap: balance; max-width: 32ch; }
 .art .cal-mast + h2.hd { margin-top: 18px; }
 .art h2.hd .live { color: var(--live); }
 .art .cal-blocks > .cal-block { overflow-x: auto; }
@@ -707,8 +707,9 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
   </section>
 
   <section class="cal-sec" id="finishes">
-    <div class="cal-sec-h"><b>9 · Finishes</b><span>same drawings, your colours · every example re-inks</span><span>sheet 9/9</span></div>
-    <div class="finish-row" role="group" aria-label="Finish" id="finishes-row"></div>
+    <div class="cal-sec-h"><b>9 · Looks</b><span>same drawings, a look for each subject · every example changes</span><span>sheet 9/9</span></div>
+    <p class="cal-lede">Claude picks the palette and the headline face from what the page is about. The marks, the scales and the one lamp stay the same.</p>
+    <div class="finish-row" role="group" aria-label="Look" id="finishes-row"></div>
     <div class="ba">
         <div class="layer art cal-theme">
           <header class="cal-mast"><svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg><span class="word">Launch</span><span class="cal-caption lg">today</span><span class="sp"></span><span class="cal-count" data-n="1" data-noun="running" data-ink="live"></span></header>
@@ -720,7 +721,7 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
           <div class="mt"><cal-durations max="15" unit="m"><cal-span name="homepage" value="312"></cal-span><cal-span name="search" value="505"></cal-span><cal-span name="checkout" live data-live></cal-span></cal-durations></div>
         </div>
       </div>
-    <p class="ask"><span class="cal-legend">ask claude</span><q>Re-colour it with our brand: navy page, white ink, cyan lamp.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+    <p class="ask"><span class="cal-legend">ask claude</span><q>Make the launch page in a look that fits a network team, or in our brand: navy page, white ink, cyan lamp.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
   </section>
 
   <section class="cal-sec" id="get">
@@ -882,20 +883,20 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
     $$('button[data-view]').forEach((b) => b.addEventListener('click', () => { io.disconnect(); plates.forEach((ba) => clearTimeout(ba._auto)); }));
   }
 
-  /* ── finishes: re-seed every example */
+  /* ── looks: re-seed every example and swap its headline face */
   const FIN = [
     ['film', 'Film', 'Ink on paper panels, amber lamp', { '--bg': '#f4f2ec', '--fg': '#262b2e', '--muted': '#646b68', '--title': '#15191b', '--live': '#9c6a06', '--ok': '#3b7449', '--fault': '#b5402e', '--shade': '#6f746a', '--desk-depth': '9%', 'color-scheme': 'light' }],
     ['night', 'Night', 'Warm ink on slate, amber lamp', { '--bg': '#1b2225', '--fg': '#e5e0d3', '--muted': '#949c97', '--title': '#eef0ec', '--live': '#dcb662', '--ok': '#b2d49c', '--fault': '#e3735f', '--shade': '#000', '--desk-depth': '24%', 'color-scheme': 'dark' }],
-    ['harbour', 'Harbour', 'Navy, white ink, cyan lamp', { '--bg': '#10223a', '--fg': '#e9eff6', '--muted': '#9db0c6', '--title': '#ffffff', '--live': '#45d3ea', '--ok': '#6fd39a', '--fault': '#ff8070', '--shade': '#000', '--desk-depth': '24%', 'color-scheme': 'dark' }],
-    ['forest', 'Forest', 'Pine ink, olive lamp', { '--bg': '#f2f5ef', '--fg': '#1d3326', '--muted': '#55685a', '--title': '#12241a', '--live': '#5a7414', '--ok': '#2b7a46', '--fault': '#b8432f', '--shade': '#4d5a4f', '--desk-depth': '9%', 'color-scheme': 'light' }],
-    ['signal', 'Signal', 'Cool grey, orange lamp', { '--bg': '#f1f2f4', '--fg': '#1b1d22', '--muted': '#5a5f69', '--title': '#0d0e11', '--live': '#b5530c', '--ok': '#2c7a4b', '--fault': '#c22f6b', '--shade': '#5c616b', '--desk-depth': '9%', 'color-scheme': 'light' }],
-    ['plum', 'Plum', 'Dark plum, pink lamp', { '--bg': '#1d1522', '--fg': '#f0e7f3', '--muted': '#b3a2ba', '--title': '#ffffff', '--live': '#f5a3d6', '--ok': '#86d4a2', '--fault': '#ff7f6e', '--shade': '#000', '--desk-depth': '24%', 'color-scheme': 'dark' }],
+    ['blueprint', 'Blueprint', 'Deep blue, pale ink, yellow lamp · Barlow Condensed', { '--bg': '#0f2a44', '--fg': '#dbeaf5', '--muted': '#9db4c8', '--title': '#ffffff', '--live': '#f2c14e', '--ok': '#6fd39a', '--fault': '#ff8070', '--shade': '#000', '--desk-depth': '24%', 'color-scheme': 'dark', '--font-display': '"Barlow Condensed", "Arial Narrow", sans-serif', '--display-case': 'none', '--display-weight': '600', '--track-title': '0' }],
+    ['forest', 'Forest', 'Pine ink, olive lamp · Space Grotesk', { '--font-display': '"Space Grotesk", "Helvetica Neue", sans-serif', '--display-case': 'none', '--display-weight': '600', '--track-title': '-.01em', '--bg': '#f2f5ef', '--fg': '#1d3326', '--muted': '#55685a', '--title': '#12241a', '--live': '#5a7414', '--ok': '#2b7a46', '--fault': '#b8432f', '--shade': '#4d5a4f', '--desk-depth': '9%', 'color-scheme': 'light' }],
+    ['steel', 'Steel', 'Cool grey, orange lamp · Archivo wide caps', { '--font-display': '"Archivo", "Helvetica Neue", sans-serif', '--display-weight': '600', '--track-title': '.04em', '--bg': '#f1f2f4', '--fg': '#1b1d22', '--muted': '#5a5f69', '--title': '#0d0e11', '--live': '#b5530c', '--ok': '#2c7a4b', '--fault': '#c22f6b', '--shade': '#5c616b', '--desk-depth': '9%', 'color-scheme': 'light' }],
+    ['plum', 'Plum', 'Dark plum, pink lamp · Chivo bold caps', { '--font-display': '"Chivo", "Helvetica Neue", sans-serif', '--display-weight': '700', '--track-title': '.05em', '--bg': '#1d1522', '--fg': '#f0e7f3', '--muted': '#b3a2ba', '--title': '#ffffff', '--live': '#f5a3d6', '--ok': '#86d4a2', '--fault': '#ff7f6e', '--shade': '#000', '--desk-depth': '24%', 'color-scheme': 'dark' }],
   ];
   FIN.forEach((f) => { if (!f[4]) f[4] = [f[3]['--bg'], f[3]['--fg'], f[3]['--live']]; });
   const row = $('#finishes-row');
   row.innerHTML = FIN.map(([id, name, sub, , c]) => `<button class="cal-btn" type="button" data-fin="${id}" aria-pressed="false" title="${sub}"><span class="chip" aria-hidden="true"><i style="background:${c[0]}"></i><i style="background:${c[1]}"></i><i style="background:${c[2]}"></i></span>${name}</button>`).join('');
   let finish = null;
-  const KEYS = ['--bg', '--fg', '--muted', '--title', '--live', '--ok', '--fault', '--shade', '--desk-depth', 'color-scheme'];
+  const KEYS = ['--bg', '--fg', '--muted', '--title', '--live', '--ok', '--fault', '--shade', '--desk-depth', 'color-scheme', '--font-display', '--display-case', '--display-weight', '--track-title'];
   function applyFinish(id) {
     finish = id;
     const f = FIN.find((x) => x[0] === id), vars = f && f[3];

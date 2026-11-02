@@ -28,7 +28,7 @@ Labels are 11px legend type. A label's baseline sits at `y`, and its cap height 
 - `K.path(d, ink='ed', { w, dash, cap, opacity, fill })`
 - `K.rect(x, y, w, h, fill='none', stroke='ed', { w, dash, opacity })`
 - `K.circle(cx, cy, r, fill='pn', stroke='fg')`
-- `K.highlight(x, y, w, h)`: a faint lamp tint behind an area. Rarely needed: light lines, labels and outlines first. Draw it before the ink it sits under.
+- `K.highlight(x, y, w, h)`: a faint lamp tint behind an area. For the one live region of a figure (the window being measured, the area in use), when lines, labels and outlines can't show it. Draw it before the ink it sits under.
 - `K.star(x, y, r=7, ink='lv')`: the lamp, a four-point star with a soft glow. `K.node(…, 'live')` draws it. One per figure.
 - `K.centre(x1, y1, x2, y2, ink='fa')`: an ISO long-dash-dot centre line (`10 3 2 3`) for axes and lines of symmetry.
 

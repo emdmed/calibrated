@@ -1,6 +1,6 @@
 # Page patterns
 
-The first four page types are documents people read and cite. They share the same frame: **panels on the desk inside `.wrap` → mast → intro (headline beside a short lede) → numbered sections → foot**. They differ in what the sections hold. Wrap the page in `.cal-sheet` with zones and add a title block only when it needs drawing numbers and approvals.
+The first four page types are documents people read and cite. They usually run **intro (headline beside a short lede) → sections → foot**, with a mast when the page belongs to a product or a set. They differ in what the sections hold, and the look (palette, headline face, frame, layout, space) comes from the subject: see `looks.md`. The section lists below are the usual content, not a fixed order; drop or merge sections the subject doesn't need. Wrap the page in `.cal-sheet` with zones and add a title block only when it needs drawing numbers and approvals.
 
 ## 1 · Proposal / review board
 *"Here are N changes. Look at each, keep or drop."* This is the template's page.
@@ -19,7 +19,7 @@ The first four page types are documents people read and cite. They share the sam
 *"How does X work?"* There's no sign-off. Each section answers one question with drawings that measure the answer.
 
 - **Headline**: the question and a short answer, two or three lines beside the title. Not a hero: the first drawing goes on the first screen.
-- Sections in reading order. Each holds a run of `cal-card`s without `cal-compare`: the info column (number, title, *why*, `cal-kv` facts such as `input` / `output` / `cost` / `source`) and a stage the figure fills. Use a bare `cal-figure` with a caption only for a wide figure that spans the page.
+- Sections in reading order. A section holds `cal-card`s without `cal-compare` (the info column: number, title, *why*, `cal-kv` facts such as `input` / `output` / `cost` / `source`; and a stage the figure fills), or a full-width `cal-figure` with a caption for a wide drawing, or a `cal-grid` of figures. Explainers often read best on `data-frame="paper"` with `data-space="open"`.
 - **Show direction.** A cycle or a pipeline numbers its steps or draws arrows, so the reader sees where it starts and which way it runs.
 - **"How it works" isn't a flowchart.** Find what each part measures (how long it takes, how much it holds or passes, how many there are, what it can't reach) and draw that: `timeline` or `loop` for stages, with durations as dimension lines; `fanout` for hierarchies, with counts; `section` for boundaries, with hatch for what's out of reach; `merge` for branches; `matrix` for which-touches-what; `measured` for a total and its parts. A part with nothing to measure goes in the info column as text.
 - Give the reader one worked example with real numbers (one request, one file, one run) and draw that, instead of an abstract box per component.
@@ -30,7 +30,7 @@ The first four page types are documents people read and cite. They share the sam
 
 - **Headline**: the one-line state, with the live thing in lamp (`<span class="live">`).
 - **1 · Now**: instruments in a panel (`.cal-panel`): `cal-meter` against limits, `cal-progress` for pipelines, `cal-durations` for runs, and `cal-count` for queues.
-- **2 · Detail**: `lanes`, `budget`, `timeline` figures.
+- **2 · Detail**: `lanes`, `budget`, `timeline` figures, often side by side in a `cal-grid`.
 - **3 · Roll-up**: a `cal-table` with `cal-diff` cells (full density, so the +/− numbers show) and `.st` statuses.
 - No sign-off. The title block and foot show when the data was taken.
 
@@ -38,7 +38,7 @@ The first four page types are documents people read and cite. They share the sam
 *"What is this thing?"* Dimensions, limits and rules for one object (an API, a network, a service).
 
 - **Headline**: name and one-line purpose. Version and revision go in the title block.
-- **1 · Section drawing**: the `section` recipe for what's inside or outside, closed or open.
+- **1 · Section drawing**: the `section` recipe for what's inside or outside, closed or open. A spec can be one large drawing with its limits and notes beside it, instead of a run of cards.
 - **2 · Limits**: `budget` or `cal-meter` per limit, with thresholds as fault lines.
 - **3 · Commands**: a `merge`-style figure, or nodes with `K.cmd` in run order. Repeat the commands as selectable `<pre class="cal-pre">` text.
 - **4 · Table**: parameters (`cal-table` with `.num` columns).

@@ -44,7 +44,7 @@
 .cal-titleblock dt { font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--key); }
 .cal-titleblock dd { font-family: var(--font-legend); font-variant-numeric: tabular-nums; color: var(--fg); overflow-wrap: anywhere; }
 .cal-titleblock .name { grid-column: 1 / -1; }
-.cal-titleblock .name dd { font-family: var(--font-display); font-weight: 500; font-size: 17px; text-transform: uppercase; letter-spacing: var(--track-title); line-height: 1.25; white-space: normal; color: var(--title); }
+.cal-titleblock .name dd { font-family: var(--font-display); font-weight: var(--display-weight); font-size: 17px; text-transform: var(--display-case); letter-spacing: var(--track-title); line-height: 1.25; white-space: normal; color: var(--title); }
 .cal-titleblock .wide { grid-column: span 2; }
 @media (min-width: 701px) { .cal-titleblock { grid-template-columns: repeat(var(--tb-cols, 4), minmax(0, auto)); } }
 
@@ -86,12 +86,13 @@
 
 /* ── intro · a typewriter-caps headline beside a short lede */
 .cal-intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: clamp(24px, 4vw, 48px); padding: clamp(28px, 3.5vw, 44px) 0 clamp(20px, 3vw, 36px); align-items: end; }
-.cal-intro h1 { font-family: var(--font-display); font-weight: 500; font-size: var(--fs-h1); line-height: 1.12; letter-spacing: .02em; text-transform: uppercase; color: var(--title); text-wrap: balance; }
+.cal-intro h1 { font-family: var(--font-display); font-weight: var(--display-weight); font-size: var(--fs-h1); line-height: 1.12; letter-spacing: .02em; text-transform: var(--display-case); color: var(--title); text-wrap: balance; }
 .cal-intro p { max-width: 62ch; color: var(--legend); }
 .cal-intro p + p { margin-top: 12px; }
 
 /* ── section · a legend line between two rules: ── 2 · NAME  note ──────── sheet 2/3 */
 .cal-sec { margin: clamp(36px, 4vw, 52px) 0 0; }
+[data-space="open"] .cal-sec { margin-top: clamp(44px, 5vw, 68px); }
 .cal-sec-h {
   display: flex; align-items: center; gap: 10px; white-space: nowrap;
   margin-bottom: 18px;
@@ -227,7 +228,7 @@
 .cal-card { background: var(--panel); display: grid; grid-template-columns: 290px minmax(0, 1fr); min-height: 220px; position: relative; }
 .cal-card > .info { padding: 16px 18px 18px; border-right: var(--line-thin) solid var(--edge); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .cal-card > .stage, .cal-stage { padding: 14px 18px 18px; display: flex; flex-direction: column; align-items: safe center; justify-content: center; gap: 12px; min-width: 0; overflow-x: auto; }
-.cal-card h3 { font-family: var(--font-display); font-weight: 500; font-size: var(--fs-h3); line-height: 1.25; color: var(--title); text-transform: uppercase; letter-spacing: var(--track-title); text-wrap: balance; }
+.cal-card h3 { font-family: var(--font-display); font-weight: var(--display-weight); font-size: var(--fs-h3); line-height: 1.25; color: var(--title); text-transform: var(--display-case); letter-spacing: var(--track-title); text-wrap: balance; }
 .cal-card .why { font-size: 13px; color: var(--fg); max-width: 46ch; }
 .cal-card > .info > .cal-kv { margin-top: auto; }
 .cal-card .id {
@@ -404,6 +405,12 @@ textarea.cal-tally-text[hidden] { display: none; }
 .cal-spec p { font-size: 12px; color: var(--muted); line-height: 1.5; }
 
 /* ── figure · a drawing with its caption under a hairline */
+/* ── grid · figures or panels side by side, wrapping to one column when narrow */
+.cal-grid { display: grid; gap: var(--gap); grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--cal-grid-min, 420px)), 1fr)); }
+
+/* ── paper frame · no desk: panels sit flush on the paper and a rule marks each one */
+[data-frame="paper"] :is(.cal-card, .cal-figure, .cal-panel) { border-top: var(--line-thin) solid var(--edge-strong); }
+
 .cal-figure { background: var(--panel); display: grid; grid-template-rows: 1fr auto; min-width: 0; overflow-x: auto; }
 .cal-figure > svg, .cal-figure > .stage { margin: 16px 18px 14px; max-width: calc(100% - 36px); overflow: visible; justify-self: center; }
 .cal-figure > figcaption { border-top: var(--line-thin) solid var(--edge); padding: 7px 14px; font-size: 12.5px; color: var(--muted); display: flex; gap: 10px; align-items: baseline; }

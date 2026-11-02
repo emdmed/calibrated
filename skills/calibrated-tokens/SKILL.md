@@ -11,15 +11,16 @@ Calibrated draws quantities as small technical figures and keeps everything else
 - `assets/calibrated.css`: tokens, the `film` (light, default) and `night` (dark) themes, the base reset and utilities. Copy it into the project and load it first.
 - `references/theming.md`: how every colour is derived, how to make a theme from a few colours, and contrast checks.
 - `references/fonts.md`: the type roles, the Google Fonts link, self-hosting, and how the fallbacks behave.
+- `references/looks.md`: the fixed grammar and the five settings that change per page (palette, headline face, frame, layout, space). **Read it before starting a page.**
 
 ## Rules
 
 1. **Seeds.** `--bg` (the panel), `--fg` (ink) and `--live` (the lamp) set the look, with `--desk-depth` for how far the desk sinks. Every other colour comes from them through `color-mix()`: the supporting inks `--title`, `--muted`, `--ok` (check green), `--fault` (markup red) and `--shade`, and the surfaces and lines (`--gutter`, `--panel`, `--well`, `--raised`, `--edge`, `--edge-strong`, `--legend`, `--faint`, `--key`, `--glow`, `--swipe`, `--hover`, `--current`). To re-theme, change the seeds and nothing else.
-2. **Ink, and one lamp.** Draw everything in `--fg` and its derived tints. The one live or current thing per view (a running job, the selected value, the next step) is **lit by the lamp**: `--live` as a line, a word (`.live`), an outline or a small glowing star (`.star`). Never fill a box or region with it. `--swipe` is a faint lamp tint for the rare area that must read as live. `--ok` and `--fault` only state a result (passed, failed, over the limit) or a revision. Never use colour for decoration.
+2. **Ink, and one lamp.** Draw everything in `--fg` and its derived tints. The one live or current thing per view (a running job, the selected value, the next step) is **lit by the lamp**: `--live` as a line, a word (`.live`), an outline or a small glowing star (`.star`). Never fill a box or region with it. `--swipe` is a faint lamp tint for the one live region of a figure, when the live thing is an area. `--ok` and `--fault` only state a result (passed, failed, over the limit) or a revision. Never use colour for decoration.
 3. **Tone, not frames.** Surfaces are flat panels on a darker desk (`--gutter` desk < `--panel` < `--raised`; `--well` recessed), separated by gaps. The desk is dark enough (`--desk-depth`) that every panel edge is visible at a glance. Lines are hairlines: `--edge` inside, `--edge-strong` for heads and dividers. `--line-thick` (1.6px) is kept for the rare rule that must weigh more. No shadows, no rounded corners, no gradients.
-4. **Type roles.** Every word is monospace.
+4. **Type roles.** Text, labels and legends are monospace. Only headings may take another face.
    - body `--font-body` (IBM Plex Mono → `ui-monospace`) at 14px/1.6: prose and values.
-   - display `--font-display` (the same face): headlines and titles in uppercase at medium weight (500), tracked `.03em` (`.title`); section heads at `--fs-h2` (16px, 500, sentence case), and the wordmark once per page (`.word`; add `.ruled` to set it on a scale of ten with a lamp tick at 7).
+   - display `--font-display` (the same face by default): headlines and titles in uppercase at medium weight (500), tracked `.03em` (`.title`). It may be set to one grotesk or condensed sans headline face, with `--display-case` and `--display-weight` (see `looks.md`; never serif, script or italic); section heads at `--fs-h2` (16px, 500, sentence case), and the wordmark once per page (`.word`; add `.ruled` to set it on a scale of ten with a lamp tick at 7).
    - legend `--font-legend` (Chivo Mono → `ui-monospace`) at 11px, tracked `.05em`, uppercase for short labels: section heads, tags, table heads, numbers, every SVG label. Use class `.lg` (+ `.up`). Ligatures are off.
    - controls at `--fs-control` (12px): buttons, tabs and field labels. Field labels, helper text and anything longer than four words stay in sentence case. Caps are for short labels only.
 5. **Numbers are tabular** (`font-variant-numeric: tabular-nums`, already on `.lg` and `svg[data-cal]`). Zero-pad only counts that update live, so they don't jump.
@@ -46,8 +47,10 @@ Calibrated draws quantities as small technical figures and keeps everything else
 </html>
 ```
 
+7. **Page settings** on `<html>`: `data-frame="paper"` drops the desk (panels sit flush, ruled on top); `data-space="open"` doubles gaps and section spacing. Choose them, the palette and the headline face from the subject (`looks.md`).
+
 ## Brand themes
-To adapt the style to a brand, override the seeds on `:root` (or any container) after loading the file:
+Pick the seeds from the subject: a brand's colours, or a material or place it belongs to (`looks.md`). Film and night are the defaults for when nothing points elsewhere. To adapt the style to a brand, override the seeds on `:root` (or any container) after loading the file:
 ```css
 :root { --bg: #f4f6fa; --fg: #14213d; --live: #0a7d93; }
 ```

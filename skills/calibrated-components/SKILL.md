@@ -14,6 +14,7 @@ UI parts that apply the Calibrated language to every quantity: a count, a positi
 - `assets/calibrated-components.js`: the custom elements, the wiring for the controls that need a hand (textarea status line, detent, range, number, tag input, file drop, dialog openers, menus), plus `Calibrated.redraw()`, `counts()`, `sheets()`, `controls()`, `toast()` and `pager()`. Load it after `calibrated-figures.js`.
 - `references/ux-rules.md`: how to compose a page people can use: order of work, when to draw and when not to, actions, forms, words, colour meaning, and the check before you deliver. **Read it first.**
 - `references/catalog.md`: markup, attributes and variants for every part. Read it before you write markup.
+- calibrated-tokens `references/looks.md`: the five settings that change per page (palette, headline face, frame, layout, space). The parts below work with every setting.
 
 ```html
 <link rel="stylesheet" href="css/calibrated.css">
@@ -83,8 +84,8 @@ Every instrument moves, with nothing to set up. When it is half in view it sweep
 - Red means wrong or removed, green means passed or approved: an approval stamp is `<span class="cal-stamp" data-ink="ok">`.
 - A chosen row or option is boxed in ink (its `.v` label), never tinted or barred; hover moves the box. Focus is the lamp: a lamp underline on write-in lines, a lamp outline elsewhere.
 - Native elements first: `<select>`, `<dialog>`, `popover`, `<details>`, radios and checkboxes stay real, so the controls work without JS and from a file.
-- Panels, not frames: surfaces separate by tone and gaps, lines are hairlines (`--edge`, `--edge-strong`). No shadows, no radius, no gradients.
-- A card's `.id` line (number badge, where, status) opens its info column.
+- Panels, not frames: surfaces separate by tone and gaps (or by a top rule with `data-frame="paper"`), lines are hairlines (`--edge`, `--edge-strong`). No shadows, no radius, no gradients.
+- A card's `.id` line (number badge, where, status) opens its info column when the page has numbered items. Not every section needs a card: use `.cal-figure` full width, or `.cal-grid` for figures and panels side by side.
 - Every instrument draws an `<svg role="img">` with a sentence label. Add `label="…"` attributes so the sentence names the thing.
 
 ## Minimal example

@@ -100,10 +100,12 @@ Colour comes from meaning, not decoration. The lamp marks the one live thing. Re
 
 The engineering-drawing sheet (`.cal-sheet`: frame, zone markers, title block) is still in the kit as an optional extra for pages that want it. Most pages don't.
 
+**Fixed grammar, chosen look.** What follows describes the default look, not the only one. The grammar is fixed: the eight marks, one scale per figure, figures that keep every fact, one lamp per view, red and green meanings, colours derived from three seeds, monospace for every label, legend and body text, hairlines with square corners and no shadows or gradients. Five settings change from page to page, chosen from the subject: palette, headline face, frame (desk, paper or sheet), layout (cards, full-width figures, side by side, one large drawing) and space (dense or open). Generated pages change at least two of them unless the user asked for the default look. See `skills/calibrated-tokens/references/looks.md`.
+
 **Key Characteristics:**
-- Panels on a desk, with gaps between them. No thick ink frames.
+- Panels on a desk, with gaps between them, by default (or flush on paper, or in a drawing sheet). No thick ink frames.
 - Hairlines only: `--edge` inside, `--edge-strong` for heads and dividers, dashed between "today" and "drawn".
-- All monospace: typewriter caps at regular weight for titles, Chivo Mono for legends and every figure label.
+- Monospace for every label, legend and line of text; typewriter caps for headings by default, or a chosen headline face. Chivo Mono for legends and every figure label.
 - The lamp marks the one live thing, as line, text, outline or a glowing star.
 - No radius, no drop shadows, no gradients. The star's soft glow is the only blur.
 
@@ -116,7 +118,7 @@ The base is warm ink on a paper or slate panel, plus three meaningful inks: lamp
 - **Title Ink** (`title-ink` / `night-title`): Titles, the wordmark and the h1.
 
 ### Secondary
-- **Lamp** (`lamp` / `night-lamp`): The one live thing. Used as stroke and text colour: the live lane, the live station name, the live value and its box outline, the live count, the live status cell, the `.live` word in running text, and the star node. On film it's a dark amber so lamp text stays readable on paper. A 16% lamp tint (`--swipe`) exists for marking an area, and is used rarely. `--glow` (55% lamp) is the halo behind the star.
+- **Lamp** (`lamp` / `night-lamp`): The one live thing. Used as stroke and text colour: the live lane, the live station name, the live value and its box outline, the live count, the live status cell, the `.live` word in running text, and the star node. On film it's a dark amber so lamp text stays readable on paper. A 16% lamp tint (`--swipe`) marks the one live region of a figure, when the live thing is an area rather than a line. `--glow` (55% lamp) is the halo behind the star.
 
 ### Tertiary
 - **Markup Red** (`markup-red` / `night-markup`): Faults, limits, alert thresholds, invalid fields, revision triangles and the SUPERSEDED stamp. Never approvals: an "approved" stamp is green.
@@ -133,7 +135,7 @@ The base is warm ink on a paper or slate panel, plus three meaningful inks: lamp
 ### Named Rules
 **The One Lamp Rule.** Each figure, instrument and working view lights a single live item. Every recipe takes one `live` entry. Rarity is what makes the lamp readable.
 
-**The Line-Not-Fill Rule.** The lamp is a line, a word, an outline or a star. It never fills a box or a region. The faint tint is for the rare area that must read as live, never for emphasis.
+**The Line-Not-Fill Rule.** The lamp is a line, a word, an outline or a star. It never fills a box or a region. The faint tint marks the one live region of a figure (the window being measured, the area in use), never emphasis or decoration.
 
 **The Seed Rule.** A theme is three seeds (`--bg`, `--fg`, `--live`) plus `--desk-depth`. Every ink, surface, edge and wash derives from them through `color-mix()`, so theme work never adds a hard-coded hex. A theme may still override a derived ink after the kit's CSS.
 
@@ -141,6 +143,7 @@ The base is warm ink on a paper or slate panel, plus three meaningful inks: lamp
 
 **Body and Title Font:** IBM Plex Mono (with ui-monospace, SF Mono, Menlo, Consolas)
 **Legend Font:** Chivo Mono (with the same fallbacks)
+**Headline Face (optional):** one grotesk or condensed sans for headings only, chosen from the subject (Barlow Condensed, IBM Plex Sans Condensed, Space Grotesk, Archivo, Chivo). See `looks.md`.
 
 **Character:** A typewriter on a bench. Words are set in IBM Plex Mono; titles are the same face in uppercase at regular weight, tracked a little. Chivo Mono, tighter and smaller, carries every legend: labels, numbers, tags, table heads and every figure label, with tabular figures so values line up in boxes and columns.
 
@@ -154,7 +157,7 @@ The base is warm ink on a paper or slate panel, plus three meaningful inks: lamp
 - **Control** (Chivo Mono 400, 12px): Buttons and tabs in caps; field labels, group legends and helper text in sentence case. What people click or fill in is never below 12px.
 
 ### Named Rules
-**The All-Mono Rule.** Every word on the page is monospace. Titles get their weight from caps, tracking and medium (500) weight, never from bold (600+).
+**The Mono-Labels Rule.** Body text, labels, legends, numbers, table heads, controls and every figure label are monospace. Headings (the page headline, section names, card titles, the title-block name, the wordmark) are IBM Plex Mono caps by default and may take one chosen headline face instead: a grotesk or condensed sans set through `--font-display`, `--display-case` and `--display-weight`. Never a serif, a script or italic. Mono titles get their weight from caps, tracking and medium (500) weight, never bold; a sans headline face may use 500–700.
 
 **The Four-Steps Rule.** Every view reads in four steps: headline (display), section (16px, medium), block (12px medium caps, ink), then labels and scales (11px, muted or faint). If two steps look alike, the lower one gets quieter.
 
@@ -168,7 +171,9 @@ The base is warm ink on a paper or slate panel, plus three meaningful inks: lamp
 
 The page centres on a 1240px wrap (`--wrap`) with `clamp(16px, 3vw, 32px)` side padding, straight on the desk. The masthead has the mark, wordmark and caption on the left and the version on the right, closed by a hairline. The intro sets the headline beside a lede of up to 440px. Then come numbered sections. Each section head is a legend line between rules: a short rule, `1 · NAME` in ink, a muted note, a rule running to the right, and `sheet 1/3` in faint. Sections sit `clamp(36px, 4vw, 52px)` apart.
 
-Cards stack with a 14px gap (`--gap`). A card is a 290px info column beside a stage, or beside a today / drawn comparison split by a dashed hairline. The specimen grid is a hairline-ruled grid of 4 → 2 → 1 columns. Panel padding is 16–18px (`--pad`).
+That is the default frame. `data-frame="paper"` drops the desk so panels sit flush on the paper, each marked by a rule on top, and `data-space="open"` doubles the gaps and section spacing. The masthead, the `sheet n/m` numbers and the card `.id` line are optional, used when a page has several numbered items.
+
+Cards stack with a 14px gap (`--gap`). A card is a 290px info column beside a stage, or beside a today / drawn comparison split by a dashed hairline. The specimen grid is a hairline-ruled grid of 4 → 2 → 1 columns. Panel padding is 16–18px (`--pad`). Sections don't all have to be cards: a wide drawing goes in a full-width `.cal-figure`, like things go side by side in a `.cal-grid`, and a spec can be one large drawing with its notes beside it.
 
 Responsive: at ≤1100px cards stack and the specimen grid goes to 2 columns. At ≤700px the compare panes stack, tables scroll and the title block goes to 2 columns. At ≤520px the specimen grid goes to 1 column. Figures and instruments shrink to at most 80% (legends stay readable), then scroll horizontally with a dashed cut-edge cue and become a named Tab stop.
 
@@ -243,11 +248,12 @@ The demo (`demo/index.html`) and the reference (`demo/reference.html`) are docs 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** set pages as panels on a desk, separated by gaps and hairlines.
+- **Do** choose the look from the subject (palette, headline face, frame, layout, space) and change at least two settings from the defaults.
+- **Do** keep the grammar the same on every page: the marks, one scale, one lamp, the red and green meanings.
 - **Do** light the one live thing with the lamp: a line, a word, an outline or the star.
 - **Do** keep red for faults, limits and revisions, and green for passed and kept.
-- **Do** set every word in monospace: IBM Plex Mono for text and titles, Chivo Mono for legends and numbers.
-- **Do** open each card with its `.id` line and number badge.
+- **Do** set text in monospace: IBM Plex Mono for text, Chivo Mono for legends and numbers. Only headings may take another face.
+- **Do** open a card with its `.id` line and number badge when the page has numbered items to review or cite.
 - **Do** let figures scroll on narrow screens rather than drawing them below 90% of natural size.
 - **Do** re-theme by changing seeds only, and let `color-mix()` derive the rest.
 
@@ -256,7 +262,8 @@ The demo (`demo/index.html`) and the reference (`demo/reference.html`) are docs 
 - **Don't** light more than one live item in a figure or working view.
 - **Don't** frame panels in thick ink borders or round their corners.
 - **Don't** add drop shadows or gradients. The star's glow is the only one.
-- **Don't** use bold (600+) for titles. Caps, tracking and medium weight carry them.
+- **Don't** use bold (600+) for mono titles. Caps, tracking and medium weight carry them.
+- **Don't** reuse the template's layout for every subject, or use a serif, script or italic headline face.
 - **Don't** let a panel hold several groups without block heads or rules between them.
 - **Don't** draw checks or stars with text glyphs inside figures. Use the kit's marks.
 - **Don't** tilt the SUPERSEDED or verdict stamp. Markup stamps sit square.

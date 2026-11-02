@@ -8,7 +8,9 @@ Calibrated uses two monospace families, both under the SIL Open Font License and
 | display | `--font-display` | **IBM Plex Mono** 400–500, uppercase, tracked | headlines, card titles, the title-block name, the wordmark | same |
 | legend | `--font-legend` | **Chivo Mono** | 11px labels, tags, table heads, numbers, every SVG label | same |
 
-Titles get their weight from caps and tracking, not from bold. Chivo Mono is tighter than Plex at small sizes, which is why it carries the legends and every figure label.
+Titles get their weight from caps and tracking, not from bold.
+
+A page may swap the display face for one grotesk or condensed sans, for headings only (headline, section names, card titles, title-block name, wordmark). Body, labels, legends and figures stay monospace. See `looks.md` for the faces that fit and how to set `--font-display`, `--display-case` and `--display-weight`. Load it in the same Google Fonts link, e.g. `&family=Barlow+Condensed:wght@500;600`. Chivo Mono is tighter than Plex at small sizes, which is why it carries the legends and every figure label.
 
 ## Loading from Google Fonts (default)
 Put this before `calibrated.css`. The demo and the artifact template do the same, and Claude artifacts allow Google Fonts.

@@ -41,6 +41,7 @@ writeFileSync(join(out, 'assets/calibrated-inline.js'), stamp + js);
 
 const docs = {
   'skills/calibrated-tokens/references/theming.md': 'theming.md',
+  'skills/calibrated-tokens/references/looks.md': 'looks.md',
   'skills/calibrated-figures/references/marks.md': 'marks.md',
   'skills/calibrated-figures/references/recipes.md': 'recipes.md',
   'skills/calibrated-figures/references/drawing-quality.md': 'drawing-quality.md',
