@@ -19,25 +19,44 @@
 
    Full or compact: the nearest [data-density="full|compact"], or a
    density="…" attribute on the element itself. Full prints scales, boxes
-   values and adds leaders. Compact keeps the marks only and moves the
-   value to the tooltip (the <title>).
+   values and adds leaders. Compact keeps the marks and a bare reading
+   beside them (3/7, +184 −20); the full sentence is in the <title>.
 
-   Needs calibrated.css and calibrated-figures.js loaded first. */
+   Needs calibrated.css. The instruments also need calibrated-figures.js loaded
+   first; without it the controls, toast, pager, tabs, sign-off and <cal-spin>
+   still work. */
 (function (root) {
   'use strict';
-  const C = root.Calibrated;
-  if (!C) throw new Error('calibrated-components.js needs calibrated-figures.js first');
-  const { K, fmt, textWidth: tw, esc } = C;
-  if (!root.customElements) return;
+  if (typeof document === 'undefined') return;
+  /* the instruments draw with the figure kit; the controls, toast, pager, tabs, sign-off and
+     <cal-spin> work without it */
+  const C = root.Calibrated || {};
+  const FIG = !!C.K;
+  const { K, fmt, textWidth: tw } = C;
+  const esc = C.esc || ((t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'));
+  const define = (n, c) => { if (root.customElements && !customElements.get(n)) customElements.define(n, c); };
 
   const num = (el, a, d) => { const v = parseFloat(el.getAttribute(a)); return Number.isFinite(v) ? v : d; };
   const str = (el, a, d = '') => (el.hasAttribute(a) ? el.getAttribute(a) : d);
+  const group = (n) => Math.round(n).toLocaleString('en-US').replace(/,/g, ' ');
+  /* nice · the smallest 1, 2 or 5 × 10ⁿ at or above raw */
+  const nice = (raw) => { const p = Math.pow(10, Math.floor(Math.log10(raw))); return [1, 2, 5, 10].map((m) => m * p).find((m) => m >= raw * (1 - 1e-9)); };
+  const KY = 'var(--key)';   /* small text: scale numbers and names (--faint is for marks only) */
+  const warned = new Set();
+  const warn = (el, msg) => { const k = el.localName + msg; if (!warned.has(k)) { warned.add(k); console.warn(`<${el.localName}> ${msg}`); } };
+
+  if (!FIG) console.warn('calibrated-components.js: load calibrated-figures.js first to draw the <cal-*> instruments');
+  else {
   const formatter = (name, unit = '') => {
     if (name === 'pct') return (v) => fmt.pct(v);
     if (name === 'raw') return (v) => String(Math.round(v * 100) / 100) + unit;
     if (name === 'dur') return (v) => fmt.dur(v);
     return (v) => fmt.k(v) + unit;
   };
+  /* fit · cut a label with … to fit px */
+  const fit = (s, px) => { if (tw(s) <= px) return s; let t = s; while (t.length > 1 && tw(t + '…') > px) t = t.slice(0, -1); return t + '…'; };
+  /* brk · the break mark across a run that goes on past the end of its scale (over the limit) */
+  const brk = (x, y) => K.line(x - 3, y + 5, x + 1, y - 7, 'ft') + K.line(x + 1, y + 5, x + 5, y - 7, 'ft');
 
   /* a glide moves one number or a list of numbers (each part on the same clock) */
   const V = {
@@ -46,13 +65,19 @@
     mix: (f, t, e) => (Array.isArray(t) ? t.map((v, i) => (f[i] || 0) + (v - (f[i] || 0)) * e) : f + (t - f) * e),
     dist: (f, t) => (Array.isArray(t) ? Math.max(0, ...t.map((v, i) => Math.abs(v - (f[i] || 0)))) : Math.abs(t - f)),
   };
+  const media = (q) => !!(root.matchMedia && root.matchMedia(q).matches);
+
+  /* a host too narrow for its drawing scrolls: it becomes a named Tab stop and shows the cue */
+  const sized = root.ResizeObserver && new ResizeObserver((es) => es.forEach((e) => e.target.scrolls && e.target.scrolls()));
 
   class CalElement extends HTMLElement {
-    connectedCallback() { this.render(); }
+    connectedCallback() { this.render(); if (sized) sized.observe(this); }
     attributeChangedCallback() { if (this.isConnected) this.render(); }
     get density() {
       const own = this.getAttribute('density');
       if (own === 'full' || own === 'compact') return own;
+      /* in a table cell the marks are enough, unless a density is set around it */
+      if (!this.closest('[data-density]') && this.closest('.cal-table')) return 'compact';
       return C.density(this);
     }
     surface() {
@@ -66,13 +91,21 @@
       C.attr(svg, 'viewBox', `0 0 ${w} ${h}`);
       C.attr(svg, 'role', 'img');
       C.attr(svg, 'aria-label', label);
-      const minW = Math.round(w * 0.9) + 'px';   /* scroll, don't shrink legends */
-      if (w > 200 && svg.style.minWidth !== minW) svg.style.minWidth = minW;
+      /* shrink to fit down to 80% (legends stay readable), then scroll */
+      const minW = w > 200 ? Math.round(w * 0.8) + 'px' : '';
+      if (svg.style.minWidth !== minW) svg.style.minWidth = minW;
       /* each frame of a glide swaps only the parts that moved */
       C.patch(svg, `<title>${esc(label)}</title>` + markup);
     }
+    scrolls() {
+      const over = this.scrollWidth > this.clientWidth + 1;
+      if (over === this.hasAttribute('data-scroll')) return;
+      this.toggleAttribute('data-scroll', over);
+      if (over) { this.tabIndex = 0; this.setAttribute('role', 'group'); this.setAttribute('aria-label', 'drawing, scrolls sideways'); }
+      else ['tabindex', 'role', 'aria-label'].forEach((a) => this.removeAttribute(a));
+    }
     render() { try { this.paint(this.draw(this.density === 'full')); } catch (e) { console.error(this.localName, e); } }
-    disconnectedCallback() { this.halt(); }
+    disconnectedCallback() { this.halt(); if (sized) sized.unobserve(this); }
 
     /* ── motion · a reading glides to its new value, redrawing each frame.
        motion(target, scale) returns the value to draw now. The first reading
@@ -83,11 +116,11 @@
        follows the same curve TRAIL ms later, so the line moves first and the
        bar catches up. Read the trail with this.trail.
        The target can be a number or a list of numbers (all on one clock).
-       Reduced motion, a `still` attribute or no WAAPI: draw the value at once.
+       Reduced motion, print, a `still` attribute or no WAAPI: draw the value at once.
        Labels and titles must always state the target, never the frame. */
     get still() {
       return this.hasAttribute('still') || !this.animate || !root.IntersectionObserver ||
-        !!(root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches);
+        media('(prefers-reduced-motion: reduce)') || media('print');
     }
     motion(target, scale = 1) {
       if (this._to === undefined) {
@@ -157,35 +190,44 @@
     }
   }
 
-  /* ── cal-meter · a meter with a printed scale, a hatched alert zone, a needle and a boxed reading */
+  /* ── cal-meter · a meter with a printed scale, a hatched alert zone, a needle and a boxed reading.
+     The needle is ink; add `live` to light it with the lamp. Past max the needle stops at the end,
+     the run breaks off in red and the box states the real value. */
   class CalMeter extends CalElement {
-    static get observedAttributes() { return ['value', 'max', 'warn', 'label', 'format', 'unit', 'width', 'density']; }
+    static get observedAttributes() { return ['value', 'max', 'warn', 'label', 'format', 'unit', 'width', 'live', 'density']; }
     draw(full) {
-      const max = num(this, 'max', 100), v = Math.min(num(this, 'value', 0), max), warn = num(this, 'warn', max * 0.8);
+      const m0 = num(this, 'max', 100), max = m0 > 0 ? m0 : 100;
+      if (!(m0 > 0)) warn(this, 'needs max > 0');
+      const val = Math.max(0, num(this, 'value', 0)), v = Math.min(val, max), past = val > max;
+      const w0 = num(this, 'warn', max * 0.8), alert = w0 > 0 && w0 < max ? w0 : max;
       const f = formatter(str(this, 'format', 'k'), str(this, 'unit')), name = str(this, 'label', 'value');
-      const wr = warn / max, label = `${name}: ${f(v)} / ${f(max)} · ${fmt.pct(v / max, 1)}${warn < max ? `, alert at ${fmt.pct(wr)}` : ''}`;
-      /* draw the gliding value; the label above always states the real one */
-      const at = this.motion(v, max), r = at / max, shown = Number.isInteger(v) ? Math.round(at) : at;
+      const wr = alert / max, al = `alert ${Math.round(wr * 100)}%`, needle = this.hasAttribute('live') ? 'lv' : 'fg';
+      const label = `${name}: ${f(val)} of ${f(max)}, ${fmt.pct(val / max, 1)}`
+        + (past ? `, over by ${f(val - max)}` : wr < 1 ? (v > alert ? `, past the alert at ${fmt.pct(wr)}` : `, alert at ${fmt.pct(wr)}`) : '');
+      /* draw the gliding value (the needle stops at max); once landed the reading states the real one */
+      const at = this.motion(v, max), r = at / max, landed = at === v && !this.moving;
+      const shown = landed ? val : Number.isInteger(val) ? Math.round(at) : at;
       const read = (x) => `${f(x)} / ${f(max)} · ${fmt.pct(x / max, 1)}`, reading = read(shown);
       const H = K.hatch('ft', 4, 0.55);
-      const fr = this.trail / max, over = wr < 1 && r > wr;   /* the fill trails the needle */
+      const fr = this.trail / max, over = (wr < 1 && r > wr) || (past && landed);   /* the fill trails the needle */
       const meter = (x0, x1, y, labels) => {
-        const X = (q) => x0 + q * (x1 - x0); let s = '';
+        const X = (q) => x0 + q * (x1 - x0), ends = x1 - x0 < 200; let s = '';
         /* the alert label sits above the scale numbers; drop a number it would touch */
-        const alertW = labels && wr < 1 ? tw(`alert ${Math.round(wr * 100)}`) : 0;
+        const alertW = labels && wr < 1 ? tw(al) : 0;
         for (let i = 0; i <= 10; i++) {
           const M = i % 5 === 0, x = X(i / 10);
           s += K.line(x, y - 6, x, y - (M ? 18 : 12), M ? 'fa' : 'ed');
-          if (!labels || !M) continue;
+          if (!labels || !M || (ends && i === 5)) continue;
           const txt = i === 10 ? '100%' : String(i * 10), a = i === 0 ? 'start' : i === 10 ? 'end' : 'middle';
           if (alertW && i === 5 && Math.abs(X(wr) - x) < (alertW + tw(txt)) / 2 + 6) continue;
-          s += K.t(x, y - 24, txt, 'fa', a);
+          s += K.t(x, y - 24, txt, KY, a);
         }
         if (wr < 1) s += `<rect x="${X(wr)}" y="${y - 5}" width="${X(1) - X(wr)}" height="5" fill="${H.url}"/>`;
         /* the fill is ink up to the alert line and red only for the part past it */
-        s += K.line(x0, y, x1, y, 'ed') + K.rect(x0, y - 4, X(Math.min(fr, wr)) - x0, 4, 'fg', 'none');
+        s += K.line(x0, y, x1, y, 'fa') + K.rect(x0, y - 4, X(Math.min(fr, wr)) - x0, 4, 'fg', 'none');
         if (wr < 1 && fr > wr) s += K.rect(X(wr), y - 4, X(fr) - X(wr), 4, 'ft', 'none');
-        s += K.line(X(r), y - 18, X(r), y + 2, 'lv', { w: 1.6 });
+        if (past && landed) s += K.rect(x1, y - 4, 8, 4, 'ft', 'none') + brk(x1 + 12, y - 2);
+        s += K.line(X(r), y - 18, X(r), y + 2, needle, { w: 1.6 });
         return s;
       };
       if (full) {
@@ -193,21 +235,21 @@
         let g = H.def + meter(x0, x1, y, true);
         if (wr < 1) {
           /* keep the alert label inside the drawing near either end */
-          const al = `alert ${Math.round(wr * 100)}`, half = tw(al) / 2;
-          const ax = Math.min(Math.max(X(wr), x0 + half), w - half - 2);
+          const half = tw(al) / 2, ax = Math.min(Math.max(X(wr), x0 + half), w - half - 2);
           g += K.line(X(wr), y - 30, X(wr), y, 'ft', { opacity: 0.7 }) + K.t(ax, y - 34, al, 'ft', 'middle');
         }
         /* box to the side the final value takes. Gliding toward a left box, ride on the
-           right until there is room, so the box swaps sides once and early */
-        const bw = Math.max(K.boxWidth(name, reading), K.boxWidth(name, read(v))), nx = X(r);   /* no width wobble mid-glide */
-        const right = X(v / max) + 14 + bw <= w - 2 || nx - 14 - bw < 2;
+           right until there is room, so the box swaps sides once and early. A box too
+           wide for either side widens the drawing instead of leaving it */
+        const bw = Math.max(K.boxWidth(name, reading), K.boxWidth(name, read(val))), nx = X(r), fx = X(v / max);   /* no width wobble mid-glide */
+        const right = fx + 14 + bw <= w - 2 || fx - 14 - bw < 2;
         const bx = right ? nx + 14 : Math.max(2, nx - 14 - bw), lx = right ? bx : bx + bw;
         g += K.leader([[nx, y + 4], [nx, y + 24], [lx, y + 24]], false) + `<g data-cal-reading>${K.box(bx, y + 8, bw, name, reading, over ? 'ft' : 'fg')}</g>`;
-        return { w, h: y + 44, markup: g, label };
+        return { w: right ? Math.max(w, fx + 14 + bw + 2) : w, h: y + 44, markup: g, label };
       }
-      const mw = num(this, 'width', 144), y = 22, vs = f(shown), ms = '/' + f(max);
-      const vw = Math.max(tw(vs), tw(f(v))), w = mw + 10 + vw + tw(ms) + 2;   /* width from the widest, so the row doesn't reflow */
-      const g = H.def + meter(1, mw, y, false) + `<g data-cal-reading>${K.t(mw + 10 + vw, y + 1, vs, over ? 'ft' : 'fg', 'end') + K.t(mw + 10 + vw, y + 1, ms, 'fa')}</g>`;
+      const mw = num(this, 'width', 144), y = 22, vs = f(shown), ms = '/' + f(max), gap = past ? 24 : 10;
+      const vw = Math.max(tw(vs), tw(f(val))), w = mw + gap + vw + tw(ms) + 2;   /* width from the widest, so the row doesn't reflow */
+      const g = H.def + meter(1, mw, y, false) + `<g data-cal-reading>${K.t(mw + gap + vw, y + 1, vs, over ? 'ft' : 'fg', 'end') + K.t(mw + gap + vw, y + 1, ms, KY)}</g>`;
       return { w, h: y + 4, markup: g, label };
     }
   }
@@ -216,8 +258,12 @@
   class CalPosition extends CalElement {
     static get observedAttributes() { return ['index', 'count', 'label', 'width', 'density']; }
     draw(full) {
-      const n = Math.max(1, Math.round(num(this, 'count', 1))), i = Math.min(n, Math.max(1, Math.round(num(this, 'index', 1))));
-      const name = str(this, 'label'), top = full && name ? 18 : 0;
+      const c = Math.round(num(this, 'count', 1)), name = str(this, 'label'), top = full && name ? 18 : 0;
+      if (c < 1) {
+        const g = (top ? K.t(0, 11, name, KY) : '') + K.t(0, top + 14, 'none', KY);
+        return { w: Math.max(tw('none'), top ? tw(name) : 0) + 2, h: top + 20, markup: g, label: `${name ? name + ': ' : ''}none` };
+      }
+      const n = c, i = Math.min(n, Math.max(1, Math.round(num(this, 'index', 1))));
       const label = `${name ? name + ': ' : ''}${i} of ${n}`;
       /* the marker glides between items (0-based, fractional mid-glide); the
          ticks it passes darken as the trail goes by; the reading counts through */
@@ -228,37 +274,42 @@
       if (n <= 24) {
         const step = n > 12 ? 10 : 16, x0 = 5, sx = x0 + p * step; x1 = x0 + (n - 1) * step;
         g += K.line(x0, y, x1, y, 'e1');
-        for (let k = 0; k < n; k++) { const x = x0 + k * step; if (Math.abs(x - sx) >= 5) g += K.line(x, y - 4, x, y + 4, k < t - 0.5 ? 'mu' : 'ed'); }
+        for (let k = 0; k < n; k++) { const x = x0 + k * step; if (Math.abs(x - sx) >= 5) g += K.line(x, y - 4, x, y + 4, k < t - 0.5 ? 'mu' : 'fa'); }
         g += K.rect(sx - 4, y - 4, 8, 8, 'fg', 'none');
         x1 += 5;
       } else {
-        const x0 = 1; x1 = num(this, 'width', 160); const X = K.scale(x0, x1, 1, n);
-        const major = n > 500 ? 100 : n > 100 ? 50 : 10, minor = major / 5;
-        g += K.line(x0, y, x1, y, 'ed');
+        /* a major tick every round step, about 8 of them, so a long list stays a scale */
+        const x0 = 5; x1 = num(this, 'width', 160); const X = K.scale(x0, x1, 1, n);
+        const major = Math.max(10, nice(n / 8)), minor = major / 5;
+        g += K.line(x0, y, x1, y, 'fa');
         for (let v = 0; v <= n; v += minor) if (v >= 1 || v === 0) { const xx = X(Math.max(1, v)), M = v % major === 0; g += K.line(xx, y, xx, y + (M ? 5 : 3), M ? 'fa' : 'ed'); }
         g += `<path d="M${X(p + 1).toFixed(2)} ${y - 2}l-4 -7h8z" style="fill:var(--fg)"/>`;
       }
       if (full) {
-        if (name) g += K.t(0, 11, name, 'fa');
+        if (name) g += K.t(0, 11, name, KY);
         g += `<g data-cal-reading>${K.count(x1 + 10, y, read)}</g>`;
-        return { w: x1 + 12 + cw, h: y + 10, markup: g, label };
+        return { w: Math.max(x1 + 12 + cw, name ? tw(name) + 2 : 0), h: y + 10, markup: g, label };
       }
-      return { w: x1 + 2, h: y + 10, markup: g, label };
+      /* compact keeps a bare reading beside the marks */
+      g += `<g data-cal-reading>${K.t(x1 + 8, y + 4, read, KY)}</g>`;
+      return { w: x1 + 10 + tw(`${n}/${n}`), h: y + 10, markup: g, label };
     }
   }
 
-  /* ── cal-progress · steps as nodes: done ■, to do □, needs you ■ (fault), running ✦ (the lamp star) */
+  /* ── cal-progress · steps as nodes: done ■, to do □, needs you ■ (fault), running ✦ (the lamp star).
+     One lamp: only the first running step is lit. */
   class CalProgress extends CalElement {
     static get observedAttributes() { return ['states', 'done', 'total', 'live', 'fault', 'live-label', 'fault-label', 'done-label', 'step', 'density']; }
     /* steps fill at one even pace, 50ms each, however far the jump */
     timing(from, to) { return { ms: Math.max(150, Math.round(Math.abs(to - from) * 50)), curve: (q) => q }; }
     states() {
-      if (this.hasAttribute('states')) return str(this, 'states').split(/[\s,]+/).filter(Boolean);
-      const total = num(this, 'total', 1), done = num(this, 'done', 0);
-      return K.states(total, done, num(this, 'live', 0) - 1, num(this, 'fault', 0) - 1);
+      const s = this.hasAttribute('states') ? str(this, 'states').split(/[\s,]+/).filter(Boolean)
+        : K.states(num(this, 'total', 1), num(this, 'done', 0), num(this, 'live', 0) - 1, num(this, 'fault', 0) - 1);
+      const first = s.indexOf('live');
+      return s.map((x, i) => (x === 'live' && i !== first ? 'todo' : x));
     }
     draw(full) {
-      const fin = this.states(), n = fin.length, step = num(this, 'step', 18);
+      const fin = this.states(), n = fin.length, step = num(this, 'step', n > 30 ? Math.max(10, Math.floor(540 / n)) : 18);
       const done = fin.filter((s) => s === 'done').length, live = fin.indexOf('live'), fault = fin.indexOf('fault');
       /* motion · the live star leads, stepping node to node; done squares latch
          behind it on the trail; a fault shows once the glide lands. A states=""
@@ -277,38 +328,48 @@
             st = st.map((s, k) => (k >= lo && k < hi && s === 'done' ? 'todo' : s));
         }
       }
-      const ll = str(this, 'live-label'), dl = str(this, 'done-label');
+      const ll = str(this, 'live-label'), dl = str(this, 'done-label'), fl = str(this, 'fault-label', 'needs you');
       /* shift right if the done label is wider than the run it measures */
-      const x0 = Math.max(9, full && dl && done > 1 ? tw(dl) / 2 + 2 - (done - 1) * step / 2 : 9);
+      const x0 = Math.max(9, full && dl && done >= 1 ? tw(dl) / 2 + 2 - (done - 1) * step / 2 : 9);
       const top = full && dl ? 30 : 0, y = top + 10, x1 = x0 + (n - 1) * step;
       let g = K.nodes(x0, y, step, st, { size: 8 });
       const read = `${shown}/${n}`;
       let w = x1 + 10, h = y + 12;
       if (full) {
-        if (dl && done > 1) g += K.dim(x0, x0 + (done - 1) * step, y - 18, dl);   /* fixed at the final run: the nodes fill into it */
-        g += `<g data-cal-reading>${K.count(x1 + 16, y, read, landed && done === n ? 'ok' : 'fg')}</g>`;
+        /* fixed at the final run: the nodes fill into it. One done step gets the label over its node */
+        if (dl && done > 1) g += K.dim(x0, x0 + (done - 1) * step, y - 18, dl);
+        else if (dl && done === 1) g += K.line(x0, y - 14, x0, y - 7, 'fa') + K.t(x0, y - 18, dl, 'mu', 'middle');
+        g += `<g data-cal-reading>${K.count(x1 + 16, y, read, landed && n > 0 && done === n ? 'ok' : 'fg')}</g>`;
         w = x1 + 18 + K.countWidth(`${n}/${n}`);   /* widest reading, so nothing reflows */
-        /* caption centred under its node, clamped so it never leaves the drawing */
-        const caption = (i, text, ink, show = true) => {
-          const half = tw(text) / 2, cx = Math.max(half, x0 + i * step);
-          if (show) g += K.leader([[x0 + i * step, y + 6], [x0 + i * step, y + 12]], false) + K.t(cx, y + 24, text, ink, 'middle');
-          w = Math.max(w, cx + half + 2); h = y + 28;   /* room kept while hidden */
+        /* caption centred under its node, clamped so it never leaves the drawing; a second
+           caption takes the row below */
+        const caption = (i, text, ink, show, row) => {
+          const half = tw(text) / 2, cx = Math.max(half, x0 + i * step), cy = y + 24 + row * 14;
+          if (show) g += K.leader([[x0 + i * step, y + 6], [x0 + i * step, cy - 12]], false) + K.t(cx, cy, text, ink, 'middle');
+          w = Math.max(w, cx + half + 2); h = Math.max(h, cy + 4);   /* room kept while hidden */
         };
-        if (live >= 0 && ll) caption(live, ll, 'lv');
-        else if (fault >= 0) caption(fault, str(this, 'fault-label', 'needs you'), 'ft', landed);
-        if (dl && done > 1) w = Math.max(w, x0 + (done - 1) * step / 2 + tw(dl) / 2 + 2);
+        const lit = live >= 0 && ll;
+        if (lit) caption(live, ll, 'lv', true, 0);
+        if (fault >= 0) caption(fault, fl, 'ft', landed, lit ? 1 : 0);
+        if (dl && done >= 1) w = Math.max(w, x0 + (done - 1) * step / 2 + tw(dl) / 2 + 2);
+      } else {
+        g += `<g data-cal-reading>${K.t(x1 + 12, y + 4, read, KY)}</g>`;
+        w = x1 + 14 + tw(`${n}/${n}`);
       }
-      const label = `${done} of ${n} done` + (live >= 0 ? `, step ${live + 1} running` : '') + (fault >= 0 ? `, step ${fault + 1} needs attention` : '');
+      const label = `${done} of ${n} done${dl ? ` (${dl})` : ''}`
+        + (live >= 0 ? `, step ${live + 1} running${ll ? ` (${ll})` : ''}` : '') + (fault >= 0 ? `, step ${fault + 1}: ${fl}` : '');
       return { w, h, markup: g, label };
     }
   }
 
-  /* ── cal-diff · added to the right, removed to the left of a centre tick; log past the knee */
+  /* ── cal-diff · added to the right, removed to the left of a centre tick; log past the knee.
+     The name column is a fixed width (name-width, default 64), so a column of diffs shares one
+     centre line; a longer name is cut with … and led to its bars by a dotted line. */
   class CalDiff extends CalElement {
     static get observedAttributes() { return ['added', 'removed', 'knee', 'max', 'label', 'name-width', 'density']; }
     draw(full) {
-      const a = Math.max(0, num(this, 'added', 0)), r = Math.max(0, num(this, 'removed', 0));
-      const knee = num(this, 'knee', 200), max = num(this, 'max', 100000), name = str(this, 'label');
+      const a = Math.max(0, num(this, 'added', 0)), r = Math.max(0, num(this, 'removed', 0)), name = str(this, 'label');
+      const k0 = num(this, 'knee', 200), knee = k0 > 0 ? k0 : 200, m0 = num(this, 'max', 100000), max = m0 > knee ? m0 : knee * 10;
       const span = 130, kneePx = 50, decades = Math.log10(max / knee);
       const F = (v) => (v <= 0 ? 0 : v <= knee ? v / knee * kneePx : kneePx + Math.min(1, Math.log10(v / knee) / decades) * (span - kneePx));
       const inv = (px) => (px <= kneePx ? px / kneePx * knee : knee * Math.pow(10, (px - kneePx) / (span - kneePx) * decades));
@@ -321,7 +382,7 @@
       const la = '+' + fmt.k(shownA), lr = '−' + fmt.k(shownR);
       /* fixed side widths so a column of diffs shares one centre line */
       const side = full ? span + 10 + Math.max(tw('+000.0k'), tw('+' + fmt.k(a)), tw('−' + fmt.k(r))) : span + 4;
-      const nameW = full && name ? Math.max(num(this, 'name-width', 64), tw(name) + 12) : 0;
+      const nameW = full && name ? Math.max(24, num(this, 'name-width', 64)) : 0, nm = nameW ? fit(name, nameW - 12) : '';
       const cx = nameW + side, y = 12, w = cx + side, on = (px) => px > 0.05;
       let g = '';
       [cx - kneePx, cx + kneePx].forEach((x) => { g += K.line(x, y - 9, x, y + 9, 'ed', { dash: '1 3' }); });
@@ -330,20 +391,33 @@
       if (on(pa)) g += K.line(cx + pa, y - 4, cx + pa, y + 4, 'ok');
       if (on(tr)) g += K.line(cx - tr, y, cx, y, 'ft', { w: 2 });
       if (on(pr)) g += K.line(cx - pr, y - 4, cx - pr, y + 4, 'ft');
+      /* past max the bar breaks off before its end tick */
+      if (landed && a > max) g += brk(cx + span - 8, y);
+      if (landed && r > max) g += brk(cx - span + 6, y);
+      const label = `${name ? name + ': ' : ''}${a} lines added, ${r} removed` + (a > max || r > max ? `, beyond the scale at ${fmt.k(max)}` : '');
       if (full) {
         let txt = '';
         if (on(pa)) txt += K.t(cx + pa + 8, y + 4, la, 'ok');
         if (on(pr)) txt += K.t(cx - pr - 8, y + 4, lr, 'ft', 'end');
         if (txt) g += `<g data-cal-reading>${txt}</g>`;
-        if (!a && !r && !on(pa) && !on(pr)) g += K.t(cx + 8, y + 4, 'no changes', 'fa');
-        if (name) g += K.t(0, y + 4, name, 'fa');
+        if (!a && !r && !on(pa) && !on(pr)) g += K.t(cx + 8, y + 4, 'no changes', KY);
+        if (nm) {
+          const x0 = tw(nm) + 6, x1 = cx - (on(pr) ? pr + 14 + tw(lr) : 6);
+          g += K.t(0, y + 4, nm, KY) + (x1 - x0 > 8 ? K.line(x0, y, x1, y, 'fa', { dash: '1 3' }) : '');
+        }
+      } else {
+        /* compact: the bare counts after the marks */
+        const s = `+${fmt.k(shownA)} −${fmt.k(shownR)}`;
+        g += `<g data-cal-reading>${K.t(w + 6, y + 4, s, KY)}</g>`;
+        return { w: w + 8 + Math.max(tw(s), tw(`+${fmt.k(a)} −${fmt.k(r)}`)), h: 24, markup: g, label };
       }
-      return { w, h: 24, markup: g, label: `${name ? name + ': ' : ''}${a} lines added, ${r} removed` };
+      return { w, h: 24, markup: g, label };
     }
   }
 
 
-  /* ── cal-durations · several runs on one shared ruler; a live run is lit by the lamp and grows a dashed tail */
+  /* ── cal-durations · several runs on one shared ruler; a live run is lit by the lamp and grows a
+     dashed tail. One lamp: only the first live span is lit; a run past max breaks off in red. */
   class CalSpan extends HTMLElement {
     static get observedAttributes() { return ['name', 'value', 'start', 'end', 'live']; }
     attributeChangedCallback() { const p = this.closest('cal-durations'); if (p && p.isConnected && p.render) p.render(); }
@@ -356,7 +430,7 @@
       this._mo = new MutationObserver((ms) => { if (ms.some((m) => [...m.addedNodes, ...m.removedNodes].some(isSpan))) this.render(); });
       this._mo.observe(this, { childList: true });
     }
-    disconnectedCallback() { if (this._mo) this._mo.disconnect(); clearInterval(this._tick); }
+    disconnectedCallback() { super.disconnectedCallback(); if (this._mo) this._mo.disconnect(); clearInterval(this._tick); this._tick = null; }
     /* grow · seconds a ticking span has run since this element first drew.
        Motion glides each span's length as of that moment (its base), and the
        ticking part is added on top, so the clock never starts a glide but a
@@ -385,23 +459,25 @@
       if (!ticking && this._tick) { clearInterval(this._tick); this._tick = null; }
     }
     draw(full) {
-      const rows = this.spans(), unit = str(this, 'unit', 'm'), div = unit === 'h' ? 3600 : unit === 's' ? 1 : 60;
+      const rows = this.spans(), u = str(this, 'unit', 'm'), unit = u === 'h' || u === 's' ? u : 'm', div = unit === 'h' ? 3600 : unit === 's' ? 1 : 60;
       const longest = Math.max(1, ...rows.map((r) => r.v / div));
       /* auto scale: the smallest round major that fits the longest run in 2–5 majors */
       const major = [1, 2, 5, 10, 15, 20, 30, 60, 120, 300, 600].find((m) => longest / m <= 5) || 1200;
       const max = num(this, 'max', Math.ceil(longest / major) * major);
-      const nameW = Math.max(40, ...rows.map((r) => tw(r.name))) + 16;
-      const w = num(this, 'width', 480), valW = 70, x0 = nameW, x1 = w - valW - (full ? 48 : 10), X = K.scale(x0, x1, 0, max);
+      /* names take at most 30% of the width, cut with … past that, so the ruler keeps its room */
+      const w = num(this, 'width', 480), names = rows.map((r) => fit(r.name, w * 0.3));
+      const nameW = Math.max(40, ...names.map((s) => tw(s))) + 16;
+      const valW = 70, x0 = nameW, x1 = w - valW - (full ? 48 : 10), X = K.scale(x0, x1, 0, max);
       let g = '', y0;
       if (full) {
         const step = max <= 20 ? 1 : max <= 60 ? 5 : 10, lab = (v) => v + unit;
         /* number every major and always the end of the scale */
         const every = [5, 4, 2, 1].find((e) => max % (step * e) === 0 && max / (step * e) <= 6) || 5;
         g += K.ruler(x0, x1, 22, max, step, every, lab, true);
-        if (max % (step * every)) g += K.line(x1, 22, x1, 16, 'fa') + K.t(x1, 12, lab(max), 'fa', 'middle');
+        if (max % (step * every)) g += K.line(x1, 22, x1, 16, 'fa') + K.t(x1, 12, lab(max), KY, 'middle');
         y0 = 44;
       } else y0 = 10;
-      const gap = full ? 22 : 14;
+      const gap = full ? 22 : 14, lamp = rows.findIndex((r) => r.live);
       /* motion · bars grow out from the start line and glide to new values. A
          ticking span glides by its base (see spans), so a new start glides but
          the tick every second just redraws, without a glide or a blink. The end
@@ -411,47 +487,65 @@
       let txt = '';
       rows.forEach((r, i) => {
         const v = len(r, at[i] || 0), y = y0 + i * gap, xe = X(Math.min(max, v / div)), xt = X(Math.min(max, len(r, tr[i] || 0) / div));
-        const c = r.live ? 'lv' : full ? 'fg' : 'mu', lab = fmt.dur(this.moving ? Math.round(v) : r.v);
-        g += K.t(x0 - 10, y + 4, r.name, 'fg', 'end');
+        const lit = r.live && i === lamp, c = lit ? 'lv' : full ? 'fg' : 'mu', lab = fmt.dur(this.moving ? Math.round(v) : r.v);
+        g += K.t(x0 - 10, y + 4, names[i], 'fg', 'end');
         if (xt > x0) g += K.line(x0, y, xt, y, c, { w: full ? 1.6 : 1.3 });
         if (full) g += K.line(x0, y - 4, x0, y + 4, 'fa');
+        if (!this.moving && r.v / div > max) g += brk(x1 - 6, y);
         if (r.live) {
           g += K.line(xe, y, full ? xe + 40 : Math.min(xe + 40, x1), y, 'fa', { dash: '2 3' });
-          if (full) g += K.node(xe, y, 'live');
-          txt += K.t(full ? xe + 48 : x1 + 10, y + 4, lab, 'lv');
+          if (full) g += lit ? K.node(xe, y, 'live') : K.line(xe, y - 4, xe, y + 4, 'fg');
+          txt += K.t(full ? xe + 48 : x1 + 10, y + 4, lab, lit ? 'lv' : 'mu');
         } else {
           if (full) g += K.line(xe, y - 4, xe, y + 4, 'fg');
           txt += K.t(full ? xe + 8 : x1 + 10, y + 4, lab, 'mu');
         }
       });
       g += `<g data-cal-reading>${txt}</g>`;
-      const label = 'Durations: ' + rows.map((r) => `${r.name} ${r.live ? 'running for' : 'took'} ${fmt.dur(r.v)}`).join('; ');
-      return { w, h: y0 + (rows.length - 1) * gap + 12, markup: g, label };
+      const label = 'Durations: ' + (rows.length ? rows.map((r) => `${r.name || 'run'} ${r.live ? 'running for' : 'took'} ${fmt.dur(r.v)}${r.v / div > max ? ' (past the scale)' : ''}`).join('; ') : 'none');
+      return { w, h: y0 + (Math.max(1, rows.length) - 1) * gap + 12, markup: g, label };
     }
   }
 
-  /* ── cal-ruler · a standalone scale */
+  /* ── cal-ruler · a standalone scale. With value="…" a lamp marker sits on it and its value is
+     boxed on a short leader (full density); a value past either end pins the marker and boxes the
+     real value in red. Compact drops the numbers and the box. */
   class CalRuler extends CalElement {
     static get observedAttributes() { return ['min', 'max', 'step', 'every', 'unit', 'width', 'up', 'value', 'density']; }
-    draw() {
-      const min = num(this, 'min', 0), max = num(this, 'max', 100), step = num(this, 'step', (max - min) / 10);
-      const every = num(this, 'every', 5), unit = str(this, 'unit'), w = num(this, 'width', 320), up = this.hasAttribute('up');
-      const f = (v) => (v === 0 ? '0' : Math.round(v * 100) / 100 + unit), marked = this.hasAttribute('value');
-      /* the marker sits on the side away from the numbers; leave room for it and for the last number */
-      const mk = marked ? 12 : 0, y = up ? 22 : 4 + mk, x0 = 6, x1 = w - Math.max(8, tw(f(max)) / 2 + 2);
-      let g = K.ruler(x0, x1, y, max, step, every, f, up, min);
+    draw(full) {
+      let min = num(this, 'min', 0), max = num(this, 'max', 100);
+      if (min > max) { warn(this, 'has min > max; drawn swapped'); [min, max] = [max, min]; }
+      if (!(max > min)) { warn(this, 'needs max > min'); max = min + 1; }
+      /* never more than 200 ticks: a step that small widens to a round one */
+      let step = num(this, 'step', (max - min) / 10);
+      if (!(step > 0)) { warn(this, 'needs step > 0'); step = (max - min) / 10; }
+      if ((max - min) / step > 200) { warn(this, 'step too small for the range; widened'); step = nice((max - min) / 100); }
+      let every = Math.max(1, Math.round(num(this, 'every', 5)));
+      const unit = str(this, 'unit'), w = num(this, 'width', 320), up = this.hasAttribute('up');
+      const f = (v) => (v === 0 ? '0' : (Math.abs(v) >= 10000 ? fmt.k(v) : String(Math.round(v * 100) / 100)) + unit), marked = this.hasAttribute('value');
+      /* the marker (and its box) sit on the side away from the numbers; leave room for them and for the last number */
+      const mk = marked ? 12 + (full ? 22 : 0) : 0, y = up ? 22 : 4 + mk, x0 = 6, x1 = w - Math.max(8, tw(f(max)) / 2 + 2);
+      /* numbers never closer than the widest one and a gap: number every 2nd, 4th … major instead */
+      const room = (x1 - x0) / (Math.max(tw(f(min)), tw(f(max))) + 12);
+      while ((max - min) / (step * every) > Math.max(1, room)) every *= 2;
+      let g = K.ruler(x0, x1, y, max, step, every, full ? f : () => '', up, min), label = `Scale from ${f(min)} to ${f(max)}`;
       if (marked) {
         /* motion · the marker sweeps in from min when half in view, then glides
            to new values on the shared clock and blinks twice on landing. */
-        const X = K.scale(x0, x1, min, max), v = Math.min(max, Math.max(min, num(this, 'value', min)));
-        const at = min + this.motion(v - min, max - min);
-        g += `<path data-cal-reading d="M${X(at).toFixed(2)} ${up ? y + 2 : y - 2}l-5 ${up ? 9 : -9}h10z" style="fill:var(--live);filter:drop-shadow(0 0 2px var(--glow))"/>`;
+        const raw = num(this, 'value', min), X = K.scale(x0, x1, min, max), v = Math.min(max, Math.max(min, raw)), beyond = raw !== v;
+        const at = min + this.motion(v - min, max - min), mx = X(at), landed = at === v && !this.moving;
+        let m = `<path d="M${mx.toFixed(2)} ${up ? y + 2 : y - 2}l-5 ${up ? 9 : -9}h10z" style="fill:var(--live)"/>`;
+        if (full) {
+          const s = f(landed ? raw : at), cw = K.countWidth(s), bx = Math.min(Math.max(0, mx - cw / 2), w - cw - 1), by = up ? y + 23 : y - 23;
+          m += K.line(mx, up ? y + 11 : y - 11, mx, up ? y + 15 : y - 15, 'fa') + K.count(bx, by, s, landed && beyond ? 'ft' : 'fg');
+        }
+        g += `<g data-cal-reading>${m}</g>`;
+        label += `, marker at ${f(v)}` + (beyond ? `, the value ${f(raw)} is beyond the scale` : '');
       }
-      return { w, h: (up ? 30 : 26) + mk, markup: g, label: `Scale from ${f(min)} to ${f(max)}` + (this.hasAttribute('value') ? `, marker at ${f(num(this, 'value', min))}` : '') };
+      return { w, h: up ? y + 8 + mk : y + 22, markup: g, label };
     }
   }
 
-  const define = (n, c) => { if (!customElements.get(n)) customElements.define(n, c); };
   define('cal-meter', CalMeter);
   define('cal-position', CalPosition);
   define('cal-progress', CalProgress);
@@ -459,22 +553,28 @@
   define('cal-span', CalSpan);
   define('cal-durations', CalDurations);
   define('cal-ruler', CalRuler);
+  }
 
   /* redraw every instrument when any [data-density] changes */
   const ALL = 'cal-meter,cal-position,cal-progress,cal-diff,cal-durations,cal-ruler';
   const redraw = (scope = document) => scope.querySelectorAll(ALL).forEach((el) => el.render && el.render());
-  new MutationObserver((ms) => { if (ms.some((m) => m.attributeName === 'data-density')) redraw(); })
-    .observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ['data-density'] });
-
-  /* redraw once fonts are in, so measured boxes fit */
-  C.ready(() => redraw());
+  if (FIG) {
+    new MutationObserver((ms) => { if (ms.some((m) => m.attributeName === 'data-density')) redraw(); })
+      .observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ['data-density'] });
+    /* redraw once fonts are in, so measured boxes fit */
+    C.ready(() => redraw());
+    /* print and PDF: every instrument shows its final value, seen or not */
+    root.addEventListener('beforeprint', () => document.querySelectorAll(ALL).forEach((el) => { if (el.halt) { el.halt(); el.render(); } }));
+  }
 
   /* boxed counts: <span class="cal-count" data-n="3" data-noun="places">; add data-pad="2" to
-     zero-pad a count that changes live, so the layout doesn't jump */
+     zero-pad a count that changes live, so the layout doesn't jump. Long counts are grouped
+     (1 234 567); an empty data-n leaves the markup as written. */
   function counts(scope = document) {
     scope.querySelectorAll('.cal-count[data-n]').forEach((el) => {
-      const pad = parseInt(el.dataset.pad || '1', 10), n = el.dataset.n;
-      el.innerHTML = `<b>${esc(String(n).padStart(pad, '0'))}</b>` + (el.dataset.noun ? `<span>${esc(el.dataset.noun)}</span>` : '');
+      const n = String(el.dataset.n).trim(); if (n === '') return;
+      const pad = parseInt(el.dataset.pad || '1', 10), shown = /^\d{5,}$/.test(n) ? group(+n) : n.padStart(pad, '0');
+      el.innerHTML = `<b>${esc(shown)}</b>` + (el.dataset.noun ? `<span>${esc(el.dataset.noun)}</span>` : '');
       el.setAttribute('role', 'img');   /* so the label is read, not "zero three" */
       el.setAttribute('aria-label', `${n} ${el.dataset.noun || ''}`.trim());
     });
@@ -516,7 +616,6 @@
   /* ── controls · the few CSS parts that need a hand. Listeners sit on the document, so
      parts added later work too; controls(scope) paints their resting state (call it after
      inserting markup, like counts()). */
-  const group = (n) => Math.round(n).toLocaleString('en-US').replace(/,/g, ' ');
   const digits = (s) => parseInt(String(s).replace(/[^\d-]/g, ''), 10);
   const fileSize = (b) => (b >= 1e6 ? (b / 1e6).toFixed(1) + ' MB' : b >= 1e3 ? Math.round(b / 1e3) + ' KB' : b + ' B');
 
@@ -632,6 +731,85 @@
     if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
   });
 
+  /* ── tabs · .cal-tabs[role=tablist] > button[role=tab]. A click, ← → or Home / End selects; the
+     tabs are one Tab stop (roving tabindex) and the panel named by each tab's aria-controls shows
+     only while its tab is selected. tabs(scope) paints the resting state; a change fires
+     `cal-tab` on the tab. */
+  const tabList = (list) => [...list.querySelectorAll(':scope > [role="tab"]')];
+  function selectTab(t) {
+    tabList(t.parentElement).forEach((x) => {
+      const sel = x === t, p = x.getAttribute('aria-controls') && document.getElementById(x.getAttribute('aria-controls'));
+      x.setAttribute('aria-selected', String(sel)); x.tabIndex = sel ? 0 : -1;
+      if (p) p.hidden = !sel;
+    });
+  }
+  function tabs(scope = document) {
+    scope.querySelectorAll('.cal-tabs[role="tablist"]').forEach((list) => {
+      const all = tabList(list); if (!all.length) return;
+      all.forEach((x) => { if (x.localName === 'button' && !x.hasAttribute('type')) x.type = 'button'; });
+      selectTab(all.find((x) => x.getAttribute('aria-selected') === 'true') || all[0]);
+    });
+  }
+  on('click', '.cal-tabs[role="tablist"] > [role="tab"]', (t) => {
+    if (t.disabled || t.getAttribute('aria-selected') === 'true') return;
+    selectTab(t); t.dispatchEvent(new CustomEvent('cal-tab', { bubbles: true }));
+  });
+  on('keydown', '.cal-tabs[role="tablist"] > [role="tab"]', (t, e) => {
+    const all = tabList(t.parentElement).filter((x) => !x.disabled), i = all.indexOf(t);
+    const k = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: all.length - 1 }[e.key];
+    if (k === undefined || !all.length) return;
+    e.preventDefault();
+    const to = all[(k + all.length) % all.length];
+    to.focus(); to.click();   /* a click, so the page's own click handlers run too */
+  });
+
+  /* ── sign-off · .cal-card > .cal-sign > .cal-btn[data-v="keep|rework|drop"][aria-pressed]. Pressing
+     one presses only it and sets the card's data-verdict and data-state (ok · rework · dropped);
+     rework shows the card's .note line. Every .cal-tally counts the signed cards into its
+     [data-tally="n"] and its [data-tally="copy"] button copies one line per card, with the rework
+     note; if the clipboard is blocked the lines appear in a selected text box under the tally.
+     signoff() repaints the tallies (call it after adding cards). A change fires `cal-signoff`. */
+  const VERDICT = { ok: 'keep', live: 'rework', fault: 'drop' }, STATE = { keep: 'ok', rework: 'rework', drop: 'dropped' };
+  const signed = () => [...document.querySelectorAll('.cal-card')].filter((c) => c.querySelector('.cal-sign .cal-btn[aria-pressed]'));
+  const tallyPart = (t, k) => t.querySelector(`[data-tally="${k}"]`) || t.querySelector(`#tally-${k}`);
+  function signoff() {
+    const cards = signed(), n = cards.filter((c) => c.dataset.verdict).length;
+    document.querySelectorAll('.cal-tally').forEach((t) => { const el = tallyPart(t, 'n'); if (el) el.textContent = `${n} of ${cards.length} signed`; });
+  }
+  on('click', '.cal-card .cal-sign .cal-btn[aria-pressed]', (b) => {
+    if (b.disabled || b.getAttribute('aria-disabled') === 'true') return;
+    const card = b.closest('.cal-card'), v = b.dataset.v || VERDICT[b.dataset.ink] || 'keep', press = b.getAttribute('aria-pressed') !== 'true';
+    card.querySelectorAll('.cal-sign .cal-btn[aria-pressed]').forEach((x) => x.setAttribute('aria-pressed', String(press && x === b)));
+    if (press) { card.dataset.verdict = v; card.dataset.state = STATE[v] || 'ok'; }
+    else { delete card.dataset.verdict; delete card.dataset.state; }
+    const note = card.querySelector('.cal-sign .note');
+    if (note) { note.hidden = card.dataset.state !== 'rework'; if (!note.hidden) note.querySelector('input')?.focus(); }
+    signoff();
+    card.dispatchEvent(new CustomEvent('cal-signoff', { bubbles: true, detail: { verdict: card.dataset.verdict || null } }));
+  });
+  on('click', '.cal-tally :is([data-tally="copy"], #tally-copy)', async (b) => {
+    const t = b.closest('.cal-tally'), msg = tallyPart(t, 'msg');
+    const text = signed().map((c) => {
+      const no = c.querySelector('.id .no')?.textContent.trim(), h = c.querySelector('h3')?.textContent.trim() || '';
+      const note = c.dataset.state === 'rework' ? c.querySelector('.cal-sign .note input')?.value.trim() : '';
+      return `${no ? no + ' ' : ''}${h}: ${c.dataset.verdict || 'not signed'}${note ? ' — ' + note : ''}`;
+    }).join('\n');
+    let box = t.nextElementSibling?.matches('.cal-tally-text') ? t.nextElementSibling : null;
+    try {
+      await navigator.clipboard.writeText(text);
+      if (msg) msg.textContent = 'copied';
+      if (box) box.hidden = true;
+    } catch {
+      if (!box) {
+        box = document.createElement('textarea'); box.className = 'cal-textarea cal-tally-text'; box.readOnly = true;
+        box.setAttribute('aria-label', 'Sign-off lines'); t.after(box);
+      }
+      box.hidden = false; box.value = text; box.rows = Math.min(12, text.split('\n').length + 1);
+      box.focus(); box.select();
+      if (msg) msg.textContent = 'Copy blocked. Select the text below and copy it.';
+    }
+  });
+
   /* ── toast · Calibrated.toast('Limit saved', { ink: 'ok', action: 'undo', onAction, timeout })
      ink: 'live' (in progress, the lamp star) · 'ok' · 'fault' · none. Returns the element;
      .remove() it to dismiss early. Toasts stack bottom right in one polite live region. */
@@ -679,9 +857,9 @@
     return { set: (k) => set(k), get page() { return p; } };
   }
 
-  const boot = () => { counts(); sheets(); controls(); };
+  const boot = () => { counts(); sheets(); controls(); tabs(); signoff(); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
-  root.Calibrated = Object.assign(C, { redraw, counts, sheets, controls, toast, pager });
+  root.Calibrated = Object.assign(C, { redraw, counts, sheets, controls, tabs, signoff, toast, pager });
 })(typeof window !== 'undefined' ? window : globalThis);

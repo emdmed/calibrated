@@ -28,20 +28,22 @@
 .cal-sheet > .zones.top span + span, .cal-sheet > .zones.bottom span + span { border-left: var(--line-thin) solid var(--edge); }
 .cal-sheet > .zones.left span + span, .cal-sheet > .zones.right span + span { border-top: var(--line-thin) solid var(--edge); }
 
-/* ── title block · ruled cells, a small legend over each value */
+/* ── title block · ruled cells, a small legend over each value. --tb-cols (default 4) applies
+   above 700px; narrower it is always 2, even when --tb-cols is set inline. */
 .cal-titleblock {
   display: grid;
-  grid-template-columns: repeat(var(--tb-cols, 4), minmax(0, auto));
+  grid-template-columns: repeat(2, minmax(0, auto));
   border-top: var(--line-thin) solid var(--edge); border-left: var(--line-thin) solid var(--edge);
   background: var(--panel);
   font-size: var(--fs-small);
 }
 .cal-titleblock > div { padding: 5px 10px 6px; border-right: var(--line-thin) solid var(--edge); border-bottom: var(--line-thin) solid var(--edge); min-width: 0; }
-.cal-titleblock dt { font: 10.5px var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--key); }
-.cal-titleblock dd { font-family: var(--font-legend); font-variant-numeric: tabular-nums; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal-titleblock dt { font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--key); }
+.cal-titleblock dd { font-family: var(--font-legend); font-variant-numeric: tabular-nums; color: var(--fg); overflow-wrap: anywhere; }
 .cal-titleblock .name { grid-column: 1 / -1; }
 .cal-titleblock .name dd { font-family: var(--font-display); font-weight: 500; font-size: 17px; text-transform: uppercase; letter-spacing: var(--track-title); line-height: 1.25; white-space: normal; color: var(--title); }
 .cal-titleblock .wide { grid-column: span 2; }
+@media (min-width: 701px) { .cal-titleblock { grid-template-columns: repeat(var(--tb-cols, 4), minmax(0, auto)); } }
 
 /* ── revision table and the revision triangle that points at a change */
 .cal-revs { border-collapse: collapse; font-size: var(--fs-small); background: var(--panel); }
@@ -227,14 +229,17 @@
   order: -1; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
   font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--muted);
 }
-.cal-card .id .no { color: var(--live); border: var(--line-thin) solid color-mix(in srgb, var(--live) 50%, var(--edge-strong)); padding: 0 4px; line-height: 14px; }
+.cal-card .id .no { color: var(--fg); border: var(--line-thin) solid var(--faint); padding: 0 4px; line-height: 14px; }
+/* the number takes the lamp only on the card in hand (focused, or marked aria-current) */
+.cal-card:is(:focus-within, [aria-current]:not([aria-current="false"])) .id .no { color: var(--live); border-color: color-mix(in srgb, var(--live) 50%, var(--edge-strong)); }
+.cal-card .id > span:not(.no, .end) { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cal-card .id .end { margin-left: auto; white-space: nowrap; color: var(--muted); }
 .cal-card .id .end.okc, .cal-card .id .end[data-ink="ok"] { color: var(--ok); }
 .cal-card[data-state="ok"] .id .no { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 50%, var(--edge-strong)); }
 /* dropped · the card is taped off: a band of oblique red stripes laid in the top padding (the
    card keeps its height), the stamp hung from it, a red outline round the card, the drawing faded */
 .cal-card[data-state="dropped"] { outline: var(--line-thin) solid var(--fault); outline-offset: -1px; }
-.cal-card[data-state="dropped"] > :not(.cal-sign) { opacity: .34; }
+.cal-card[data-state="dropped"] > :not(.cal-sign) { opacity: .58; }
 .cal-card[data-state="dropped"]::before {
   content: ""; position: absolute; inset: 0 0 auto; height: 12px; z-index: 1; pointer-events: none;
   background: repeating-linear-gradient(-45deg, var(--fault) 0 7px, transparent 7px 14px);
@@ -260,6 +265,19 @@
 .cal-compare > div { padding: 12px 18px 18px; display: flex; flex-direction: column; min-width: 0; }
 .cal-compare > div + div { border-left: var(--line-thin) dashed var(--edge); }
 .cal-compare .stage { flex: 1; display: flex; flex-direction: column; align-items: safe center; justify-content: center; gap: 12px; min-height: 150px; overflow-x: auto; }
+/* ── scroll cue · a drawing wider than its box scrolls sideways; a dashed line at a cut edge says it
+   goes on, and is covered once you reach that end. --under is the surface colour (panel by default). */
+.cal-card > .stage, .cal-stage, .cal-compare .stage,
+:is(cal-meter, cal-position, cal-progress, cal-diff, cal-durations, cal-ruler)[data-scroll] {
+  background:
+    linear-gradient(var(--under, var(--panel)), var(--under, var(--panel))) left / 6px 100% no-repeat local,
+    linear-gradient(var(--under, var(--panel)), var(--under, var(--panel))) right / 6px 100% no-repeat local,
+    repeating-linear-gradient(var(--faint) 0 3px, transparent 3px 6px) left / 1px 100% no-repeat scroll,
+    repeating-linear-gradient(var(--faint) 0 3px, transparent 3px 6px) right / 1px 100% no-repeat scroll,
+    var(--under, var(--panel));
+}
+.cal-well { --under: var(--well); }
+.cal-raised { --under: var(--raised); }
 .cal-tag { color: var(--key); margin-bottom: 10px; display: flex; gap: 8px; align-items: center; font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; }
 .cal-tag.on { color: var(--legend); }
 .cal-tag.on::before { content: ""; width: 7px; height: 7px; background: var(--live); clip-path: var(--star); }
@@ -281,9 +299,11 @@
 [data-density="compact"] .cal-count > span { display: none; }
 
 /* ── tabs · keys with a counted box; the open one is underlined in ink */
-.cal-tabs { display: flex; align-items: end; gap: 16px; border-bottom: var(--line-thin) solid var(--edge); font: var(--fs-control) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--muted); }
-.cal-tabs > * { padding: 0 0 6px; margin-bottom: -1px; background: none; border: 0; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
-.cal-tabs > *:hover { color: var(--fg); }
+.cal-tabs { display: flex; align-items: end; gap: 16px; border-bottom: var(--line-thin) solid var(--edge); font: var(--fs-control) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--muted); overflow-x: auto; scrollbar-width: thin; }
+.cal-tabs > * { flex: none; white-space: nowrap; min-height: 24px; padding: 4px 1px 6px; margin-bottom: -1px; background: none; border: 0; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; cursor: pointer; }
+.cal-tabs > *:not(:disabled):hover { color: var(--fg); }
+.cal-tabs > :focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: -1px; }
+.cal-tabs > :disabled { color: var(--faint); cursor: not-allowed; }
 .cal-tabs > .on, .cal-tabs > [aria-selected="true"] { color: var(--fg); box-shadow: inset 0 -1px var(--fg); }
 .cal-tabs .cal-cnt { margin-left: 5px; }
 .cal-tabs > .on .cal-cnt, .cal-tabs > [aria-selected="true"] .cal-cnt { border-color: var(--fg); }
@@ -301,28 +321,32 @@
   border: var(--line-thin) solid var(--edge-strong); padding: 6px 12px; cursor: pointer;
   transition: color .12s ease-out, border-color .12s ease-out, background-color .12s ease-out;
 }
-.cal-btn:not(:disabled):hover { border-color: var(--fg); }
+.cal-btn:not(:disabled, [aria-disabled="true"]):hover { border-color: var(--fg); }
+.cal-btn:not(:disabled, [aria-disabled="true"]):active { background: var(--current); }
 .cal-btn:focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: 2px; }
-.cal-btn:disabled { color: var(--faint); border-color: var(--edge); cursor: not-allowed; }
+/* disabled, or busy (aria-disabled keeps it focusable while it works) */
+.cal-btn:is(:disabled, [aria-disabled="true"]) { color: var(--faint); border-color: var(--edge); cursor: not-allowed; }
 /* primary · filled with ink (never with the lamp) */
 .cal-btn.primary { background: var(--fg); color: var(--panel); border-color: var(--fg); }
-.cal-btn.primary:not(:disabled):hover { background: var(--title); border-color: var(--title); }
-.cal-btn.primary:disabled { background: var(--edge-strong); border-color: var(--edge-strong); color: var(--panel); }
+.cal-btn.primary:not(:disabled, [aria-disabled="true"]):hover { background: var(--title); border-color: var(--title); }
+.cal-btn.primary:not(:disabled, [aria-disabled="true"]):active { background: var(--muted); border-color: var(--muted); }
+.cal-btn.primary:is(:disabled, [aria-disabled="true"]) { background: none; border-style: dashed; border-color: var(--faint); color: var(--muted); }
 /* pressed toggles: the box and the word take the meaning's ink */
 .cal-btn[aria-pressed="false"] { color: var(--muted); }
-.cal-btn[aria-pressed="false"]:not(:disabled):hover { color: var(--fg); }
+.cal-btn[aria-pressed="false"]:not(:disabled, [aria-disabled="true"]):hover { color: var(--fg); }
 .cal-btn[aria-pressed="true"] { color: var(--fg); border-color: var(--fg); }
 .cal-btn[data-ink="ok"][aria-pressed="true"] { color: var(--ok); border-color: var(--ok); }
 .cal-btn[data-ink="fault"][aria-pressed="true"] { color: var(--fault); border-color: var(--fault); }
 .cal-btn[data-ink="fault"][aria-pressed="true"]::before { content: ""; width: 12px; height: 9px; flex: none; margin-left: -2px; background: repeating-linear-gradient(-45deg, var(--fault) 0 2px, transparent 2px 4.5px); border-block: var(--line-thin) solid var(--fault); }
 /* inline · a bracketed word; automatic inside toasts, fields and code blocks */
-:is(.cal-btn.inline, .cal-toast .cal-btn, .cal-affixed .cal-btn, .cal-code > .cal-btn) { border: 0; padding: 5px 3px; color: var(--muted); background: none; }
-:is(.cal-btn.inline, .cal-toast .cal-btn, .cal-affixed .cal-btn, .cal-code > .cal-btn)::before { content: "["; }
-:is(.cal-btn.inline, .cal-toast .cal-btn, .cal-affixed .cal-btn, .cal-code > .cal-btn)::after { content: "]"; }
-:is(.cal-btn.inline, .cal-toast .cal-btn, .cal-affixed .cal-btn, .cal-code > .cal-btn):not(:disabled):hover { color: var(--fg); }
+:is(.cal-btn.inline, .cal-toast .cal-btn, .cal-affixed .cal-btn, .cal-code > .cal-btn) { border: 0; padding: 5px 3px; gap: 0; color: var(--muted); background: none; }
+/* the brackets are drawn, not read: the name stays "copy" */
+:is(.cal-btn.inline, .cal-toast .cal-btn, .cal-affixed .cal-btn, .cal-code > .cal-btn)::before { content: "[" / ""; }
+:is(.cal-btn.inline, .cal-toast .cal-btn, .cal-affixed .cal-btn, .cal-code > .cal-btn)::after { content: "]" / ""; }
+:is(.cal-btn.inline, .cal-toast .cal-btn, .cal-affixed .cal-btn, .cal-code > .cal-btn):not(:disabled, [aria-disabled="true"]):hover { color: var(--fg); }
 /* quiet · an underlined word */
-.cal-btn.quiet { border: 0; padding: 6px 3px; color: var(--muted); background: none; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--edge-strong); }
-.cal-btn.quiet:not(:disabled):hover { color: var(--fg); text-decoration-color: var(--fg); }
+.cal-btn.quiet { border: 0; padding: 6px 3px; color: var(--muted); background: none; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--faint); }
+.cal-btn.quiet:not(:disabled, [aria-disabled="true"]):hover { color: var(--fg); text-decoration-color: var(--fg); }
 .cal-btn.quiet[aria-current="page"] { color: var(--fg); text-decoration-color: var(--fg); }
 
 /* ── sign-off row at the foot of a card */
@@ -336,7 +360,11 @@
   font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--legend);
 }
 .cal-tally > * { white-space: nowrap; }
+/* the status message wraps in plain case, so a long one stays readable on a phone */
+.cal-tally > [role="status"] { white-space: normal; text-transform: none; letter-spacing: .01em; min-width: 0; }
 .cal-tally > :last-child { margin-left: auto; }
+textarea.cal-tally-text { width: 100%; margin-top: 8px; min-height: 0; background: var(--well); border: var(--line-thin) solid var(--edge-strong); font: 12px/1.6 var(--font-legend); }
+textarea.cal-tally-text[hidden] { display: none; }
 .cal-tally .sp { flex: 1; }
 .cal-tally.sticky { position: sticky; bottom: 0; z-index: 2; }
 
@@ -381,7 +409,7 @@
 .cal-rows { background: var(--panel); border: var(--line-thin) solid var(--edge); font-size: 13px; line-height: 1.6; }
 .cal-rows > * { padding: 8px 14px 9px; border-bottom: var(--line-thin) solid var(--edge); }
 .cal-rows > *:last-child { border-bottom: 0; }
-.cal-rows > :is(.sel, [aria-selected="true"]):not(:has(.v)) { outline: var(--line-thin) solid var(--fg); outline-offset: -5px; }
+.cal-rows > :is(.sel, [aria-selected="true"], [aria-current]:not([aria-current="false"])):not(:has(.v)) { outline: var(--line-thin) solid var(--fg); outline-offset: -5px; }
 .cal-rows .meta { color: var(--muted); }
 
 /* ── form controls */
@@ -498,7 +526,19 @@
 @media (prefers-reduced-motion: reduce) {
   .cal-switch input, .cal-switch input::after { transition: none; }
 }
+/* ── forced colours · calibrated.css turns the inks into system colours, so a mark drawn with a
+   background, gradient or box-shadow only has to opt out of forcing to stay drawn. States the
+   system palette would merge (selected, pressed) take Highlight. One block for the whole kit. */
 @media (forced-colors: active) {
+  /* components */
+  .cal-rev, .cal-rev::before, .cal-rev::after,
+  .cal-card[data-state="dropped"]::before, .cal-card[data-state="dropped"]::after,
+  .cal-tabs > *, .cal-btn.primary, .cal-btn[data-ink="fault"][aria-pressed="true"]::before,
+  .cal-rows .v, .cal-list .v, .cal-menu .it .v, .cal-select option .v { forced-color-adjust: none; }
+  .cal-tabs > :is(.on, [aria-selected="true"]) { box-shadow: inset 0 -2px Highlight; }
+  .cal-btn[aria-pressed="true"] { border-color: Highlight; outline: var(--line-thin) solid Highlight; outline-offset: -3px; }
+  .cal-btn:focus-visible, .cal-tabs > :focus-visible { outline-color: Highlight; }
+  /* form controls */
   .cal-switch input { border-color: CanvasText; }
   .cal-switch input::after { background: CanvasText; }
   .cal-switch input:checked::after { background: Highlight; }
@@ -654,11 +694,10 @@
 /* ── the chosen value · its label boxed in an ink hairline (the boxed-value mark).
    The box sits in the row's padding, so the text never moves. No tint, no lamp. */
 .cal-list .v, .cal-menu .it .v, .cal-select option .v, .cal-rows .v { display: inline-block; border: var(--line-thin) solid transparent; padding: 0 5px; margin: 0 -6px; line-height: 1.45; }
-.cal-list > .sel .v, .cal-select option:checked .v, .cal-rows > :is(.sel, [aria-selected="true"]) .v,
+.cal-list > .sel .v, .cal-select option:checked .v, .cal-rows > :is(.sel, [aria-selected="true"], [aria-current]:not([aria-current="false"])) .v,
 .cal-menu .it:is(:hover, :focus-visible, .on) .v { border-color: var(--fg); color: var(--title); }
 .cal-menu .it[data-ink="fault"]:is(:hover, :focus-visible, .on) .v { border-color: var(--fault); color: var(--fault); }
 .cal-rows > .sel, .cal-rows > [aria-selected="true"] { background: none; box-shadow: none; }
-.cal-rows > :is(.sel, [aria-selected="true"]):not(:has(.v)) { outline: var(--line-thin) solid var(--fg); outline-offset: -5px; }
 .cal-rows > .none[hidden] { display: none; }
 
 /* ── sign-off: keep · rework · drop. Rework stamps the card in lamp and asks what isn't good enough. */
@@ -677,15 +716,16 @@
 @media (max-width: 1100px) { .cal-card[data-state="rework"] .id .end { visibility: hidden; } }
 @media (max-width: 700px) { .cal-card .cal-sign { flex-wrap: wrap; } .cal-card .cal-sign .note { flex-basis: 100%; margin: 4px 0 2px; } }
 
-/* hover moves the box: the row under the pointer (or keyboard) takes it, and the chosen row gives it up
-   until the pointer leaves. No background change anywhere. */
+/* hover moves the box: in a list or picker the row under the pointer (or keyboard) takes it, and the
+   chosen row gives it up until the pointer leaves. In .cal-rows the chosen row keeps its ink box and
+   the row under the pointer or holding focus takes a lighter one. No background change anywhere. */
 .cal-list .v, .cal-menu .it .v, .cal-select option .v, .cal-rows .v { transition: border-color .1s ease-out, color .1s ease-out; }
 .cal-list > div:hover .v,
-.cal-select option:is(:hover, :focus-visible) .v,
-.cal-rows > :hover .v { border-color: var(--fg); color: var(--title); }
+.cal-select option:is(:hover, :focus-visible) .v { border-color: var(--fg); color: var(--title); }
+.cal-rows > :is(:hover, :focus-within):not(.sel, [aria-selected="true"], [aria-current]:not([aria-current="false"])) .v { border-color: var(--faint); }
 .cal-list:has(> div:hover) > .sel:not(:hover) .v,
 .cal-select:has(option:is(:hover, :focus-visible)) option:checked:not(:hover, :focus-visible) .v,
-.cal-rows:has(> :hover .v) > :is(.sel, [aria-selected="true"]):not(:hover) .v { border-color: transparent; color: inherit; }
+.cal-select:has(option:focus-visible) option:hover:not(:focus-visible) .v { border-color: transparent; color: inherit; }
 .cal-rows > *:hover { background: none; }
 
 .cal-field > .lbl { font: var(--fs-control) var(--font-legend); letter-spacing: .01em; color: var(--legend); }
@@ -842,6 +882,8 @@ cal-spin { display: inline-block; line-height: 0; vertical-align: middle; }
 
 /* ── custom elements host defaults (see calibrated-components.js) */
 cal-meter, cal-position, cal-progress, cal-diff, cal-durations, cal-ruler { display: inline-block; max-width: 100%; vertical-align: middle; overflow-x: auto; }
+:is(cal-meter, cal-position, cal-progress, cal-diff, cal-durations, cal-ruler) > svg { display: block; max-width: 100%; height: auto; }
+:is(cal-meter, cal-position, cal-progress, cal-diff, cal-durations, cal-ruler)[data-scroll]:focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: 2px; }
 cal-durations { display: block; }
 cal-span { display: none; }
 
@@ -857,10 +899,17 @@ cal-span { display: none; }
   .cal-compare { grid-template-columns: 1fr; }
   .cal-compare > div + div { border-left: 0; border-top: var(--line-thin) dashed var(--edge); }
   .cal-table { display: block; overflow-x: auto; }
+  .cal-table {   /* the scroll cue, as on a stage */
+    background:
+      linear-gradient(var(--panel), var(--panel)) left / 6px 100% no-repeat local,
+      linear-gradient(var(--panel), var(--panel)) right / 6px 100% no-repeat local,
+      repeating-linear-gradient(var(--faint) 0 3px, transparent 3px 6px) left / 1px 100% no-repeat scroll,
+      repeating-linear-gradient(var(--faint) 0 3px, transparent 3px 6px) right / 1px 100% no-repeat scroll,
+      var(--panel);
+  }
   .cal-table th, .cal-table td { white-space: nowrap; }  /* scroll, don't squeeze */
   .cal-sheet { margin: 22px 4px 30px; outline-offset: 5px; padding: 16px; }
   .cal-sheet > .zones.left, .cal-sheet > .zones.right { display: none; }
-  .cal-titleblock { --tb-cols: 2; }
 }
 @media (max-width: 520px) {
   .cal-specimens { --cols: 1; }
