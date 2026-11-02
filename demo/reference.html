@@ -203,7 +203,7 @@ pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-
     <h4>Form controls</h4>
     <ul><li><a href="#textarea"><span>Textarea</span></a></li><li><a href="#select"><span>Select</span></a></li><li><a href="#choices"><span>Radio, switch, detent</span></a></li><li><a href="#range"><span>Range</span></a></li><li><a href="#number"><span>Number and search</span></a></li><li><a href="#group"><span>Group, tags, date</span></a></li><li><a href="#drop"><span>File drop</span></a></li></ul>
     <h4>Overlays and feedback</h4>
-    <ul><li><a href="#menus"><span>Menu</span></a></li><li><a href="#dialog"><span>Dialog</span></a></li><li><a href="#tooltip"><span>Tooltip and notes</span></a></li><li><a href="#details"><span>Detail callout</span></a></li><li><a href="#toast"><span>Toast and empty</span></a></li><li><a href="#spinners"><span>Spinners</span></a></li></ul>
+    <ul><li><a href="#menus"><span>Menu</span></a></li><li><a href="#dialog"><span>Dialog</span></a></li><li><a href="#tooltip"><span>Tooltip and notes</span></a></li><li><a href="#separators"><span>Separators</span></a></li><li><a href="#zones"><span>Zones and brackets</span></a></li><li><a href="#details"><span>Detail callout</span></a></li><li><a href="#toast"><span>Toast and empty</span></a></li><li><a href="#spinners"><span>Spinners</span></a></li></ul>
     <h4>Navigation and labels</h4>
     <ul><li><a href="#pager"><span>Crumbs, pager, steps</span></a></li><li><a href="#badges"><span>Badges, code, keys</span></a></li></ul>
     <h4>Theming</h4>
@@ -682,6 +682,41 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
 </div></template></div>
       </div>
 
+      <div class="item" id="separators">
+        <h3>Separators <a class="anchor" href="#separators" aria-label="Link to Separators">#</a></h3>
+        <p>Rules in drafting line types, so the split says what it is: solid for the next topic, dashed for an aside, the centre line for two halves, the break line where lines were skipped. A labelled rule names the break; the lamp rule marks what's new.</p>
+        <div class="ex"><template><div style="max-width:480px">
+  <p>Deploys run in three regions, one after the other.</p>
+  <hr class="cal-rule">
+  <p>Rollback is one command and takes about a minute.</p>
+  <hr class="cal-rule" data-line="dashed">
+  <p style="font-size:12.5px;color:var(--muted)">eu-west is behind a feature flag this week.</p>
+  <div class="cal-rule" role="separator">or</div>
+  <p>Ship from the release branch.</p>
+  <div class="cal-rule" role="separator" data-align="start">build log<span>checkout · v2.14.0</span></div>
+  <p style="font-size:12.5px">12:04:01 build started</p>
+  <hr class="cal-rule" data-line="break" data-space="tight" aria-label="38 lines skipped">
+  <p style="font-size:12.5px">12:09:44 build finished</p>
+  <div class="cal-rule" role="separator" data-ink="live">new since 09:00</div>
+  <p>Two deploys finished overnight.</p>
+  <hr class="cal-rule">
+  <ul class="cal-meta"><li>v2.14.0</li><li>3 regions</li><li>2026-10-31</li><li>checkout team</li></ul>
+</div></template></div>
+      </div>
+
+      <div class="item" id="zones">
+        <h3>Zones and brackets <a class="anchor" href="#zones" aria-label="Link to Zones and brackets">#</a></h3>
+        <p>A zone is a named region with its name set into the edge, and no fill, so it sits on any surface. Dashed means not decided yet; red holds destructive settings. A bracket binds a few lines into one idea without a box.</p>
+        <div class="ex"><template><div class="stack" style="max-width:560px;gap:18px">
+  <div class="cal-zones">
+    <section class="cal-zone"><div class="cal-zone-h">today</div><p>Three status lines, one per region.</p></section>
+    <section class="cal-zone" data-line="dashed"><div class="cal-zone-h">proposed<span>not decided</span></div><p>One ruler with three lanes.</p></section>
+  </div>
+  <section class="cal-zone" data-ink="fault"><div class="cal-zone-h">danger zone<span class="end">owner only</span></div><div class="row" style="gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap"><p>Deleting the project removes every run and its logs.</p><button class="cal-btn primary" data-ink="fault">delete project</button></div></section>
+  <div class="cal-bracket"><div class="cal-bracket-h">before you deploy<span>3 checks</span></div><p>Tests pass on main.</p><p>The changelog names the release.</p><p>Someone on call knows it's going out.</p></div>
+</div></template></div>
+      </div>
+
       <div class="item" id="details">
         <h3>Detail callout <a class="anchor" href="#details" aria-label="Link to Detail callout">#</a></h3>
         <p>A lettered balloon on a dotted leader. Open, it drops a dashed leader into an inset labelled DETAIL A.</p>
@@ -778,6 +813,7 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
     <section class="group" id="changelog">
       <h2>Changelog</h2>
       <ol class="log">
+        <li><b>Rev M</b><time datetime="2026-11-02">2026-11-02</time><p>Separators and containers. Rules in drafting line types, each with one meaning: solid for the next topic, dashed for an aside, the centre line for two halves, a break line where something was left out, a labelled rule, and a lamp rule for what's new (<code>.cal-rule</code>). Facts on one line split by hairline ticks (<code>.cal-meta</code>), a vertical rule for toolbars (<code>.cal-vr</code>), a zone with its name set into its edge (<code>.cal-zone</code>) and a bracket that groups a few lines (<code>.cal-bracket</code>). A dropped card is now taped off with red stripes and a solid SUPERSEDED stamp.</p></li>
         <li><b>Rev L</b><time datetime="2026-11-01">2026-11-01</time><p>Usable first: a UX rules reference every skill reads before composing, and an app mode (<code>data-mode="app"</code>) for screens and forms. The primary button is boxed, field labels are sentence case at 12px, an approval stamp is green, textareas show only their count unless they opt into the editor line, counts aren't zero-padded unless they change live, and loops show their direction. Clearer hierarchy and separation: buttons in tiers (filled primary, boxed default, bracketed inline, underlined quiet), medium-weight titles, 16px section heads, block heads that rule the groups in a panel apart (<code>.cal-block</code>), and a darker desk.</p></li>
         <li><b>Rev K</b><time datetime="2026-11-01">2026-11-01</time><p>Twenty-six controls: textarea, select, menu, radio, switch, detent, dialog, tooltip, range, number, search, field group, detail callout, callout, toast, empty state, breadcrumb, pager, badge, file drop, tags, steps, code block, key cap, spinners, date. Chosen rows are boxed instead of barred; sign-off gains rework.</p></li>
         <li><b>Rev J</b><time datetime="2026-10-31">2026-10-31</time><p>Merge steps can be left out and the rest are numbered in run order; long branch names are no longer cut by a leader.</p></li>

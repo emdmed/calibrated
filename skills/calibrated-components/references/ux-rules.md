@@ -47,7 +47,7 @@ If a Calibrated part makes the conventional pattern harder to recognise, use the
 - Caps are for short labels: section heads, tags, table heads, buttons. Field labels, helper text, body and anything longer than four words stay in sentence case.
 - Anything people click or fill in is at least 12px (`--fs-control`). Figure legends never go below 10px.
 - Each view reads in four steps: the headline, section heads (16px medium), block heads (`.cal-block-h`, 12px medium caps in ink), then labels and scale numbers (11px, muted). If everything is caps at the same size, nothing leads: raise the headline, quiet the metadata.
-- **Separate the groups.** A panel that holds several kinds of thing (instruments, a figure, a table, notes) gives each a `.cal-block` with a head; the blocks are ruled apart. Whitespace alone isn't enough on a busy page.
+- **Separate the groups.** A panel that holds several kinds of thing (instruments, a figure, a table, notes) gives each a `.cal-block` with a head; the blocks are ruled apart. Whitespace alone isn't enough on a busy page. Inside a group, split topics with `.cal-rule` and bound a named group with `.cal-zone`; pick the line type by meaning (solid = next topic, dashed = aside or proposed, break = something left out). One kind of separator per level: a panel of zones doesn't also need rules between them.
 - Panels sit on a visibly darker desk. Don't lighten the desk or nest panels of the same tone.
 - Put metadata (dates, ids, sources, versions) at the edges and in muted ink, never between the reader and the content.
 

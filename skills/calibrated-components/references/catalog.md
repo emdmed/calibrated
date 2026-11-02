@@ -104,7 +104,7 @@ A legend line between rules: a short rule, the number and title in ink, a muted 
 ```
 - `.id` opens the info column: `.no` is an outlined lamp number badge, then where it lives, then an optional `.end` status on the right (`rev B`, or `✓ built` with `data-ink="ok"`). It renders at the top wherever it sits in `.info`; put it first.
 - Then the title, the *why*, and the `cal-kv` sheet (faint keys, muted values) under a hairline.
-- `data-state="ok"` turns the badge green. `data-state="dropped"` fades the card and stamps it SUPERSEDED. `data-state="rework"` stamps it REWORK in lamp, for an item that stays but isn't good enough yet.
+- `data-state="ok"` turns the badge green. `data-state="dropped"` fades the card, tapes it off: a band of oblique red/transparent stripes laid in its top padding (the height doesn't change) with a solid red SUPERSEDED stamp hung from it, and a red outline round the card; the pressed Drop button carries a matching tape swatch. `data-state="rework"` stamps it REWORK in lamp, for an item that stays but isn't good enough yet.
 - A rework note: put `<label class="note" hidden>rework<input class="cal-input" placeholder="what isn’t good enough yet?"></label>` first in `.cal-sign`, show it when rework is pressed, and add its text to the copied sign-off.
 - `.cal-tag.on` draws its own lamp star; don't add one.
 - With a single stage, use `<div class="stage">…</div>` in place of `.cal-compare`.
@@ -143,6 +143,60 @@ A group inside a panel: the instruments, a figure, a table, the notes. A block h
 <div class="cal-block"><div class="cal-block-h">channels<span>days running</span></div><figure class="cal-figure">…</figure></div>
 ```
 `.cal-block-h` is a 12px medium caps label in ink, with an optional muted note in a `<span>` (a last span goes to the right). Stacked `.cal-block`s get a hairline and 20px between them; inside `.cal-blocks` they sit side by side with a hairline between. Use them in any panel that holds more than one kind of thing.
+
+## Separators and containers
+Use these to split text or ideas apart inside a panel. Each line type has one meaning, taken from drafting, so pick by what the split says:
+
+| the split says | use |
+|---|---|
+| next topic, same panel | `<hr class="cal-rule">` (`data-weight="strong"` between bigger parts) |
+| an aside, a footnote, something proposed | `<hr class="cal-rule" data-line="dashed">` |
+| two halves of one thing (before/after, in/out) | `<hr class="cal-rule" data-line="centre">` |
+| something was left out here (skipped log lines, omitted rows) | `<hr class="cal-rule" data-line="break" aria-label="38 lines skipped">` |
+| a choice between two paths, or a named break | a labelled rule: `<div class="cal-rule" role="separator">or</div>` |
+| everything below is new / over the limit | `<div class="cal-rule" role="separator" data-ink="live">new since 09:00</div>` (`fault` for a cut-off) |
+| a few facts on one line | `<ul class="cal-meta"><li>v2.14.0</li><li>3 regions</li><li>2026-10-31</li></ul>` |
+| items in a toolbar row | `<span class="cal-vr" aria-hidden="true"></span>` |
+| a named group with an edge (settings, a danger zone, today vs proposed) | `.cal-zone` |
+| a few lines that belong together, no box | `.cal-bracket` |
+| a group with a head in a panel of several kinds of thing | `.cal-block` (above) |
+
+### Rule
+```html
+<hr class="cal-rule">                                             <!-- --edge hairline, 20px above and below -->
+<hr class="cal-rule" data-line="dashed" data-space="tight">       <!-- data-space: tight 10px · loose 36px -->
+<div class="cal-rule" role="separator">or</div>                     <!-- label centred in the line -->
+<div class="cal-rule" role="separator" data-align="start">limits<span>per account</span></div>
+```
+A bare rule must be an `<hr>` (or an empty element): any text inside turns it into a labelled rule. The label is legend caps in `--key`; a `<span>` after it is a muted sentence-case note. `data-line` (`dashed`, `centre`, `break`) and `data-weight="strong"` draw in `--edge-strong`. `data-ink="live"` sets line and label in lamp: use it once per view, for the "new since" line in a feed or log. `fault` and `ok` mark a limit or a passed line.
+
+### Meta and vertical rule
+`.cal-meta` is a list of facts split by short hairline ticks, in muted 12.5px. It wraps without starting a line on a tick. Use it in place of hand-typed `a · b · c` strings. `.cal-vr` is a hairline between items in a flex row (a toolbar, a status line); it stretches to the row's height.
+
+### Zone
+```html
+<section class="cal-zone">
+  <div class="cal-zone-h">billing<span>owner only</span><span class="end">2 settings</span></div>
+  …
+</section>
+<div class="cal-zones">                                             <!-- side by side, stacks on narrow screens -->
+  <section class="cal-zone"><div class="cal-zone-h">today</div>…</section>
+  <section class="cal-zone" data-line="dashed"><div class="cal-zone-h">proposed<span>not decided</span></div>…</section>
+</div>
+<section class="cal-zone" data-ink="fault"><div class="cal-zone-h">danger zone</div>…</section>
+```
+A hairline region with its name set into the top edge, like a boxed area on a drawing. It has no fill, so it sits on a panel, a well or the desk alike; don't put a zone around a whole panel (the panel already is one). The head is 11px medium caps in ink; a `<span>` is a muted note; `.end` goes to the right in `--key` caps. `data-line="dashed"` means optional, proposed or not decided yet. `data-ink="live"` outlines the one live group in lamp; `fault` is for destructive settings; `ok` for a group that passed. Without a head it's a plain hairline box. Don't nest zones more than one deep.
+
+### Bracket
+```html
+<div class="cal-bracket">
+  <div class="cal-bracket-h">before you deploy<span>3 checks</span></div>
+  <p>Tests pass on main.</p><p>The changelog names the release.</p><p>Someone on call knows.</p>
+</div>
+```
+A hairline `[` with a tick at its middle that binds a few lines into one idea without boxing them. Lighter than a zone: use it in running text, lists and notes. The head is optional. `data-ink` works as on the zone.
+
+In app mode, rule labels and zone and bracket heads drop the caps and go to 12px, so write them in sentence case ("Danger zone").
 
 ## App mode
 `data-mode="app"` on any ancestor (the screen, a dialog, a form) marks it as a tool rather than a document: section heads lose their sheet number, and section heads, table heads and key/value keys switch to sentence case. Use it on settings screens, forms and dialogs. Leave out FIG labels, title blocks, revision triangles and stamps there too.

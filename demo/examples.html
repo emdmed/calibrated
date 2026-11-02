@@ -86,6 +86,7 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
 .app .btns { display: flex; gap: 10px; justify-content: flex-end; align-items: center; margin-top: 16px; flex-wrap: wrap; }
 .app .panel-h { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
 .app .panel-h .sp { flex: 1; }
+.app .danger { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; font-size: 13px; }
 .app .cal-table { background: none; }
 .app .panel-h .cal-search { width: min(100%, 240px); }
 .app .form .wide { grid-column: 1 / -1; }
@@ -558,8 +559,19 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
               </tbody>
             </table>
           </div>
+          <section class="cal-zone" data-ink="fault"><div class="cal-zone-h">Danger zone<span>can't be undone</span></div>
+            <div class="danger">
+              <div class="cal-bracket"><p>Delete the Mobile app project.</p><p class="mut">Events, exports and its 3 active keys go with it.</p></div>
+              <button class="cal-btn" type="button" data-dialog="del-project">delete project</button>
+            </div>
+          </section>
         </div>
       </div>
+      <dialog class="cal-dialog" id="del-project" aria-labelledby="del-project-t"><form method="dialog">
+        <header><b id="del-project-t">delete mobile app</b><span class="sp"></span><kbd class="cal-kbd">esc</kbd></header>
+        <div class="bd"><p>The project, its events and its exports are removed. Its API keys stop working at once.</p><dl class="cal-kv"><dt>events</dt><dd>2.3M</dd><dt>api keys</dt><dd>3 active</dd><dt>members</dt><dd>6 lose access</dd></dl></div>
+        <footer><button class="cal-btn" value="cancel" autofocus>cancel</button><button class="cal-btn primary" data-ink="fault" value="delete">delete project</button></footer>
+      </form></dialog>
       <dialog class="cal-dialog" id="new-key" aria-labelledby="new-key-t"><form method="dialog">
         <header><b id="new-key-t">new api key</b><span class="sp"></span><kbd class="cal-kbd">esc</kbd></header>
         <div class="bd">
@@ -838,6 +850,7 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
   nkName.addEventListener('input', nkClear);
   /* Enter in the name creates the key (the first button in the form is cancel) */
   nkName.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); $('#nk-go').click(); } });
+  $('#del-project').addEventListener('close', (e) => { if (e.target.returnValue === 'delete') Calibrated.toast('Not deleted · this is an example', { ink: 'ok' }); });
   nk.addEventListener('close', () => {
     if (nk.returnValue === 'create') {
       const scope = $('input[name="nk-scope"]:checked', nk).value, tail = Math.random().toString(16).slice(2, 6);

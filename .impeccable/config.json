@@ -32,6 +32,24 @@
         ],
         "createdAt": "2026-11-01T20:49:24.796Z",
         "reason": "user asked for a cyberpunk aesthetic in this lab page; glow limited to the lamp (tube-lit headline time, lamp strokes, powered panel corners)"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "skills/calibrated-components/assets/calibrated-components.css"
+        ],
+        "createdAt": "2026-11-02T09:59:06.118Z",
+        "reason": "model triage: L238 is the dropped card's full-width top tape band (inset 0 0 auto, 12px tall), not a one-side accent border"
+      },
+      {
+        "rule": "layout-transition",
+        "value": "*",
+        "files": [
+          "skills/calibrated-components/assets/calibrated-components.css"
+        ],
+        "createdAt": "2026-11-02T09:59:10.211Z",
+        "reason": "model triage: detent tick is a 6px absolutely-positioned pseudo (no sibling reflow); details uses the interpolate-size open pattern behind prefers-reduced-motion"
       }
     ]
   }

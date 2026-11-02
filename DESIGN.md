@@ -206,6 +206,12 @@ A zero-padded number in a small hairline box, with its noun beside it in legend 
 - **Figure:** The drawing with a caption under a hairline: a legend label and a muted line.
 - **Note:** The text a figure replaces, on a raised ground with an `--edge-strong` hairline.
 
+### Separators and Containers
+- **Rule:** A hairline that splits topics in a panel. The line type carries the meaning, as on a drawing: solid for the next topic, dashed for an aside or a proposal, the centre line (`10 3 2 3`) for two halves of one thing, and the break line (a small jag) where something was left out. A labelled rule sets a legend word in the line (`── or ──`). The lamp rule marks the one "new since" line in a feed.
+- **Meta:** Facts on one line split by short hairline ticks, never hand-typed middots.
+- **Zone:** A hairline region with its name set into the top edge, no fill, so it works on any surface. Dashed means optional or not decided; a red zone holds destructive settings.
+- **Bracket:** A hairline `[` with a middle tick that binds a few lines into one idea without a box.
+
 ### Inputs / Fields
 - **Style:** A write-in line: a bottom `--edge-strong` hairline, mono value text, a legend label above.
 - **Focus:** The line turns lamp. No glow.

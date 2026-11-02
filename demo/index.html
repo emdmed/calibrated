@@ -207,6 +207,10 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
 .art .notes-row { display: flex; flex-wrap: wrap; gap: 20px 40px; align-items: flex-start; }
 .art .notes-row > * { flex: 1 1 280px; min-width: 0; }
 .art .dets { display: grid; gap: 2px; max-width: 640px; }
+.art .hd + .cal-meta { margin-top: -8px; margin-bottom: 18px; }
+.art .danger { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; }
+.art .danger p { font-size: 13px; max-width: 52ch; }
+#separators .seps { display: grid; align-content: center; min-height: 64px; }
 .art .limits { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 22px 40px; align-items: start; }
 .art .limits + .limits { margin-top: 8px; align-items: end; }
 .art .limits .cal-detent { width: max-content; }
@@ -382,6 +386,7 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
         <div class="layer art cal-theme">
           <div class="head-row"><nav class="cal-crumbs" aria-label="Breadcrumb"><ol><li><a href="#report">marketing</a></li><li><a href="#report">campaigns</a></li><li aria-current="page">spring · day 19</li></ol></nav><span class="cal-badge" data-ink="fault"><span class="cal-dot fault"></span>pacing over plan</span></div>
           <h2 class="hd">€612k spent. At this pace we cross the <span class="live">80% alert</span> on day 25.</h2>
+          <ul class="cal-meta"><li>day 19 of 30</li><li>3 channels</li><li>€1M budget</li></ul>
           <figure class="cal-figure"><svg id="f-budget"></svg><figcaption><b>Budget</b>Spend so far, the alert lines and where today's pace lands.</figcaption></figure>
           <figure class="cal-figure mt"><svg id="f-lanes"></svg><figcaption><b>Channels</b>Days each channel ran, on one ruler.</figcaption></figure>
           <table class="cal-table mt"><thead><tr><th>no</th><th>channel</th><th class="num">spend</th><th>status</th></tr></thead><tbody>
@@ -455,7 +460,8 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
             <figure class="cal-figure"><svg id="f-loop"></svg><figcaption><b>Cycle</b>The live station is lit.</figcaption></figure>
             <figure class="cal-figure"><svg id="f-fan"></svg><figcaption><b>Team</b>Who is working on what.</figcaption></figure>
           </div>
-          <div class="dets mt">
+          <div class="cal-rule" role="separator" data-align="start" style="margin-top:26px">questions<span>2</span></div>
+          <div class="dets">
             <details class="cal-details" open><summary><span class="bl">A</span><b>when a ticket counts as resolved</b><span class="ld"></span><span class="tg"></span></summary><div class="bd"><div class="inset"><div class="cal-gl">detail A</div>When the customer confirms, or after 3 days with no reply.</div></div></details>
             <details class="cal-details"><summary><span class="bl">B</span><b>what happens when one is reopened</b><span class="ld"></span><span class="tg"></span></summary><div class="bd"><div class="inset"><div class="cal-gl">detail B</div>It goes back to <b>working</b> with the same agent, and its clock keeps running.</div></div></details>
           </div>
@@ -479,6 +485,7 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
         </div>
         <div class="layer art cal-theme">
           <h2 class="hd">Who can see what. Hatched means closed.</h2>
+          <ul class="cal-meta"><li>POL-012</li><li>version B</li><li>31 oct 2026</li><li>owner: security team</li></ul>
           <figure class="cal-figure"><svg id="f-section"></svg><figcaption><b>Section</b>Regions inside the policy, closed or open.</figcaption></figure>
           <div class="row2 mt">
             <dl class="cal-titleblock">
@@ -547,12 +554,14 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
               <label class="cal-switch"><span class="txt">Pause new messages at the limit</span><span class="o off">off</span><input type="checkbox" role="switch" checked><span class="o on">on</span></label>
             </div>
           </fieldset>
+          <section class="cal-zone" data-ink="fault" style="margin-top:26px"><div class="cal-zone-h">Danger zone<span>can't be undone</span></div>
+            <div class="danger"><p>Set this month's counters back to zero. Billing doesn't change.</p><button class="cal-btn" type="button" data-dialog="reset-usage">reset usage</button></div>
+          </section>
           <div class="btns">
             <button class="cal-btn" type="button" popovertarget="usage-menu">actions ▼</button>
             <div popover id="usage-menu" class="cal-menu" role="menu" aria-label="Usage actions">
               <button class="it" role="menuitem" type="button" data-toast="Usage exported · usage-oct.csv"><span class="n">01</span><span class="v">export usage</span><kbd class="cal-kbd">e</kbd></button>
               <button class="it" role="menuitem" type="button" data-toast="Invite link copied"><span class="n">02</span><span class="v">invite member</span><kbd class="cal-kbd">i</kbd></button>
-              <hr><button class="it" role="menuitem" type="button" data-ink="fault" data-dialog="reset-usage"><span class="n">03</span><span class="v">reset usage</span><kbd class="cal-kbd">⌫</kbd></button>
             </div>
             <span class="sp" style="flex:1"></span>
             <button class="cal-btn quiet" type="button">cancel</button><button class="cal-btn primary" type="button" id="save-limits">save changes</button>
@@ -593,6 +602,7 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
         <div class="layer art cal-theme" data-mode="app">
           <div class="head-row"><nav class="cal-crumbs" aria-label="Breadcrumb"><ol><li><a href="#form">support</a></li><li><a href="#form">refunds</a></li><li aria-current="page">order 4471</li></ol></nav><span class="cal-badge" id="rf-badge"><span class="cal-dot"></span>draft</span></div>
           <h2 class="hd">Refund for order 4471: what went wrong, and how much goes back.</h2>
+          <ul class="cal-meta"><li>Ana Ruiz</li><li>€64.00</li><li>placed 22 Oct</li></ul>
           <ol class="cal-steps" id="rf-steps" aria-label="Refund steps">
             <li class="done"><span class="s">01</span>order</li>
             <li aria-current="step"><span class="s">02</span>problem</li>
@@ -661,6 +671,13 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
       <div class="cal-spec"><div><div class="cal-chips"><span class="chip">payments<button type="button" aria-label="Remove payments">×</button></span><span class="chip">search<button type="button" aria-label="Remove search">×</button></span><input aria-label="Add a team" placeholder="add a team"></div></div><h4>Tags</h4><p>Enter adds one. A repeat lights the one already there.</p></div>
       <div class="cal-spec"><div><ol class="cal-steps"><li class="done"><span class="s">01</span>source</li><li aria-current="step"><span class="s">02</span>limits</li><li><span class="s">03</span>review</li></ol></div><h4>Steps</h4><p>Where you are in a form of several parts.</p></div>
       <div class="cal-spec"><div><div class="row"><span class="cal-badge" data-ink="ok">✓ shipped</span><span class="cal-badge" data-ink="fault"><span class="cal-dot fault"></span>failed</span><span class="cal-badge"><span class="cal-dot"></span>queued</span></div><div class="row"><cal-spin size="sm" label="Loading"></cal-spin><span class="cal-scan" role="status" aria-label="Loading"><i></i></span><span class="cal-wait" role="status" aria-label="Loading"><i></i><i></i><i></i><i></i></span></div></div><h4>Status and waiting</h4><p>Boxed words for state. Drawn spinners for the wait.</p></div>
+    </div>
+    <div class="cal-gl marks-h">the separators</div>
+    <div class="cal-specimens" id="separators">
+      <div class="cal-spec"><div class="seps"><hr class="cal-rule" data-space="tight"><hr class="cal-rule" data-line="dashed" data-space="tight"><hr class="cal-rule" data-line="centre" data-space="tight"></div><h4>Rules</h4><p>Solid for the next topic, dashed for an aside, the centre line for two halves.</p></div>
+      <div class="cal-spec"><div class="seps"><div class="cal-rule" role="separator" data-space="tight">or</div><hr class="cal-rule" data-line="break" data-space="tight" aria-label="lines skipped"><div class="cal-rule" role="separator" data-ink="live" data-space="tight">new since 09:00</div></div><h4>Named breaks</h4><p>A word in the line, a jag where lines were left out, the lamp on what's new.</p></div>
+      <div class="cal-spec"><div><section class="cal-zone"><div class="cal-zone-h">billing<span>owner only</span></div><p>Invoices go out on the 1st.</p></section></div><h4>Zone</h4><p>A named group with an edge. Dashed when it isn't decided yet.</p></div>
+      <div class="cal-spec"><div><div class="cal-bracket"><div class="cal-bracket-h">before you ship</div><p>Tests pass.</p><p>Someone is on call.</p></div><ul class="cal-meta" style="margin-top:12px"><li>v2.14.0</li><li>3 regions</li><li>31 oct</li></ul></div><h4>Bracket and facts</h4><p>Lines that belong together. Facts on one line.</p></div>
     </div>
     <p class="ask"><span class="cal-legend">ask claude</span><q>Add a Calibrated meter for our API quota: 46 000 of 1 000 000 requests, alert at 80%.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
   </section>
