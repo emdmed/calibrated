@@ -616,7 +616,16 @@
   /* ── controls · the few CSS parts that need a hand. Listeners sit on the document, so
      parts added later work too; controls(scope) paints their resting state (call it after
      inserting markup, like counts()). */
-  const digits = (s) => parseInt(String(s).replace(/[^\d-]/g, ''), 10);
+  /* numbers as written in a .cal-num field: grouped with spaces, '.' for decimals */
+  const parseNum = (s) => { const t = String(s).replace(/[\s\u00a0\u202f]/g, ''); return /^-?(\d+\.?\d*|\.\d+)$/.test(t) ? parseFloat(t) : NaN; };
+  const decimals = (x) => (String(x).split('.')[1] || '').length;
+  const groupNum = (v, d = 0) => { const [i, f] = Math.abs(v).toFixed(d).split('.'); return (v < 0 ? '-' : '') + i.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + (f ? '.' + f : ''); };
+  /* a polite live node inside el, for short announcements */
+  const say = (el, text) => {
+    let n = el.querySelector(':scope > .cal-sr[aria-live]');
+    if (!n) { n = document.createElement('span'); n.className = 'cal-sr'; n.setAttribute('aria-live', 'polite'); el.append(n); }
+    n.textContent = ''; setTimeout(() => { n.textContent = text; }, 30);
+  };
   const fileSize = (b) => (b >= 1e6 ? (b / 1e6).toFixed(1) + ' MB' : b >= 1e3 ? Math.round(b / 1e3) + ' KB' : b + ' B');
 
   /* textarea · .cal-term[data-max] > .cal-textarea + .bar (.mode, .pos, .cal-count > b) */
@@ -637,28 +646,46 @@
   /* detent · .cal-detent > .mk + label > input[type=radio]: the marker glides over the chosen tick */
   function detent(g) {
     g.classList.add('js');
+    const ls = g.querySelectorAll('label'), mid = (l) => l.offsetLeft + l.offsetWidth / 2;
+    if (ls.length) { g.style.setProperty('--r0', mid(ls[0]) + 'px'); g.style.setProperty('--r1', g.clientWidth - mid(ls[ls.length - 1]) + 'px'); }
     const l = g.querySelector('label:has(:checked)'); if (!l) return;
-    g.style.setProperty('--x', l.offsetLeft + l.offsetWidth / 2 + 'px');
+    g.style.setProperty('--x', mid(l) + 'px');
   }
   /* range · .cal-range > output + input[type=range]: --p and the boxed reading */
   function range(w) {
     const r = w.querySelector('input[type="range"]'); if (!r) return;
-    const min = +r.min || 0, max = r.max === '' ? 100 : +r.max, unit = w.dataset.unit ?? '';
-    w.style.setProperty('--p', (r.value - min) / (max - min || 1));
-    const o = w.querySelector('output'); if (o) o.textContent = r.value + unit;
+    const min = +r.min || 0, max = r.max === '' ? 100 : +r.max, unit = w.dataset.unit ?? '', p = (r.value - min) / (max - min || 1);
+    w.classList.add('js');
+    w.style.setProperty('--p', p);
+    const o = w.querySelector('output');
+    if (o) {
+      o.textContent = r.value + unit;
+      /* keep the box inside the control; the leader stays on the handle */
+      const W = w.clientWidth, x = 6.5 + (W - 13) * p, half = o.offsetWidth / 2, ox = W ? Math.min(Math.max(x, half), W - half) : x;
+      w.style.setProperty('--ox', ox + 'px'); w.style.setProperty('--lx', x - ox + 'px');
+    }
     r.setAttribute('aria-valuetext', r.value + unit);
   }
-  /* file drop · label.cal-drop > input[type=file], listing into the .cal-rows named by data-list */
+  /* file drop · label.cal-drop > input[type=file], listing into the .cal-rows named by data-list.
+     A file over data-max bytes, or not matching the input's accept, is flagged in red. The list
+     is a polite live region, so the result is read out. */
+  const accepts = (input, f) => {
+    const a = (input?.accept || '').split(',').map((x) => x.trim().toLowerCase()).filter(Boolean);
+    if (!a.length) return true;
+    const name = f.name.toLowerCase(), type = (f.type || '').toLowerCase();
+    return a.some((x) => (x.startsWith('.') ? name.endsWith(x) : x.endsWith('/*') ? type.startsWith(x.slice(0, -1)) : type === x));
+  };
   function listFiles(z, files) {
     const list = z.dataset.list && document.getElementById(z.dataset.list); if (!list) return;
-    const max = parseFloat(z.dataset.max) || Infinity;
+    const max = parseFloat(z.dataset.max) || Infinity, input = z.querySelector('input[type="file"]');
+    if (!list.hasAttribute('aria-live')) list.setAttribute('aria-live', 'polite');
     list.replaceChildren(...[...files].map((f) => {
-      const r = document.createElement('div'), big = f.size > max;
-      r.className = 'file' + (big ? ' bad' : '');
+      const r = document.createElement('div'), big = f.size > max, odd = !accepts(input, f);
+      r.className = 'file' + (big || odd ? ' bad' : '');
       r.innerHTML = '<span></span><span class="lg"></span>';
       r.children[0].textContent = f.name;
-      r.children[1].textContent = fileSize(f.size) + (big ? ` · over ${fileSize(max)}` : '');
-      if (!big) r.children[1].classList.add('mut');
+      r.children[1].textContent = fileSize(f.size) + (odd ? ' · type not accepted' : '') + (big ? ` · over ${fileSize(max)}` : '');
+      if (!big && !odd) r.children[1].classList.add('mut');
       return r;
     }));
   }
@@ -666,36 +693,87 @@
   function addChip(box, v) {
     const input = box.querySelector('input');
     const dup = [...box.querySelectorAll('.chip')].find((c) => c.firstChild.textContent.trim().toLowerCase() === v.toLowerCase());
-    if (dup) { dup.classList.add('dup'); setTimeout(() => dup.classList.remove('dup'), 900); return; }
+    if (dup) { dup.classList.add('dup'); setTimeout(() => dup.classList.remove('dup'), 900); say(box, `${v} is already added`); return; }
     const c = document.createElement('span'), x = document.createElement('button');
     c.className = 'chip'; c.append(v);
     x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', 'Remove ' + v); c.append(x);
     box.insertBefore(c, input);
+    say(box, `Added ${v}`);
     box.dispatchEvent(new CustomEvent('cal-chips', { bubbles: true, detail: { values: chipValues(box) } }));
   }
   const chipValues = (box) => [...box.querySelectorAll('.chip')].map((c) => c.firstChild.textContent.trim());
+
+  /* number · .cal-num input[data-step] is a spinbutton: value, min, max and the value with its unit */
+  function spin(t) {
+    const v = parseNum(t.value), unit = t.closest('.cal-affixed')?.querySelector('.cal-affix')?.textContent.trim();
+    t.setAttribute('role', 'spinbutton');
+    if (t.dataset.min !== undefined) t.setAttribute('aria-valuemin', t.dataset.min); else t.setAttribute('aria-valuemin', '0');
+    if (t.dataset.max !== undefined) t.setAttribute('aria-valuemax', t.dataset.max);
+    if (Number.isFinite(v)) { t.setAttribute('aria-valuenow', v); t.setAttribute('aria-valuetext', t.value.trim() + (unit ? ' ' + unit : '')); }
+    else { t.removeAttribute('aria-valuenow'); t.removeAttribute('aria-valuetext'); }
+  }
+  const bounds = (t) => [t.dataset.min !== undefined ? parseFloat(t.dataset.min) : 0, t.dataset.max !== undefined ? parseFloat(t.dataset.max) : Infinity];
+  /* search · a .cal-btn in .cal-search clears it, shown only while there is text */
+  const clearBtn = (box) => { const b = box.querySelector(':scope > .cal-btn'), i = box.querySelector('input'); if (b && i) b.hidden = !i.value; };
 
   function controls(scope = document) {
     scope.querySelectorAll('.cal-term').forEach(term);
     scope.querySelectorAll('.cal-detent').forEach(detent);
     scope.querySelectorAll('.cal-range').forEach(range);
+    scope.querySelectorAll('.cal-num input[data-step]').forEach(spin);
+    scope.querySelectorAll('.cal-search').forEach(clearBtn);
   }
 
   const on = (type, sel, fn, opts) => document.addEventListener(type, (e) => { const t = e.target.closest?.(sel); if (t) fn(t, e); }, opts);
   on('input', '.cal-term .cal-textarea', (t) => term(t.closest('.cal-term')));
   ['keyup', 'click', 'select', 'focusin', 'focusout'].forEach((ev) => on(ev, '.cal-term .cal-textarea', (t) => term(t.closest('.cal-term'))));
-  on('change', '.cal-detent input', (t) => detent(t.closest('.cal-detent')));
+  on('change', '.cal-detent input', (t) => {
+    const g = t.closest('.cal-detent'); detent(g);
+    g.classList.add('moving'); clearTimeout(g._mv); g._mv = setTimeout(() => g.classList.remove('moving'), 340);
+  });
+  /* switch · a click on the OFF or ON word sets that state, it doesn't toggle */
+  on('click', '.cal-switch .o', (o, e) => {
+    const i = o.closest('.cal-switch').querySelector('input'); e.preventDefault();
+    if (!i || i.disabled) return;
+    const want = o.classList.contains('on');
+    if (i.checked !== want) { i.checked = want; i.dispatchEvent(new Event('input', { bubbles: true })); i.dispatchEvent(new Event('change', { bubbles: true })); }
+  });
   on('input', '.cal-range input[type="range"]', (t) => range(t.closest('.cal-range')));
-  /* number · .cal-num input[data-step]: ↑ ↓ step it, Shift ×10; digits are grouped on blur */
+  /* number · .cal-num input[data-step]: ↑ ↓ step it, Shift ×10, kept within data-min (default 0) and
+     data-max at the step's precision; on blur the integer part is grouped, and a value that isn't a
+     number or is out of range is marked aria-invalid (never changed behind the writer's back) */
   on('keydown', '.cal-num input[data-step]', (t, e) => {
     if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
     e.preventDefault();
-    const step = (parseFloat(t.dataset.step) || 1) * (e.shiftKey ? 10 : 1) * (e.key === 'ArrowUp' ? 1 : -1);
-    const min = t.dataset.min !== undefined ? parseFloat(t.dataset.min) : 0, max = t.dataset.max !== undefined ? parseFloat(t.dataset.max) : Infinity;
-    t.value = group(Math.min(max, Math.max(min, (digits(t.value) || 0) + step)));
+    const s0 = parseFloat(t.dataset.step) || 1, step = s0 * (e.shiftKey ? 10 : 1) * (e.key === 'ArrowUp' ? 1 : -1);
+    const [min, max] = bounds(t), cur = parseNum(t.value), d = Math.max(decimals(s0), Number.isFinite(cur) ? decimals(cur) : 0);
+    const next = Math.min(max, Math.max(min, (Number.isFinite(cur) ? cur : Number.isFinite(min) ? min : 0) + step));
+    t.value = groupNum(+next.toFixed(d), d);
+    if (t.dataset.calInvalid) { t.removeAttribute('aria-invalid'); delete t.dataset.calInvalid; }
     t.dispatchEvent(new Event('input', { bubbles: true }));
   });
-  on('focusout', '.cal-num input[data-step]', (t) => { const v = digits(t.value); if (Number.isFinite(v) && /^[\d\s-]+$/.test(t.value.trim())) t.value = group(v); });
+  on('input', '.cal-num input[data-step]', spin);
+  on('focusout', '.cal-num input[data-step]', (t) => {
+    const raw = t.value.trim(), v = parseNum(raw), [min, max] = bounds(t);
+    if (raw === '') return;
+    const bad = !Number.isFinite(v) || v < min || v > max;
+    if (bad) { t.setAttribute('aria-invalid', 'true'); t.dataset.calInvalid = '1'; }
+    else { if (t.dataset.calInvalid) { t.removeAttribute('aria-invalid'); delete t.dataset.calInvalid; } t.value = groupNum(v, decimals(raw.replace(/\s/g, ''))); }
+    spin(t);
+  });
+  on('input', '.cal-search input', (t) => clearBtn(t.closest('.cal-search')));
+  on('click', '.cal-search > .cal-btn', (b) => {
+    const i = b.closest('.cal-search').querySelector('input'); if (!i) return;
+    i.value = ''; i.dispatchEvent(new Event('input', { bubbles: true })); i.focus();
+  });
+  /* data-key="/" on a field: that key, pressed outside any text field, focuses it */
+  document.addEventListener('keydown', (e) => {
+    if (e.defaultPrevented || e.ctrlKey || e.metaKey || e.altKey || e.key.length !== 1) return;
+    const a = document.activeElement;
+    if (a && (a.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))) return;
+    const f = [...document.querySelectorAll('[data-key]')].find((x) => x.dataset.key === e.key && !x.disabled && x.getClientRects().length);
+    if (f) { e.preventDefault(); f.focus(); }
+  });
   on('dragover', '.cal-drop', (z, e) => { e.preventDefault(); z.classList.add('over'); });
   on('dragleave', '.cal-drop', (z) => z.classList.remove('over'));
   on('drop', '.cal-drop', (z, e) => {
@@ -703,15 +781,16 @@
     const input = z.querySelector('input[type="file"]');
     try { input.files = e.dataTransfer.files; } catch { /* read-only in old browsers */ }
     listFiles(z, e.dataTransfer.files);
+    z._listed = true;   /* the change below is ours: already listed */
     input.dispatchEvent(new Event('change', { bubbles: true }));
   });
-  on('change', '.cal-drop input[type="file"]', (t, e) => { if (e.isTrusted) listFiles(t.closest('.cal-drop'), t.files); });
+  on('change', '.cal-drop input[type="file"]', (t) => { const z = t.closest('.cal-drop'); if (z._listed) { z._listed = false; return; } listFiles(z, t.files); });
   on('keydown', '.cal-chips input', (t, e) => {
     const box = t.closest('.cal-chips'), v = t.value.trim().replace(/,$/, '');
     if ((e.key === 'Enter' || e.key === ',') && v) { e.preventDefault(); addChip(box, v); t.value = ''; }
-    else if (e.key === 'Backspace' && !t.value) { const last = [...box.querySelectorAll('.chip')].pop(); if (last) { last.remove(); box.dispatchEvent(new CustomEvent('cal-chips', { bubbles: true, detail: { values: chipValues(box) } })); } }
+    else if (e.key === 'Backspace' && !t.value) { const last = [...box.querySelectorAll('.chip')].pop(); if (last) { say(box, `Removed ${last.firstChild.textContent.trim()}`); last.remove(); box.dispatchEvent(new CustomEvent('cal-chips', { bubbles: true, detail: { values: chipValues(box) } })); } }
   });
-  on('click', '.cal-chips .chip button', (b) => { const box = b.closest('.cal-chips'); b.parentElement.remove(); box.querySelector('input')?.focus(); box.dispatchEvent(new CustomEvent('cal-chips', { bubbles: true, detail: { values: chipValues(box) } })); });
+  on('click', '.cal-chips .chip button', (b) => { const box = b.closest('.cal-chips'); say(box, `Removed ${b.parentElement.firstChild.textContent.trim()}`); b.parentElement.remove(); box.querySelector('input')?.focus(); box.dispatchEvent(new CustomEvent('cal-chips', { bubbles: true, detail: { values: chipValues(box) } })); });
   on('click', '.cal-chips', (box, e) => { if (e.target === box) box.querySelector('input')?.focus(); });
   /* dialog · <button data-dialog="id"> opens <dialog class="cal-dialog" id="id"> as a modal */
   on('click', '[data-dialog]', (b) => { const d = document.getElementById(b.dataset.dialog); if (d?.showModal && !d.open) d.showModal(); });

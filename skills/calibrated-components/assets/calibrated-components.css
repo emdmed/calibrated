@@ -5,6 +5,9 @@
    SVG instruments (meter, position, progress, diff, durations, ruler) live in
    calibrated-components.js. */
 
+/* ── read by screen readers, not drawn: live announcements and words a mark stands for */
+.cal-sr { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+
 /* ════ sheet (optional) ════ */
 
 /* ── sheet · an optional drawing-sheet frame with zone labels, for pages that
@@ -417,18 +420,27 @@ textarea.cal-tally-text[hidden] { display: none; }
 .cal-field > label { font: var(--fs-control) var(--font-legend); letter-spacing: .01em; color: var(--legend); }
 /* sentence case even when the label is written in lower case */
 .cal-field > label::first-letter, .cal-field > .lbl::first-letter { text-transform: uppercase; }
-.cal-input { font: 14px var(--font-legend); font-variant-numeric: tabular-nums; color: var(--fg); background: transparent; border: 0; border-bottom: var(--line-thin) solid var(--edge-strong); padding: 5px 2px 4px; min-width: 0; border-radius: 0; }
+.cal-input { font: 14px var(--font-legend); font-variant-numeric: tabular-nums; color: var(--fg); background: transparent; border: 0; border-bottom: var(--line-thin) solid var(--faint); padding: 5px 2px 4px; min-width: 0; border-radius: 0; }
 .cal-input:hover:not(:disabled):not(:focus) { border-bottom-color: var(--fg); }
 .cal-input:focus { outline: none; border-bottom-color: var(--live); box-shadow: 0 1px 0 var(--live); }
 .cal-input[aria-invalid="true"]:focus { box-shadow: 0 1px 0 var(--fault); }
+/* invalid and focused: the line stays red, focus shows as the lamp outline */
+:is(.cal-input, .cal-select)[aria-invalid="true"]:focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: 3px; }
 .cal-input:disabled { color: var(--muted); border-bottom-style: dashed; border-bottom-color: var(--edge-strong); cursor: not-allowed; }
-.cal-input::placeholder { color: var(--faint); }
+/* read-only: a dotted line, no lamp on focus (it can be selected, not changed) */
+.cal-input:read-only:not(:disabled) { border-bottom-style: dotted; }
+.cal-input:read-only:not(:disabled):focus { border-bottom-color: var(--fg); box-shadow: none; }
+.cal-input::placeholder { color: var(--key); }
 .cal-input[aria-invalid="true"], .cal-input[aria-invalid="true"]:hover { border-bottom-color: var(--fault); }
 .cal-field .hint { font-size: 12px; color: var(--muted); }
 .cal-field .err { font-size: 12px; color: var(--fault); }
-.cal-check { display: inline-flex; gap: 9px; align-items: center; cursor: pointer; font-size: 13px; }
-.cal-check input { appearance: none; width: 12px; height: 12px; border: var(--line-thin) solid var(--edge-strong); background: transparent; margin: 0; cursor: pointer; display: grid; place-items: center; }
-.cal-check:hover input, .cal-check input:checked { border-color: var(--fg); }
+.cal-check { display: inline-flex; gap: 9px; align-items: flex-start; min-height: 24px; padding-block: 1.6px; cursor: pointer; font-size: 13px; }
+/* the box keeps its size beside a long label and sits on the first line */
+.cal-check input { appearance: none; flex: none; width: 12px; height: 12px; margin: calc((1lh - 12px) / 2) 0 0; border: var(--line-thin) solid var(--faint); background: transparent; cursor: pointer; display: grid; place-items: center; }
+.cal-check:hover input, .cal-check input:is(:checked, :indeterminate) { border-color: var(--fg); }
+.cal-check input:indeterminate::after { content: ""; width: 6px; height: 1px; background: var(--fg); }
+/* required: a small word after the label (the field is already announced as required) */
+.cal-field:has(:required) > label::after { content: "required" / ""; margin-left: 8px; font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--key); }
 .cal-check input:disabled, .cal-check:has(input:disabled) { cursor: not-allowed; opacity: .5; }
 .cal-check input:checked::after { content: ""; width: 6px; height: 6px; background: var(--fg); }
 .cal-check input:focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: 2px; }
@@ -441,19 +453,22 @@ textarea.cal-tally-text[hidden] { display: none; }
 }
 
 /* ── kbd · a key cap as a small hairline box */
-.cal-kbd { display: inline-block; color: var(--muted); border: var(--line-thin) solid var(--edge-strong); padding: 0 4px; line-height: 14px; min-width: 16px; text-align: center; font-size: 10px; }
+.cal-kbd { display: inline-block; color: var(--muted); border: var(--line-thin) solid var(--edge-strong); padding: 0 4px; line-height: 14px; min-width: 16px; text-align: center; font-size: var(--fs-legend); }
 
 /* ── select · a write-in line ending in the ▼ marker */
 .cal-select {
   appearance: none; border-radius: 0; min-width: 200px; cursor: pointer;
   font: 14px var(--font-legend); color: var(--fg); padding: 5px 24px 4px 2px;
-  border: 0; border-bottom: var(--line-thin) solid var(--edge-strong);
+  border: 0; border-bottom: var(--line-thin) solid var(--faint);
   background: transparent no-repeat;
   background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
   background-position: calc(100% - 10px) 55%, calc(100% - 5px) 55%; background-size: 5px 5px;
 }
-.cal-select:hover:not(:focus) { border-bottom-color: var(--fg); }
+.cal-select:hover:not(:focus, :disabled) { border-bottom-color: var(--fg); }
 .cal-select:focus { outline: none; border-bottom-color: var(--live); box-shadow: 0 1px 0 var(--live); }
+.cal-select:disabled { color: var(--muted); border-bottom-style: dashed; border-bottom-color: var(--edge-strong); cursor: not-allowed; }
+.cal-select[aria-invalid="true"], .cal-select[aria-invalid="true"]:hover { border-bottom-color: var(--fault); }
+.cal-select[aria-invalid="true"]:focus { box-shadow: 0 1px 0 var(--fault); }
 .cal-select option { background: var(--raised); color: var(--fg); }
 @supports (appearance: base-select) {
   .cal-select, .cal-select::picker(select) { appearance: base-select; }
@@ -470,7 +485,7 @@ textarea.cal-tally-text[hidden] { display: none; }
 .cal-list { border: var(--line-thin) solid var(--edge-strong); background: var(--raised); min-width: 200px; }
 .cal-list > div { font: 13px var(--font-legend); padding: 6px 12px 6px 14px; border-top: var(--line-thin) solid var(--edge); display: flex; justify-content: space-between; gap: 12px; }
 .cal-list > div:first-child { border-top: 0; }
-.cal-list .lg { color: var(--faint); }
+.cal-list .lg { color: var(--key); }
 
 /* ── menu · a numbered parts list in a popover */
 .cal-menu { margin: 0; border: var(--line-thin) solid var(--edge-strong); background: var(--raised); color: var(--fg); padding: 4px 0; min-width: 210px; }
@@ -483,8 +498,8 @@ textarea.cal-tally-text[hidden] { display: none; }
 .cal-menu hr { border: 0; border-top: var(--line-thin) solid var(--edge); margin: 4px 0; }
 
 /* ── radio · a drawing balloon with an ink dot */
-.cal-radio { display: inline-flex; gap: 9px; align-items: center; cursor: pointer; font-size: 13px; }
-.cal-radio input { appearance: none; width: 13px; height: 13px; border-radius: 50%; border: var(--line-thin) solid var(--edge-strong); margin: 0; display: grid; place-items: center; cursor: pointer; }
+.cal-radio { display: inline-flex; gap: 9px; align-items: flex-start; min-height: 24px; padding-block: 1.6px; cursor: pointer; font-size: 13px; }
+.cal-radio input { appearance: none; flex: none; width: 13px; height: 13px; border-radius: 50%; border: var(--line-thin) solid var(--muted); margin: calc((1lh - 13px) / 2) 0 0; display: grid; place-items: center; cursor: pointer; }
 .cal-radio:hover input, .cal-radio input:checked { border-color: var(--fg); }
 .cal-radio input:checked::after { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--fg); }
 .cal-radio input:focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: 2px; }
@@ -502,24 +517,24 @@ textarea.cal-tally-text[hidden] { display: none; }
 }
 .cal-switch .txt { margin-right: 2px; }
 .cal-switch.caps .txt { font-family: var(--font-legend); font-size: var(--fs-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--key); }
-.cal-switch .o { flex: none; color: var(--muted); transition: color .12s ease-out; }
+.cal-switch .o { flex: none; color: var(--muted); transition: color .12s ease-out; }   /* a click on OFF / ON sets that state (calibrated-components.js) */
 .cal-switch:has(input:not(:checked)) .o.off, .cal-switch:has(input:checked) .o.on { color: var(--title); }
 .cal-switch input {
   appearance: none; position: relative; flex: none; box-sizing: border-box;
   width: var(--sw-w); height: var(--sw-h); margin: 0; cursor: pointer;
-  border: var(--line-thin) solid var(--edge-strong); border-radius: var(--sw-h); background: transparent;
+  border: var(--line-thin) solid var(--muted); border-radius: var(--sw-h); background: transparent;
   transition: border-color .12s ease-out, background-color .12s ease-out;
 }
 .cal-switch input::after {
   content: ""; position: absolute; top: 50%; left: 1px;
   width: var(--sw-knob); height: var(--sw-knob); border-radius: 50%;
-  background: var(--faint); translate: 0 -50%;
+  background: var(--muted); translate: 0 -50%;
   transition: translate .24s var(--sw-ease), background-color .12s ease-out;
 }
-.cal-switch input:checked { border-color: var(--faint); background: var(--current); }
+.cal-switch input:checked { border-color: var(--muted); background: var(--current); }
 .cal-switch input:checked::after { translate: calc(var(--sw-w) - var(--sw-knob) - 4px) -50%; background: var(--fg); }
-.cal-switch:hover input:not(:disabled) { border-color: var(--muted); }
-.cal-switch:hover input:not(:checked):not(:disabled)::after { background: var(--muted); }
+.cal-switch:hover input:not(:disabled) { border-color: var(--fg); }
+.cal-switch:hover input:not(:checked):not(:disabled)::after { background: var(--fg); }
 .cal-switch input:focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: 2px; }
 .cal-switch:has(input:disabled) { cursor: not-allowed; opacity: .5; }
 .cal-switch input:disabled { cursor: not-allowed; }
@@ -539,6 +554,8 @@ textarea.cal-tally-text[hidden] { display: none; }
   .cal-btn[aria-pressed="true"] { border-color: Highlight; outline: var(--line-thin) solid Highlight; outline-offset: -3px; }
   .cal-btn:focus-visible, .cal-tabs > :focus-visible { outline-color: Highlight; }
   /* form controls */
+  .cal-input, .cal-select, .cal-affixed, .cal-chips, .cal-term,
+  .cal-check input, .cal-radio input, .cal-detent, .cal-range { forced-color-adjust: none; }
   .cal-switch input { border-color: CanvasText; }
   .cal-switch input::after { background: CanvasText; }
   .cal-switch input:checked::after { background: Highlight; }
@@ -572,7 +589,7 @@ textarea.cal-tally-text[hidden] { display: none; }
 :has(> [data-tip]:is(:hover, :focus-visible)) > [data-tip].show:not(:hover, :focus-visible)::after { opacity: 0; }
 
 /* ── number + affix · a write-in line with a unit; ↑ ↓ step it (see calibrated-components.js) */
-.cal-affixed { display: inline-flex; align-items: center; gap: 6px; border-bottom: var(--line-thin) solid var(--edge-strong); }
+.cal-affixed { display: inline-flex; align-items: center; gap: 6px; border-bottom: var(--line-thin) solid var(--faint); }
 .cal-affixed:hover:not(:focus-within) { border-bottom-color: var(--fg); }
 .cal-affixed:focus-within { border-bottom-color: var(--live); box-shadow: 0 1px 0 var(--live); }
 .cal-affixed .cal-input { border: 0; box-shadow: none; flex: 1; }
@@ -593,9 +610,9 @@ textarea.cal-tally-text[hidden] { display: none; }
 /* ── fieldset group */
 .cal-group { border: 0; display: grid; gap: 14px; width: 100%; min-width: 0; }
 .cal-group > legend { float: left; width: 100%; display: flex; gap: 8px; align-items: center; font: var(--fs-control) var(--font-legend); letter-spacing: .01em; color: var(--legend); }
-.cal-group > legend b { font-weight: 500; color: var(--title); }
 .cal-group > legend b { font-weight: 400; color: var(--fg); }
-.cal-group > legend::after { content: ""; flex: 1; border-top: var(--line-thin) solid var(--edge); }
+.cal-group > legend > span { color: var(--key); }
+.cal-group > legend::after { content: ""; flex: 1; min-width: 24px; border-top: var(--line-thin) solid var(--edge); }
 .cal-group > legend + * { clear: both; }
 .cal-group .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 .cal-group .opts { display: flex; gap: 18px; flex-wrap: wrap; }
@@ -641,7 +658,7 @@ textarea.cal-tally-text[hidden] { display: none; }
 .cal-badge[data-ink="fault"] { color: var(--fault); border-color: color-mix(in srgb, var(--fault) 55%, var(--edge-strong)); }
 
 /* ── file drop */
-.cal-drop { display: grid; justify-items: center; gap: 4px; width: 100%; padding: 22px 16px; border: var(--line-thin) dashed var(--edge-strong); cursor: pointer; text-align: center; }
+.cal-drop { position: relative; display: grid; justify-items: center; gap: 4px; width: 100%; padding: 22px 16px; border: var(--line-thin) dashed var(--edge-strong); cursor: pointer; text-align: center; }
 .cal-drop:hover, .cal-drop.over { border-color: var(--fg); }
 .cal-drop.over { border-style: solid; background: var(--hover); }
 .cal-drop:has(input:focus-visible) { outline: var(--line-thin) solid var(--live); outline-offset: 2px; }
@@ -653,13 +670,14 @@ textarea.cal-tally-text[hidden] { display: none; }
 .drop-wrap { width: 100%; display: grid; gap: 8px; }
 
 /* ── chips · boxed words on a write-in line */
-.cal-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; width: 100%; border-bottom: var(--line-thin) solid var(--edge-strong); padding: 4px 0 5px; cursor: text; }
+.cal-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; width: 100%; border-bottom: var(--line-thin) solid var(--faint); padding: 4px 0 5px; cursor: text; }
 .cal-chips:focus-within { border-bottom-color: var(--live); box-shadow: 0 1px 0 var(--live); }
-.cal-chips .chip { display: inline-flex; align-items: center; gap: 4px; border: var(--line-thin) solid var(--edge-strong); padding: 0 2px 0 6px; line-height: 16px; color: var(--fg); }
-.cal-chips .chip button { background: none; border: 0; color: var(--muted); cursor: pointer; font: inherit; padding: 0 3px; }
+.cal-chips .chip { display: inline-block; max-width: 100%; overflow-wrap: anywhere; border: var(--line-thin) solid var(--edge-strong); padding: 0 2px 0 6px; line-height: 16px; color: var(--fg); }
+/* × is a 24px target; negative margins keep the chip its drawn size */
+.cal-chips .chip button { background: none; border: 0; color: var(--muted); cursor: pointer; font: inherit; min-width: 24px; min-height: 24px; margin: -4px -2px -4px 0; padding: 0; vertical-align: middle; }
 .cal-chips .chip button:hover { color: var(--fault); }
 .cal-chips input { flex: 1; min-width: 90px; border: 0; background: transparent; color: var(--fg); font: 13px var(--font-legend); padding: 2px; outline: none; }
-.cal-chips input::placeholder { color: var(--faint); }
+.cal-chips input::placeholder { color: var(--key); }
 
 /* ── steps · progress nodes with names */
 .cal-steps { list-style: none; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; width: 100%; }
@@ -678,14 +696,18 @@ textarea.cal-tally-text[hidden] { display: none; }
 .cal-date { font: 14px var(--font-legend); color-scheme: inherit; min-width: 170px; }
 .cal-date::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 1; width: 10px; height: 10px; padding: 0; margin-left: 8px;
   background: no-repeat; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: 0 60%, 5px 60%; background-size: 5px 5px; }
+.cal-date::-webkit-calendar-picker-indicator:focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: 2px; }
 .cal-date::-webkit-datetime-edit-fields-wrapper { padding: 0; }
 .cal-code pre, .cal-kbd { font-variant-ligatures: none; }
 
 .cal-affixed:has([aria-invalid="true"]) { border-bottom-color: var(--fault); }
-.cal-affixed:has([aria-invalid="true"]):focus-within { box-shadow: 0 1px 0 var(--fault); }
+.cal-affixed:has([aria-invalid="true"]):focus-within { box-shadow: 0 1px 0 var(--fault); outline: var(--line-thin) solid var(--live); outline-offset: 3px; }
+.cal-affixed:has(.cal-input:disabled) { border-bottom-style: dashed; border-bottom-color: var(--edge-strong); }
 .cal-rows > .none { color: var(--muted); font-size: 12.5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .cal-rows > .none b { font-weight: 400; color: var(--fg); }
 .cal-rows > .file { display: flex; justify-content: space-between; gap: 12px; }
+.cal-rows > .file > :first-child { min-width: 0; overflow-wrap: anywhere; }
+.cal-rows > .file > .lg { flex: none; white-space: nowrap; }
 .cal-rows > .file.bad .lg { color: var(--fault); }
 .cal-chips .chip { transition: border-color .2s, color .2s; }
 .cal-chips .chip.dup { border-color: var(--live); color: var(--live); }
@@ -731,69 +753,83 @@ textarea.cal-tally-text[hidden] { display: none; }
 .cal-field > .lbl { font: var(--fs-control) var(--font-legend); letter-spacing: .01em; color: var(--legend); }
 
 /* ── textarea · a recessed editor pane with a terminal status line */
-.cal-term { width: 100%; background: var(--well); border: var(--line-thin) solid var(--edge-strong); }
-.cal-term:hover:not(:focus-within) { border-color: var(--fg); }
+.cal-term { width: 100%; background: var(--well); border: var(--line-thin) solid var(--faint); }
+.cal-term:hover:not(:focus-within, :has(:disabled)) { border-color: var(--fg); }
 .cal-term:focus-within { border-color: var(--live); }
 .cal-term[data-over] { border-color: var(--fault); }
+.cal-term:has(.cal-textarea:disabled) { border-style: dashed; border-color: var(--edge-strong); }
+.cal-term:has(.cal-textarea:disabled) .cal-textarea { color: var(--muted); cursor: not-allowed; resize: none; }
+.cal-term:has(.cal-textarea:read-only:not(:disabled)) { border-style: dotted; }
+.cal-term:has(.cal-textarea:read-only:not(:disabled)):focus-within { border-color: var(--fg); }
 .cal-textarea {
   display: block; width: 100%; min-height: calc(4 * 1.7em + 20px); resize: vertical; field-sizing: content; overflow-wrap: anywhere;
   font: 13px/1.7 var(--font-body); color: var(--fg); background: transparent; border: 0; border-radius: 0; padding: 10px 12px;
   caret-color: var(--live); caret-shape: block; outline: none;
 }
-.cal-textarea::placeholder { color: var(--faint); }
+.cal-textarea::placeholder { color: var(--key); }
 .cal-term .bar { display: flex; align-items: center; gap: 14px; border-top: var(--line-thin) solid var(--edge); padding: 3px 8px 3px 12px;
-  font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; font-variant-numeric: tabular-nums; color: var(--muted); }
+  font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; font-variant-numeric: tabular-nums; color: var(--key); }
 .cal-term .bar .sp { flex: 1; }
-.cal-term .mode { color: var(--faint); }
+.cal-term .mode { color: var(--key); }
 /* the vim mode and caret position are for editors only: opt in with data-status="editor" */
 .cal-term:not([data-status="editor"]) .bar .mode, .cal-term:not([data-status="editor"]) .bar .pos { display: none; }
 .cal-term:focus-within .mode { color: var(--live); }
 
 /* ── detent choice · ordered options as labelled ticks; the lamp ▼ over the chosen one */
-.cal-detent { --col: 52px; position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: var(--col); padding-top: 14px; }
-.cal-detent::before { content: ""; position: absolute; top: 14px; left: calc(var(--col) / 2); right: calc(var(--col) / 2); height: 1px; background: var(--edge-strong); }
-.cal-detent label { position: relative; display: grid; justify-items: center; padding: 10px 0 2px; color: var(--muted); cursor: pointer; transition: color .12s ease-out; }
+.cal-detent { --col: 52px; position: relative; display: inline-grid; justify-self: start; width: max-content; grid-auto-flow: column; grid-auto-columns: minmax(var(--col), max-content); padding-top: 14px; }
+/* the rule runs from the first tick to the last (the JS measures them when labels widen a column) */
+.cal-detent::before { content: ""; position: absolute; top: 14px; left: var(--r0, calc(var(--col) / 2)); right: var(--r1, calc(var(--col) / 2)); height: 1px; background: var(--faint); }
+.cal-detent label { position: relative; display: grid; justify-items: center; padding: 10px 5px 2px; color: var(--muted); cursor: pointer; transition: color .12s ease-out; }
+.cal-detent label:has(:disabled) { color: var(--faint); cursor: not-allowed; }
+.cal-detent label:has(:disabled)::before { background: var(--edge); }
 .cal-detent label::before { content: ""; position: absolute; top: 0; left: 50%; width: 1px; height: 6px; background: var(--faint); transition: height .12s ease-out, background .12s; }
-.cal-detent label:hover { color: var(--fg); }
-.cal-detent label:hover::before { background: var(--fg); }
+.cal-detent label:not(:has(:disabled)):hover { color: var(--fg); }
+.cal-detent label:not(:has(:disabled)):hover::before { background: var(--fg); }
 .cal-detent label:has(:checked) { color: var(--title); }
 .cal-detent label:has(:checked)::before { background: var(--fg); height: 8px; }
 .cal-detent input { position: absolute; opacity: 0; pointer-events: none; }
 .cal-detent label:has(:focus-visible) span { outline: var(--line-thin) solid var(--live); outline-offset: 3px; }
-.cal-detent .mk { position: absolute; top: 2px; left: var(--x, 50%); width: 11px; height: 10px; translate: -50% 0; background: var(--live); clip-path: polygon(0 0, 100% 0, 50% 100%); transition: left .32s cubic-bezier(.16, 1, .3, 1); }
+.cal-detent .mk { position: absolute; top: 2px; left: var(--x, 50%); width: 11px; height: 10px; translate: -50% 0; background: var(--fg); clip-path: polygon(0 0, 100% 0, 50% 100%); transition: left .32s cubic-bezier(.16, 1, .3, 1), background-color .12s ease-out; }
+/* the ▼ is ink at rest and takes the lamp only while the choice is in hand (focused or gliding) */
+.cal-detent:is(:has(:focus-visible), .moving) .mk { background: var(--live); }
 .cal-detent:not(.js) .mk { display: none; }
-.cal-detent:not(.js) label:has(:checked)::after { content: ""; position: absolute; top: -12px; left: 50%; width: 11px; height: 10px; translate: -50% 0; background: var(--live); clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.cal-detent:not(.js) label:has(:checked)::after { content: ""; position: absolute; top: -12px; left: 50%; width: 11px; height: 10px; translate: -50% 0; background: var(--fg); clip-path: polygon(0 0, 100% 0, 50% 100%); }
 @media (prefers-reduced-motion: reduce) { .cal-detent .mk { transition: none; } }
 
 /* ── range · a handle on a ruler, the run to the value drawn heavier */
-.cal-range { --p: .5; --g: var(--muted); position: relative; width: 100%; max-width: 380px; padding-top: 30px; }
-.cal-range input { appearance: none; width: 100%; height: 20px; background: transparent; margin: 0; cursor: grab; display: block; }
+.cal-range { --p: .5; --g: var(--muted); --run: calc(6.5px + var(--p) * (100% - 13px)); position: relative; width: 100%; max-width: 380px; padding-top: 30px; }
+/* without the JS there is no reading yet: no run, no box (the handle alone is true) */
+.cal-range:not(.js) { --run: 0px; }
+.cal-range:not(.js) output { display: none; }
+.cal-range input { appearance: none; width: 100%; height: 24px; background: transparent; margin: 0; cursor: grab; display: block; }
 .cal-range input:active { cursor: grabbing; }
-.cal-range input:hover { --g: var(--fg); }
+.cal-range input:not(:disabled):hover { --g: var(--fg); }
+.cal-range:has(input:disabled) { opacity: .5; }
+.cal-range input:disabled { cursor: not-allowed; }
 .cal-range input:active, .cal-range input:focus-visible { --g: var(--live); }
 .cal-range input:focus-visible { outline: none; }
 .cal-range input::-webkit-slider-runnable-track { height: 20px;
   background:
-    linear-gradient(var(--fg), var(--fg)) 0 50% / calc(6.5px + var(--p) * (100% - 13px)) 2px no-repeat,
+    linear-gradient(var(--fg), var(--fg)) 0 50% / var(--run) 2px no-repeat,
     repeating-linear-gradient(to right, var(--fg) 0 1px, transparent 1px 50%) 6.5px 50% / calc(100% - 13px) 12px no-repeat,
     linear-gradient(var(--fg), var(--fg)) calc(100% - 6px) 50% / 1px 12px no-repeat,
     repeating-linear-gradient(to right, var(--faint) 0 1px, transparent 1px 10%) 6.5px 50% / calc(100% - 13px) 7px no-repeat,
-    linear-gradient(var(--edge-strong), var(--edge-strong)) 0 50% / 100% 1px no-repeat; }
+    linear-gradient(var(--faint), var(--faint)) 0 50% / 100% 1px no-repeat; }
 .cal-range input::-moz-range-track { height: 20px;
   background:
-    linear-gradient(var(--fg), var(--fg)) 0 50% / calc(6.5px + var(--p) * (100% - 13px)) 2px no-repeat,
+    linear-gradient(var(--fg), var(--fg)) 0 50% / var(--run) 2px no-repeat,
     repeating-linear-gradient(to right, var(--fg) 0 1px, transparent 1px 50%) 6.5px 50% / calc(100% - 13px) 12px no-repeat,
     linear-gradient(var(--fg), var(--fg)) calc(100% - 6px) 50% / 1px 12px no-repeat,
     repeating-linear-gradient(to right, var(--faint) 0 1px, transparent 1px 10%) 6.5px 50% / calc(100% - 13px) 7px no-repeat,
-    linear-gradient(var(--edge-strong), var(--edge-strong)) 0 50% / 100% 1px no-repeat; }
+    linear-gradient(var(--faint), var(--faint)) 0 50% / 100% 1px no-repeat; }
 .cal-range input::-webkit-slider-thumb { appearance: none; box-sizing: border-box; width: 13px; height: 20px; border: var(--line-thin) solid var(--g); border-radius: 0;
   background: linear-gradient(var(--g), var(--g)) 4px 4px / 1px 10px no-repeat, linear-gradient(var(--g), var(--g)) 6px 4px / 1px 10px no-repeat, var(--panel); }
 .cal-range input::-moz-range-thumb { box-sizing: border-box; width: 13px; height: 20px; border: var(--line-thin) solid var(--g); border-radius: 0;
   background: linear-gradient(var(--g), var(--g)) 4px 4px / 1px 10px no-repeat, linear-gradient(var(--g), var(--g)) 6px 4px / 1px 10px no-repeat, var(--panel); }
 .cal-range .nums { margin: 4px 6.5px 0; display: flex; justify-content: space-between; color: var(--muted); }
 .cal-range .nums span { width: 0; display: flex; justify-content: center; white-space: nowrap; }
-.cal-range output { position: absolute; top: 0; left: calc(6.5px + (100% - 13px) * var(--p)); translate: -50% 0; color: var(--fg); border: var(--line-thin) solid var(--fg); padding: 0 5px; line-height: 16px; background: var(--panel); white-space: nowrap; }
-.cal-range output::after { content: ""; position: absolute; left: 50%; top: 100%; width: 1px; height: 12px; background: var(--fg); }
+.cal-range output { position: absolute; top: 0; left: var(--ox, calc(6.5px + (100% - 13px) * var(--p))); translate: -50% 0; color: var(--fg); border: var(--line-thin) solid var(--fg); padding: 0 5px; line-height: 16px; background: var(--panel); white-space: nowrap; }
+.cal-range output::after { content: ""; position: absolute; left: calc(50% + var(--lx, 0px)); top: 100%; width: 1px; height: 12px; background: var(--fg); }
 .cal-range:has(input:active, input:focus-visible) output { border-color: var(--live); color: var(--live); }
 
 /* ── detail callout · a lettered balloon on a leader; open drops into an inset */
