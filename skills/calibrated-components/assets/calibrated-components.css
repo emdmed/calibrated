@@ -143,16 +143,18 @@
   display: block; height: var(--line-thin); border: 0; margin: var(--rule-space, 20px) 0;
   background: var(--rule-paint); color: var(--key);
 }
-.cal-rule[data-weight="strong"], .cal-rule[data-line] { --rule: var(--edge-strong); }
+.cal-rule[data-weight="strong"], .cal-rule[data-line] { --rule: var(--faint); }   /* a line type carries meaning: ≥3:1 */
 .cal-rule[data-line="dashed"] { --rule-paint: repeating-linear-gradient(90deg, var(--rule) 0 4px, transparent 4px 7px); }
 .cal-rule[data-line="centre"] { --rule-paint: repeating-linear-gradient(90deg, var(--rule) 0 10px, transparent 10px 13px, var(--rule) 13px 15px, transparent 15px 18px); }
 .cal-rule[data-space="tight"] { --rule-space: 10px; }
 .cal-rule[data-space="loose"] { --rule-space: 36px; }
 /* labelled: the label sits in the line; data-align="start" sets it near the left like a section head */
 .cal-rule:not(:empty) {
-  height: auto; background: none; display: flex; align-items: center; gap: 10px; white-space: nowrap;
+  height: auto; background: none; display: flex; align-items: center; gap: 10px;
   font: var(--fs-legend)/1.3 var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase;
 }
+/* a long label wraps between its lines instead of pushing them out */
+.cal-rule:not(:empty) > * { min-width: 0; text-wrap: balance; }
 .cal-rule:not(:empty)::before, .cal-rule:not(:empty)::after { content: ""; flex: 1; min-width: 18px; height: var(--line-thin); background: var(--rule-paint); }
 .cal-rule[data-align="start"]::before { flex: 0 0 18px; }
 .cal-rule:not(:empty) > span { color: var(--muted); text-transform: none; letter-spacing: .01em; }
@@ -186,7 +188,7 @@
 .cal-zone { --zone: var(--edge-strong); --zone-line: solid; --zone-pad: 16px; display: flow-root; position: relative; min-width: 0; border: var(--line-thin) var(--zone-line) var(--zone); padding: 14px var(--zone-pad) 16px; }
 .cal-zone:has(> .cal-zone-h:first-child) { border-top: 0; margin-top: 7px; padding-top: 0; }
 .cal-zone-h {
-  display: flex; align-items: center; gap: 8px; height: 14px; white-space: nowrap;
+  display: flex; align-items: center; gap: 8px; min-height: 14px; text-wrap: balance;
   margin: -7px calc(-1 * var(--zone-pad) - var(--line-thin)) 14px;
   font: 500 var(--fs-legend)/1 var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--fg);
 }
@@ -553,6 +555,14 @@ textarea.cal-tally-text[hidden] { display: none; }
   .cal-tabs > :is(.on, [aria-selected="true"]) { box-shadow: inset 0 -2px Highlight; }
   .cal-btn[aria-pressed="true"] { border-color: Highlight; outline: var(--line-thin) solid Highlight; outline-offset: -3px; }
   .cal-btn:focus-visible, .cal-tabs > :focus-visible { outline-color: Highlight; }
+  .cal-btn:is(:disabled, [aria-disabled="true"]) { color: GrayText; border-color: GrayText; }
+  /* overlays and feedback */
+  .cal-rule, .cal-rule::before, .cal-rule::after, .cal-meta > li::before, .cal-vr,
+  [data-tip]::before, .cal-callout[data-ink="fault"] .cal-gl::before, .cal-details .bl,
+  .cal-scan, .cal-scan > i, .cal-scan > i::after, .cal-wait > i { forced-color-adjust: none; }
+  /* navigation */
+  .cal-pager .pg, .cal-steps li::before, .cal-steps li::after { forced-color-adjust: none; }
+  .cal-pager .cur { border-color: Highlight; }
   /* form controls */
   .cal-input, .cal-select, .cal-affixed, .cal-chips, .cal-term,
   .cal-check input, .cal-radio input, .cal-detent, .cal-range { forced-color-adjust: none; }
@@ -562,8 +572,10 @@ textarea.cal-tally-text[hidden] { display: none; }
 }
 
 /* ── dialog · a raised panel with a ruled head */
-.cal-dialog { border: var(--line-thin) solid var(--edge-strong); background: var(--panel); color: var(--fg); padding: 0; width: min(440px, calc(100vw - 32px)); margin: auto; }
+.cal-dialog { border: var(--line-thin) solid var(--fg); background: var(--panel); color: var(--fg); padding: 0; width: min(440px, calc(100vw - 32px)); margin: auto; }
 .cal-dialog::backdrop { background: color-mix(in srgb, var(--shade) 55%, transparent); }
+/* the page under a modal stays put */
+html:has(dialog.cal-dialog[open]:modal) { overflow: hidden; scrollbar-gutter: stable; }
 .cal-dialog header { display: flex; align-items: center; gap: 10px; padding: 10px 14px 9px 16px; border-bottom: var(--line-thin) solid var(--edge-strong); font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--muted); }
 .cal-dialog header b { font-weight: 400; color: var(--fg); }
 .cal-dialog header .sp { flex: 1; }
@@ -574,17 +586,21 @@ textarea.cal-tally-text[hidden] { display: none; }
 .cal-btn[data-ink="fault"].primary:not(:disabled):hover { background: var(--fault); border-color: var(--fault); opacity: .88; }
 
 /* ── tooltip · a leader line to a boxed value */
+/* The box is drawn, not read (its words go to aria-describedby, which the JS wires); it can be
+   hovered, the leader bridging the gap, and Esc hides it until the pointer or focus leaves. */
 [data-tip] { position: relative; text-decoration: underline dotted var(--faint); text-underline-offset: 3px; cursor: help; }
 [data-tip]::before, [data-tip]::after { position: absolute; left: 50%; opacity: 0; pointer-events: none; transition: opacity .12s ease-out; z-index: 3; }
-[data-tip]::before { content: ""; bottom: 100%; width: 1px; height: 12px; background: var(--fg); }
+[data-tip]::before { content: ""; bottom: 100%; width: 15px; height: 12px; translate: -7px 0; background: linear-gradient(var(--fg), var(--fg)) center / 1px 100% no-repeat; }
 [data-tip]::after {
-  content: attr(data-tip); bottom: calc(100% + 12px); translate: -7px 0; white-space: nowrap;
-  font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--fg);
+  content: attr(data-tip) / ""; bottom: calc(100% + 12px); translate: -7px 0; width: max-content; max-width: min(36ch, calc(100vw - 32px)); white-space: normal;
+  font: var(--fs-legend)/1.4 var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--fg);
   background: var(--raised); border: var(--line-thin) solid var(--fg); padding: 1px 6px;
 }
-[data-tip]:hover::before, [data-tip]:hover::after, [data-tip]:focus-visible::before, [data-tip]:focus-visible::after, [data-tip].show::before, [data-tip].show::after { opacity: 1; }
-[data-tip][data-tip-end]::after { translate: calc(-100% + 7px) 0; }
-[data-tip]:focus-visible { outline: none; color: var(--live); }
+[data-tip]:is(:hover, :focus-visible, .show)::before, [data-tip]:is(:hover, :focus-visible, .show)::after { opacity: 1; pointer-events: auto; }
+@media (hover: none) { [data-tip]:focus::before, [data-tip]:focus::after { opacity: 1; pointer-events: auto; } }
+[data-tip][data-tip-off]::before, [data-tip][data-tip-off]::after { opacity: 0 !important; pointer-events: none !important; }
+[data-tip]:is([data-tip-end], [data-tip-flip])::after { translate: calc(-100% + 8px) 0; }
+[data-tip]:focus-visible { outline: none; color: var(--live); text-decoration: underline solid var(--live); }
 :has(> [data-tip]:is(:hover, :focus-visible)) > [data-tip].show:not(:hover, :focus-visible)::before,
 :has(> [data-tip]:is(:hover, :focus-visible)) > [data-tip].show:not(:hover, :focus-visible)::after { opacity: 0; }
 
@@ -629,29 +645,32 @@ textarea.cal-tally-text[hidden] { display: none; }
 
 /* ── toast · a raised strip that reports and goes */
 .cal-toast { display: flex; align-items: center; gap: 10px; background: var(--raised); border: var(--line-thin) solid var(--edge-strong); padding: 3px 6px 3px 12px; color: var(--fg); min-width: 300px; }
-.cal-toast .msg { flex: 1; text-transform: none; font-family: var(--font-body); font-size: 12.5px; letter-spacing: 0; }
+.cal-toast .msg { flex: 1; text-transform: none; font-family: var(--font-body); font-size: var(--fs-small); letter-spacing: 0; }
 .cal-toast[data-ink="ok"] .ic { color: var(--ok); }
 .cal-toast[data-ink="fault"] { border-color: color-mix(in srgb, var(--fault) 60%, var(--edge-strong)); }
 .cal-toast[data-ink="fault"] .ic { color: var(--fault); }
 .cal-toasts { position: fixed; right: 16px; bottom: 56px; display: grid; gap: 8px; z-index: 20; }
 .cal-toasts .cal-toast { animation: toast-in .2s ease-out; }
+@media (max-width: 480px) { .cal-toasts { left: 16px; right: 16px; } .cal-toast { min-width: 0; } }
 @keyframes toast-in { from { opacity: 0; translate: 0 6px; } }
 
-/* ── empty state · a hatched zone with one way forward */
-.cal-empty { width: 100%; min-height: 150px; display: grid; place-items: center; border: var(--line-thin) dashed var(--edge-strong); background: repeating-linear-gradient(-45deg, var(--edge) 0 1px, transparent 1px 7px); padding: 18px; }
+/* ── empty state · a dashed blank area with one way forward (no hatch: hatch means closed) */
+.cal-empty { width: 100%; min-height: 150px; display: grid; place-items: center; border: var(--line-thin) dashed var(--edge-strong); padding: 18px; }
 .cal-empty > div { background: var(--panel); border: var(--line-thin) solid var(--edge-strong); padding: 10px 16px 6px; display: grid; justify-items: center; gap: 2px; text-align: center; }
 .cal-empty .ttl { color: var(--fg); }
-.cal-empty p { font-size: 12.5px; color: var(--muted); }
+.cal-empty p { font-size: var(--fs-small); color: var(--muted); }
 
 /* ── breadcrumb · a sheet path */
 .cal-crumbs ol { list-style: none; display: flex; flex-wrap: wrap; gap: 0; color: var(--muted); }
-.cal-crumbs li + li::before { content: "/"; color: var(--faint); padding: 0 9px; }
-.cal-crumbs a { text-decoration: none; }
-.cal-crumbs a:hover { color: var(--fg); text-decoration: underline; text-decoration-color: var(--fg); }
+.cal-crumbs li + li::before { content: "/" / ""; color: var(--key); padding: 0 9px; }
+/* links keep the base hairline underline: underlined means pressable */
+.cal-crumbs a { display: inline-block; padding-block: 5px; }
+.cal-crumbs a:hover { color: var(--fg); text-decoration-color: var(--fg); }
 .cal-crumbs [aria-current] { color: var(--fg); }
 
 /* ── badge · a boxed status word */
-.cal-badge { display: inline-flex; align-items: center; gap: 6px; border: var(--line-thin) solid var(--edge-strong); padding: 0 6px; line-height: 16px; color: var(--muted); white-space: nowrap; }
+/* a long status wraps inside its box rather than running out of the column */
+.cal-badge { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; border: var(--line-thin) solid var(--edge-strong); padding: 0 6px; line-height: 16px; color: var(--muted); overflow-wrap: anywhere; }
 .cal-badge .cal-dot { margin: 0; }
 .cal-badge[data-ink="live"] { color: var(--live); border-color: color-mix(in srgb, var(--live) 55%, var(--edge-strong)); }
 .cal-badge[data-ink="ok"] { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 55%, var(--edge-strong)); }
@@ -680,17 +699,18 @@ textarea.cal-tally-text[hidden] { display: none; }
 .cal-chips input::placeholder { color: var(--key); }
 
 /* ── steps · progress nodes with names */
-.cal-steps { list-style: none; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; width: 100%; }
+.cal-steps { list-style: none; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(64px, 1fr); width: 100%; overflow-x: auto; padding-top: 1px; }
 .cal-steps li { position: relative; padding-top: 18px; color: var(--muted); padding-right: 8px; }
-.cal-steps li::before { content: ""; position: absolute; top: 0; left: 0; width: 9px; height: 9px; border: var(--line-thin) solid var(--edge-strong); background: var(--panel); }
-.cal-steps li::after { content: ""; position: absolute; top: 4px; left: 13px; right: 4px; height: 1px; background: var(--edge-strong); }
+.cal-steps li::before { content: ""; position: absolute; top: 1px; left: 0; width: 9px; height: 9px; border: var(--line-thin) solid var(--faint); }
+.cal-steps li::after { content: ""; position: absolute; top: 5px; left: 13px; right: 4px; height: 1px; background: var(--faint); }
 .cal-steps li:last-child::after { display: none; }
 .cal-steps li.done { color: var(--fg); }
-.cal-steps li.done::before { background: var(--fg); border-color: var(--fg); }
+.cal-steps li.done::before { content: "" / "done, "; background: var(--fg); border-color: var(--fg); }   /* "done" is read, not drawn */
 .cal-steps li.done::after { background: var(--fg); }
-.cal-steps li[aria-current="step"] { color: var(--live); }
-.cal-steps li[aria-current="step"]::before { border: 0; width: 11px; height: 11px; top: -1px; left: -1px; background: var(--live); clip-path: var(--star); }
-.cal-steps li .s { display: block; color: var(--faint); font-size: 10px; }
+/* where you are: an ink star (the lamp is for what is running, not for a wizard step) */
+.cal-steps li[aria-current="step"] { color: var(--title); }
+.cal-steps li[aria-current="step"]::before { border: 0; width: 11px; height: 11px; top: 0; left: -1px; background: var(--fg); clip-path: var(--star); }
+.cal-steps li .s { display: block; color: var(--key); font-size: var(--fs-legend); }
 
 /* ── date · native date and time on a write-in line */
 .cal-date { font: 14px var(--font-legend); color-scheme: inherit; min-width: 170px; }
@@ -841,8 +861,8 @@ textarea.cal-tally-text[hidden] { display: none; }
 .cal-details .bl { flex: none; width: 18px; height: 18px; border-radius: 50%; border: var(--line-thin) solid var(--edge-strong); display: grid; place-items: center; color: var(--fg); font-size: 10px; line-height: 1; transition: background .15s, color .15s, border-color .15s; }
 .cal-details > summary b { font-weight: 400; color: var(--fg); }
 .cal-details .ld { flex: 1; min-width: 16px; border-bottom: var(--line-thin) dotted var(--edge-strong); }
-.cal-details .tg::before { content: "[show]"; }
-.cal-details[open] .tg::before { content: "[hide]"; }
+.cal-details .tg::before { content: "[show]" / ""; }
+.cal-details[open] .tg::before { content: "[hide]" / ""; }
 .cal-details > summary:hover .bl { border-color: var(--fg); }
 .cal-details > summary:hover .tg { color: var(--fg); }
 .cal-details[open] .bl { background: var(--fg); border-color: var(--fg); color: var(--panel); }
@@ -854,29 +874,37 @@ textarea.cal-tally-text[hidden] { display: none; }
   .cal-details[open]::details-content { height: auto; }
 }
 
-/* ── pager · bracketed steps, underlined pages, the current page boxed */
+/* ── pager · bracketed steps, underlined pages, the current page boxed (see Calibrated.pager) */
 .cal-pager { display: flex; align-items: center; gap: 2px; flex-wrap: wrap; color: var(--muted); }
+.cal-pager > * { white-space: nowrap; }
 .cal-pager .cal-btn:first-child { margin-right: 8px; }
 .cal-pager .cal-btn:last-child { margin-left: 8px; }
-.cal-pager .pg { font: inherit; letter-spacing: inherit; background: none; border: var(--line-thin) solid transparent; padding: 0 5px; line-height: 18px; color: var(--muted); cursor: pointer;
-  text-decoration: underline; text-decoration-color: var(--edge-strong); text-underline-offset: 3px; }
-.cal-pager button.pg:hover { color: var(--fg); text-decoration-color: var(--fg); }
+.cal-pager .pg { font: inherit; letter-spacing: inherit; background: none; border: var(--line-thin) solid transparent; min-width: 24px; padding: 0 5px; line-height: 22px; text-align: center; color: var(--muted); cursor: pointer;
+  text-decoration: underline; text-decoration-color: var(--faint); text-underline-offset: 3px; }
+.cal-pager .pg:not(.cur):hover { color: var(--fg); text-decoration-color: var(--fg); }
+.cal-pager .pg:focus-visible, .cal-pager a.cal-btn:focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: 2px; }
 .cal-pager .cur { color: var(--title); border-color: var(--fg); text-decoration: none; cursor: default; }
-.cal-pager .gap { color: var(--faint); padding: 0 3px; }
+.cal-pager .gap { color: var(--key); padding: 0 3px; }
+.cal-pager a.cal-btn { text-decoration: none; }
 
 /* ── code block · a plain well with a little flavour */
 .cal-code { position: relative; width: 100%; background: var(--well); }
-.cal-code pre { margin: 0; padding: 12px 14px 22px; font: 12.5px/1.75 var(--font-legend); font-variant-ligatures: none; overflow-x: auto; }
+.cal-code pre { margin: 0; padding: 12px 14px 22px; font: var(--fs-small)/1.75 var(--font-legend); font-variant-ligatures: none; overflow-x: auto; }
+/* room for the copy button, so it never covers the first line */
+.cal-code:has(> .cal-btn) pre { padding-right: 64px; }
+.cal-code pre:focus-visible { outline: var(--line-thin) solid var(--live); outline-offset: -1px; }
 .cal-code .ln, .cal-code .cm { display: block; white-space: pre; }
-.cal-code .ln::before { content: "$ "; color: var(--faint); }
-.cal-code .cm { color: var(--muted); }
-.cal-code::after { content: attr(data-lang); position: absolute; right: 10px; bottom: 5px; font: 10px var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--faint); }
+.cal-code .ln::before { content: "$ "; color: var(--key); }
+.cal-code .cm { color: var(--key); }
+.cal-code::after { content: attr(data-lang) / ""; position: absolute; right: 10px; bottom: 5px; font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--key); }
 .cal-code > .cal-btn { position: absolute; top: 4px; right: 6px; opacity: 0; transition: opacity .12s ease-out; }
 .cal-code:hover > .cal-btn, .cal-code:focus-within > .cal-btn { opacity: 1; }
 @media (hover: none) { .cal-code > .cal-btn { opacity: 1; } }
 
 /* ── spinners · drawn from the loop and measured figures. <cal-spin> draws the dial SVG. */
 cal-spin { display: inline-block; line-height: 0; vertical-align: middle; }
+cal-spin:empty { width: 56px; height: 56px; }   /* holds its place before the JS draws it */
+cal-spin[size="sm"]:empty { width: 24px; height: 24px; }
 /* loop dial: hairline circle, dash-dot centre lines, four stations, the star stepping clockwise with an ink arc behind */
 .cal-spin { width: 56px; height: 56px; flex: none; overflow: visible; }
 .cal-spin :is(.o, .cl, .st rect, .tr) { vector-effect: non-scaling-stroke; }
@@ -911,6 +939,9 @@ cal-spin { display: inline-block; line-height: 0; vertical-align: middle; }
   .cal-spin .run, .cal-scan > i { animation: none; }
   .cal-wait > i { animation: none; }
   .cal-wait > i:first-child { border-color: transparent; background: var(--live); clip-path: var(--star); scale: 1.45; }
+  /* the sliding bar can't slide: it shows hatched end to end (busy, amount unknown), not a 30% fill */
+  .cal-scan:not(.det) > i { left: 1px; right: 1px; width: auto; background: repeating-linear-gradient(-45deg, var(--fg) 0 1px, transparent 1px 4px); }
+  .cal-scan:not(.det) > i::after { display: none; }
 }
 
 /* ── footer */

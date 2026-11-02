@@ -794,20 +794,79 @@
   on('click', '.cal-chips', (box, e) => { if (e.target === box) box.querySelector('input')?.focus(); });
   /* dialog · <button data-dialog="id"> opens <dialog class="cal-dialog" id="id"> as a modal */
   on('click', '[data-dialog]', (b) => { const d = document.getElementById(b.dataset.dialog); if (d?.showModal && !d.open) d.showModal(); });
-  /* menu · a .cal-menu[popover]: where anchor positioning is missing, sit it under its button;
-     focus the first item on open, arrow keys move, picking an item closes it */
+  /* menu · a .cal-menu[popover] with role=menu, opened by its [popovertarget] button. Where anchor
+     positioning is missing it sits under its button. Enter, Space or ↓ on the button open it on the
+     first item (↑ on the last); ↑ ↓ Home End move; a key shown in an item's .cal-kbd (or its
+     data-key) picks it; Tab or picking an item closes it; Esc closes and returns focus. Items are out
+     of the Tab order. menus(scope) wires the resting state (aria-haspopup, key shortcuts). */
   const anchored = !!root.CSS?.supports?.('position-area: bottom');
+  const opener = (m) => m.id && document.querySelector(`[popovertarget="${CSS.escape(m.id)}"]`);
+  const menuItems = (m) => [...m.querySelectorAll('.it')].filter((x) => !x.disabled);
+  const KEYS = { '⌫': 'Backspace', '⌦': 'Delete', '↵': 'Enter', esc: 'Escape' };
+  const itemKey = (it) => it.dataset.key || it.querySelector('.cal-kbd')?.textContent.trim() || '';
+  function menus(scope = document) {
+    scope.querySelectorAll('.cal-menu[popover]').forEach((m) => {
+      const b = opener(m); if (b) { b.setAttribute('aria-haspopup', 'menu'); b.setAttribute('aria-expanded', String(m.matches(':popover-open'))); }
+      m.querySelectorAll('.it').forEach((it) => {
+        it.tabIndex = -1;
+        const k = itemKey(it); if (k && !it.hasAttribute('aria-keyshortcuts')) it.setAttribute('aria-keyshortcuts', KEYS[k] || k);
+      });
+    });
+  }
   document.addEventListener('toggle', (e) => {
-    const m = e.target; if (!m.matches?.('.cal-menu[popover]') || e.newState !== 'open') return;
-    const b = document.querySelector(`[popovertarget="${m.id}"]`);
+    const m = e.target; if (!m.matches?.('.cal-menu[popover]')) return;
+    const b = opener(m), open = e.newState === 'open';
+    if (b) b.setAttribute('aria-expanded', String(open));
+    /* closed with focus inside (or lost): back to the button */
+    if (!open) { const a = document.activeElement; if (b && (!a || a === document.body || m.contains(a))) b.focus(); return; }
     if (!anchored && b) { const r = b.getBoundingClientRect(); Object.assign(m.style, { position: 'fixed', inset: 'auto', left: r.left + 'px', top: r.bottom + 4 + 'px' }); }
-    m.querySelector('.it')?.focus();
+    menus(m.parentElement || document);
+    const items = menuItems(m); (m._last ? items[items.length - 1] : items[0])?.focus(); m._last = false;
   }, true);
+  on('keydown', '[popovertarget]', (b, e) => {
+    const m = document.getElementById(b.getAttribute('popovertarget'));
+    if (!m?.matches('.cal-menu[popover]') || (e.key !== 'ArrowDown' && e.key !== 'ArrowUp')) return;
+    e.preventDefault(); m._last = e.key === 'ArrowUp';
+    if (!m.matches(':popover-open')) m.showPopover({ source: b }); else { const items = menuItems(m); (m._last ? items[items.length - 1] : items[0])?.focus(); }
+  });
   on('click', '.cal-menu[popover] .it', (it) => it.closest('.cal-menu').hidePopover?.());
   on('keydown', '.cal-menu .it', (it, e) => {
-    const items = [...it.closest('.cal-menu').querySelectorAll('.it')], i = items.indexOf(it);
-    if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
-    if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+    const m = it.closest('.cal-menu'), items = menuItems(m), i = items.indexOf(it), n = items.length;
+    const to = { ArrowDown: (i + 1) % n, ArrowUp: (i - 1 + n) % n, Home: 0, End: n - 1 }[e.key];
+    if (to !== undefined) { e.preventDefault(); items[to].focus(); return; }
+    if (e.key === 'Tab') { if (m.matches(':popover-open')) { m.hidePopover(); opener(m)?.focus(); } return; }   /* Tab goes on from the button */
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    const hit = items.find((x) => { const k = itemKey(x); return k && (KEYS[k] || k).toLowerCase() === e.key.toLowerCase(); });
+    if (hit) { e.preventDefault(); hit.click(); }
+  });
+
+  /* tooltip · [data-tip="…"] on a focusable element. The words go to a hidden node named by
+     aria-describedby (the drawn box is not read); a tip that would run off the right edge opens to
+     the left; Esc hides it until the pointer or focus leaves. tips(scope) wires them (also done
+     lazily on first hover or focus). */
+  let tipN = 0;
+  function tip(el) {
+    let d = el._tip;
+    if (!d || !d.isConnected) {
+      d = document.createElement('span'); d.hidden = true; d.id = `cal-tip-${++tipN}`; document.body.append(d); el._tip = d;
+      el.setAttribute('aria-describedby', [el.getAttribute('aria-describedby'), d.id].filter(Boolean).join(' '));
+    }
+    d.textContent = el.dataset.tip;
+  }
+  const tips = (scope = document) => scope.querySelectorAll('[data-tip]').forEach(tip);
+  const tipShow = (el) => {
+    tip(el);
+    if (el.hasAttribute('data-tip-end')) return;
+    const r = el.getBoundingClientRect(), est = Math.min(String(el.dataset.tip).length * 7.2 + 14, 36 * 7.2 + 14);
+    el.toggleAttribute('data-tip-flip', r.left + r.width / 2 - 7 + est > document.documentElement.clientWidth - 8);
+  };
+  on('pointerover', '[data-tip]', tipShow);
+  on('focusin', '[data-tip]', tipShow);
+  on('pointerout', '[data-tip]', (el, e) => { if (!el.contains(e.relatedTarget)) el.removeAttribute('data-tip-off'); });
+  on('focusout', '[data-tip]', (el) => el.removeAttribute('data-tip-off'));
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    document.querySelectorAll('[data-tip]:is(:hover, :focus, .show)').forEach((el) => el.setAttribute('data-tip-off', ''));
   });
 
   /* ── tabs · .cal-tabs[role=tablist] > button[role=tab]. A click, ← → or Home / End selects; the
@@ -890,53 +949,79 @@
   });
 
   /* ── toast · Calibrated.toast('Limit saved', { ink: 'ok', action: 'undo', onAction, timeout })
-     ink: 'live' (in progress, the lamp star) · 'ok' · 'fault' · none. Returns the element;
-     .remove() it to dismiss early. Toasts stack bottom right in one polite live region. */
-  function toast(message, o = {}) {
+     ink: 'live' (in progress, the lamp star) · 'ok' · 'fault' · none. A plain toast goes after 5s;
+     one with an action, or ink 'live', stays until dismissed (timeout: 0) unless a timeout is
+     given. The timer pauses while the toast is hovered or holds focus. Returns the element;
+     .remove() it to dismiss early. When a toast that holds focus goes, focus returns to where it
+     was. Toasts stack bottom right in one polite live region, made at load so the first is heard. */
+  const toastBox = () => {
     let box = document.querySelector('.cal-toasts');
-    if (!box) { box = document.createElement('div'); box.className = 'cal-toasts'; box.setAttribute('role', 'status'); box.setAttribute('aria-live', 'polite'); document.body.append(box); }
+    if (!box && document.body) { box = document.createElement('div'); box.className = 'cal-toasts'; box.setAttribute('role', 'status'); box.setAttribute('aria-live', 'polite'); document.body.append(box); }
+    return box;
+  };
+  function toast(message, o = {}) {
+    const box = toastBox(), back = document.activeElement;
     const el = document.createElement('div'), ic = { live: '<span class="star"></span>', ok: '<span class="ic">✓</span>', fault: '<span class="ic">✕</span>' }[o.ink] || '';
     el.className = 'cal-toast'; if (o.ink) el.dataset.ink = o.ink;
     el.innerHTML = `${ic}<span class="msg">${esc(message)}</span>`
       + (o.action ? `<button class="cal-btn" type="button" data-act>${esc(o.action)}</button>` : '')
-      + '<button class="cal-btn" type="button" data-hide aria-label="Dismiss">hide</button>';
-    el.querySelector('[data-act]')?.addEventListener('click', () => { o.onAction?.(); el.remove(); });
-    el.querySelector('[data-hide]').addEventListener('click', () => el.remove());
+      + '<button class="cal-btn" type="button" data-hide>hide</button>';
+    let timer = null, left = o.timeout ?? (o.ink === 'live' || o.action ? 0 : 5000), since = 0;
+    const done = () => {
+      clearTimeout(timer); const had = el.contains(document.activeElement); el.remove();
+      if (had && back && back !== document.body && back.isConnected) back.focus();
+    };
+    const run = () => { if (left && !timer && el.isConnected) { since = Date.now(); timer = setTimeout(done, left); } };
+    const pause = () => { if (timer) { clearTimeout(timer); timer = null; left = Math.max(1500, left - (Date.now() - since)); } };
+    el.addEventListener('pointerenter', pause); el.addEventListener('focusin', pause);
+    el.addEventListener('pointerleave', () => { if (!el.contains(document.activeElement)) run(); });
+    el.addEventListener('focusout', (e) => { if (!el.contains(e.relatedTarget) && !el.matches(':hover')) run(); });
+    el.querySelector('[data-act]')?.addEventListener('click', () => { o.onAction?.(); done(); });
+    el.querySelector('[data-hide]').addEventListener('click', done);
     box.append(el);
-    const t = o.timeout ?? (o.ink === 'live' ? 0 : 5000);
-    if (t) setTimeout(() => el.remove(), t);
+    run();
     return el;
   }
 
-  /* ── pager · Calibrated.pager(nav, { page, pages, onChange }) draws [‹ prev] 1 … 4 [5] 6 … 12 [next ›]
-     into a <nav class="cal-pager">. The current page is boxed and not a link. Returns { set(page) }. */
+  /* ── pager · Calibrated.pager(nav, { page, pages, onChange, href }) draws [‹ prev] 1 … 4 [5] 6 … 12 [next ›]
+     into a <nav class="cal-pager">: bracketed steps, underlined pages, the current page boxed.
+     Buttons by default (onChange(page) is called); pass href: (page) => url to draw links instead.
+     Focus stays where it was pressed: on the step (kept focusable at the ends, aria-disabled) or on
+     the new current page. Returns { set(page), page }. */
   function pager(nav, o = {}) {
-    let p = o.page || 1; const N = Math.max(1, o.pages || 1);
-    const two = (k) => String(k);
+    const N = Math.max(1, Math.round(o.pages || 1)), href = typeof o.href === 'function' ? o.href : null;
+    let p = Math.min(N, Math.max(1, Math.round(o.page || 1)));
     const pages = () => {
       const list = [...new Set([1, N, p - 1, p, p + 1].filter((k) => k >= 1 && k <= N))].sort((a, b) => a - b), out = [];
       list.forEach((k, j) => { if (j && k - list[j - 1] > 1) out.push(0); out.push(k); });
       return out;
     };
-    const draw = (refocus) => {
-      nav.innerHTML = `<button class="cal-btn" type="button" data-go="${p - 1}" ${p === 1 ? 'disabled' : ''} aria-label="Previous page">‹ prev</button>`
-        + pages().map((k) => (k === 0 ? '<span class="gap" aria-hidden="true">…</span>'
-          : k === p ? `<span class="pg cur" aria-current="page" aria-label="Page ${k}, current">${two(k)}</span>`
-          : `<button class="pg" type="button" data-go="${k}" aria-label="Page ${k}">${two(k)}</button>`)).join('')
-        + `<button class="cal-btn" type="button" data-go="${p + 1}" ${p === N ? 'disabled' : ''} aria-label="Next page">next ›</button>`;
-      if (refocus) (nav.querySelector(refocus + ':not(:disabled)') || nav.querySelector('button:not(:disabled)'))?.focus();
+    const step = (k, dir, txt, name) => {
+      const off = k < 1 || k > N;
+      if (href) return `<a class="cal-btn inline" data-step="${dir}"${off ? ' aria-disabled="true"' : ` href="${esc(href(k))}"`} aria-label="${name}">${txt}</a>`;
+      return `<button class="cal-btn inline" type="button" data-step="${dir}" data-go="${k}"${off ? ' aria-disabled="true"' : ''} aria-label="${name}">${txt}</button>`;
     };
-    const set = (k, refocus) => { k = Math.min(N, Math.max(1, k)); if (k === p && nav.childElementCount) return; p = k; draw(refocus); o.onChange?.(p); };
+    const page = (k) => {
+      if (k === 0) return '<span class="gap" aria-hidden="true">…</span>';
+      if (k === p) return href ? `<a class="pg cur" href="${esc(href(k))}" aria-current="page" aria-label="Page ${k}, current">${k}</a>`
+        : `<button class="pg cur" type="button" aria-current="page" aria-disabled="true" tabindex="-1" aria-label="Page ${k}, current">${k}</button>`;
+      return href ? `<a class="pg" href="${esc(href(k))}" aria-label="Page ${k}">${k}</a>` : `<button class="pg" type="button" data-go="${k}" aria-label="Page ${k}">${k}</button>`;
+    };
+    const draw = (refocus) => {
+      nav.innerHTML = step(p - 1, 'prev', '‹ prev', 'Previous page') + pages().map(page).join('') + step(p + 1, 'next', 'next ›', 'Next page');
+      if (refocus) nav.querySelector(refocus)?.focus();
+    };
+    const set = (k, refocus) => { k = Math.min(N, Math.max(1, Math.round(k))); if (k === p && nav.childElementCount) return; p = k; draw(refocus); o.onChange?.(p); };
     nav.classList.add('cal-pager'); if (!nav.hasAttribute('aria-label')) nav.setAttribute('aria-label', 'Pages');
-    nav.addEventListener('click', (e) => {
-      const b = e.target.closest('[data-go]'); if (!b || b.disabled) return;
-      set(+b.dataset.go, b.classList.contains('cal-btn') ? (b.dataset.go < p ? '.cal-btn:first-child' : '.cal-btn:last-child') : null);
+    if (!href) nav.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-go]'); if (!b || b.getAttribute('aria-disabled') === 'true') return;
+      set(+b.dataset.go, b.dataset.step ? `[data-step="${b.dataset.step}"]` : '.cur');
     });
     draw();
     return { set: (k) => set(k), get page() { return p; } };
   }
 
-  const boot = () => { counts(); sheets(); controls(); tabs(); signoff(); };
+  const boot = () => { counts(); sheets(); controls(); tabs(); signoff(); menus(); tips(); toastBox(); };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 
