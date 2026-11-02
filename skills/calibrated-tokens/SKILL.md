@@ -14,7 +14,7 @@ Calibrated draws quantities as small technical figures and keeps everything else
 
 ## Rules
 
-1. **Seeds.** `--bg` (the panel), `--fg` (ink) and `--live` (the lamp) set the look. `--ok` (check green), `--fault` (markup red), `--muted`, `--title`, `--shade` and `--desk-depth` complete it. Every other colour (`--gutter`, `--panel`, `--well`, `--raised`, `--edge`, `--edge-strong`, `--legend`, `--faint`, `--glow`, `--swipe`, `--hover`, `--current`) comes from `color-mix()` over the seeds. To re-theme, change the seeds and nothing else.
+1. **Seeds.** `--bg` (the panel), `--fg` (ink) and `--live` (the lamp) set the look, with `--desk-depth` for how far the desk sinks. Every other colour comes from them through `color-mix()`: the supporting inks `--title`, `--muted`, `--ok` (check green), `--fault` (markup red) and `--shade`, and the surfaces and lines (`--gutter`, `--panel`, `--well`, `--raised`, `--edge`, `--edge-strong`, `--legend`, `--faint`, `--key`, `--glow`, `--swipe`, `--hover`, `--current`). To re-theme, change the seeds and nothing else.
 2. **Ink, and one lamp.** Draw everything in `--fg` and its derived tints. The one live or current thing per view (a running job, the selected value, the next step) is **lit by the lamp**: `--live` as a line, a word (`.live`), an outline or a small glowing star (`.star`). Never fill a box or region with it. `--swipe` is a faint lamp tint for the rare area that must read as live. `--ok` and `--fault` only state a result (passed, failed, over the limit) or a revision. Never use colour for decoration.
 3. **Tone, not frames.** Surfaces are flat panels on a darker desk (`--gutter` desk < `--panel` < `--raised`; `--well` recessed), separated by gaps. The desk is dark enough (`--desk-depth`) that every panel edge is visible at a glance. Lines are hairlines: `--edge` inside, `--edge-strong` for heads and dividers. `--line-thick` (1.6px) is kept for the rare rule that must weigh more. No shadows, no rounded corners, no gradients.
 4. **Type roles.** Every word is monospace.
@@ -49,9 +49,9 @@ Calibrated draws quantities as small technical figures and keeps everything else
 ## Brand themes
 To adapt the style to a brand, override the seeds on `:root` (or any container) after loading the file:
 ```css
-:root { --bg: #f4f6fa; --fg: #14213d; --live: #0a7d93; --ok: #2c7a4b; --fault: #c5302a; --muted: #55607a; --title: #0b1428; }
+:root { --bg: #f4f6fa; --fg: #14213d; --live: #0a7d93; }
 ```
-Then check contrast as described in `references/theming.md`.
+Title, muted, green, red, the desk and every line derive from these three. Then check contrast as described in `references/theming.md` (ink on panel 11:1, lamp on panel 4.5:1).
 
 ## Related skills
 - **calibrated-figures**: SVG marks (ruler, leader, boxed value, dimension line, hatch, nodes…) for drawing quantities.

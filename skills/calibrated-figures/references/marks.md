@@ -6,7 +6,8 @@ All calls return SVG markup strings. Coordinates are in viewBox units: 1 unit = 
 |---|---|---|
 | `fg` | `--fg` | measured things, values, done nodes |
 | `mu` | `--muted` | names in boxes, secondary labels |
-| `fa` | `--faint` | major ticks, scale numbers, leaders, FIG., centre lines |
+| `ky` | `--key` | small text: scale numbers, FIG. numbers, quiet names and tags (holds 4.5:1) |
+| `fa` | `--faint` | marks only, never text: major ticks, leaders, open nodes, centre lines (holds 3:1) |
 | `ed` | `--edge-strong` | box outlines, ruler baseline, minor ticks |
 | `e1` | `--edge` | grids, faint guide lines |
 | `lv` | `--live` | the one live thing: the lamp |
@@ -31,7 +32,7 @@ Labels are 11px legend type. A label's baseline sits at `y`, and its cap height 
 - `K.centre(x1, y1, x2, y2, ink='fa')`: an ISO long-dash-dot centre line (`10 3 2 3`) for axes and lines of symmetry.
 
 ## FIG. label
-`K.fig(n, title, x=0, y=11)` draws `FIG.n` in faint with the title in muted uppercase. Leave 26 units of headroom below it before the drawing starts.
+`K.fig(n, title, x=0, y=11)` draws `FIG.n` in key with the title in muted uppercase. Leave 26 units of headroom below it before the drawing starts.
 
 ## Leader + boxed value
 - `K.leader([[x,y], [x,y2], [x2,y2]], dot=true)`: an open dot on the measured point, then an elbowed faint line. Use `dot=false` when the line starts on a node.
@@ -43,7 +44,7 @@ Labels are 11px legend type. A label's baseline sits at `y`, and its cap height 
 Place boxes in a column at the right edge, or under the drawing. Leaders should never cross each other.
 
 ## Ruler
-`K.ruler(x0, x1, y, max, step, every=5, fmt, up=false, min=0)`: a baseline in `ed`. Minor ticks are 3 units in `ed`. Every `every`-th tick is major: 6 units in `fa`, numbered with `fmt(v)` 17 units below the line (or 10 above with `up`). The first number is left-aligned.
+`K.ruler(x0, x1, y, max, step, every=5, fmt, up=false, min=0)`: a baseline in `ed`. Minor ticks are 3 units in `ed`. Every `every`-th tick is major: 6 units in `fa`, numbered with `fmt(v)` in `ky` 17 units below the line (or 10 above with `up`). The first number is left-aligned. Ticks are placed by index, so a step of `0.1` prints `0.3`, not `0.30000000000000004`. A step of 0 or less, or `max ≤ min`, draws the baseline alone, and a step that would give more than about 200 ticks is coarsened by a whole multiple.
 
 `K.scale(x0, x1, min, max, { knee, kneeAt=0.4 })` returns `v → x`. With `knee`, it's linear up to the knee (which lands at `kneeAt` of the width), then log10 up to max. Mark the knee on the drawing with a dotted line and a note such as `200 · log beyond`.
 
@@ -57,12 +58,12 @@ Place boxes in a column at the right edge, or under the drawing. Leaders should 
 ## Hatch
 - `K.hatch(ink='fa', gap=5, opacity=1)` returns `{ def, url }`. Add `def` once, then use `fill="${url}"`. Ids are unique per call.
 - `K.hatchRect(x, y, w, h, ink='fa', stroke='ed', gap=5, opacity=1)`: the same in one call.
-- Common hatches: `('e1', 6)` for big read-only regions, `('fa', 4)` for small locked islands, `('ft', 4, .5)` for an over-limit zone.
+- Common hatches: `('fa', 6)` for big read-only regions, `('fa', 4)` for small locked islands, `('ft', 4, .5)` for an over-limit zone. A hatch that means "closed" is drawn in `fa`, not `e1`, so it holds 3:1.
 
 ## Nodes
 `K.node(x, y, state, size=8)`
 - `done`: filled ink square
-- `todo`: outlined square (next or pending)
+- `todo`: outlined square in `fa` (next or pending)
 - `started`: outlined square with an ink dot (in progress, not live)
 - `merge`: outlined diamond, 1.3 stroke
 - `live`: the lamp star (radius 0.85 × size) with a soft glow. **One per figure.**
