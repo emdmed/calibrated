@@ -25,3 +25,7 @@ video/
 .claude/scheduled_tasks.json
 .claude/worktrees/
 .claude/checkpoints/
+
+# agent instructions: local only
+/AGENTS.md
+/CLAUDE.md
