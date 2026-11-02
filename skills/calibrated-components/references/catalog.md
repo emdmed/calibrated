@@ -423,13 +423,15 @@ A dashed blank area, like space left on a drawing for something to come, with a 
 
 ### Spinners
 ```html
-<cal-spin></cal-spin>                       <!-- loop dial; size="sm" for inline, label="Loading runs" -->
-<span class="cal-scan" role="status" aria-label="Loading"><i></i></span>              <!-- measured bar -->
-<span class="cal-scan det" style="--p:.4" role="img" aria-label="4 of 10 loaded"><i></i></span>   <!-- filled to a known amount -->
-<span class="cal-wait" role="status" aria-label="Loading"><i></i><i></i><i></i><i></i></span>   <!-- node row -->
+<cal-spin></cal-spin>                       <!-- braille ring; size="sm" for inline, label="Loading runs" -->
+<span class="cal-wait" role="status" aria-label="Loading"><i></i><i></i><i></i><i></i></span>   <!-- braille row -->
 <button class="cal-btn" aria-disabled="true"><span class="cal-wait" aria-hidden="true"><i></i><i></i><i></i><i></i></span>saving</button>
+<div class="cal-readout" role="status">                                                  <!-- waiting line -->
+  <span class="cal-wait" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="lb">fetching rows</span><span class="ld"></span><cal-elapsed></cal-elapsed>
+</div>
+<div class="cal-readout" data-ink="ok"><i class="nd"></i><span class="lb">fetched 1 204 rows</span><span class="ld"></span><span class="tm">00:03.4</span></div>
 ```
-Drawn from the figures. The loop dial is the loop recipe in small: four square stations on a hairline circle and the lamp star stepping clockwise with an ink arc behind. The measured bar is a hairline frame with an ink run sliding inside and a lamp leading edge; `.det` with `--p` fills it to a known amount. The node row is the progress nodes with the star stepping along, for a line of text or inside a button. Each holds still under `prefers-reduced-motion`; the sliding bar then shows hatched end to end (busy, amount unknown), never as a part-filled bar. A busy button takes `aria-disabled="true"`, which keeps focus on it and makes it look and act disabled.
+Braille, stepped in whole frames like a terminal redraw: 8 frames of 80 ms, the lamp dot is the head and two ink dots trail it. `<cal-spin>` is a 3×3 dot ring (48 px, or 16 px with `size="sm"`) for an empty panel or a loading area. `.cal-wait` is the braille cell on its side, four dots by two, for a line of text or inside a button; its four `<i>` are its columns. The readout is the waiting line for work that takes a while: the braille row, what is happening, a dotted leader and the time so far boxed by `<cal-elapsed>` (`mm:ss.t`, or `since="<epoch ms>"` to start from a known time). Give it `data-ink="ok"` or `"fault"` when the work ends: the clock stops on its last time and turns green or red; for a static result, swap the row for `<i class="nd"></i>` and the clock for `<span class="tm">`. The clock is hidden from screen readers while it runs, so the status line isn't read out every 100 ms. For a known amount, use `<cal-progress>` or `<cal-meter>`. Under `prefers-reduced-motion` the dots hold the first frame and the clock counts whole seconds. A busy button takes `aria-disabled="true"`, which keeps focus on it and makes it look and act disabled. The older measured bar (`.cal-scan`, `.cal-scan.det` with `--p`) still renders for pages that use it.
 
 ## Navigation and labels
 
@@ -522,6 +524,7 @@ Instruments draw their final values when printed. Motion: the marker sweeps in f
 - `Calibrated.tabs(scope?)`: paint the resting state of `.cal-tabs[role=tablist]` (runs on load). Fires `cal-tab`.
 - `Calibrated.signoff()`: recount every `.cal-tally` (runs on load; call it after adding cards). Fires `cal-signoff`.
 - `Calibrated.toast(message, { ink, action, onAction, timeout })` and `Calibrated.pager(nav, { page, pages, onChange, href })`: see Toast and Pager.
-- The controls, toast, pager, tabs, sign-off and `<cal-spin>` work without `calibrated-figures.js`; the instruments need it loaded first.
-- `<cal-spin>`: the loop dial spinner (see Spinners).
+- The controls, toast, pager, tabs, sign-off, `<cal-spin>` and `<cal-elapsed>` work without `calibrated-figures.js`; the instruments need it loaded first.
+- `<cal-spin>`: the braille ring spinner (see Spinners).
+- `<cal-elapsed>`: the readout's clock; `since`, `stopped` (see Spinners).
 - Elements are plain DOM, so frameworks can set attributes directly: `el.setAttribute('value', v)`.

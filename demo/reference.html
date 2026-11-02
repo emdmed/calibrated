@@ -178,7 +178,7 @@ pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-
 <header class="top">
   <button class="icon-btn menu-btn" id="menu" aria-label="Open navigation" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 18 18"><path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
   <a class="brand" href="#intro" aria-label="Calibrated, back to top"><svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg><span class="word">Calibrated</span></a>
-  <span class="ver" id="ver">Rev O</span>
+  <span class="ver" id="ver">Rev P</span>
   <span class="sp"></span>
   <a class="top-link" href="index.html">Catalog</a>
   <a class="top-link" href="#install">Install</a>
@@ -775,13 +775,17 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
 
       <div class="item" id="spinners">
         <h3>Spinners <a class="anchor" href="#spinners" aria-label="Link to Spinners">#</a></h3>
-        <p>The loop dial, the measured bar (sliding, or <code>.det</code> filled to <code>--p</code> on a scale of tenths) and the node row for text and buttons. A busy button takes <code>aria-disabled</code>, so it keeps focus while it works.</p>
+        <p>Braille, stepped in whole frames like a terminal: the ring for a loading area, the row for text and buttons, and the readout line with its clock for work that takes a while. The readout resolves in place to a green or red result. A busy button takes <code>aria-disabled</code>, so it keeps focus while it works.</p>
         <div class="ex"><template><div style="display:flex;flex-wrap:wrap;gap:36px;align-items:center">
   <cal-spin></cal-spin>
-  <span class="cal-scan" role="status" aria-label="Loading"><i></i></span>
-  <span class="cal-scan det" style="--p:.4" role="img" aria-label="4 of 10 loaded"><i></i></span>
+  <cal-spin size="sm"></cal-spin>
   <span class="cal-wait" role="status" aria-label="Loading"><i></i><i></i><i></i><i></i></span>
   <button class="cal-btn primary" aria-disabled="true"><span class="cal-wait" aria-hidden="true"><i></i><i></i><i></i><i></i></span> saving</button>
+</div>
+<div style="display:grid;gap:10px;max-width:420px;margin-top:20px">
+  <div class="cal-readout" role="status"><span class="cal-wait" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="lb">fetching rows</span><span class="ld"></span><cal-elapsed></cal-elapsed></div>
+  <div class="cal-readout" data-ink="ok"><i class="nd"></i><span class="lb">fetched 1 204 rows</span><span class="ld"></span><span class="tm">00:03.4</span></div>
+  <div class="cal-readout" data-ink="fault"><i class="nd"></i><span class="lb">timed out at row 812</span><span class="ld"></span><span class="tm">00:30.0</span></div>
 </div></template></div>
       </div>
     </section>
@@ -853,6 +857,7 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
     <section class="group" id="changelog">
       <h2>Changelog</h2>
       <ol class="log">
+        <li><b>Rev P</b><time datetime="2026-11-02">2026-11-02</time><p>Terminal spinners. They step in whole frames, like a terminal redraw, with the lamp dot as the head. <code>&lt;cal-spin&gt;</code> is now a 3×3 braille dot ring, and <code>.cal-wait</code> is a braille row, four dots by two, with the same four-<code>&lt;i&gt;</code> markup as before. New: <code>.cal-readout</code>, a waiting line with a dotted leader and a <code>&lt;cal-elapsed&gt;</code> clock that resolves in place to a green or red result. <code>.cal-scan</code> still renders but is no longer shown.</p></li>
         <li><b>Rev O</b><time datetime="2026-11-02">2026-11-02</time><p>A review of every component on this page. A theme is now three colours: title, muted, green, red and the desk derive from <code>--bg</code>, <code>--fg</code> and <code>--live</code>, so a re-seeded region stays readable, and every mark holds up in forced-colours mode. Small text reads at 4.5:1 and state marks at 3:1, and the film lamp is darker. Sign-off and tabs are wired by the kit (<code>Calibrated.signoff()</code>, <code>Calibrated.tabs()</code>). The lamp lights only what is live: a meter needle is ink unless set <code>live</code>, a wizard step is an ink star. Values past the end of a scale break off in red and state the real number, the ruler writes its value, and recipes report bad data in <code>r.warnings</code>. Toasts with an action stay until dismissed, tooltips close on Esc, the menu finishes its keyboard pattern, the pager can draw links, the empty state drops its hatch, and drawings shrink before they scroll on phones.</p></li>
         <li><b>Rev N</b><time datetime="2026-11-02">2026-11-02</time><p>A redrawn switch: a small hairline pill whose knob slides right and turns ink when on. OFF/ON words are now optional, <code>.caps</code> sets the label in legend caps for toolbars, the whole label is a 24px hit area, and it holds up in forced-colours mode and with reduced motion.</p></li>
         <li><b>Rev M</b><time datetime="2026-11-02">2026-11-02</time><p>Separators and containers. Rules in drafting line types, each with one meaning: solid for the next topic, dashed for an aside, the centre line for two halves, a break line where something was left out, a labelled rule, and a lamp rule for what's new (<code>.cal-rule</code>). Facts on one line split by hairline ticks (<code>.cal-meta</code>), a vertical rule for toolbars (<code>.cal-vr</code>), a zone with its name set into its edge (<code>.cal-zone</code>) and a bracket that groups a few lines (<code>.cal-bracket</code>). A dropped card is now taped off with red stripes and a solid SUPERSEDED stamp.</p></li>

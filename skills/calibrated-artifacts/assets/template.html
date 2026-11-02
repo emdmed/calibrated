@@ -799,7 +799,8 @@ textarea.cal-tally-text[hidden] { display: none; }
   /* overlays and feedback */
   .cal-rule, .cal-rule::before, .cal-rule::after, .cal-meta > li::before, .cal-vr,
   [data-tip]::before, .cal-callout[data-ink="fault"] .cal-gl::before, .cal-details .bl,
-  .cal-scan, .cal-scan > i, .cal-scan > i::after, .cal-wait > i { forced-color-adjust: none; }
+  .cal-scan, .cal-scan > i, .cal-scan > i::after, .cal-spin > i, .cal-wait > i::before, .cal-wait > i::after,
+  .cal-readout > .ld, .cal-readout > .nd { forced-color-adjust: none; }
   /* navigation */
   .cal-pager .pg, .cal-steps li::before, .cal-steps li::after { forced-color-adjust: none; }
   .cal-pager .cur { border-color: Highlight; }
@@ -1141,26 +1142,43 @@ html:has(dialog.cal-dialog[open]:modal) { overflow: hidden; scrollbar-gutter: st
 .cal-code:hover > .cal-btn, .cal-code:focus-within > .cal-btn { opacity: 1; }
 @media (hover: none) { .cal-code > .cal-btn { opacity: 1; } }
 
-/* ── spinners · drawn from the loop and measured figures. <cal-spin> draws the dial SVG. */
+/* ── spinners · braille, stepped in whole frames like a terminal redraw: 8 frames of 80 ms, the
+   lamp dot is the head and two ink dots trail it. <cal-spin> is a 3×3 dot ring (the JS draws its
+   eight dots); .cal-wait is the braille cell on its side, 4 dots by 2, for text and buttons, drawn
+   from its four <i> (each one is a column: ::before the top dot, ::after the bottom). */
 cal-spin { display: inline-block; line-height: 0; vertical-align: middle; }
-cal-spin:empty { width: 56px; height: 56px; }   /* holds its place before the JS draws it */
-cal-spin[size="sm"]:empty { width: 24px; height: 24px; }
-/* loop dial: hairline circle, dash-dot centre lines, four stations, the star stepping clockwise with an ink arc behind */
-.cal-spin { width: 56px; height: 56px; flex: none; overflow: visible; }
-.cal-spin :is(.o, .cl, .st rect, .tr) { vector-effect: non-scaling-stroke; }
-.cal-spin.sm { width: 24px; height: 24px; }
-.cal-spin .o { fill: none; stroke: var(--edge-strong); stroke-width: 1; }
-.cal-spin .cl { stroke: var(--faint); stroke-width: .7; stroke-dasharray: 5 2 1 2; }
-.cal-spin .st rect { fill: var(--panel); stroke: var(--fg); stroke-width: 1; }
-.cal-spin .tr { fill: none; stroke: var(--fg); stroke-width: 1.6; }
-.cal-spin .sr { fill: var(--live); }
-.cal-spin .run { transform-origin: 20px 20px; animation: cal-loop 2.4s infinite; }
-.cal-spin.sm .cl, .cal-spin.sm .st { display: none; }
-@keyframes cal-loop {
-  0% { rotate: 0deg; animation-timing-function: cubic-bezier(.65, 0, .35, 1); } 18%, 25% { rotate: 90deg; animation-timing-function: cubic-bezier(.65, 0, .35, 1); }
-  43%, 50% { rotate: 180deg; animation-timing-function: cubic-bezier(.65, 0, .35, 1); } 68%, 75% { rotate: 270deg; animation-timing-function: cubic-bezier(.65, 0, .35, 1); }
-  93%, 100% { rotate: 360deg; } }
-/* measured bar: a hairline frame, an ink run sliding inside, a lamp leading edge, a scale underneath */
+cal-spin:empty { width: 48px; height: 48px; }   /* holds its place before the JS draws it */
+cal-spin[size="sm"]:empty { width: 16px; height: 16px; }
+.cal-spin { --d: 12px; --g: 6px; display: inline-grid; grid-template-columns: repeat(3, var(--d)); grid-template-rows: repeat(3, var(--d)); gap: var(--g); flex: none; }
+.cal-spin.sm { --d: 4px; --g: 2px; }
+/* --o is how many frames each dot waits to become the head, counted clockwise from the top left */
+.cal-spin > i, .cal-wait > i::before, .cal-wait > i::after { background: var(--edge); animation: cal-dots .64s steps(1) infinite; animation-delay: calc(var(--o) * -80ms); }
+.cal-spin > i:nth-child(1) { grid-area: 1 / 1; --o: 0; } .cal-spin > i:nth-child(2) { grid-area: 1 / 2; --o: 7; }
+.cal-spin > i:nth-child(3) { grid-area: 1 / 3; --o: 6; } .cal-spin > i:nth-child(4) { grid-area: 2 / 3; --o: 5; }
+.cal-spin > i:nth-child(5) { grid-area: 3 / 3; --o: 4; } .cal-spin > i:nth-child(6) { grid-area: 3 / 2; --o: 3; }
+.cal-spin > i:nth-child(7) { grid-area: 3 / 1; --o: 2; } .cal-spin > i:nth-child(8) { grid-area: 2 / 1; --o: 1; }
+@keyframes cal-dots { 0% { background: var(--live); } 12.5% { background: var(--fg); } 25% { background: var(--muted); } 37.5%, 100% { background: var(--edge); } }
+/* braille row: along the top left to right, back along the bottom */
+.cal-wait { --d: 4px; --g: 2px; display: inline-flex; gap: var(--g); vertical-align: middle; }
+.cal-wait > i { display: grid; gap: var(--g); }
+.cal-wait > i::before, .cal-wait > i::after { content: ""; width: var(--d); height: var(--d); }
+.cal-wait > i:nth-child(1)::before { --o: 0; } .cal-wait > i:nth-child(2)::before { --o: 7; } .cal-wait > i:nth-child(3)::before { --o: 6; } .cal-wait > i:nth-child(4)::before { --o: 5; }
+.cal-wait > i:nth-child(4)::after { --o: 4; } .cal-wait > i:nth-child(3)::after { --o: 3; } .cal-wait > i:nth-child(2)::after { --o: 2; } .cal-wait > i:nth-child(1)::after { --o: 1; }
+.cal-btn .cal-wait { --d: 3.5px; --g: 1.5px; margin-right: 6px; vertical-align: 0; }
+/* readout · the waiting line: the braille row, what is happening, a dotted leader and the time
+   so far in a box (<cal-elapsed>). data-ink="ok|fault" resolves it in place: .nd takes the
+   row's place and the box keeps the final time. */
+.cal-readout { display: flex; align-items: center; gap: 8px; min-width: 0; font: 12px/1.2 var(--font-legend); letter-spacing: .02em; color: var(--fg); }
+.cal-readout > .lb { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-readout > .ld { flex: 1; min-width: 16px; height: 1px; align-self: flex-end; margin-bottom: 4px; background: repeating-linear-gradient(to right, var(--faint) 0 1px, transparent 1px 4px); }
+.cal-readout > :is(cal-elapsed, .tm) { flex: none; border: var(--line-thin) solid var(--edge-strong); padding: 3px 5px 2px; font-variant-numeric: tabular-nums; }
+.cal-readout > .nd { flex: none; width: 7px; height: 7px; margin-right: 15px; background: var(--fg); }   /* as wide as the row it replaces */
+.cal-readout[data-ink="ok"] > .nd { background: var(--ok); }
+.cal-readout[data-ink="ok"] > :is(cal-elapsed, .tm) { color: var(--ok); border-color: var(--ok); }
+.cal-readout[data-ink="fault"] > .nd { background: var(--fault); }
+.cal-readout[data-ink="fault"] > :is(.lb, cal-elapsed, .tm) { color: var(--fault); }
+.cal-readout[data-ink="fault"] > :is(cal-elapsed, .tm) { border-color: var(--fault); }
+/* measured bar (kept for pages that use it; new pages use .cal-readout or <cal-progress>): a hairline frame, an ink run sliding inside, a lamp leading edge, a scale underneath */
 .cal-scan { --p: .3; position: relative; display: inline-block; width: 150px; height: 7px; flex: none; border: var(--line-thin) solid var(--edge-strong); margin-bottom: 5px; }
 .cal-scan::after { content: ""; position: absolute; left: -1px; right: -1px; top: calc(100% + 1px); height: 4px;
   background: repeating-linear-gradient(to right, var(--faint) 0 1px, transparent 1px 10%) 0 0 / calc(100% - 1px) 100% no-repeat, linear-gradient(var(--faint), var(--faint)) 100% 0 / 1px 100% no-repeat; }
@@ -1168,17 +1186,12 @@ cal-spin[size="sm"]:empty { width: 24px; height: 24px; }
 .cal-scan > i::after { content: ""; position: absolute; right: -2px; top: -4px; bottom: -4px; width: 2px; background: var(--live); }
 .cal-scan.det > i { width: calc((100% - 2px) * var(--p)); animation: none; }
 @keyframes cal-measure { to { left: calc(70% - 1px); } }
-/* node row: the progress nodes with the star stepping along */
-.cal-wait { display: inline-flex; align-items: center; gap: 4px; vertical-align: middle; }
-.cal-wait > i { width: 7px; height: 7px; border: var(--line-thin) solid var(--edge-strong); animation: cal-node 1.2s steps(1) infinite; }
-.cal-wait > i:nth-child(2) { animation-delay: .3s; } .cal-wait > i:nth-child(3) { animation-delay: .6s; } .cal-wait > i:nth-child(4) { animation-delay: .9s; }
-@keyframes cal-node { 0%, 23% { border-color: transparent; background: var(--live); clip-path: var(--star); scale: 1.45; } 24%, 100% { border-color: var(--edge-strong); background: transparent; clip-path: none; scale: 1; } }
-.cal-btn .cal-wait { margin-right: 3px; vertical-align: 0; }
-.cal-btn .cal-wait > i { width: 5px; height: 5px; }
 @media (prefers-reduced-motion: reduce) {
-  .cal-spin .run, .cal-scan > i { animation: none; }
-  .cal-wait > i { animation: none; }
-  .cal-wait > i:first-child { border-color: transparent; background: var(--live); clip-path: var(--star); scale: 1.45; }
+  /* the dots hold the first frame: head on the first dot, its tail behind */
+  .cal-spin > i, .cal-wait > i::before, .cal-wait > i::after, .cal-scan > i { animation: none; }
+  .cal-spin > i:nth-child(1), .cal-wait > i:nth-child(1)::before { background: var(--live); }
+  .cal-spin > i:nth-child(8), .cal-wait > i:nth-child(1)::after { background: var(--fg); }
+  .cal-spin > i:nth-child(7), .cal-wait > i:nth-child(2)::after { background: var(--muted); }
   /* the sliding bar can't slide: it shows hatched end to end (busy, amount unknown), not a 30% fill */
   .cal-scan:not(.det) > i { left: 1px; right: 1px; width: auto; background: repeating-linear-gradient(-45deg, var(--fg) 0 1px, transparent 1px 4px); }
   .cal-scan:not(.det) > i::after { display: none; }
@@ -2677,7 +2690,8 @@ cal-span { display: none; }
      <cal-span name="deploy" value="485" live></cal-span>   <!-- or start="<epoch ms>" to tick live -->
    </cal-durations>
    <cal-ruler min="0" max="150" step="10" every="5" unit="k"></cal-ruler>
-   <cal-spin></cal-spin>                                    <!-- the loop dial spinner -->
+   <cal-spin></cal-spin>                                    <!-- the braille ring spinner -->
+   <cal-elapsed></cal-elapsed>                              <!-- the readout's clock, mm:ss.t -->
 
    Plus the wiring for the CSS controls (textarea status line, detent, range,
    number, file drop, tag input, dialog openers, menus) and Calibrated.toast()
@@ -2689,13 +2703,13 @@ cal-span { display: none; }
    beside them (3/7, +184 −20); the full sentence is in the <title>.
 
    Needs calibrated.css. The instruments also need calibrated-figures.js loaded
-   first; without it the controls, toast, pager, tabs, sign-off and <cal-spin>
-   still work. */
+   first; without it the controls, toast, pager, tabs, sign-off, <cal-spin> and
+   <cal-elapsed> still work. */
 (function (root) {
   'use strict';
   if (typeof document === 'undefined') return;
-  /* the instruments draw with the figure kit; the controls, toast, pager, tabs, sign-off and
-     <cal-spin> work without it */
+  /* the instruments draw with the figure kit; the controls, toast, pager, tabs, sign-off,
+     <cal-spin> and <cal-elapsed> work without it */
   const C = root.Calibrated || {};
   const FIG = !!C.K;
   const { K, fmt, textWidth: tw } = C;
@@ -3260,9 +3274,9 @@ cal-span { display: none; }
   }
 
 
-  /* ── cal-spin · the loop dial spinner: a hairline circle on dash-dot centre lines with four
-     stations, the lamp star stepping clockwise with an ink arc behind. size="sm" drops the
-     stations for inline use; label="…" names what is loading (default "Loading"). */
+  /* ── cal-spin · the braille ring spinner: eight dots round an empty centre, the lamp head
+     stepping clockwise with two ink dots behind (the CSS steps it). size="sm" draws it at text
+     size; label="…" names what is loading (default "Loading"). */
   class CalSpin extends HTMLElement {
     static get observedAttributes() { return ['size', 'label']; }
     connectedCallback() { this.render(); }
@@ -3271,13 +3285,37 @@ cal-span { display: none; }
       const sm = this.getAttribute('size') === 'sm', label = this.getAttribute('label') || 'Loading';
       if (!this.hasAttribute('role')) this.setAttribute('role', 'status');
       this.setAttribute('aria-label', label);
-      this.innerHTML = `<svg class="cal-spin${sm ? ' sm' : ''}" viewBox="0 0 40 40" aria-hidden="true">`
-        + '<circle class="o" cx="20" cy="20" r="14"/><path class="cl" d="M20 2V38M2 20H38"/>'
-        + '<g class="st"><rect x="18" y="4" width="4" height="4"/><rect x="32" y="18" width="4" height="4"/><rect x="18" y="32" width="4" height="4"/><rect x="4" y="18" width="4" height="4"/></g>'
-        + '<g class="run"><path class="tr" d="M6 20A14 14 0 0 1 20 6"/><path class="sr" d="M20 1.5 21.3 4.7 24.5 6 21.3 7.3 20 10.5 18.7 7.3 15.5 6 18.7 4.7Z"/></g></svg>';
+      this.innerHTML = `<span class="cal-spin${sm ? ' sm' : ''}" aria-hidden="true">${'<i></i>'.repeat(8)}</span>`;
     }
   }
   define('cal-spin', CalSpin);
+
+  /* ── cal-elapsed · the readout's clock: mm:ss.t since it was added (or since="<epoch ms>"),
+     stepping every 100 ms, whole seconds under reduced motion. It stops when it gets `stopped`
+     or its .cal-readout takes data-ink, and keeps the final time. While it runs it is hidden
+     from screen readers, so a status line around it isn't read out ten times a second. */
+  const clocks = new Set();
+  let clockTimer = 0;
+  const clock = (ms, whole) => {
+    const t = Math.max(0, Math.floor(ms / 100)), m = String(Math.floor(t / 600)).padStart(2, '0'), r = (t % 600) / 10;
+    return `${m}:${whole ? String(Math.floor(r)).padStart(2, '0') : r.toFixed(1).padStart(4, '0')}`;
+  };
+  class CalElapsed extends HTMLElement {
+    static get observedAttributes() { return ['since', 'stopped']; }
+    connectedCallback() {
+      if (!this.t0) this.t0 = num(this, 'since', Date.now());
+      clocks.add(this); this.tick();
+      if (!clockTimer) clockTimer = setInterval(() => clocks.forEach((c) => c.tick()), 100);
+    }
+    disconnectedCallback() { clocks.delete(this); if (!clocks.size) { clearInterval(clockTimer); clockTimer = 0; } }
+    attributeChangedCallback(n) { if (n === 'since') this.t0 = num(this, 'since', this.t0 || Date.now()); if (this.isConnected) this.tick(); }
+    tick() {
+      const run = !this.hasAttribute('stopped') && !this.closest('.cal-readout[data-ink]');
+      if (run) { this.setAttribute('aria-hidden', 'true'); this.textContent = clock(Date.now() - this.t0, !!root.matchMedia?.('(prefers-reduced-motion: reduce)').matches); }
+      else { this.removeAttribute('aria-hidden'); if (!this.textContent) this.textContent = clock(0); }
+    }
+  }
+  define('cal-elapsed', CalElapsed);
 
   /* ── controls · the few CSS parts that need a hand. Listeners sit on the document, so
      parts added later work too; controls(scope) paints their resting state (call it after

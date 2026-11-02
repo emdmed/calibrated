@@ -11,7 +11,8 @@
      <cal-span name="deploy" value="485" live></cal-span>   <!-- or start="<epoch ms>" to tick live -->
    </cal-durations>
    <cal-ruler min="0" max="150" step="10" every="5" unit="k"></cal-ruler>
-   <cal-spin></cal-spin>                                    <!-- the loop dial spinner -->
+   <cal-spin></cal-spin>                                    <!-- the braille ring spinner -->
+   <cal-elapsed></cal-elapsed>                              <!-- the readout's clock, mm:ss.t -->
 
    Plus the wiring for the CSS controls (textarea status line, detent, range,
    number, file drop, tag input, dialog openers, menus) and Calibrated.toast()
@@ -23,13 +24,13 @@
    beside them (3/7, +184 −20); the full sentence is in the <title>.
 
    Needs calibrated.css. The instruments also need calibrated-figures.js loaded
-   first; without it the controls, toast, pager, tabs, sign-off and <cal-spin>
-   still work. */
+   first; without it the controls, toast, pager, tabs, sign-off, <cal-spin> and
+   <cal-elapsed> still work. */
 (function (root) {
   'use strict';
   if (typeof document === 'undefined') return;
-  /* the instruments draw with the figure kit; the controls, toast, pager, tabs, sign-off and
-     <cal-spin> work without it */
+  /* the instruments draw with the figure kit; the controls, toast, pager, tabs, sign-off,
+     <cal-spin> and <cal-elapsed> work without it */
   const C = root.Calibrated || {};
   const FIG = !!C.K;
   const { K, fmt, textWidth: tw } = C;
@@ -594,9 +595,9 @@
   }
 
 
-  /* ── cal-spin · the loop dial spinner: a hairline circle on dash-dot centre lines with four
-     stations, the lamp star stepping clockwise with an ink arc behind. size="sm" drops the
-     stations for inline use; label="…" names what is loading (default "Loading"). */
+  /* ── cal-spin · the braille ring spinner: eight dots round an empty centre, the lamp head
+     stepping clockwise with two ink dots behind (the CSS steps it). size="sm" draws it at text
+     size; label="…" names what is loading (default "Loading"). */
   class CalSpin extends HTMLElement {
     static get observedAttributes() { return ['size', 'label']; }
     connectedCallback() { this.render(); }
@@ -605,13 +606,37 @@
       const sm = this.getAttribute('size') === 'sm', label = this.getAttribute('label') || 'Loading';
       if (!this.hasAttribute('role')) this.setAttribute('role', 'status');
       this.setAttribute('aria-label', label);
-      this.innerHTML = `<svg class="cal-spin${sm ? ' sm' : ''}" viewBox="0 0 40 40" aria-hidden="true">`
-        + '<circle class="o" cx="20" cy="20" r="14"/><path class="cl" d="M20 2V38M2 20H38"/>'
-        + '<g class="st"><rect x="18" y="4" width="4" height="4"/><rect x="32" y="18" width="4" height="4"/><rect x="18" y="32" width="4" height="4"/><rect x="4" y="18" width="4" height="4"/></g>'
-        + '<g class="run"><path class="tr" d="M6 20A14 14 0 0 1 20 6"/><path class="sr" d="M20 1.5 21.3 4.7 24.5 6 21.3 7.3 20 10.5 18.7 7.3 15.5 6 18.7 4.7Z"/></g></svg>';
+      this.innerHTML = `<span class="cal-spin${sm ? ' sm' : ''}" aria-hidden="true">${'<i></i>'.repeat(8)}</span>`;
     }
   }
   define('cal-spin', CalSpin);
+
+  /* ── cal-elapsed · the readout's clock: mm:ss.t since it was added (or since="<epoch ms>"),
+     stepping every 100 ms, whole seconds under reduced motion. It stops when it gets `stopped`
+     or its .cal-readout takes data-ink, and keeps the final time. While it runs it is hidden
+     from screen readers, so a status line around it isn't read out ten times a second. */
+  const clocks = new Set();
+  let clockTimer = 0;
+  const clock = (ms, whole) => {
+    const t = Math.max(0, Math.floor(ms / 100)), m = String(Math.floor(t / 600)).padStart(2, '0'), r = (t % 600) / 10;
+    return `${m}:${whole ? String(Math.floor(r)).padStart(2, '0') : r.toFixed(1).padStart(4, '0')}`;
+  };
+  class CalElapsed extends HTMLElement {
+    static get observedAttributes() { return ['since', 'stopped']; }
+    connectedCallback() {
+      if (!this.t0) this.t0 = num(this, 'since', Date.now());
+      clocks.add(this); this.tick();
+      if (!clockTimer) clockTimer = setInterval(() => clocks.forEach((c) => c.tick()), 100);
+    }
+    disconnectedCallback() { clocks.delete(this); if (!clocks.size) { clearInterval(clockTimer); clockTimer = 0; } }
+    attributeChangedCallback(n) { if (n === 'since') this.t0 = num(this, 'since', this.t0 || Date.now()); if (this.isConnected) this.tick(); }
+    tick() {
+      const run = !this.hasAttribute('stopped') && !this.closest('.cal-readout[data-ink]');
+      if (run) { this.setAttribute('aria-hidden', 'true'); this.textContent = clock(Date.now() - this.t0, !!root.matchMedia?.('(prefers-reduced-motion: reduce)').matches); }
+      else { this.removeAttribute('aria-hidden'); if (!this.textContent) this.textContent = clock(0); }
+    }
+  }
+  define('cal-elapsed', CalElapsed);
 
   /* ── controls · the few CSS parts that need a hand. Listeners sit on the document, so
      parts added later work too; controls(scope) paints their resting state (call it after
