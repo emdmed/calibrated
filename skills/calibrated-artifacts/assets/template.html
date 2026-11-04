@@ -3918,7 +3918,7 @@ cal-span { display: none; }
       const f = (v) => (v === 0 ? '0' : (Math.abs(v) >= 10000 ? fmt.k(v) : String(Math.round(v * 100) / 100)) + unit), marked = this.hasAttribute('value');
       if (this.strong) return this.heavy(full, { min, max, step, every, w, up, f, marked });
       /* the marker (and its box) sit on the side away from the numbers; leave room for them and for the last number */
-      const mk = marked ? 12 + (full ? 22 : 0) : 0, y = up ? 22 : 4 + mk, x0 = 6, x1 = w - Math.max(8, tw(f(max)) / 2 + 2);
+      const mk = marked ? 12 + (full ? 22 : 0) : 0, y = up ? 22 : 4 + mk, x0 = Math.max(6, tw(f(min)) / 2 + 2), x1 = w - Math.max(8, tw(f(max)) / 2 + 2);
       /* numbers never closer than the widest one and a gap: number every 2nd, 4th … major instead */
       const room = (x1 - x0) / (Math.max(tw(f(min)), tw(f(max))) + 12);
       while ((max - min) / (step * every) > Math.max(1, room)) every *= 2;
@@ -3943,7 +3943,7 @@ cal-span { display: none; }
     heavy(full, { min, max, step, every, w, up, f, marked }) {
       const { W } = K, dir = up ? -1 : 1, mk = marked ? 15 + (full ? 24 : 0) : 0;
       const y = up ? (full ? 30 : 18) : 4 + mk;
-      const x0 = 6, x1 = w - Math.max(8, tw(f(max)) / 2 + 2), X = K.scale(x0, x1, min, max);
+      const x0 = Math.max(6, tw(f(min)) / 2 + 2), x1 = w - Math.max(8, tw(f(max)) / 2 + 2), X = K.scale(x0, x1, min, max);
       const room = (x1 - x0) / (Math.max(tw(f(min)), tw(f(max))) + 14);
       while ((max - min) / (step * every) > Math.max(1, room)) every *= 2;
       let g = K.mitre([[x0, y + dir * 14], [x0, y], [x1, y], [x1, y + dir * 14]]);
