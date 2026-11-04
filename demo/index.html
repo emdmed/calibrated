@@ -307,6 +307,7 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
     <span class="cal-caption lg">technical drawings for claude's pages</span>
     <span class="sp"></span>
     <span class="btn-pair" role="group" aria-label="Show examples as"><button class="cal-btn" type="button" data-view="plain" aria-pressed="false">plain</button><button class="cal-btn" type="button" data-view="cal" aria-pressed="true">calibrated</button></span>
+    <span class="btn-pair" role="group" aria-label="Weight"><button class="cal-btn" type="button" data-weight-set="soft" aria-pressed="true">soft</button><button class="cal-btn" type="button" data-weight-set="strong" aria-pressed="false">strong</button></span>
     <a class="cal-btn quiet" href="examples.html">examples</a>
     <a class="cal-btn primary" href="#get" style="text-decoration:none">install</a>
     <a class="gh" href="https://github.com/emdmed/calibrated" aria-label="Calibrated on GitHub"><svg aria-hidden="true"><use href="#i-gh"/></svg><span>github</span></a>
@@ -327,7 +328,7 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
 /plugin install calibrated@calibrated</code></pre></div>
         <p class="alt"><a class="gh" href="https://github.com/emdmed/calibrated"><svg aria-hidden="true"><use href="#i-gh"/></svg><span>emdmed/calibrated</span></a><a href="#get">other ways to install</a><a href="examples.html">see six finished pages</a></p>
       </div>
-      <div class="switch"><span class="btn-pair" role="group" aria-label="Show examples as"><button class="cal-btn" type="button" data-view="plain" aria-pressed="false">plain</button><button class="cal-btn" type="button" data-view="cal" aria-pressed="true">calibrated</button></span><span class="mut" style="font-size:14px">Flip to plain, then click any example to calibrate it.</span></div>
+      <div class="switch"><span class="btn-pair" role="group" aria-label="Show examples as"><button class="cal-btn" type="button" data-view="plain" aria-pressed="false">plain</button><button class="cal-btn" type="button" data-view="cal" aria-pressed="true">calibrated</button></span><span class="btn-pair" role="group" aria-label="Weight"><button class="cal-btn" type="button" data-weight-set="soft" aria-pressed="true">soft</button><button class="cal-btn" type="button" data-weight-set="strong" aria-pressed="false">strong</button></span><span class="mut" style="font-size:14px">Flip to plain, then click any example to calibrate it.</span></div>
     </div>
   </section>
 
@@ -1023,6 +1024,21 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
     try { await navigator.clipboard.writeText(data.url); msg.textContent = 'link copied'; }
     catch { msg.textContent = 'copy the address from your browser bar'; }
   });
+})();
+</script>
+<script>
+/* weight: soft or strong for the calibrated designs, remembered across the demo pages */
+(() => {
+  const btns = [...document.querySelectorAll('[data-weight-set]')];
+  const set = (w) => {
+    document.querySelectorAll('.ba > .art').forEach((el) => { el.dataset.weight = w; });
+    btns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.weightSet === w)));
+    try { localStorage.setItem('cal-cat-weight', w); } catch {}
+  };
+  btns.forEach((b) => b.addEventListener('click', () => set(b.dataset.weightSet)));
+  let w = new URLSearchParams(location.search).get('weight');
+  if (!w) { try { w = localStorage.getItem('cal-cat-weight'); } catch {} }
+  if (w === 'strong') set(w);
 })();
 </script>
 </body>

@@ -117,6 +117,7 @@ main > .cal-sec > .brief { margin-bottom: 26px; }
 
 /* ── looks: each finished page takes its look from its subject (skills/calibrated-tokens/references/looks.md).
    html.looks-off shows them all in the default look, for comparison. */
+.btn-pair { display: inline-flex; gap: 6px; }
 .looks-sw { display: inline-flex; gap: 6px; margin-left: 6px; vertical-align: baseline; }
 html:not(.looks-off) .page[data-look="ops"] { --bg: #eef0f2; --fg: #1b2026; --live: #a8430a;
   --font-display: "Chivo", "Helvetica Neue", sans-serif; --display-weight: 700; --track-title: .04em; }
@@ -169,6 +170,7 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
     <a class="word ruled" href="index.html">Calibrated</a>
     <span class="cal-caption lg">examples · finished pages</span>
     <span class="sp"></span>
+    <span class="btn-pair" role="group" aria-label="Weight"><button class="cal-btn" type="button" data-weight-set="soft" aria-pressed="true">soft</button><button class="cal-btn" type="button" data-weight-set="strong" aria-pressed="false">strong</button></span>
     <nav class="nav" aria-label="Site"><a class="cal-btn quiet" href="index.html">catalog</a><a class="cal-btn quiet" href="examples.html" aria-current="page">examples</a><a class="cal-btn quiet" href="reference.html">reference</a></nav>
     <a class="cal-btn primary" href="index.html#get" style="text-decoration:none">install</a>
     <a class="gh" href="https://github.com/emdmed/calibrated" aria-label="Calibrated on GitHub"><svg aria-hidden="true"><use href="#i-gh"/></svg><span>github</span></a>
@@ -182,7 +184,7 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
       <h1>Six finished pages, start to end</h1>
       <p>The catalog shows one drawing per page type. These are whole pages: the kind of report, review board, explainer, spec sheet, app screen and form a team would share. Each starts with the request that made it and the numbers pasted with it, and lists the skill and parts it is built from.</p>
       <p>Each page also chooses its own look from its subject: the palette, the headline face, the frame and the spacing. The drawings follow the same rules on every page. <span class="btn-pair looks-sw" role="group" aria-label="Looks"><button class="cal-btn" type="button" data-looks="on" aria-pressed="true">chosen looks</button><button class="cal-btn" type="button" data-looks="off" aria-pressed="false">all default</button></span></p>
-      <p class="mut">All figures and instruments are live. Buttons and forms work. Every number is example data.</p>
+      <p class="mut">All figures and instruments are live. Buttons and forms work. Every number is example data. Switch <b>soft</b> / <b>strong</b> at the top to see every page in either weight.</p>
     </div>
     <table class="cal-table toc">
       <thead><tr><th>no</th><th>page</th><th>type</th></tr></thead>
@@ -986,6 +988,21 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
     btns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
     window.Calibrated && Calibrated.redraw && Calibrated.redraw();
   }));
+})();
+</script>
+<script>
+/* weight: soft or strong for every finished page, remembered across the demo pages */
+(() => {
+  const btns = [...document.querySelectorAll('[data-weight-set]')];
+  const set = (w) => {
+    document.querySelectorAll('.page').forEach((el) => { el.dataset.weight = w; });
+    btns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.weightSet === w)));
+    try { localStorage.setItem('cal-cat-weight', w); } catch {}
+  };
+  btns.forEach((b) => b.addEventListener('click', () => set(b.dataset.weightSet)));
+  let w = new URLSearchParams(location.search).get('weight');
+  if (!w) { try { w = localStorage.getItem('cal-cat-weight'); } catch {} }
+  if (w === 'strong') set(w);
 })();
 </script>
 </body>
