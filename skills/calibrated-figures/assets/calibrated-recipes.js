@@ -33,10 +33,6 @@
     const raw = span / n, p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
     return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p;
   };
-  /* brk · the break mark in fault ink where a run goes on past the end of its scale (as the instruments draw it) */
-  const brk = (x, y) => K.line(x - 3, y + 5, x + 1, y - 7, 'ft') + K.line(x + 1, y + 5, x + 5, y - 7, 'ft');
-  /* hbrk · the break mark at strong weight */
-  const hbrk = (x, y) => K.line(x - 4, y + 7, x + 1, y - 8, 'ft', { w: 2 }) + K.line(x + 2, y + 7, x + 7, y - 8, 'ft', { w: 2 });
   const LAMP = 'var(--live)';   /* a solid lamp fill: K.rect turns ink 'lv' into the faint tint */
   const n2 = (v) => Math.round(v * 100) / 100;
 
@@ -50,7 +46,7 @@
     if (!S) {
       return {
         S, ruler: K.ruler, box: K.box, boxWidth: K.boxWidth, plate: K.plate, plateWidth: (a, b) => Math.max(94, tw(a) + 18, tw(b) + 18),
-        leader: K.leader, dim: K.dim, node: K.node, cmd: K.cmd, brk, L: K.t, rh: 0,
+        leader: K.leader, dim: K.dim, node: K.node, cmd: K.cmd, brk: K.brk, L: K.t, rh: 0,
       };
     }
     const ink = (c2, s) => (c2 === 'lv' || s === 'lv' ? 'lv' : c2 === 'ft' || s === 'ft' ? 'ft' : 'fg');
@@ -108,7 +104,7 @@
       cmd(x, y, n, s, c = 'fg') {
         return K.rect(x, y - 10, 14, 14, 'fg', 'none') + K.t(x + 7, y + 1, n, 'pn', 'middle', 0, { wt: 700 }) + K.t(x + 20, y + 1, '$ ' + s, c, 'start', 0, { wt: W.wt });
       },
-      brk: hbrk,
+      brk: K.hbrk,
       /* L · a legend: names, keys and scale words at 600 */
       L: (x, y, s, c, a, ls) => K.t(x, y, s, c, a, ls, { wt: W.wt }),
       /* rh · how much further the strong ruler's numbers reach below it */
@@ -868,7 +864,13 @@
   function mount(svg, r, data) {
     if (typeof svg === 'string') svg = document.querySelector(svg);
     if (!svg) return null;
+    /* a plain result replaces whatever recipe was remembered, so a weight change can't redraw old data */
     if (typeof r === 'function') { svg._calFig = { recipe: r, data }; r = r(weighed(svg, data)); }
+    else svg._calFig = null;
+    return put(svg, r);
+  }
+  /* put · draw a result without touching the remembered recipe (play's frames) */
+  function put(svg, r) {
     C.attr(svg, 'width', r.w); C.attr(svg, 'height', r.h);
     C.attr(svg, 'viewBox', `0 0 ${r.w} ${r.h}`);
     return C.draw(svg, r.markup, r.label);
@@ -966,13 +968,13 @@
     svg._calStop = stop;
     svg._calRetarget = (r, d) => {
       draw = r; cur = d; svg._calFig = { recipe: r, data: d };
-      if (!clock) mount(svg, draw(weighed(svg, { ...cur, t: 0, tt: 0 })));   /* still waiting to be seen */
+      if (!clock) put(svg, draw(weighed(svg, { ...cur, t: 0, tt: 0 })));   /* still waiting to be seen */
     };
     const frame = () => {
       if (!clock) return;
       if (!svg.isConnected) return stop();
       const e = clock.currentTime || 0;
-      mount(svg, draw(weighed(svg, { ...cur, t: at(e), tt: at(e - TRAIL) })));
+      put(svg, draw(weighed(svg, { ...cur, t: at(e), tt: at(e - TRAIL) })));
       let busy = e < ms + TRAIL;
       svg.querySelectorAll('[data-land]').forEach((g) => {
         const k = g.getAttribute('data-land');
@@ -989,7 +991,7 @@
       crawl(svg);
     };
     svg._calFig = { recipe, data };
-    mount(svg, draw(weighed(svg, { ...cur, t: 0, tt: 0 })));
+    put(svg, draw(weighed(svg, { ...cur, t: 0, tt: 0 })));
     io = new IntersectionObserver((es) => {
       if (!es.some((x) => x.isIntersecting)) return;
       io.disconnect(); io = null;

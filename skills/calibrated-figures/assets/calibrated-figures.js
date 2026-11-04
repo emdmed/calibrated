@@ -275,6 +275,10 @@
     /* ── strong weight · heavier forms of the same marks (see weight()). Sizes in px. */
     W: { rule: 1.5, tick: 2, major: 3, base: 3, needle: 4, plate: 2, lamp: 2.5, hatch: 2.5, pitch: 7, wt: 600 },
 
+    /* brk · the break mark in fault ink where a run goes on past the end of its scale; hbrk at strong weight */
+    brk(x, y) { return K.line(x - 3, y + 5, x + 1, y - 7, 'ft') + K.line(x + 1, y + 5, x + 5, y - 7, 'ft'); },
+    hbrk(x, y) { return K.line(x - 4, y + 7, x + 1, y - 8, 'ft', { w: 2 }) + K.line(x + 2, y + 7, x + 7, y - 8, 'ft', { w: 2 }); },
+
     /* hazard · alert-zone stripes at strong weight: hatch(c, 7, 1, 2.5) */
     hazard(c = 'ft') { return K.hatch(c, K.W.pitch, 1, K.W.hatch); },
 

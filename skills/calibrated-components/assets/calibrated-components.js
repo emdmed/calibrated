@@ -60,9 +60,6 @@
   };
   /* fit · cut a label with … to fit px */
   const fit = (s, px) => { if (tw(s) <= px) return s; let t = s; while (t.length > 1 && tw(t + '…') > px) t = t.slice(0, -1); return t + '…'; };
-  /* brk · the break mark across a run that goes on past the end of its scale (over the limit) */
-  const brk = (x, y) => K.line(x - 3, y + 5, x + 1, y - 7, 'ft') + K.line(x + 1, y + 5, x + 5, y - 7, 'ft');
-  const hbrk = (x, y) => K.line(x - 4, y + 7, x + 1, y - 8, 'ft', { w: 2 }) + K.line(x + 2, y + 7, x + 7, y - 8, 'ft', { w: 2 });   /* at strong weight */
   const n2 = (v) => Math.round(v * 100) / 100;
   const LAMP = 'var(--live)';   /* a solid lamp fill: K.rect turns ink 'lv' into the faint tint */
 
@@ -241,7 +238,7 @@
         /* the fill is ink up to the alert line and red only for the part past it */
         s += K.line(x0, y, x1, y, 'fa') + K.rect(x0, y - 4, X(Math.min(fr, wr)) - x0, 4, 'fg', 'none');
         if (wr < 1 && fr > wr) s += K.rect(X(wr), y - 4, X(fr) - X(wr), 4, 'ft', 'none');
-        if (past && landed) s += K.rect(x1, y - 4, 8, 4, 'ft', 'none') + brk(x1 + 12, y - 2);
+        if (past && landed) s += K.rect(x1, y - 4, 8, 4, 'ft', 'none') + K.brk(x1 + 12, y - 2);
         s += K.line(X(r), y - 18, X(r), y + 2, needle, { w: 1.6 });
         return s;
       };
@@ -278,7 +275,7 @@
         s += K.rect(x0, y, Math.max(0, X(Math.min(fr, wr)) - x0), bh, 'fg', 'none');
         if (wr < 1 && fr > wr) s += K.rect(X(wr), y, X(fr) - X(wr), bh, 'ft', 'none');
         s += K.outline(x0, y, x1 - x0, bh, 'ed', W.rule);
-        if (past && landed) s += K.rect(x1, y, 8, bh, 'ft', 'none') + hbrk(x1 + 14, y + bh / 2);
+        if (past && landed) s += K.rect(x1, y, 8, bh, 'ft', 'none') + K.hbrk(x1 + 14, y + bh / 2);
         if (full) s += K.rect(nx - 4, y, 1.5, bh, 'pn', 'none') + K.rect(nx + 2.5, y, 1.5, bh, 'pn', 'none') + K.rect(nx - 2, y - 20, W.needle, bh + 28, needle, 'none');
         else s += K.rect(nx - 1.5, y - 4, 3, bh + 8, needle, 'none');
         return s;
@@ -533,8 +530,8 @@
       if (on(tr)) g += K.line(cx - tr, y, cx, y, 'ft', { w: 2 });
       if (on(pr)) g += K.line(cx - pr, y - 4, cx - pr, y + 4, 'ft');
       /* past max the bar breaks off before its end tick */
-      if (landed && a > max) g += brk(cx + span - 8, y);
-      if (landed && r > max) g += brk(cx - span + 6, y);
+      if (landed && a > max) g += K.brk(cx + span - 8, y);
+      if (landed && r > max) g += K.brk(cx - span + 6, y);
       const label = `${name ? name + ': ' : ''}${a} lines added, ${r} removed` + (a > max || r > max ? `, beyond the scale at ${fmt.k(max)}` : '');
       if (full) {
         let txt = '';
@@ -567,8 +564,8 @@
       if (on(pa)) g += K.line(cx + pa, y - bh / 2 - 2, cx + pa, y + bh / 2 + 2, 'ok', { w: 2 });
       if (on(pr)) g += K.line(cx - pr, y - bh / 2 - 2, cx - pr, y + bh / 2 + 2, 'ft', { w: 2 });
       g += K.rect(cx - 1.5, y - 11, 3, 22, 'fg', 'none');
-      if (landed && a > max) g += hbrk(cx + span - 8, y);
-      if (landed && r > max) g += hbrk(cx - span + 6, y);
+      if (landed && a > max) g += K.hbrk(cx + span - 8, y);
+      if (landed && r > max) g += K.hbrk(cx - span + 6, y);
       if (full) {
         let txt = '';
         if (on(pa)) txt += K.t(cx + pa + 7, y + 4.5, la, 'ok', 'start', 0, { fs, wt: 700 });
@@ -664,7 +661,7 @@
         g += K.t(x0 - 10, y + 4, names[i], 'fg', 'end');
         if (xt > x0) g += K.line(x0, y, xt, y, c, { w: full ? 1.6 : 1.3 });
         if (full) g += K.line(x0, y - 4, x0, y + 4, 'fa');
-        if (!this.moving && r.v / div > max) g += brk(x1 - 6, y);
+        if (!this.moving && r.v / div > max) g += K.brk(x1 - 6, y);
         if (r.live) {
           g += K.line(xe, y, full ? xe + 40 : Math.min(xe + 40, x1), y, 'fa', { dash: '2 3' });
           if (full) g += lit ? K.node(xe, y, 'live') : K.line(xe, y - 4, xe, y + 4, 'fg');
@@ -708,7 +705,7 @@
         if (full) g += K.line(x0, y - 9, x0, y + 9, 'fg', { w: W.major });
         if (r.live) g += K.line(xe, y, full ? xe + 40 : Math.min(xe + 40, x1), y, 'fa', { w: 2, dash: '3 3' });
         if (xt > x0) g += K.rect(x0, y - bh / 2, xt - x0, bh, lit ? LAMP : full ? 'fg' : 'mu', 'none');
-        if (!this.moving && r.v / div > max) g += hbrk(x1 - 6, y);
+        if (!this.moving && r.v / div > max) g += K.hbrk(x1 - 6, y);
         if (r.live) {
           if (full) g += lit ? K.star(xe, y, 12, 'pn') + K.star(xe, y, 9) : K.line(xe, y - 7, xe, y + 7, 'fg', { w: W.major });
           txt += K.t(full ? xe + 48 : x1 + 10, y + 4, lab, lit ? 'lv' : 'mu', 'start', 0, { wt: 700 });
