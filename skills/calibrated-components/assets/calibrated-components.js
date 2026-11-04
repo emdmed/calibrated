@@ -37,15 +37,13 @@
      <cal-spin> and <cal-elapsed> work without it */
   const C = root.Calibrated || {};
   const FIG = !!C.K;
-  const { K, fmt, textWidth: tw } = C;
+  const { K, fmt, textWidth: tw, fit, n2, nice, LAMP, blink } = C;
   const esc = C.esc || ((t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'));
   const define = (n, c) => { if (root.customElements && !customElements.get(n)) customElements.define(n, c); };
 
   const num = (el, a, d) => { const v = parseFloat(el.getAttribute(a)); return Number.isFinite(v) ? v : d; };
   const str = (el, a, d = '') => (el.hasAttribute(a) ? el.getAttribute(a) : d);
   const group = (n) => Math.round(n).toLocaleString('en-US').replace(/,/g, ' ');
-  /* nice · the smallest 1, 2 or 5 × 10ⁿ at or above raw */
-  const nice = (raw) => { const p = Math.pow(10, Math.floor(Math.log10(raw))); return [1, 2, 5, 10].map((m) => m * p).find((m) => m >= raw * (1 - 1e-9)); };
   const KY = 'ky';   /* small text in --key: scale numbers and names (--faint 'fa' is for marks only) */
   const warned = new Set();
   const warn = (el, msg) => { const k = el.localName + msg; if (!warned.has(k)) { warned.add(k); console.warn(`<${el.localName}> ${msg}`); } };
@@ -58,10 +56,6 @@
     if (name === 'dur') return (v) => fmt.dur(v);
     return (v) => fmt.k(v) + unit;
   };
-  /* fit · cut a label with … to fit px */
-  const fit = (s, px) => { if (tw(s) <= px) return s; let t = s; while (t.length > 1 && tw(t + '…') > px) t = t.slice(0, -1); return t + '…'; };
-  const n2 = (v) => Math.round(v * 100) / 100;
-  const LAMP = 'var(--live)';   /* a solid lamp fill: K.rect turns ink 'lv' into the faint tint */
 
   /* a glide moves one number or a list of numbers (each part on the same clock) */
   const V = {
@@ -183,17 +177,9 @@
     get moving() { return !!this._anim || !!this._io; }
     /* elapsed · ms into the running glide, or -1 when settled */
     get elapsed() { return this._anim ? this._anim.currentTime || 0 : -1; }
-    /* land · once a glide settles, the reading blinks, hard on and off, like an
-       instrument latching its value. Each off stays ~30ms (two frames at 60Hz);
-       shorter and a blink can fall between frames. Marked by [data-cal-reading]. */
-    land() {
-      const el = this.querySelector('[data-cal-reading]');
-      if (!el || !el.animate) return;
-      const BLINKS = 2, OFF = 30, k = [];
-      for (let i = 0; i < BLINKS; i++) { const o = i / BLINKS, h = 1 / (2 * BLINKS); k.push({ opacity: 1, offset: o }, { opacity: 0.15, offset: o + 0.001 }, { opacity: 0.15, offset: o + h }, { opacity: 1, offset: o + h + 0.001 }); }
-      k.push({ opacity: 1, offset: 1 });
-      el.animate(k, { duration: BLINKS * OFF * 2 });
-    }
+    /* land · once a glide settles, the reading (marked [data-cal-reading]) blinks,
+       like an instrument latching its value */
+    land() { blink(this.querySelector('[data-cal-reading]')); }
     halt() {
       if (this._anim) { this._anim.cancel(); this._anim = null; }
       if (this._io) { this._io.disconnect(); this._io = null; }
@@ -514,10 +500,8 @@
       const landed = pa === F(a) && pr === F(r);
       const shownA = landed ? a : Math.round(inv(pa)), shownR = landed ? r : Math.round(inv(pr));
       const la = '+' + fmt.k(shownA), lr = '−' + fmt.k(shownR);
-      if (this.strong) {
-        const label = `${name ? name + ': ' : ''}${a} lines added, ${r} removed` + (a > max || r > max ? `, beyond the scale at ${fmt.k(max)}` : '');
-        return this.heavy(full, { a, r, name, max, span, kneePx, pa, pr, ta, tr, landed, la, lr, shownA, shownR, label });
-      }
+      const label = `${name ? name + ': ' : ''}${a} lines added, ${r} removed` + (a > max || r > max ? `, beyond the scale at ${fmt.k(max)}` : '');
+      if (this.strong) return this.heavy(full, { a, r, name, max, span, kneePx, pa, pr, ta, tr, landed, la, lr, shownA, shownR, label });
       /* fixed side widths so a column of diffs shares one centre line */
       const side = full ? span + 10 + Math.max(tw('+000.0k'), tw('+' + fmt.k(a)), tw('−' + fmt.k(r))) : span + 4;
       const nameW = full && name ? Math.max(24, num(this, 'name-width', 64)) : 0, nm = nameW ? fit(name, nameW - 12) : '';
@@ -532,7 +516,6 @@
       /* past max the bar breaks off before its end tick */
       if (landed && a > max) g += K.brk(cx + span - 8, y);
       if (landed && r > max) g += K.brk(cx - span + 6, y);
-      const label = `${name ? name + ': ' : ''}${a} lines added, ${r} removed` + (a > max || r > max ? `, beyond the scale at ${fmt.k(max)}` : '');
       if (full) {
         let txt = '';
         if (on(pa)) txt += K.t(cx + pa + 8, y + 4, la, 'ok');
@@ -968,9 +951,15 @@
     x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', 'Remove ' + v); c.append(x);
     box.insertBefore(c, input);
     say(box, `Added ${v}`);
-    box.dispatchEvent(new CustomEvent('cal-chips', { bubbles: true, detail: { values: chipValues(box) } }));
+    chipsChanged(box);
+  }
+  function removeChip(box, chip) {
+    say(box, `Removed ${chip.firstChild.textContent.trim()}`);
+    chip.remove();
+    chipsChanged(box);
   }
   const chipValues = (box) => [...box.querySelectorAll('.chip')].map((c) => c.firstChild.textContent.trim());
+  const chipsChanged = (box) => box.dispatchEvent(new CustomEvent('cal-chips', { bubbles: true, detail: { values: chipValues(box) } }));
 
   /* number · .cal-num input[data-step] is a spinbutton: value, min, max and the value with its unit */
   function spin(t) {
@@ -1057,9 +1046,9 @@
   on('keydown', '.cal-chips input', (t, e) => {
     const box = t.closest('.cal-chips'), v = t.value.trim().replace(/,$/, '');
     if ((e.key === 'Enter' || e.key === ',') && v) { e.preventDefault(); addChip(box, v); t.value = ''; }
-    else if (e.key === 'Backspace' && !t.value) { const last = [...box.querySelectorAll('.chip')].pop(); if (last) { say(box, `Removed ${last.firstChild.textContent.trim()}`); last.remove(); box.dispatchEvent(new CustomEvent('cal-chips', { bubbles: true, detail: { values: chipValues(box) } })); } }
+    else if (e.key === 'Backspace' && !t.value) { const last = [...box.querySelectorAll('.chip')].pop(); if (last) removeChip(box, last); }
   });
-  on('click', '.cal-chips .chip button', (b) => { const box = b.closest('.cal-chips'); say(box, `Removed ${b.parentElement.firstChild.textContent.trim()}`); b.parentElement.remove(); box.querySelector('input')?.focus(); box.dispatchEvent(new CustomEvent('cal-chips', { bubbles: true, detail: { values: chipValues(box) } })); });
+  on('click', '.cal-chips .chip button', (b) => { const box = b.closest('.cal-chips'); removeChip(box, b.parentElement); box.querySelector('input')?.focus(); });
   on('click', '.cal-chips', (box, e) => { if (e.target === box) box.querySelector('input')?.focus(); });
   /* dialog · <button data-dialog="id"> opens <dialog class="cal-dialog" id="id"> as a modal */
   on('click', '[data-dialog]', (b) => { const d = document.getElementById(b.dataset.dialog); if (d?.showModal && !d.open) d.showModal(); });

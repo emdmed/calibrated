@@ -9,7 +9,7 @@
   'use strict';
   const C = root.Calibrated;
   if (!C) throw new Error('calibrated-recipes.js needs calibrated-figures.js first');
-  const { K, textWidth: tw, fmt } = C;
+  const { K, textWidth: tw, fmt, n2, LAMP, fit, nice, blink, BLINK, poly, pick } = C;
 
   const head = (o) => (o.n != null || o.title ? K.fig(o.n ?? '', o.title || '') : '');
 
@@ -28,13 +28,6 @@
     return warn;
   }
   const num = (v, d = 0) => (Number.isFinite(+v) && v !== null && v !== '' ? +v : d);
-  /* niceStep · a ruler step of 1, 2 or 5 × 10ⁿ giving about n ticks */
-  const niceStep = (span, n = 15) => {
-    const raw = span / n, p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
-    return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p;
-  };
-  const LAMP = 'var(--live)';   /* a solid lamp fill: K.rect turns ink 'lv' into the faint tint */
-  const n2 = (v) => Math.round(v * 100) / 100;
 
   /* pen(o) · the marks a recipe draws with, at the data's weight ('soft' or 'strong').
      Strong keeps every position and swaps each mark for its heavy form, as the
@@ -110,14 +103,6 @@
       /* rh · how much further the strong ruler's numbers reach below it */
       rh: 5,
     };
-  }
-
-  /* fit · text cut with … to fit room px */
-  function fit(s, room) {
-    s = String(s ?? '');
-    if (tw(s) <= room) return s;
-    while (s.length > 1 && tw(s + '…') > room) s = s.slice(0, -1);
-    return s + '…';
   }
 
   /* the merge replay, in ms: the branch draws in, then after a beat the details appear */
@@ -279,7 +264,7 @@
       }
       if (pace != null && TT > used && used < max) g += K.line(Xc(used), y, Xc(clamp(TT, used, pace)), y, 'lv', S ? { w: 3, dash: '5 3' } : { dash: '4 3' });
       if (S) g += K.outline(x0, y - 6, x1 - x0, 12, 'ed', W.rule);
-      g += P.ruler(x0, x1, y + (S ? 8 : 6), max, o.step || niceStep(max), o.every || 5, (v) => (v ? f(v) : '0'));
+      g += P.ruler(x0, x1, y + (S ? 8 : 6), max, o.step || nice(max / 15), o.every || 5, (v) => (v ? f(v) : '0'));
       alerts.forEach((a, i) => {
         const end = i === 0 && alerts.length > 1, ax = Xc(+a.v);
         const m = K.line(ax, y - 36, ax, y + (S ? 6 : 4), 'ft', S ? { w: W.major } : { opacity: 0.7 }) + P.L(ax + (end ? -5 : 5), y - 28, a.label ?? f(a.v), 'ft', end ? 'end' : 'start');
@@ -431,7 +416,7 @@
       kids.forEach((s, i) => {
         const y = top + i * gap, nx = 200, st = states[i], on = st === 'live' || st === 'running', r = routes[i], pts = grow(r);
         /* a running branch is ink, a queued one dashed (not reached yet), a finished one faint, a failed one red */
-        if (pts) g += K.path('M' + pts.map((p) => p.map((v) => +v.toFixed(2)).join(' ')).join(' L'), on ? 'fg' : st === 'fault' ? 'ft' : 'fa', S ? (st === 'todo' ? { w: 2, dash: '3 3' } : { w: on ? W.major : 2 }) : st === 'todo' ? { dash: '2 3' } : {});
+        if (pts) g += K.path(poly(pts), on ? 'fg' : st === 'fault' ? 'ft' : 'fa', S ? (st === 'todo' ? { w: 2, dash: '3 3' } : { w: on ? W.major : 2 }) : st === 'todo' ? { dash: '2 3' } : {});
         if (d >= polyLen(r.pts)) g += P.node(nx, y + 10, st === 'running' ? 'started' : st);
         const time = String(s.time ?? ''), room = w - 18 - 220;
         /* strong: a 2px outline, the lit child's in the lamp; task and time heavier */
@@ -443,7 +428,7 @@
       });
       if (o.folded) {
         const pts = grow(routes[kids.length]);
-        if (pts) g += K.path('M' + pts.map((p) => p.map((v) => +v.toFixed(2)).join(' ')).join(' L'), S ? 'fa' : 'e1', S ? { w: 2, dash: '3 3' } : { dash: '2 3' });
+        if (pts) g += K.path(poly(pts), S ? 'fa' : 'e1', S ? { w: 2, dash: '3 3' } : { dash: '2 3' });
         k += P.L(212, fy + 4, o.folded, 'ky');
       }
       if (T >= M.flash) g += `<g data-land="children">${k}</g>`;
@@ -500,7 +485,7 @@
       const T = o.t ?? Infinity, stepping = o.from != null, moving = stepping && T < LOOP.step;
       let states = statesAt(o.at), tip = null, textStates = states, lap = o.lap;
       let g = head(o);
-      const ring = `M${P.map((p) => p[0].toFixed(2) + ' ' + p[1].toFixed(2)).join(' L')} Z`;
+      const ring = poly(P) + ' Z';
       g += S ? `<path d="${ring}" stroke-width="${EW}" stroke-linejoin="miter" style="fill:none;stroke:var(--faint)"/>`
         : K.circle(cx, cy, R * 1.2, 'none', 'e1') + K.path(ring, 'ed');
       if (moving) {
@@ -554,12 +539,12 @@
         : K.rect(cx - tw(c0) / 2 - 3, cy + 14, tw(c0) + 6, 14, 'pn', 'none') + K.t(cx, cy + 24, c0, 'mu', 'middle');
       let k = stepping && !moving && o.lap !== o.lapFrom ? `<g data-land="centre">${ck}</g>` : ck;
       st.forEach((s, i) => {
-        const [x, y, a] = P[i], cos = Math.cos(a), sin = Math.sin(a), sn = states[i];
+        const [x, y, a] = P[i], sin = Math.sin(a), sn = states[i];
         /* done: a solid square and a green ✓ name; todo: a hollow square and a muted name */
         if (S) g += chipAt(x, y, String(i + 1), sn === 'live' && tip ? 'todo' : sn);
         else if (sn === 'live' && !tip) g += K.node(x, y, 'live', ns);
         else g += K.node(x, y, sn === 'done' || sn === 'fault' ? sn : 'todo', ns);
-        const side = Math.abs(cos) < 0.3 ? 0 : cos > 0 ? 1 : -1;
+        const side = sideOf(a);
         const off = S ? 22 : 16;
         const tx = side === 1 ? x + off : side === -1 ? x - off : x;
         const ty = side === 0 ? (sin < 0 ? y - (S ? 30 : 26) : y + (S ? 29 : 22)) : y - 4;
@@ -826,7 +811,7 @@
         if (o.boundary.label) g += K.path(`M16 ${h - 17}l6 6M22 ${h - 17}l-6 6`, 'fg', { w: S ? 2.5 : 1.4 }) + P.L(30, h - 10, o.boundary.label, 'mu');
       }
       regions.forEach((r) => {
-        const L = r.label ? P.L(r.x + 8, r.y + 16, r.label, 'fg') : '', S = r.sub ? K.t(r.x + 8, r.y + 32, r.sub, 'ky') : '';
+        const L = r.label ? P.L(r.x + 8, r.y + 16, r.label, 'fg') : '', sub = r.sub ? K.t(r.x + 8, r.y + 32, r.sub, 'ky') : '';
         if (r.kind === 'hatch') {
           g += `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${H1.url}" style="stroke:var(--edge-strong)${S ? ';stroke-width:1.5' : ''}"/>`;
           if (r.label) g += K.rect(r.x + 4, r.y + 4, tw(r.label) + 8, 16, 'pn', 'none') + P.L(r.x + 8, r.y + 16, r.label, 'fg');
@@ -835,7 +820,7 @@
           g += `<rect x="${r.x}" y="${r.y}" width="${iw}" height="17" fill="${H2.url}" style="stroke:var(--edge-strong)${S ? ';stroke-width:1.5' : ''}"/>` + K.rect(r.x + 2, r.y + 3, iw - 4, 11, 'pn', 'none') + P.L(r.x + 5, r.y + 12.5, r.label, 'mu');
         } else {
           const opt = r.kind === 'strong' ? { w: S ? W.major : 1.6 } : r.kind === 'dotted' ? (S ? { w: 2, dash: '2 3' } : { dash: '1 2' }) : S ? { w: W.rule } : {};
-          g += K.rect(r.x, r.y, r.w, r.h, r.kind === 'strong' ? 'none' : 'pn', 'fg', opt) + L + S;
+          g += K.rect(r.x, r.y, r.w, r.h, r.kind === 'strong' ? 'none' : 'pn', 'fg', opt) + L + sub;
         }
       });
       calls.forEach((c, i) => {
@@ -862,7 +847,7 @@
   /* mount a recipe result into an <svg>: mount(svg, result), or mount(svg, recipe, data),
      which draws at the svg's weight and redraws when a [data-weight] around it changes */
   function mount(svg, r, data) {
-    if (typeof svg === 'string') svg = document.querySelector(svg);
+    svg = pick(svg);
     if (!svg) return null;
     /* a plain result replaces whatever recipe was remembered, so a weight change can't redraw old data */
     if (typeof r === 'function') { svg._calFig = { recipe: r, data }; r = r(weighed(svg, data)); }
@@ -906,14 +891,6 @@
     return { ...o, at: to, lap: l, from: at, lapFrom: lap, dir };
   };
 
-  /* the landing blink: two hard offs of 30ms each (two frames at 60Hz;
-     shorter and a blink can fall between frames), run as a Web Animation so
-     dropped frames can't stretch or skip it */
-  const OFF = 30, BLINK = 4 * OFF;
-  const BLINK_FRAMES = [0, 0.5].flatMap((o) => [
-    { opacity: 0.15, offset: o }, { opacity: 0.15, offset: o + 0.25 },
-    { opacity: 1, offset: o + 0.2501 }, { opacity: 1, offset: o + 0.5 },
-  ]);
   const reduced = () => !!(root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   /* crawl(svg) · dashed live tails (data-crawl) move one dash period every
@@ -941,7 +918,7 @@
      motion, { still: true }, a recipe without an extent or no WAAPI: mount
      the finished figure. */
   function play(svg, recipe, data, opts = {}) {
-    if (typeof svg === 'string') svg = document.querySelector(svg);
+    svg = pick(svg);
     if (!svg) return null;
     if (svg._calStop) svg._calStop();
     const ext0 = recipe.extent ? recipe.extent(data) : 0;
@@ -983,7 +960,7 @@
         if (q >= BLINK) return;
         busy = true;
         /* a group redrawn mid-blink picks the blink up where it was */
-        if (g._calLanded !== landed) { g._calLanded = landed; g.animate(BLINK_FRAMES, { duration: BLINK }).currentTime = q; }
+        if (g._calLanded !== landed) { g._calLanded = landed; blink(g, q); }
       });
       if (busy) return requestAnimationFrame(frame);
       clock.cancel(); clock = null; svg._calRetarget = null;
@@ -1008,7 +985,7 @@
      for live values (a running clock) between replays, so a tick never cuts
      a replay short. */
   function update(svg, recipe, data) {
-    if (typeof svg === 'string') svg = document.querySelector(svg);
+    svg = pick(svg);
     if (!svg) return null;
     if (svg._calRetarget) { svg._calRetarget(recipe, data); return svg; }
     mount(svg, recipe, data);

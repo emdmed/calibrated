@@ -69,10 +69,41 @@
 
   const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
   const n2 = (v) => Math.round(v * 100) / 100;
+  /* a solid lamp fill: K.rect turns ink 'lv' into the faint tint */
+  const LAMP = 'var(--live)';
+  /* fit · text cut with … to fit room px */
+  function fit(s, room) {
+    s = String(s ?? '');
+    if (textWidth(s) <= room) return s;
+    while (s.length > 1 && textWidth(s + '…') > room) s = s.slice(0, -1);
+    return s + '…';
+  }
+  /* nice · the smallest 1, 2 or 5 × 10ⁿ at or above raw */
+  const nice = (raw) => { const p = Math.pow(10, Math.floor(Math.log10(raw))); return [1, 2, 5, 10].map((m) => m * p).find((m) => m >= raw * (1 - 1e-9)); };
+
+  /* blink(el, at) · the landing blink: two hard offs of 30ms each (two frames at
+     60Hz; shorter and a blink can fall between frames), run as a Web Animation
+     so dropped frames can't stretch or skip it. at: ms of it already past. */
+  const BLINK = 120;
+  const BLINK_FRAMES = [0, 0.5].flatMap((o) => [
+    { opacity: 0.15, offset: o }, { opacity: 0.15, offset: o + 0.25 },
+    { opacity: 1, offset: o + 0.2501 }, { opacity: 1, offset: o + 0.5 },
+  ]);
+  function blink(el, at = 0) {
+    if (!el || !el.animate) return null;
+    const a = el.animate(BLINK_FRAMES, { duration: BLINK });
+    a.currentTime = at;
+    return a;
+  }
 
   /* ── unique ids for <pattern> so two figures never clash */
   let uid = 0;
   const id = (p = 'cal') => `${p}-${(++uid).toString(36)}`;
+
+  /* the optional stroke attributes shared by line, path and rect */
+  const strokeAttrs = (o) => `${o.w ? ` stroke-width="${o.w}"` : ''}${o.dash ? ` stroke-dasharray="${o.dash}"` : ''}${o.cap ? ` stroke-linecap="${o.cap}"` : ''}${o.opacity ? ` stroke-opacity="${o.opacity}"` : ''}`;
+  /* poly · points [[x, y], …] as path data */
+  const poly = (pts) => 'M' + pts.map((p) => n2(p[0]) + ' ' + n2(p[1])).join(' L');
 
   const K = {
     /* text label · t(x, y, 'label', ink, anchor, letterSpacing, { fs, wt }) · fs and wt set a size and weight */
@@ -83,14 +114,14 @@
 
     /* plain line / path / rect / circle, painted with tokens */
     line(x1, y1, x2, y2, c = 'ed', o = {}) {
-      return `<line x1="${n2(x1)}" y1="${n2(y1)}" x2="${n2(x2)}" y2="${n2(y2)}"${o.w ? ` stroke-width="${o.w}"` : ''}${o.dash ? ` stroke-dasharray="${o.dash}"` : ''}${o.cap ? ` stroke-linecap="${o.cap}"` : ''}${o.opacity ? ` stroke-opacity="${o.opacity}"` : ''}${paint(null, c)}/>`;
+      return `<line x1="${n2(x1)}" y1="${n2(y1)}" x2="${n2(x2)}" y2="${n2(y2)}"${strokeAttrs(o)}${paint(null, c)}/>`;
     },
     path(d, c = 'ed', o = {}) {
-      return `<path d="${d}"${o.w ? ` stroke-width="${o.w}"` : ''}${o.dash ? ` stroke-dasharray="${o.dash}"` : ''}${o.cap ? ` stroke-linecap="${o.cap}"` : ''}${o.opacity ? ` stroke-opacity="${o.opacity}"` : ''}${paint(o.fill || 'none', c)}/>`;
+      return `<path d="${d}"${strokeAttrs(o)}${paint(o.fill || 'none', c)}/>`;
     },
     rect(x, y, w, h, f = 'none', s = 'ed', o = {}) {
       if (f === LIVE) f = 'swipe';
-      return `<rect x="${n2(x)}" y="${n2(y)}" width="${n2(w)}" height="${n2(h)}"${o.w ? ` stroke-width="${o.w}"` : ''}${o.dash ? ` stroke-dasharray="${o.dash}"` : ''}${o.opacity ? ` stroke-opacity="${o.opacity}"` : ''}${paint(f, s)}/>`;
+      return `<rect x="${n2(x)}" y="${n2(y)}" width="${n2(w)}" height="${n2(h)}"${strokeAttrs(o)}${paint(f, s)}/>`;
     },
     circle(cx, cy, r, f = 'pn', s = 'fg') {
       if (f === LIVE) f = 'swipe';
@@ -140,8 +171,7 @@
 
     /* leader · a dot on what is measured, an elbowed line to the label */
     leader(pts, dot = true) {
-      const d = 'M' + pts.map((p) => p.map(n2).join(' ')).join(' L');
-      return K.path(d, 'fa') + (dot ? K.circle(pts[0][0], pts[0][1], 2, 'pn', 'fg') : '');
+      return K.path(poly(pts), 'fa') + (dot ? K.circle(pts[0][0], pts[0][1], 2, 'pn', 'fg') : '');
     },
 
     /* dimension line · a span with its length written into the gap */
@@ -284,8 +314,7 @@
 
     /* mitre · a polyline with square corners and ends, so heavy strokes close without a notch */
     mitre(pts, c = 'fg', w = K.W.major) {
-      const d = pts.map((q, i) => (i ? 'L' : 'M') + n2(q[0]) + ' ' + n2(q[1])).join('');
-      return `<path d="${d}" stroke-width="${w}" stroke-linejoin="miter" stroke-linecap="square"${paint('none', c)}/>`;
+      return `<path d="${poly(pts)}" stroke-width="${w}" stroke-linejoin="miter" stroke-linecap="square"${paint('none', c)}/>`;
     },
 
     /* outline · a rectangle stroked inside its bounds */
@@ -424,9 +453,12 @@
     [svg, host].forEach((el) => { if (!watched.has(el)) { watched.add(el); hosts.observe(el); } });
   }
 
+  /* pick(svg) · an element, or the first match of a selector */
+  const pick = (s) => (typeof s === 'string' ? document.querySelector(s) : s);
+
   /* draw(svg, markup, label) · fills an <svg>, marks it as a figure, sets role and label */
   function draw(svg, markup, label) {
-    if (typeof svg === 'string') svg = document.querySelector(svg);
+    svg = pick(svg);
     if (!svg) return null;
     attr(svg, 'data-cal', '');
     if (!svg.getAttribute('viewBox') && svg.getAttribute('width')) {
@@ -482,6 +514,6 @@
     pad(n, w = 2) { return String(n).padStart(w, '0'); },
   };
 
-  const api = { K, draw, patch, attr, svg, density, weight, ink, textWidth, resetMetrics, ready, esc, id, fmt, FS, CH };
+  const api = { K, draw, patch, attr, svg, density, weight, ink, textWidth, resetMetrics, ready, esc, id, fmt, FS, CH, n2, LAMP, fit, nice, blink, BLINK, poly, pick };
   root.Calibrated = Object.assign(root.Calibrated || {}, api);
 })(typeof window !== 'undefined' ? window : globalThis);

@@ -36,5 +36,12 @@ for (const [name, data] of Object.entries(cases)) {
     }
   }
 }
+/* a region's line weight follows the page weight, not whether it has a sub line */
+for (const [weight, want] of [['soft', '1.6'], ['strong', '3']]) {
+  for (const sub of [undefined, 'sub']) {
+    const m = recipes.section({ weight, regions: [{ kind: 'strong', x: 20, y: 40, w: 100, h: 60, label: 'a', sub }] }).markup;
+    if (!m.includes(`stroke-width="${want}"`)) { failed++; console.error(`section · ${weight} · sub=${!!sub}: region stroke should be ${want}`); }
+  }
+}
 console.log(failed ? `${failed} recipe draws failed` : `${Object.keys(cases).length} recipes × 2 weights × 3 times: ok`);
 process.exit(failed ? 1 : 0);

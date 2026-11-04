@@ -70,10 +70,41 @@
 
   const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
   const n2 = (v) => Math.round(v * 100) / 100;
+  /* a solid lamp fill: K.rect turns ink 'lv' into the faint tint */
+  const LAMP = 'var(--live)';
+  /* fit · text cut with … to fit room px */
+  function fit(s, room) {
+    s = String(s ?? '');
+    if (textWidth(s) <= room) return s;
+    while (s.length > 1 && textWidth(s + '…') > room) s = s.slice(0, -1);
+    return s + '…';
+  }
+  /* nice · the smallest 1, 2 or 5 × 10ⁿ at or above raw */
+  const nice = (raw) => { const p = Math.pow(10, Math.floor(Math.log10(raw))); return [1, 2, 5, 10].map((m) => m * p).find((m) => m >= raw * (1 - 1e-9)); };
+
+  /* blink(el, at) · the landing blink: two hard offs of 30ms each (two frames at
+     60Hz; shorter and a blink can fall between frames), run as a Web Animation
+     so dropped frames can't stretch or skip it. at: ms of it already past. */
+  const BLINK = 120;
+  const BLINK_FRAMES = [0, 0.5].flatMap((o) => [
+    { opacity: 0.15, offset: o }, { opacity: 0.15, offset: o + 0.25 },
+    { opacity: 1, offset: o + 0.2501 }, { opacity: 1, offset: o + 0.5 },
+  ]);
+  function blink(el, at = 0) {
+    if (!el || !el.animate) return null;
+    const a = el.animate(BLINK_FRAMES, { duration: BLINK });
+    a.currentTime = at;
+    return a;
+  }
 
   /* ── unique ids for <pattern> so two figures never clash */
   let uid = 0;
   const id = (p = 'cal') => `${p}-${(++uid).toString(36)}`;
+
+  /* the optional stroke attributes shared by line, path and rect */
+  const strokeAttrs = (o) => `${o.w ? ` stroke-width="${o.w}"` : ''}${o.dash ? ` stroke-dasharray="${o.dash}"` : ''}${o.cap ? ` stroke-linecap="${o.cap}"` : ''}${o.opacity ? ` stroke-opacity="${o.opacity}"` : ''}`;
+  /* poly · points [[x, y], …] as path data */
+  const poly = (pts) => 'M' + pts.map((p) => n2(p[0]) + ' ' + n2(p[1])).join(' L');
 
   const K = {
     /* text label · t(x, y, 'label', ink, anchor, letterSpacing, { fs, wt }) · fs and wt set a size and weight */
@@ -84,14 +115,14 @@
 
     /* plain line / path / rect / circle, painted with tokens */
     line(x1, y1, x2, y2, c = 'ed', o = {}) {
-      return `<line x1="${n2(x1)}" y1="${n2(y1)}" x2="${n2(x2)}" y2="${n2(y2)}"${o.w ? ` stroke-width="${o.w}"` : ''}${o.dash ? ` stroke-dasharray="${o.dash}"` : ''}${o.cap ? ` stroke-linecap="${o.cap}"` : ''}${o.opacity ? ` stroke-opacity="${o.opacity}"` : ''}${paint(null, c)}/>`;
+      return `<line x1="${n2(x1)}" y1="${n2(y1)}" x2="${n2(x2)}" y2="${n2(y2)}"${strokeAttrs(o)}${paint(null, c)}/>`;
     },
     path(d, c = 'ed', o = {}) {
-      return `<path d="${d}"${o.w ? ` stroke-width="${o.w}"` : ''}${o.dash ? ` stroke-dasharray="${o.dash}"` : ''}${o.cap ? ` stroke-linecap="${o.cap}"` : ''}${o.opacity ? ` stroke-opacity="${o.opacity}"` : ''}${paint(o.fill || 'none', c)}/>`;
+      return `<path d="${d}"${strokeAttrs(o)}${paint(o.fill || 'none', c)}/>`;
     },
     rect(x, y, w, h, f = 'none', s = 'ed', o = {}) {
       if (f === LIVE) f = 'swipe';
-      return `<rect x="${n2(x)}" y="${n2(y)}" width="${n2(w)}" height="${n2(h)}"${o.w ? ` stroke-width="${o.w}"` : ''}${o.dash ? ` stroke-dasharray="${o.dash}"` : ''}${o.opacity ? ` stroke-opacity="${o.opacity}"` : ''}${paint(f, s)}/>`;
+      return `<rect x="${n2(x)}" y="${n2(y)}" width="${n2(w)}" height="${n2(h)}"${strokeAttrs(o)}${paint(f, s)}/>`;
     },
     circle(cx, cy, r, f = 'pn', s = 'fg') {
       if (f === LIVE) f = 'swipe';
@@ -141,8 +172,7 @@
 
     /* leader · a dot on what is measured, an elbowed line to the label */
     leader(pts, dot = true) {
-      const d = 'M' + pts.map((p) => p.map(n2).join(' ')).join(' L');
-      return K.path(d, 'fa') + (dot ? K.circle(pts[0][0], pts[0][1], 2, 'pn', 'fg') : '');
+      return K.path(poly(pts), 'fa') + (dot ? K.circle(pts[0][0], pts[0][1], 2, 'pn', 'fg') : '');
     },
 
     /* dimension line · a span with its length written into the gap */
@@ -285,8 +315,7 @@
 
     /* mitre · a polyline with square corners and ends, so heavy strokes close without a notch */
     mitre(pts, c = 'fg', w = K.W.major) {
-      const d = pts.map((q, i) => (i ? 'L' : 'M') + n2(q[0]) + ' ' + n2(q[1])).join('');
-      return `<path d="${d}" stroke-width="${w}" stroke-linejoin="miter" stroke-linecap="square"${paint('none', c)}/>`;
+      return `<path d="${poly(pts)}" stroke-width="${w}" stroke-linejoin="miter" stroke-linecap="square"${paint('none', c)}/>`;
     },
 
     /* outline · a rectangle stroked inside its bounds */
@@ -425,9 +454,12 @@
     [svg, host].forEach((el) => { if (!watched.has(el)) { watched.add(el); hosts.observe(el); } });
   }
 
+  /* pick(svg) · an element, or the first match of a selector */
+  const pick = (s) => (typeof s === 'string' ? document.querySelector(s) : s);
+
   /* draw(svg, markup, label) · fills an <svg>, marks it as a figure, sets role and label */
   function draw(svg, markup, label) {
-    if (typeof svg === 'string') svg = document.querySelector(svg);
+    svg = pick(svg);
     if (!svg) return null;
     attr(svg, 'data-cal', '');
     if (!svg.getAttribute('viewBox') && svg.getAttribute('width')) {
@@ -483,7 +515,7 @@
     pad(n, w = 2) { return String(n).padStart(w, '0'); },
   };
 
-  const api = { K, draw, patch, attr, svg, density, weight, ink, textWidth, resetMetrics, ready, esc, id, fmt, FS, CH };
+  const api = { K, draw, patch, attr, svg, density, weight, ink, textWidth, resetMetrics, ready, esc, id, fmt, FS, CH, n2, LAMP, fit, nice, blink, BLINK, poly, pick };
   root.Calibrated = Object.assign(root.Calibrated || {}, api);
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -498,7 +530,7 @@
   'use strict';
   const C = root.Calibrated;
   if (!C) throw new Error('calibrated-recipes.js needs calibrated-figures.js first');
-  const { K, textWidth: tw, fmt } = C;
+  const { K, textWidth: tw, fmt, n2, LAMP, fit, nice, blink, BLINK, poly, pick } = C;
 
   const head = (o) => (o.n != null || o.title ? K.fig(o.n ?? '', o.title || '') : '');
 
@@ -517,13 +549,6 @@
     return warn;
   }
   const num = (v, d = 0) => (Number.isFinite(+v) && v !== null && v !== '' ? +v : d);
-  /* niceStep · a ruler step of 1, 2 or 5 × 10ⁿ giving about n ticks */
-  const niceStep = (span, n = 15) => {
-    const raw = span / n, p = Math.pow(10, Math.floor(Math.log10(raw))), m = raw / p;
-    return (m <= 1 ? 1 : m <= 2 ? 2 : m <= 5 ? 5 : 10) * p;
-  };
-  const LAMP = 'var(--live)';   /* a solid lamp fill: K.rect turns ink 'lv' into the faint tint */
-  const n2 = (v) => Math.round(v * 100) / 100;
 
   /* pen(o) · the marks a recipe draws with, at the data's weight ('soft' or 'strong').
      Strong keeps every position and swaps each mark for its heavy form, as the
@@ -599,14 +624,6 @@
       /* rh · how much further the strong ruler's numbers reach below it */
       rh: 5,
     };
-  }
-
-  /* fit · text cut with … to fit room px */
-  function fit(s, room) {
-    s = String(s ?? '');
-    if (tw(s) <= room) return s;
-    while (s.length > 1 && tw(s + '…') > room) s = s.slice(0, -1);
-    return s + '…';
   }
 
   /* the merge replay, in ms: the branch draws in, then after a beat the details appear */
@@ -768,7 +785,7 @@
       }
       if (pace != null && TT > used && used < max) g += K.line(Xc(used), y, Xc(clamp(TT, used, pace)), y, 'lv', S ? { w: 3, dash: '5 3' } : { dash: '4 3' });
       if (S) g += K.outline(x0, y - 6, x1 - x0, 12, 'ed', W.rule);
-      g += P.ruler(x0, x1, y + (S ? 8 : 6), max, o.step || niceStep(max), o.every || 5, (v) => (v ? f(v) : '0'));
+      g += P.ruler(x0, x1, y + (S ? 8 : 6), max, o.step || nice(max / 15), o.every || 5, (v) => (v ? f(v) : '0'));
       alerts.forEach((a, i) => {
         const end = i === 0 && alerts.length > 1, ax = Xc(+a.v);
         const m = K.line(ax, y - 36, ax, y + (S ? 6 : 4), 'ft', S ? { w: W.major } : { opacity: 0.7 }) + P.L(ax + (end ? -5 : 5), y - 28, a.label ?? f(a.v), 'ft', end ? 'end' : 'start');
@@ -920,7 +937,7 @@
       kids.forEach((s, i) => {
         const y = top + i * gap, nx = 200, st = states[i], on = st === 'live' || st === 'running', r = routes[i], pts = grow(r);
         /* a running branch is ink, a queued one dashed (not reached yet), a finished one faint, a failed one red */
-        if (pts) g += K.path('M' + pts.map((p) => p.map((v) => +v.toFixed(2)).join(' ')).join(' L'), on ? 'fg' : st === 'fault' ? 'ft' : 'fa', S ? (st === 'todo' ? { w: 2, dash: '3 3' } : { w: on ? W.major : 2 }) : st === 'todo' ? { dash: '2 3' } : {});
+        if (pts) g += K.path(poly(pts), on ? 'fg' : st === 'fault' ? 'ft' : 'fa', S ? (st === 'todo' ? { w: 2, dash: '3 3' } : { w: on ? W.major : 2 }) : st === 'todo' ? { dash: '2 3' } : {});
         if (d >= polyLen(r.pts)) g += P.node(nx, y + 10, st === 'running' ? 'started' : st);
         const time = String(s.time ?? ''), room = w - 18 - 220;
         /* strong: a 2px outline, the lit child's in the lamp; task and time heavier */
@@ -932,7 +949,7 @@
       });
       if (o.folded) {
         const pts = grow(routes[kids.length]);
-        if (pts) g += K.path('M' + pts.map((p) => p.map((v) => +v.toFixed(2)).join(' ')).join(' L'), S ? 'fa' : 'e1', S ? { w: 2, dash: '3 3' } : { dash: '2 3' });
+        if (pts) g += K.path(poly(pts), S ? 'fa' : 'e1', S ? { w: 2, dash: '3 3' } : { dash: '2 3' });
         k += P.L(212, fy + 4, o.folded, 'ky');
       }
       if (T >= M.flash) g += `<g data-land="children">${k}</g>`;
@@ -989,7 +1006,7 @@
       const T = o.t ?? Infinity, stepping = o.from != null, moving = stepping && T < LOOP.step;
       let states = statesAt(o.at), tip = null, textStates = states, lap = o.lap;
       let g = head(o);
-      const ring = `M${P.map((p) => p[0].toFixed(2) + ' ' + p[1].toFixed(2)).join(' L')} Z`;
+      const ring = poly(P) + ' Z';
       g += S ? `<path d="${ring}" stroke-width="${EW}" stroke-linejoin="miter" style="fill:none;stroke:var(--faint)"/>`
         : K.circle(cx, cy, R * 1.2, 'none', 'e1') + K.path(ring, 'ed');
       if (moving) {
@@ -1043,12 +1060,12 @@
         : K.rect(cx - tw(c0) / 2 - 3, cy + 14, tw(c0) + 6, 14, 'pn', 'none') + K.t(cx, cy + 24, c0, 'mu', 'middle');
       let k = stepping && !moving && o.lap !== o.lapFrom ? `<g data-land="centre">${ck}</g>` : ck;
       st.forEach((s, i) => {
-        const [x, y, a] = P[i], cos = Math.cos(a), sin = Math.sin(a), sn = states[i];
+        const [x, y, a] = P[i], sin = Math.sin(a), sn = states[i];
         /* done: a solid square and a green ✓ name; todo: a hollow square and a muted name */
         if (S) g += chipAt(x, y, String(i + 1), sn === 'live' && tip ? 'todo' : sn);
         else if (sn === 'live' && !tip) g += K.node(x, y, 'live', ns);
         else g += K.node(x, y, sn === 'done' || sn === 'fault' ? sn : 'todo', ns);
-        const side = Math.abs(cos) < 0.3 ? 0 : cos > 0 ? 1 : -1;
+        const side = sideOf(a);
         const off = S ? 22 : 16;
         const tx = side === 1 ? x + off : side === -1 ? x - off : x;
         const ty = side === 0 ? (sin < 0 ? y - (S ? 30 : 26) : y + (S ? 29 : 22)) : y - 4;
@@ -1315,7 +1332,7 @@
         if (o.boundary.label) g += K.path(`M16 ${h - 17}l6 6M22 ${h - 17}l-6 6`, 'fg', { w: S ? 2.5 : 1.4 }) + P.L(30, h - 10, o.boundary.label, 'mu');
       }
       regions.forEach((r) => {
-        const L = r.label ? P.L(r.x + 8, r.y + 16, r.label, 'fg') : '', S = r.sub ? K.t(r.x + 8, r.y + 32, r.sub, 'ky') : '';
+        const L = r.label ? P.L(r.x + 8, r.y + 16, r.label, 'fg') : '', sub = r.sub ? K.t(r.x + 8, r.y + 32, r.sub, 'ky') : '';
         if (r.kind === 'hatch') {
           g += `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${H1.url}" style="stroke:var(--edge-strong)${S ? ';stroke-width:1.5' : ''}"/>`;
           if (r.label) g += K.rect(r.x + 4, r.y + 4, tw(r.label) + 8, 16, 'pn', 'none') + P.L(r.x + 8, r.y + 16, r.label, 'fg');
@@ -1324,7 +1341,7 @@
           g += `<rect x="${r.x}" y="${r.y}" width="${iw}" height="17" fill="${H2.url}" style="stroke:var(--edge-strong)${S ? ';stroke-width:1.5' : ''}"/>` + K.rect(r.x + 2, r.y + 3, iw - 4, 11, 'pn', 'none') + P.L(r.x + 5, r.y + 12.5, r.label, 'mu');
         } else {
           const opt = r.kind === 'strong' ? { w: S ? W.major : 1.6 } : r.kind === 'dotted' ? (S ? { w: 2, dash: '2 3' } : { dash: '1 2' }) : S ? { w: W.rule } : {};
-          g += K.rect(r.x, r.y, r.w, r.h, r.kind === 'strong' ? 'none' : 'pn', 'fg', opt) + L + S;
+          g += K.rect(r.x, r.y, r.w, r.h, r.kind === 'strong' ? 'none' : 'pn', 'fg', opt) + L + sub;
         }
       });
       calls.forEach((c, i) => {
@@ -1351,7 +1368,7 @@
   /* mount a recipe result into an <svg>: mount(svg, result), or mount(svg, recipe, data),
      which draws at the svg's weight and redraws when a [data-weight] around it changes */
   function mount(svg, r, data) {
-    if (typeof svg === 'string') svg = document.querySelector(svg);
+    svg = pick(svg);
     if (!svg) return null;
     /* a plain result replaces whatever recipe was remembered, so a weight change can't redraw old data */
     if (typeof r === 'function') { svg._calFig = { recipe: r, data }; r = r(weighed(svg, data)); }
@@ -1395,14 +1412,6 @@
     return { ...o, at: to, lap: l, from: at, lapFrom: lap, dir };
   };
 
-  /* the landing blink: two hard offs of 30ms each (two frames at 60Hz;
-     shorter and a blink can fall between frames), run as a Web Animation so
-     dropped frames can't stretch or skip it */
-  const OFF = 30, BLINK = 4 * OFF;
-  const BLINK_FRAMES = [0, 0.5].flatMap((o) => [
-    { opacity: 0.15, offset: o }, { opacity: 0.15, offset: o + 0.25 },
-    { opacity: 1, offset: o + 0.2501 }, { opacity: 1, offset: o + 0.5 },
-  ]);
   const reduced = () => !!(root.matchMedia && root.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   /* crawl(svg) · dashed live tails (data-crawl) move one dash period every
@@ -1430,7 +1439,7 @@
      motion, { still: true }, a recipe without an extent or no WAAPI: mount
      the finished figure. */
   function play(svg, recipe, data, opts = {}) {
-    if (typeof svg === 'string') svg = document.querySelector(svg);
+    svg = pick(svg);
     if (!svg) return null;
     if (svg._calStop) svg._calStop();
     const ext0 = recipe.extent ? recipe.extent(data) : 0;
@@ -1472,7 +1481,7 @@
         if (q >= BLINK) return;
         busy = true;
         /* a group redrawn mid-blink picks the blink up where it was */
-        if (g._calLanded !== landed) { g._calLanded = landed; g.animate(BLINK_FRAMES, { duration: BLINK }).currentTime = q; }
+        if (g._calLanded !== landed) { g._calLanded = landed; blink(g, q); }
       });
       if (busy) return requestAnimationFrame(frame);
       clock.cancel(); clock = null; svg._calRetarget = null;
@@ -1497,7 +1506,7 @@
      for live values (a running clock) between replays, so a tick never cuts
      a replay short. */
   function update(svg, recipe, data) {
-    if (typeof svg === 'string') svg = document.querySelector(svg);
+    svg = pick(svg);
     if (!svg) return null;
     if (svg._calRetarget) { svg._calRetarget(recipe, data); return svg; }
     mount(svg, recipe, data);
@@ -1558,15 +1567,13 @@
      <cal-spin> and <cal-elapsed> work without it */
   const C = root.Calibrated || {};
   const FIG = !!C.K;
-  const { K, fmt, textWidth: tw } = C;
+  const { K, fmt, textWidth: tw, fit, n2, nice, LAMP, blink } = C;
   const esc = C.esc || ((t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'));
   const define = (n, c) => { if (root.customElements && !customElements.get(n)) customElements.define(n, c); };
 
   const num = (el, a, d) => { const v = parseFloat(el.getAttribute(a)); return Number.isFinite(v) ? v : d; };
   const str = (el, a, d = '') => (el.hasAttribute(a) ? el.getAttribute(a) : d);
   const group = (n) => Math.round(n).toLocaleString('en-US').replace(/,/g, ' ');
-  /* nice · the smallest 1, 2 or 5 × 10ⁿ at or above raw */
-  const nice = (raw) => { const p = Math.pow(10, Math.floor(Math.log10(raw))); return [1, 2, 5, 10].map((m) => m * p).find((m) => m >= raw * (1 - 1e-9)); };
   const KY = 'ky';   /* small text in --key: scale numbers and names (--faint 'fa' is for marks only) */
   const warned = new Set();
   const warn = (el, msg) => { const k = el.localName + msg; if (!warned.has(k)) { warned.add(k); console.warn(`<${el.localName}> ${msg}`); } };
@@ -1579,10 +1586,6 @@
     if (name === 'dur') return (v) => fmt.dur(v);
     return (v) => fmt.k(v) + unit;
   };
-  /* fit · cut a label with … to fit px */
-  const fit = (s, px) => { if (tw(s) <= px) return s; let t = s; while (t.length > 1 && tw(t + '…') > px) t = t.slice(0, -1); return t + '…'; };
-  const n2 = (v) => Math.round(v * 100) / 100;
-  const LAMP = 'var(--live)';   /* a solid lamp fill: K.rect turns ink 'lv' into the faint tint */
 
   /* a glide moves one number or a list of numbers (each part on the same clock) */
   const V = {
@@ -1704,17 +1707,9 @@
     get moving() { return !!this._anim || !!this._io; }
     /* elapsed · ms into the running glide, or -1 when settled */
     get elapsed() { return this._anim ? this._anim.currentTime || 0 : -1; }
-    /* land · once a glide settles, the reading blinks, hard on and off, like an
-       instrument latching its value. Each off stays ~30ms (two frames at 60Hz);
-       shorter and a blink can fall between frames. Marked by [data-cal-reading]. */
-    land() {
-      const el = this.querySelector('[data-cal-reading]');
-      if (!el || !el.animate) return;
-      const BLINKS = 2, OFF = 30, k = [];
-      for (let i = 0; i < BLINKS; i++) { const o = i / BLINKS, h = 1 / (2 * BLINKS); k.push({ opacity: 1, offset: o }, { opacity: 0.15, offset: o + 0.001 }, { opacity: 0.15, offset: o + h }, { opacity: 1, offset: o + h + 0.001 }); }
-      k.push({ opacity: 1, offset: 1 });
-      el.animate(k, { duration: BLINKS * OFF * 2 });
-    }
+    /* land · once a glide settles, the reading (marked [data-cal-reading]) blinks,
+       like an instrument latching its value */
+    land() { blink(this.querySelector('[data-cal-reading]')); }
     halt() {
       if (this._anim) { this._anim.cancel(); this._anim = null; }
       if (this._io) { this._io.disconnect(); this._io = null; }
@@ -2035,10 +2030,8 @@
       const landed = pa === F(a) && pr === F(r);
       const shownA = landed ? a : Math.round(inv(pa)), shownR = landed ? r : Math.round(inv(pr));
       const la = '+' + fmt.k(shownA), lr = '−' + fmt.k(shownR);
-      if (this.strong) {
-        const label = `${name ? name + ': ' : ''}${a} lines added, ${r} removed` + (a > max || r > max ? `, beyond the scale at ${fmt.k(max)}` : '');
-        return this.heavy(full, { a, r, name, max, span, kneePx, pa, pr, ta, tr, landed, la, lr, shownA, shownR, label });
-      }
+      const label = `${name ? name + ': ' : ''}${a} lines added, ${r} removed` + (a > max || r > max ? `, beyond the scale at ${fmt.k(max)}` : '');
+      if (this.strong) return this.heavy(full, { a, r, name, max, span, kneePx, pa, pr, ta, tr, landed, la, lr, shownA, shownR, label });
       /* fixed side widths so a column of diffs shares one centre line */
       const side = full ? span + 10 + Math.max(tw('+000.0k'), tw('+' + fmt.k(a)), tw('−' + fmt.k(r))) : span + 4;
       const nameW = full && name ? Math.max(24, num(this, 'name-width', 64)) : 0, nm = nameW ? fit(name, nameW - 12) : '';
@@ -2053,7 +2046,6 @@
       /* past max the bar breaks off before its end tick */
       if (landed && a > max) g += K.brk(cx + span - 8, y);
       if (landed && r > max) g += K.brk(cx - span + 6, y);
-      const label = `${name ? name + ': ' : ''}${a} lines added, ${r} removed` + (a > max || r > max ? `, beyond the scale at ${fmt.k(max)}` : '');
       if (full) {
         let txt = '';
         if (on(pa)) txt += K.t(cx + pa + 8, y + 4, la, 'ok');
@@ -2489,9 +2481,15 @@
     x.type = 'button'; x.textContent = '×'; x.setAttribute('aria-label', 'Remove ' + v); c.append(x);
     box.insertBefore(c, input);
     say(box, `Added ${v}`);
-    box.dispatchEvent(new CustomEvent('cal-chips', { bubbles: true, detail: { values: chipValues(box) } }));
+    chipsChanged(box);
+  }
+  function removeChip(box, chip) {
+    say(box, `Removed ${chip.firstChild.textContent.trim()}`);
+    chip.remove();
+    chipsChanged(box);
   }
   const chipValues = (box) => [...box.querySelectorAll('.chip')].map((c) => c.firstChild.textContent.trim());
+  const chipsChanged = (box) => box.dispatchEvent(new CustomEvent('cal-chips', { bubbles: true, detail: { values: chipValues(box) } }));
 
   /* number · .cal-num input[data-step] is a spinbutton: value, min, max and the value with its unit */
   function spin(t) {
@@ -2578,9 +2576,9 @@
   on('keydown', '.cal-chips input', (t, e) => {
     const box = t.closest('.cal-chips'), v = t.value.trim().replace(/,$/, '');
     if ((e.key === 'Enter' || e.key === ',') && v) { e.preventDefault(); addChip(box, v); t.value = ''; }
-    else if (e.key === 'Backspace' && !t.value) { const last = [...box.querySelectorAll('.chip')].pop(); if (last) { say(box, `Removed ${last.firstChild.textContent.trim()}`); last.remove(); box.dispatchEvent(new CustomEvent('cal-chips', { bubbles: true, detail: { values: chipValues(box) } })); } }
+    else if (e.key === 'Backspace' && !t.value) { const last = [...box.querySelectorAll('.chip')].pop(); if (last) removeChip(box, last); }
   });
-  on('click', '.cal-chips .chip button', (b) => { const box = b.closest('.cal-chips'); say(box, `Removed ${b.parentElement.firstChild.textContent.trim()}`); b.parentElement.remove(); box.querySelector('input')?.focus(); box.dispatchEvent(new CustomEvent('cal-chips', { bubbles: true, detail: { values: chipValues(box) } })); });
+  on('click', '.cal-chips .chip button', (b) => { const box = b.closest('.cal-chips'); removeChip(box, b.parentElement); box.querySelector('input')?.focus(); });
   on('click', '.cal-chips', (box, e) => { if (e.target === box) box.querySelector('input')?.focus(); });
   /* dialog · <button data-dialog="id"> opens <dialog class="cal-dialog" id="id"> as a modal */
   on('click', '[data-dialog]', (b) => { const d = document.getElementById(b.dataset.dialog); if (d?.showModal && !d.open) d.showModal(); });
