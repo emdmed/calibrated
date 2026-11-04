@@ -135,7 +135,7 @@ A legend line between rules: a short rule, the number and title in ink, a muted 
 </div>
 <div id="p-runs">…</div><div id="p-alerts" hidden>…</div>
 ```
-`data-pad` zero-pads the number (no padding by default). Use `data-pad="2"` only for counts that change live, so the layout doesn't jump. Numbers of five digits or more are grouped (`1 234 567`), and an empty `data-n` leaves the markup as written. `data-ink="live"` sets the number and outline in lamp; `ok`/`fault` colour them green or red. In compact density the noun is hidden. After inserting counts dynamically, call `Calibrated.counts(root)`.
+`data-pad` zero-pads the number (no padding by default). Use `data-pad="2"` only for counts that change live, so the layout doesn't jump. Numbers of five digits or more are grouped (`1 234 567`), and an empty `data-n` leaves the markup as written. `data-ink="live"` sets the number and outline in lamp; `ok`/`fault` colour them green or red. In compact density the noun is hidden. The kit sets each character in its own `<i>`, so strong weight can cut drum ticks between the digits; soft draws them as plain text. After inserting counts dynamically, call `Calibrated.counts(root)`.
 
 The open tab turns ink with a 1px underline, and its count box takes an ink outline. The kit wires the tab pattern: a click, ← → or Home / End selects, the tabs are one Tab stop, and the panel named by each tab's `aria-controls` shows only while its tab is selected. A change fires `cal-tab` on the tab. Call `Calibrated.tabs(root)` after inserting tabs. Name the tablist with `aria-label`. Many tabs scroll sideways rather than wrap. Tabs are for views of different content; to switch a property of the same content (density, units), use `aria-pressed` buttons.
 
@@ -222,7 +222,7 @@ Buttons come in tiers, so the main action always leads. All are 12px legend caps
 ```html
 <div class="cal-tally"><span data-tally="n">0 of 3 signed</span><span class="sp"></span><span data-tally="msg" class="mut" role="status"></span><button class="cal-btn primary" data-tally="copy">copy sign-off</button></div>
 ```
-The kit fills `[data-tally="n"]` with "n of N signed" (N counts the cards that have sign-off buttons) and the copy button copies one line per card: number, title, verdict and the rework note. If the clipboard is blocked, the lines appear selected in a read-only text box under the tally and the message says so. The older `#tally-n`, `#tally-msg` and `#tally-copy` ids still work.
+The kit fills `[data-tally="n"]` with "n of N signed" (N counts the cards that have sign-off buttons) and the copy button copies one line per card: number, title, verdict and the rework note. If the clipboard is blocked, the lines appear selected in a read-only text box under the tally and the message says so. The older `#tally-n`, `#tally-msg` and `#tally-copy` ids still work. A tally counts every card on the page; to count only one group, put `data-signoff` on an element that holds the group and its tally. The kit also puts a `.cal-tally-cells` row first in the tally, one cell per card in its verdict (`aria-hidden`; the words say the same). Only strong weight draws it.
 
 ## Table
 ```html
@@ -463,11 +463,50 @@ A recessed well, no frame, no line numbers. `.ln` lines get a faint `$ ` prompt 
 ## Labels and marks
 `.cal-kbd` (key cap) · `.cal-legend` (legend type, uppercase) · `.cal-gl` (legend with a rule to the edge) · `.cal-tag` (`.on` for the active side, with its own lamp star) · `.cal-dot` (outlined square = next, `.done`, `.on` live star, `.ok`, `.fault`) · `.cal-rev` (revision triangle) · `.live` (lamp text) · `.star` (the lamp star, inline) · `.cal-mark` (brand mark) · `.cal-sr` (read by screen readers, not drawn: for the words a mark stands for).
 
+## Strong weight
+
+`data-weight="strong"` on any ancestor (the page, a panel) draws the parts that carry state or values heavier, in the instruments' language. Markup, behaviour and accessible names don't change, and soft stays the default. Panels, the desk, gaps, rules, zones, brackets, key/value sheets, lists, menus, dialogs, tooltips, toasts and code blocks stay as they are.
+
+| part | strong |
+|---|---|
+| `.cal-btn` | a panel key: 2px rim and 600 legend; held down it becomes an ink plate. Disabled is a dashed rim |
+| `.cal-btn.primary` | the start button: an ink plate with an engraved line 2px in, which closes on press. `data-ink="fault"` is the same plate in red |
+| `.cal-btn[aria-pressed]` | latching keys: pressed keep is a green plate, drop a red plate with hazard stripes cut out in panel, rework a lamp outline with the star (never a lamp fill) |
+| `.cal-tabs` | index tabs: the open tab is an ink plate on the strip's hairline, its count cut out in panel; hover shows a 3px faint bar |
+| `.cal-count` | a counter window: one inverted window, so the number reads whole, with drum ticks cut into its rims; `live` is a lamp frame with lamp digits |
+| `.cal-badge` | a pilot-light plate: one 2px frame split into a square lens and the word. A state has an empty lens; ok and fault fill the plate and light the lens (fault striped); live is a lamp frame with the star in the lens. A leading `.cal-dot` sits in the lens |
+| `.cal-dot` | a pilot light: a 4px lens in a 2px bezel. `.on` is the lamp bezel with the star |
+| `.cal-table` | heads on an inverted nameplate band, a pilot light before each `.st`, and an index plate inset into the number cell of a failed (red, filled) or running (lamp frame) row |
+| `.cal-stamp` | struck hard: a 2px frame with a 1px inner rule, 700 caps |
+| `.cal-sec-h` | a rail: 3px end stops around a 1.5px rule, the sheet number in a ruled chip. The title stays 500 |
+| `.cal-block-h` | a 3px index bar before a 600 name |
+| `.cal-tally` | a 3px ink rail and the verdict cells |
+| `.cal-input` | a write-in slot: a 2px bracket (baseline and end ticks) over a recessed well; the lamp bracket on focus; a hazard band on a 3px red base when `aria-invalid` |
+| `.cal-check`, `.cal-radio` | 16px with a 2px wall; checked fills with ink around an engraved line or centre. Disabled is dashed, not faded |
+| `.cal-switch` | a 34px slot with a gripped knob; on fills the slot with ink and turns the knob panel |
+| `.cal-detent` | the range's slotted rail with a mark under each value and an ink cap that glides between them; the lamp rings the cap while focused |
+| `.cal-range` | the fader: an ink cap with grip lines in a slotted rail, the run filled inside the slot, the reading on an inverted chip; the lamp rings cap and chip while dragging |
+
+Focus is a 2.5px lamp ring throughout. In forced-colours mode the marks stay drawn and pressed keys, open tabs and checked controls take `Highlight`. The detent and range measure themselves again when the weight changes.
+
 ---
 
 ## Instruments (custom elements)
 
 All instruments accept `density="full|compact"`, and otherwise follow the nearest `[data-density]`; inside a `.cal-table` with no density set they draw compact. Each one draws an `<svg role="img">` with a `<title>` and an `aria-label`, and compact keeps a bare reading beside the marks. A drawing wider than its box shrinks to 80%, then scrolls sideways with a cut-edge cue and becomes a named Tab stop. Bad attributes are drawn the safe way and reported once with `console.warn`.
+
+**Weight.** All instruments accept `weight="soft|strong"`, and otherwise follow the nearest `[data-weight]` (soft by default). Strong keeps the geometry, attributes, motion and `aria-label`, and draws heavier:
+
+| instrument | strong |
+|---|---|
+| `<cal-meter>` | 12px bar in a recessed track, 2.5px hazard stripes past `warn`, a 4px needle cut out of the fill, the reading on a nameplate (red past the alert) |
+| `<cal-position>` | a grooved fader cap in a 6px slot between end stops, the slot filled in ink behind it; full prints the first, current and last numbers |
+| `<cal-progress>` | a segmented bar of 14px cells: solid done, outlined to do, solid red fault, a lamp-outlined cell with the star for the running step |
+| `<cal-diff>` | 8px green and red bars from a 3px centre post, counts at 12px |
+| `<cal-durations>` | 10px ink bars on a 3px ruler; the live span is a solid lamp bar with the star at its tip |
+| `<cal-ruler>` | a 3px scale whose ends close as one mitred bracket, a 14px lamp pointer, the value on an inverted chip (red when beyond the scale) |
+
+Compact at strong weight keeps the heavy marks and the bare reading.
 
 **One lamp.** An instrument only lights what is live: a meter's needle is ink unless you add `live`, and progress and durations light only their first live item.
 

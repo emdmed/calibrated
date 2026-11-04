@@ -75,14 +75,15 @@
   const id = (p = 'cal') => `${p}-${(++uid).toString(36)}`;
 
   const K = {
-    /* text label · t(x, y, 'label', ink, anchor, letterSpacing) */
-    t(x, y, s, c = 'mu', a = 'start', ls = 0) {
-      return `<text x="${n2(x)}" y="${n2(y)}" text-anchor="${a}"${ls ? ` letter-spacing="${ls}"` : ''}${paint(c)}>${esc(s)}</text>`;
+    /* text label · t(x, y, 'label', ink, anchor, letterSpacing, { fs, wt }) · fs and wt set a size and weight */
+    t(x, y, s, c = 'mu', a = 'start', ls = 0, o = {}) {
+      const st = (o.fs ? `font-size:${o.fs}px;` : '') + (o.wt ? `font-weight:${o.wt};` : '');
+      return `<text x="${n2(x)}" y="${n2(y)}" text-anchor="${a}"${ls ? ` letter-spacing="${ls}"` : ''}${paint(c, null, st)}>${esc(s)}</text>`;
     },
 
     /* plain line / path / rect / circle, painted with tokens */
     line(x1, y1, x2, y2, c = 'ed', o = {}) {
-      return `<line x1="${n2(x1)}" y1="${n2(y1)}" x2="${n2(x2)}" y2="${n2(y2)}"${o.w ? ` stroke-width="${o.w}"` : ''}${o.dash ? ` stroke-dasharray="${o.dash}"` : ''}${o.opacity ? ` stroke-opacity="${o.opacity}"` : ''}${paint(null, c)}/>`;
+      return `<line x1="${n2(x1)}" y1="${n2(y1)}" x2="${n2(x2)}" y2="${n2(y2)}"${o.w ? ` stroke-width="${o.w}"` : ''}${o.dash ? ` stroke-dasharray="${o.dash}"` : ''}${o.cap ? ` stroke-linecap="${o.cap}"` : ''}${o.opacity ? ` stroke-opacity="${o.opacity}"` : ''}${paint(null, c)}/>`;
     },
     path(d, c = 'ed', o = {}) {
       return `<path d="${d}"${o.w ? ` stroke-width="${o.w}"` : ''}${o.dash ? ` stroke-dasharray="${o.dash}"` : ''}${o.cap ? ` stroke-linecap="${o.cap}"` : ''}${o.opacity ? ` stroke-opacity="${o.opacity}"` : ''}${paint(o.fill || 'none', c)}/>`;
@@ -220,10 +221,10 @@
     },
 
     /* hatch · read-only, locked, over the limit. Returns { def, url } */
-    hatch(c = 'fa', gap = 5, opacity = 1) {
-      const pid = id('hatch');
+    hatch(c = 'fa', gap = 5, opacity = 1, w = 1) {
+      const pid = id('hatch'), x = w > 1 ? gap / 2 : 0;   /* a heavy stripe sits mid-tile so it isn't clipped */
       return {
-        def: `<defs><pattern id="${pid}" width="${gap}" height="${gap}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="${gap}" stroke-width="1"${opacity !== 1 ? ` stroke-opacity="${opacity}"` : ''}${paint(null, c)}/></pattern></defs>`,
+        def: `<defs><pattern id="${pid}" width="${gap}" height="${gap}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="${x}" y1="0" x2="${x}" y2="${gap}" stroke-width="${w}"${opacity !== 1 ? ` stroke-opacity="${opacity}"` : ''}${paint(null, c)}/></pattern></defs>`,
         url: `url(#${pid})`,
       };
     },
@@ -270,6 +271,40 @@
 
     /* side tag used to label rows of a comparison (FULL / COMPACT) */
     tag(y, s, x = 0) { return K.t(x, y + 4, String(s).toUpperCase(), 'ky', 'start', 0.5); },
+
+    /* ── strong weight · heavier forms of the same marks (see weight()). Sizes in px. */
+    W: { rule: 1.5, tick: 2, major: 3, base: 3, needle: 4, plate: 2, lamp: 2.5, hatch: 2.5, pitch: 7, wt: 600 },
+
+    /* hazard · alert-zone stripes at strong weight: hatch(c, 7, 1, 2.5) */
+    hazard(c = 'ft') { return K.hatch(c, K.W.pitch, 1, K.W.hatch); },
+
+    /* mitre · a polyline with square corners and ends, so heavy strokes close without a notch */
+    mitre(pts, c = 'fg', w = K.W.major) {
+      const d = pts.map((q, i) => (i ? 'L' : 'M') + n2(q[0]) + ' ' + n2(q[1])).join('');
+      return `<path d="${d}" stroke-width="${w}" stroke-linejoin="miter" stroke-linecap="square"${paint('none', c)}/>`;
+    },
+
+    /* outline · a rectangle stroked inside its bounds */
+    outline(x, y, w, h, c = 'fg', sw = K.W.plate) { return K.rect(x + sw / 2, y + sw / 2, w - sw, h - sw, 'none', c, { w: sw }); },
+
+    /* nameplate · the strong reading box: an inverted name strip over the value. Ink 'fg' or 'ft'
+       fill the strip; the lamp 'lv' only outlines it. 40px tall; w0 holds a minimum width. */
+    nameplate(x, y, name, value, c = 'fg', w0 = 0) {
+      const N = String(name).toUpperCase(), w = Math.max(w0, K.plateWidth(name, value)), band = 15;
+      let g = K.rect(x, y, w, 40, 'pn', 'none');
+      if (c === LIVE) g += K.outline(x, y, w, 40, LIVE, K.W.lamp) + K.line(x, y + band, x + w, y + band, LIVE, { w: 1.5 }) + K.t(x + 9, y + 11, N, LIVE, 'start', 0.9, { fs: 9.5, wt: 600 });
+      else g += K.rect(x, y, w, band, c, 'none') + K.outline(x, y, w, 40, c, K.W.plate) + K.t(x + 9, y + 11, N, 'pn', 'start', 0.9, { fs: 9.5, wt: 600 });
+      return g + K.t(x + 9, y + 32, value, c, 'start', 0, { fs: 13, wt: 700 });
+    },
+    plateWidth(name, value) { const N = String(name).toUpperCase(); return Math.max(textWidth(N, 9.5) + 0.9 * N.length, textWidth(value, 13)) + 18; },
+
+    /* chip · the strong count: an inverted value, vertically centred on y. The lamp only outlines. */
+    chip(x, y, s, c = 'fg', fs = 11, w0 = 0) {
+      const w = Math.max(w0, K.chipWidth(s, fs));
+      if (c === LIVE) return K.rect(x, y - 9, w, 18, 'pn', 'none') + K.outline(x, y - 9, w, 18, LIVE, 2) + K.t(x + 6, y + 4, s, LIVE, 'start', 0, { fs, wt: 700 });
+      return K.rect(x, y - 9, w, 18, c, 'none') + K.t(x + 6, y + 4, s, 'pn', 'start', 0, { fs, wt: 700 });
+    },
+    chipWidth(s, fs = 11) { return textWidth(String(s), fs) + 12; },
   };
 
   /* ── mounting */
@@ -416,6 +451,12 @@
     return host && host.getAttribute('data-density') === 'compact' ? 'compact' : 'full';
   }
 
+  /* weight(el) · 'soft' or 'strong', from the nearest [data-weight] */
+  function weight(el) {
+    const host = el && el.closest ? el.closest('[data-weight]') : null;
+    return host && host.getAttribute('data-weight') === 'strong' ? 'strong' : 'soft';
+  }
+
   /* formatters */
   const fmt = {
     k(v, d = 1) {
@@ -437,6 +478,6 @@
     pad(n, w = 2) { return String(n).padStart(w, '0'); },
   };
 
-  const api = { K, draw, patch, attr, svg, density, ink, textWidth, resetMetrics, ready, esc, id, fmt, FS, CH };
+  const api = { K, draw, patch, attr, svg, density, weight, ink, textWidth, resetMetrics, ready, esc, id, fmt, FS, CH };
   root.Calibrated = Object.assign(root.Calibrated || {}, api);
 })(typeof window !== 'undefined' ? window : globalThis);

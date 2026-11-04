@@ -11,7 +11,7 @@ Calibrated draws quantities as small technical figures and keeps everything else
 - `assets/calibrated.css`: tokens, the `film` (light, default) and `night` (dark) themes, the base reset and utilities. Copy it into the project and load it first.
 - `references/theming.md`: how every colour is derived, how to make a theme from a few colours, and contrast checks.
 - `references/fonts.md`: the type roles, the Google Fonts link, self-hosting, and how the fallbacks behave.
-- `references/looks.md`: the fixed grammar and the five settings that change per page (palette, headline face, frame, layout, space). **Read it before starting a page.**
+- `references/looks.md`: the fixed grammar and the six settings that change per page (palette, headline face, frame, layout, space, weight). **Read it before starting a page.**
 
 ## Rules
 

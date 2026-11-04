@@ -84,6 +84,8 @@ Calibrated.ready(() => Calibrated.mount('#load', Calibrated.recipes.lanes({
 ```
 To replay it instead, use `Calibrated.play('#load', Calibrated.recipes.lanes, data)`. When the figure is half in view, a time cursor sweeps the ruler, each lane latches as the cursor passes its end, and a live lane's dashed tail then crawls. Reduced motion draws the finished figure. Only recipes with an `extent` move (lanes, budget, merge, fanout, loop, measured and timeline for now); `play` mounts the others as they are. For live values between replays (a running clock), redraw with `Calibrated.update(svg, recipe, data)`, not `mount`: a replay in flight carries on and lands on the new data instead of being cut short.
 
+**Weight.** Under `data-weight="strong"` (on the page or a panel) `play`, `update` and `mount(svg, recipe, data)` draw every recipe in its strong form: the same layout and facts with 3px rulers, nameplates, chips, solid bars and heavier nodes, for operations and wall screens. Pass `weight: 'soft' | 'strong'` in the data to fix it. `mount(svg, result)` draws the result as it was made.
+
 See `references/recipes.md` for all nine. To design a new figure, start from the recipe closest to it and change the layout. Don't invent new marks.
 
 ## Related skills

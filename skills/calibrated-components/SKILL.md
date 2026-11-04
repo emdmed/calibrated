@@ -14,7 +14,7 @@ UI parts that apply the Calibrated language to every quantity: a count, a positi
 - `assets/calibrated-components.js`: the custom elements, the wiring for the controls that need a hand (textarea status line, detent, range, number, tag input, file drop, dialog openers, menus), plus `Calibrated.redraw()`, `counts()`, `sheets()`, `controls()`, `toast()` and `pager()`. Load it after `calibrated-figures.js`.
 - `references/ux-rules.md`: how to compose a page people can use: order of work, when to draw and when not to, actions, forms, words, colour meaning, and the check before you deliver. **Read it first.**
 - `references/catalog.md`: markup, attributes and variants for every part. Read it before you write markup.
-- calibrated-tokens `references/looks.md`: the five settings that change per page (palette, headline face, frame, layout, space). The parts below work with every setting.
+- calibrated-tokens `references/looks.md`: the six settings that change per page (palette, headline face, frame, layout, space, weight). The parts below work with every setting.
 
 ```html
 <link rel="stylesheet" href="css/calibrated.css">
@@ -64,7 +64,12 @@ Put `data-density="full"` or `"compact"` on any ancestor, or `density` on the el
 - **Full** prints the scale, boxes the value and adds leaders.
 - **Compact** keeps the marks only. The value moves to the tooltip/`aria-label`. Counts drop their noun.
 
-Instruments redraw by themselves when an attribute or density changes. They also redraw once fonts load.
+## Weight
+Put `data-weight="soft"` (default) or `"strong"` on any ancestor, or `weight` on the element.
+- **Soft** draws hairline instruments: 1px scales, 4px bars, boxed readings.
+- **Strong** draws the same geometry heavier, for operations and wall screens: 3px scales with mitred ends, solid 10–12px bars, readings on nameplates and inverted chips, hazard stripes past an alert, a fader cap for `<cal-position>`, segmented cells for `<cal-progress>`, and a solid lamp bar for a running `<cal-span>`. The CSS parts that carry state or values follow the same attribute: plated buttons and tabs, counter-window counts, pilot-light badges and dots, table statuses, stamps, heads, the tally and the form controls (catalog, *Strong weight*). Panels, gaps and hairline separators stay soft.
+
+Instruments redraw by themselves when an attribute, density or weight changes. They also redraw once fonts load.
 
 ## Motion
 Every instrument moves, with nothing to set up. When it is half in view it sweeps to its value. When an attribute changes it glides from where it is (220–700ms, ease-out; `<cal-progress>` steps at 50ms a node). The reading blinks twice when it settles. The `aria-label` always states the final value, never a frame.

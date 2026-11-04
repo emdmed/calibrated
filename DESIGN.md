@@ -100,7 +100,7 @@ Colour comes from meaning, not decoration. The lamp marks the one live thing. Re
 
 The engineering-drawing sheet (`.cal-sheet`: frame, zone markers, title block) is still in the kit as an optional extra for pages that want it. Most pages don't.
 
-**Fixed grammar, chosen look.** What follows describes the default look, not the only one. The grammar is fixed: the eight marks, one scale per figure, figures that keep every fact, one lamp per view, red and green meanings, colours derived from three seeds, monospace for every label, legend and body text, hairlines with square corners and no shadows or gradients. Five settings change from page to page, chosen from the subject: palette, headline face, frame (desk, paper or sheet), layout (cards, full-width figures, side by side, one large drawing) and space (dense or open). Generated pages change at least two of them unless the user asked for the default look. See `skills/calibrated-tokens/references/looks.md`.
+**Fixed grammar, chosen look.** What follows describes the default look, not the only one. The grammar is fixed: the eight marks, one scale per figure, figures that keep every fact, one lamp per view, red and green meanings, colours derived from three seeds, monospace for every label, legend and body text, hairlines with square corners and no shadows or gradients. Six settings change from page to page, chosen from the subject: palette, headline face, frame (desk, paper or sheet), layout (cards, full-width figures, side by side, one large drawing), space (dense or open) and weight (soft or strong instruments). Generated pages change at least two of them unless the user asked for the default look. See `skills/calibrated-tokens/references/looks.md`.
 
 **Key Characteristics:**
 - Panels on a desk, with gaps between them, by default (or flush on paper, or in a drawing sheet). No thick ink frames.
@@ -135,7 +135,9 @@ The base is warm ink on a paper or slate panel, plus three meaningful inks: lamp
 ### Named Rules
 **The One Lamp Rule.** Each figure, instrument and working view lights a single live item. Every recipe takes one `live` entry. Rarity is what makes the lamp readable.
 
-**The Line-Not-Fill Rule.** The lamp is a line, a word, an outline or a star. It never fills a box or a region. The faint tint marks the one live region of a figure (the window being measured, the area in use), never emphasis or decoration.
+**The Line-Not-Fill Rule.** The lamp is a line, a word, an outline or a star. It never fills a box or a region. The faint tint marks the one live region of a figure (the window being measured, the area in use), never emphasis or decoration. One exception: at strong weight, a running span in `<cal-durations>` or a running lane in the lanes recipe is a solid lamp bar, because there a bar is the lamp line drawn thick.
+
+**The Weight Rule.** Instruments, figure recipes and the parts that carry state or values come in two weights. Soft (the default) draws them in hairlines. Strong (`data-weight="strong"`) draws the same geometry for operations and wall screens: 3px scales with mitred ends, solid bars, readings on inverted nameplates and chips, hazard stripes past an alert or on a field in error, 600-weight legends. Each strong part takes one physical metaphor, not just a thicker line: buttons are panel keys and the primary an engraved ink plate, the open tab an index tab, a count a counter window, a badge a pilot-light plate with a lens, a status dot a pilot light, an input a write-in slot, the range and the detent fader caps in a slotted rail. Titles stay at 500. Strong changes the parts, not the frame: panels, the desk, gaps and hairline separators stay as they are.
 
 **The Seed Rule.** A theme is three seeds (`--bg`, `--fg`, `--live`) plus `--desk-depth`. Every ink, surface, edge and wash derives from them through `color-mix()`, so theme work never adds a hard-coded hex. A theme may still override a derived ink after the kit's CSS.
 

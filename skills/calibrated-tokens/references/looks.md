@@ -1,6 +1,6 @@
 # Choosing the look
 
-Calibrated is a drawing grammar, not one page. Two pages about different subjects should not look like the same page with new words. Before you build, choose the five settings below from the subject. Take the defaults only when nothing about the subject points elsewhere.
+Calibrated is a drawing grammar, not one page. Two pages about different subjects should not look like the same page with new words. Before you build, choose the six settings below from the subject. Take the defaults only when nothing about the subject points elsewhere.
 
 **Change at least two settings from the defaults**, unless the user asked for the default look or the page sits inside a product that already has its own. A palette taken from the subject counts as one.
 
@@ -10,11 +10,11 @@ The settings change the look. The grammar stays:
 
 - The eight marks and what they mean. One scale per figure. Values boxed on leaders.
 - A figure keeps every fact the text had. Measure, don't diagram.
-- One live item per figure or working view, lit by the lamp as a line, a word, an outline or the star.
+- One live item per figure or working view, lit by the lamp as a line, a word, an outline or the star (at strong weight, a running bar is solid lamp).
 - Red for faults, limits and revisions. Green for passed and approved. Never colour for decoration.
 - Colours come from three base colours (`--bg`, `--fg`, `--live`) through `color-mix()`.
 - Labels, legends, numbers, table heads, body text and every figure label are monospace (Chivo Mono and IBM Plex Mono).
-- Hairlines, square corners, no shadows, no gradients.
+- Hairlines for structure, square corners, no shadows, no gradients. Strong weight thickens the instruments and figures, never the panels, rules and frames.
 - App screens and forms use the plain layout people expect (`data-mode="app"`).
 - Contrast, the 10px floor for figure labels, `aria-label` sentences.
 
@@ -97,6 +97,15 @@ The `.id` number line on cards, `sheet n/m` in section heads and the header bar 
 
 Open still means the first drawing is on the first screen, and each figure fills its stage.
 
+## 6 · Weight
+
+| setting | look | fits |
+|---|---|---|
+| (default) `data-weight="soft"` | hairline instruments: 1px scales, 4px bars, boxed readings | reviews, explainers, documents read up close |
+| `data-weight="strong"` | heavy, industrial instruments and parts: 3px scales, solid 10–12px bars, nameplates and inverted chips for readings, hazard-striped alert zones, 600-weight legends; plated buttons and tabs, counter-window counts, pilot-light badges and dots, write-in slots and fader-style controls | operations, plant and field dashboards, wall screens, anything read from a distance or at a glance |
+
+Set it on `<html>` for the page, or on one panel. `weight="strong"` on a single instrument overrides it. Strong keeps every instrument's geometry, attributes, motion and `aria-label`, and every part's markup and behaviour. It changes the parts that carry state or values: instruments, figure recipes, buttons, tabs, counts, badges, status dots, table statuses, stamps, section and block heads, the tally and the form controls (see the components catalog, *Strong weight*, and the figures' `recipes.md`, *Weight*). Panels, the desk, gaps and hairline separators stay as they are. At strong weight the running span in `<cal-durations>` and the running lane in the lanes recipe are solid lamp bars, the one place the lamp fills.
+
 ## Write it down
 
-Before you build, note the five choices in one line in the page's `<style>` comment, e.g. `/* look: blueprint · Barlow Condensed · paper · full-width figures · open */`. It makes the choice deliberate and easy to change.
+Before you build, note the six choices in one line in the page's `<style>` comment, e.g. `/* look: blueprint · Barlow Condensed · paper · full-width figures · open · strong */`. It makes the choice deliberate and easy to change.

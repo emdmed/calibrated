@@ -23,6 +23,10 @@
    values and adds leaders. Compact keeps the marks and a bare reading
    beside them (3/7, +184 −20); the full sentence is in the <title>.
 
+   Soft or strong: the nearest [data-weight="soft|strong"], or a weight="…"
+   attribute on the element. Strong draws the same geometry heavier: solid
+   bars, 2–3px scales, nameplates and chips for readings, hazard stripes.
+
    Needs calibrated.css. The instruments also need calibrated-figures.js loaded
    first; without it the controls, toast, pager, tabs, sign-off, <cal-spin> and
    <cal-elapsed> still work. */
@@ -58,6 +62,9 @@
   const fit = (s, px) => { if (tw(s) <= px) return s; let t = s; while (t.length > 1 && tw(t + '…') > px) t = t.slice(0, -1); return t + '…'; };
   /* brk · the break mark across a run that goes on past the end of its scale (over the limit) */
   const brk = (x, y) => K.line(x - 3, y + 5, x + 1, y - 7, 'ft') + K.line(x + 1, y + 5, x + 5, y - 7, 'ft');
+  const hbrk = (x, y) => K.line(x - 4, y + 7, x + 1, y - 8, 'ft', { w: 2 }) + K.line(x + 2, y + 7, x + 7, y - 8, 'ft', { w: 2 });   /* at strong weight */
+  const n2 = (v) => Math.round(v * 100) / 100;
+  const LAMP = 'var(--live)';   /* a solid lamp fill: K.rect turns ink 'lv' into the faint tint */
 
   /* a glide moves one number or a list of numbers (each part on the same clock) */
   const V = {
@@ -80,6 +87,12 @@
       /* in a table cell the marks are enough, unless a density is set around it */
       if (!this.closest('[data-density]') && this.closest('.cal-table')) return 'compact';
       return C.density(this);
+    }
+    /* strong · the element's own weight="…", else the nearest [data-weight] */
+    get strong() {
+      const own = this.getAttribute('weight');
+      if (own === 'strong' || own === 'soft') return own === 'strong';
+      return C.weight(this) === 'strong';
     }
     surface() {
       let svg = this.querySelector(':scope > svg[data-cal]');
@@ -195,7 +208,7 @@
      The needle is ink; add `live` to light it with the lamp. Past max the needle stops at the end,
      the run breaks off in red and the box states the real value. */
   class CalMeter extends CalElement {
-    static get observedAttributes() { return ['value', 'max', 'warn', 'label', 'format', 'unit', 'width', 'live', 'density']; }
+    static get observedAttributes() { return ['value', 'max', 'warn', 'label', 'format', 'unit', 'width', 'live', 'density', 'weight']; }
     draw(full) {
       const m0 = num(this, 'max', 100), max = m0 > 0 ? m0 : 100;
       if (!(m0 > 0)) warn(this, 'needs max > 0');
@@ -211,6 +224,7 @@
       const read = (x) => `${f(x)} / ${f(max)} · ${fmt.pct(x / max, 1)}`, reading = read(shown);
       const H = K.hatch('ft', 4, 0.55);
       const fr = this.trail / max, over = (wr < 1 && r > wr) || (past && landed);   /* the fill trails the needle */
+      if (this.strong) return this.heavy({ full, max, val, past, wr, f, name, label, r, fr, over, landed, shown, read, reading });
       const meter = (x0, x1, y, labels) => {
         const X = (q) => x0 + q * (x1 - x0), ends = x1 - x0 < 200; let s = '';
         /* the alert label sits above the scale numbers; drop a number it would touch */
@@ -253,11 +267,56 @@
       const g = H.def + meter(1, mw, y, false) + `<g data-cal-reading>${K.t(mw + gap + vw, y + 1, vs, over ? 'ft' : 'fg', 'end') + K.t(mw + gap + vw, y + 1, ms, KY)}</g>`;
       return { w, h: y + 4, markup: g, label };
     }
+    /* strong · a 12px bar in a recessed track, hazard stripes past the alert, a 4px needle cut
+       out of the fill and the reading on a nameplate */
+    heavy({ full, max, val, past, wr, f, name, label, r, fr, over, landed, shown, read, reading }) {
+      const { W } = K, H = K.hazard(), needle = this.hasAttribute('live') ? LAMP : 'fg';
+      const bar = (x0, x1, y, bh) => {
+        const X = (q) => x0 + q * (x1 - x0), nx = X(r);
+        let s = K.rect(x0, y, x1 - x0, bh, 'well', 'none');
+        if (wr < 1) s += `<rect x="${n2(X(wr))}" y="${y}" width="${n2(X(1) - X(wr))}" height="${bh}" fill="${H.url}"/>`;
+        s += K.rect(x0, y, Math.max(0, X(Math.min(fr, wr)) - x0), bh, 'fg', 'none');
+        if (wr < 1 && fr > wr) s += K.rect(X(wr), y, X(fr) - X(wr), bh, 'ft', 'none');
+        s += K.outline(x0, y, x1 - x0, bh, 'ed', W.rule);
+        if (past && landed) s += K.rect(x1, y, 8, bh, 'ft', 'none') + hbrk(x1 + 14, y + bh / 2);
+        if (full) s += K.rect(nx - 4, y, 1.5, bh, 'pn', 'none') + K.rect(nx + 2.5, y, 1.5, bh, 'pn', 'none') + K.rect(nx - 2, y - 20, W.needle, bh + 28, needle, 'none');
+        else s += K.rect(nx - 1.5, y - 4, 3, bh + 8, needle, 'none');
+        return s;
+      };
+      if (full) {
+        const w = num(this, 'width', 420), x0 = 4, x1 = w - 30, X = (q) => x0 + q * (x1 - x0), yT = 48, bh = 12, yB = yT + bh;
+        const al = `ALERT ${Math.round(wr * 100)}%`, alW = wr < 1 ? tw(al) + 0.6 * al.length : 0;
+        let g = H.def;
+        for (let i = 0; i <= 10; i++) {
+          const M = i % 5 === 0, x = X(i / 10);
+          g += K.line(x, yT - 3, x, yT - (M ? 17 : 10), M ? 'fg' : 'fa', { w: M ? W.major : W.tick });
+          if (!M || (x1 - x0 < 200 && i === 5)) continue;
+          const txt = i === 10 ? '100%' : String(i * 10), a = i === 0 ? 'start' : i === 10 ? 'end' : 'middle';
+          if (alW && i === 5 && Math.abs(X(wr) - x) < (alW + tw(txt)) / 2 + 6) continue;
+          g += K.t(i === 0 ? x - 1.5 : i === 10 ? x + 1.5 : x, yT - 23, txt, KY, a, 0, { wt: W.wt });
+        }
+        g += bar(x0, x1, yT, bh);
+        if (wr < 1) {
+          const ax = Math.min(Math.max(X(wr), x0 + alW / 2), w - alW / 2 - 2);
+          g += K.line(X(wr), yT - 31, X(wr), yB + 3, 'ft', { w: W.major }) + K.t(ax, yT - 36, al, 'ft', 'middle', 0.6, { wt: W.wt });
+        }
+        /* plate to the side the final value takes, as the soft box does */
+        const bw = Math.max(K.plateWidth(name, reading), K.plateWidth(name, read(val))), nx = X(r), fx = X(Math.min(val, max) / max);
+        const right = fx + 14 + bw <= w - 2 || fx - 14 - bw < 2;
+        const bx = right ? nx + 14 : Math.max(2, nx - 14 - bw), lx = right ? bx : bx + bw, py = yB + 10;
+        g += K.mitre([[nx, yB + 8], [nx, py + 20], [lx, py + 20]], 'fa', 2) + `<g data-cal-reading>${K.nameplate(bx, py, name, reading, over ? 'ft' : 'fg', bw)}</g>`;
+        return { w: right ? Math.max(w, fx + 14 + bw + 2) : w, h: py + 42, markup: g, label };
+      }
+      const mw = num(this, 'width', 144), y = 4, bh = 8, vs = f(shown), ms = '/' + f(max), gap = past ? 26 : 12;
+      const vw = Math.max(tw(vs), tw(f(val))), w = mw + gap + vw + tw(ms) + 2;
+      const g = H.def + bar(1, mw, y, bh) + `<g data-cal-reading>${K.t(mw + gap + vw, y + 8, vs, over ? 'ft' : 'fg', 'end', 0, { wt: 700 }) + K.t(mw + gap + vw, y + 8, ms, KY)}</g>`;
+      return { w, h: bh + 8, markup: g, label };
+    }
   }
 
   /* ── cal-position · "3 of 7" as ticks; above 24 items a scale with a marker */
   class CalPosition extends CalElement {
-    static get observedAttributes() { return ['index', 'count', 'label', 'width', 'density']; }
+    static get observedAttributes() { return ['index', 'count', 'label', 'width', 'density', 'weight']; }
     draw(full) {
       const c = Math.round(num(this, 'count', 1)), name = str(this, 'label'), top = full && name ? 18 : 0;
       if (c < 1) {
@@ -271,6 +330,7 @@
       const clamp = (q) => Math.min(n - 1, Math.max(0, q));
       const p = clamp(this.motion(i - 1, Math.max(1, n - 1))), t = clamp(this.trail);
       const read = `${Math.round(p) + 1}/${n}`, cw = K.countWidth(`${n}/${n}`);   /* widest reading, so nothing reflows */
+      if (this.strong) return this.heavy(full, { n, name, label, p, t, read });
       let g = '', x1, y = top + 10;
       if (n <= 24) {
         const step = n > 12 ? 10 : 16, x0 = 5, sx = x0 + p * step; x1 = x0 + (n - 1) * step;
@@ -295,12 +355,47 @@
       g += `<g data-cal-reading>${K.t(x1 + 8, y + 4, read, KY)}</g>`;
       return { w: x1 + 10 + tw(`${n}/${n}`), h: y + 10, markup: g, label };
     }
+    /* strong · a grooved fader cap in a recessed slot between two end stops; the slot fills
+       in ink behind the cap, and full prints the first, current and last numbers */
+    heavy(full, { n, name, label, p, t, read }) {
+      const { W } = K, big = n > 24, step = n > 12 ? 12 : 18, top = full && name ? 22 : 0;
+      const cw = full ? 12 : 9, ch = full ? 22 : 16, sh = full ? 6 : 5, y = top + ch / 2 + 1;
+      const x0 = 10, x1 = big ? Math.max(x0 + 40, num(this, 'width', 160)) : x0 + (n - 1) * step;
+      const X = big ? K.scale(x0, x1, 1, n) : (k) => x0 + (k - 1) * step, cx = X(p + 1), tx = X(t + 1);
+      const sy = y - sh / 2, ty = sy + sh + 2;
+      let g = K.rect(x0 - 8, y - 8, 3, 16, 'fg', 'none') + K.rect(x1 + 5, y - 8, 3, 16, 'fg', 'none');
+      g += K.rect(x0 - 3, sy, x1 - x0 + 6, sh, 'well', 'none') + K.rect(x0 - 3, sy, Math.max(0, tx - x0 + 3), sh, 'fg', 'none') + K.outline(x0 - 3, sy, x1 - x0 + 6, sh, 'ed', W.rule);
+      if (!big) {
+        for (let k = 0; k < n; k++) {
+          const x = X(k + 1), past = k < t - 0.5;
+          if (Math.abs(x - cx) >= cw / 2 + 1) g += K.line(x, ty, x, ty + (past ? 7 : 5), past ? 'fg' : 'fa', { w: past ? W.major : W.tick });
+        }
+      } else {
+        const major = Math.max(10, nice(n / 8)), minor = major / 5;
+        for (let v = 0; v <= n; v += minor) { const xx = X(Math.max(1, v)), M = v % major === 0; g += K.line(xx, ty, xx, ty + (M ? 7 : 4), M && v <= t + 1 ? 'fg' : 'fa', { w: M ? W.major : W.tick }); }
+      }
+      g += K.rect(cx - cw / 2, y - ch / 2, cw, ch, 'fg', 'none');
+      (full ? [-4, 0, 4] : [0]).forEach((d) => { g += K.line(cx - cw / 2 + 2.5, y + d, cx + cw / 2 - 2.5, y + d, 'pn', { w: 1.2 }); });
+      const end = x1 + 8, widest = `${n}/${n}`;
+      if (!full) {
+        g += `<g data-cal-reading>${K.t(end + 8, y + 4, read, KY)}</g>`;
+        return { w: end + 10 + tw(widest), h: ch + 2, markup: g, label };
+      }
+      const ny = y + ch / 2 + 13, cur = String(Math.round(p) + 1), half = tw(cur) / 2 + 6;
+      if (cx - half > x0 + tw('1')) g += K.t(x0, ny, '1', KY, 'middle', 0, { wt: W.wt });
+      if (cx + half < x1 - tw(String(n)) / 2) g += K.t(x1, ny, String(n), KY, 'middle', 0, { wt: W.wt });
+      g += K.t(cx, ny, cur, 'fg', 'middle', 0, { wt: 700 });
+      if (name) g += K.t(0, 12, name.toUpperCase(), KY, 'start', 0.8, { wt: W.wt });
+      const c = K.chipWidth(widest);
+      g += `<g data-cal-reading>${K.chip(end + 10, y, read, 'fg', 11, c)}</g>`;
+      return { w: Math.max(end + 12 + c, name ? tw(name.toUpperCase()) + 0.8 * name.length + 2 : 0), h: ny + 4, markup: g, label };
+    }
   }
 
   /* ── cal-progress · steps as nodes: done ■, to do □, needs you ■ (fault), running ✦ (the lamp star).
      One lamp: only the first running step is lit. */
   class CalProgress extends CalElement {
-    static get observedAttributes() { return ['states', 'done', 'total', 'live', 'fault', 'live-label', 'fault-label', 'done-label', 'step', 'density']; }
+    static get observedAttributes() { return ['states', 'done', 'total', 'live', 'fault', 'live-label', 'fault-label', 'done-label', 'step', 'density', 'weight']; }
     /* steps fill at one even pace, 50ms each, however far the jump */
     timing(from, to) { return { ms: Math.max(150, Math.round(Math.abs(to - from) * 50)), curve: (q) => q }; }
     states() {
@@ -330,6 +425,9 @@
         }
       }
       const ll = str(this, 'live-label'), dl = str(this, 'done-label'), fl = str(this, 'fault-label', 'needs you');
+      const label = `${done} of ${n} done${dl ? ` (${dl})` : ''}`
+        + (live >= 0 ? `, step ${live + 1} running${ll ? ` (${ll})` : ''}` : '') + (fault >= 0 ? `, step ${fault + 1}: ${fl}` : '');
+      if (this.strong) return this.heavy(full, { st, n, step, done, live, fault, shown, landed, ll, dl, fl, label });
       /* shift right if the done label is wider than the run it measures */
       const x0 = Math.max(9, full && dl && done >= 1 ? tw(dl) / 2 + 2 - (done - 1) * step / 2 : 9);
       const top = full && dl ? 30 : 0, y = top + 10, x1 = x0 + (n - 1) * step;
@@ -357,8 +455,46 @@
         g += `<g data-cal-reading>${K.t(x1 + 12, y + 4, read, KY)}</g>`;
         w = x1 + 14 + tw(`${n}/${n}`);
       }
-      const label = `${done} of ${n} done${dl ? ` (${dl})` : ''}`
-        + (live >= 0 ? `, step ${live + 1} running${ll ? ` (${ll})` : ''}` : '') + (fault >= 0 ? `, step ${fault + 1}: ${fl}` : '');
+      return { w, h, markup: g, label };
+    }
+    /* strong · a segmented bar: solid cells done, outlined to do, a red cell for a fault and a
+       lamp-outlined cell with the star for the running step */
+    heavy(full, { st, n, step, done, live, fault, shown, landed, ll, dl, fl, label }) {
+      const { W } = K, sp = this.hasAttribute('step') || n > 30 ? step : full ? 18 : 14;
+      const cell = Math.max(4, Math.min(full ? 14 : 10, sp - 3)), h2 = cell / 2;
+      const x0 = Math.max(h2 + 2, full && dl && done >= 1 ? tw(dl) / 2 + 2 - (done - 1) * sp / 2 : h2 + 2);
+      const top = full && dl ? 34 : 0, y = top + h2 + 3, x1 = x0 + (n - 1) * sp;
+      let g = '';
+      st.forEach((s, k) => {
+        const x = x0 + k * sp;
+        if (s === 'done') g += K.rect(x - h2, y - h2, cell, cell, 'fg', 'none');
+        else if (s === 'fault') g += K.rect(x - h2, y - h2, cell, cell, 'ft', 'none');
+        else if (s === 'live') g += K.outline(x - h2, y - h2, cell, cell, 'lv', full ? W.lamp : 2) + K.star(x, y, cell * 0.36);
+        else g += K.outline(x - h2, y - h2, cell, cell, 'fa', 2);
+      });
+      const read = `${shown}/${n}`, widest = `${n}/${n}`;
+      if (!full) {
+        g += `<g data-cal-reading>${K.t(x1 + h2 + 7, y + 4, read, KY)}</g>`;
+        return { w: x1 + h2 + 9 + tw(widest), h: y + h2 + 3, markup: g, label };
+      }
+      let h = y + h2 + 3;
+      if (dl && done >= 1) {
+        const xa = x0 - h2, xb = x0 + (done - 1) * sp + h2;
+        g += K.line(xa, y - 18, xb, y - 18, 'mu', { w: 2 }) + K.line(xa, y - 23, xa, y - 13, 'mu', { w: 2 }) + K.line(xb, y - 23, xb, y - 13, 'mu', { w: 2 })
+          + K.t((xa + xb) / 2, y - 26, dl, 'mu', 'middle', 0, { wt: W.wt });
+      }
+      const cw = K.chipWidth(widest);
+      g += `<g data-cal-reading>${K.chip(x1 + h2 + 11, y, read, landed && n > 0 && done === n ? 'ok' : 'fg', 11, cw)}</g>`;
+      let w = x1 + h2 + 13 + cw;
+      const caption = (i, text, ink, show, row) => {
+        const half = tw(text) / 2, xi = x0 + i * sp, cx = Math.max(half, xi), cy = y + 30 + row * 16;
+        if (show) g += K.line(xi, y + h2 + 1, xi, cy - 12, 'fa', { w: 2 }) + K.t(cx, cy, text, ink, 'middle', 0, { wt: W.wt });
+        w = Math.max(w, cx + half + 2); h = Math.max(h, cy + 4);
+      };
+      const lit = live >= 0 && ll;
+      if (lit) caption(live, ll, 'lv', true, 0);
+      if (fault >= 0) caption(fault, fl, 'ft', landed, lit ? 1 : 0);
+      if (dl && done >= 1) w = Math.max(w, x0 + (done - 1) * sp / 2 + tw(dl) / 2 + 2);
       return { w, h, markup: g, label };
     }
   }
@@ -367,7 +503,7 @@
      The name column is a fixed width (name-width, default 64), so a column of diffs shares one
      centre line; a longer name is cut with … and led to its bars by a dotted line. */
   class CalDiff extends CalElement {
-    static get observedAttributes() { return ['added', 'removed', 'knee', 'max', 'label', 'name-width', 'density']; }
+    static get observedAttributes() { return ['added', 'removed', 'knee', 'max', 'label', 'name-width', 'density', 'weight']; }
     draw(full) {
       const a = Math.max(0, num(this, 'added', 0)), r = Math.max(0, num(this, 'removed', 0)), name = str(this, 'label');
       const k0 = num(this, 'knee', 200), knee = k0 > 0 ? k0 : 200, m0 = num(this, 'max', 100000), max = m0 > knee ? m0 : knee * 10;
@@ -381,6 +517,10 @@
       const landed = pa === F(a) && pr === F(r);
       const shownA = landed ? a : Math.round(inv(pa)), shownR = landed ? r : Math.round(inv(pr));
       const la = '+' + fmt.k(shownA), lr = '−' + fmt.k(shownR);
+      if (this.strong) {
+        const label = `${name ? name + ': ' : ''}${a} lines added, ${r} removed` + (a > max || r > max ? `, beyond the scale at ${fmt.k(max)}` : '');
+        return this.heavy(full, { a, r, name, max, span, kneePx, pa, pr, ta, tr, landed, la, lr, shownA, shownR, label });
+      }
       /* fixed side widths so a column of diffs shares one centre line */
       const side = full ? span + 10 + Math.max(tw('+000.0k'), tw('+' + fmt.k(a)), tw('−' + fmt.k(r))) : span + 4;
       const nameW = full && name ? Math.max(24, num(this, 'name-width', 64)) : 0, nm = nameW ? fit(name, nameW - 12) : '';
@@ -414,6 +554,37 @@
       }
       return { w, h: 24, markup: g, label };
     }
+    /* strong · solid green and red bars from a 3px centre post; counts at 12px, 700 */
+    heavy(full, { a, r, name, max, span, kneePx, pa, pr, ta, tr, landed, la, lr, shownA, shownR, label }) {
+      const { W } = K, on = (px) => px > 0.05, fs = 12;
+      const side = full ? span + 12 + Math.max(tw('+000.0k', fs), tw('+' + fmt.k(a), fs), tw('−' + fmt.k(r), fs)) : span + 4;
+      const nameW = full && name ? Math.max(24, num(this, 'name-width', 64)) : 0, nm = nameW ? fit(name, nameW - 12) : '';
+      const cx = nameW + side, y = 12, w = cx + side, bh = full ? 8 : 6;
+      let g = '';
+      [cx - kneePx, cx + kneePx].forEach((x) => { g += K.line(x, y - 10, x, y + 10, 'ed', { w: 1.5, dash: '2 3' }); });
+      if (on(ta)) g += K.rect(cx, y - bh / 2, ta, bh, 'ok', 'none');
+      if (on(tr)) g += K.rect(cx - tr, y - bh / 2, tr, bh, 'ft', 'none');
+      if (on(pa)) g += K.line(cx + pa, y - bh / 2 - 2, cx + pa, y + bh / 2 + 2, 'ok', { w: 2 });
+      if (on(pr)) g += K.line(cx - pr, y - bh / 2 - 2, cx - pr, y + bh / 2 + 2, 'ft', { w: 2 });
+      g += K.rect(cx - 1.5, y - 11, 3, 22, 'fg', 'none');
+      if (landed && a > max) g += hbrk(cx + span - 8, y);
+      if (landed && r > max) g += hbrk(cx - span + 6, y);
+      if (full) {
+        let txt = '';
+        if (on(pa)) txt += K.t(cx + pa + 7, y + 4.5, la, 'ok', 'start', 0, { fs, wt: 700 });
+        if (on(pr)) txt += K.t(cx - pr - 7, y + 4.5, lr, 'ft', 'end', 0, { fs, wt: 700 });
+        if (txt) g += `<g data-cal-reading>${txt}</g>`;
+        if (!a && !r && !on(pa) && !on(pr)) g += K.t(cx + 8, y + 4, 'no changes', KY, 'start', 0, { wt: W.wt });
+        if (nm) {
+          const x0 = tw(nm) + 6, x1 = cx - (on(pr) ? pr + 14 + tw(lr, fs) : 8);
+          g += K.t(0, y + 4, nm, KY, 'start', 0, { wt: W.wt }) + (x1 - x0 > 8 ? K.line(x0, y, x1, y, 'fa', { w: 2, dash: '1 4', cap: 'round' }) : '');
+        }
+        return { w, h: 24, markup: g, label };
+      }
+      const s = `+${fmt.k(shownA)} −${fmt.k(shownR)}`;
+      g += `<g data-cal-reading>${K.t(w + 6, y + 4, s, KY)}</g>`;
+      return { w: w + 8 + Math.max(tw(s), tw(`+${fmt.k(a)} −${fmt.k(r)}`)), h: 24, markup: g, label };
+    }
   }
 
 
@@ -424,7 +595,7 @@
     attributeChangedCallback() { const p = this.closest('cal-durations'); if (p && p.isConnected && p.render) p.render(); }
   }
   class CalDurations extends CalElement {
-    static get observedAttributes() { return ['max', 'unit', 'width', 'density']; }
+    static get observedAttributes() { return ['max', 'unit', 'width', 'density', 'weight']; }
     connectedCallback() {
       super.connectedCallback();
       const isSpan = (n) => n.nodeType === 1 && n.localName === 'cal-span';
@@ -468,6 +639,7 @@
       /* names take at most 30% of the width, cut with … past that, so the ruler keeps its room */
       const w = num(this, 'width', 480), names = rows.map((r) => fit(r.name, w * 0.3));
       const nameW = Math.max(40, ...names.map((s) => tw(s))) + 16;
+      if (this.strong) return this.heavy(full, { rows, unit, div, max, w, names, nameW });
       const valW = 70, x0 = nameW, x1 = w - valW - (full ? 48 : 10), X = K.scale(x0, x1, 0, max);
       let g = '', y0;
       if (full) {
@@ -503,8 +675,50 @@
         }
       });
       g += `<g data-cal-reading>${txt}</g>`;
-      const label = 'Durations: ' + (rows.length ? rows.map((r) => `${r.name || 'run'} ${r.live ? 'running for' : 'took'} ${fmt.dur(r.v)}${r.v / div > max ? ' (past the scale)' : ''}`).join('; ') : 'none');
-      return { w, h: y0 + (Math.max(1, rows.length) - 1) * gap + 12, markup: g, label };
+      return { w, h: y0 + (Math.max(1, rows.length) - 1) * gap + 12, markup: g, label: this.sentence(rows, div, max) };
+    }
+    sentence(rows, div, max) {
+      return 'Durations: ' + (rows.length ? rows.map((r) => `${r.name || 'run'} ${r.live ? 'running for' : 'took'} ${fmt.dur(r.v)}${r.v / div > max ? ' (past the scale)' : ''}`).join('; ') : 'none');
+    }
+    /* strong · 10px ink bars on a 3px ruler; the live span is a solid lamp bar with the star at
+       its tip on a panel halo, and a dashed tail ahead */
+    heavy(full, { rows, unit, div, max, w, names, nameW }) {
+      const { W } = K, valW = 70, x0 = nameW, x1 = w - valW - (full ? 48 : 10), X = K.scale(x0, x1, 0, max);
+      let g = '', y0;
+      if (full) {
+        const step = max <= 20 ? 1 : max <= 60 ? 5 : 10, lab = (v) => v + unit, yr = 24;
+        const every = [5, 4, 2, 1].find((e) => max % (step * e) === 0 && max / (step * e) <= 6) || 5;
+        g += K.mitre([[x0, yr - 13], [x0, yr], [x1, yr], [x1, yr - 13]]);
+        const n = Math.floor(max / step + 1e-9);
+        for (let i = 0; i <= n; i++) {
+          const v = i * step, x = X(v), M = i % every === 0;
+          if (i > 0 && v < max) g += K.line(x, yr - 1.5, x, yr - (M ? 13 : 7), M ? 'fg' : 'fa', { w: M ? W.major : W.tick });
+          if (M) g += K.t(x, yr - 17, lab(v), KY, 'middle', 0, { wt: W.wt });
+        }
+        if (max % (step * every)) g += K.t(x1, yr - 17, lab(max), KY, 'middle', 0, { wt: W.wt });
+        y0 = 50;
+      } else y0 = 10;
+      const gap = full ? 26 : 16, bh = full ? 10 : 6, lamp = rows.findIndex((r) => r.live);
+      const at = this.motion(rows.map((r) => r.base), max * div), tr = this.trail, len = (r, q) => q + r.grow;
+      let txt = '';
+      rows.forEach((r, i) => {
+        const v = len(r, at[i] || 0), y = y0 + i * gap, xe = X(Math.min(max, v / div)), xt = X(Math.min(max, len(r, tr[i] || 0) / div));
+        const lit = r.live && i === lamp, lab = fmt.dur(this.moving ? Math.round(v) : r.v);
+        g += K.t(x0 - 12, y + 4, names[i], 'fg', 'end', 0, { wt: W.wt });
+        if (full) g += K.line(x0, y - 9, x0, y + 9, 'fg', { w: W.major });
+        if (r.live) g += K.line(xe, y, full ? xe + 40 : Math.min(xe + 40, x1), y, 'fa', { w: 2, dash: '3 3' });
+        if (xt > x0) g += K.rect(x0, y - bh / 2, xt - x0, bh, lit ? LAMP : full ? 'fg' : 'mu', 'none');
+        if (!this.moving && r.v / div > max) g += hbrk(x1 - 6, y);
+        if (r.live) {
+          if (full) g += lit ? K.star(xe, y, 12, 'pn') + K.star(xe, y, 9) : K.line(xe, y - 7, xe, y + 7, 'fg', { w: W.major });
+          txt += K.t(full ? xe + 48 : x1 + 10, y + 4, lab, lit ? 'lv' : 'mu', 'start', 0, { wt: 700 });
+        } else {
+          if (full) g += K.line(xe, y - 7, xe, y + 7, 'fg', { w: W.tick });   /* the end tick leads the trailing bar */
+          txt += K.t(full ? xe + 9 : x1 + 10, y + 4, lab, full ? 'fg' : 'mu', 'start', 0, { wt: full ? 700 : W.wt });
+        }
+      });
+      g += `<g data-cal-reading>${txt}</g>`;
+      return { w, h: y0 + (Math.max(1, rows.length) - 1) * gap + 12, markup: g, label: this.sentence(rows, div, max) };
     }
   }
 
@@ -512,7 +726,7 @@
      boxed on a short leader (full density); a value past either end pins the marker and boxes the
      real value in red. Compact drops the numbers and the box. */
   class CalRuler extends CalElement {
-    static get observedAttributes() { return ['min', 'max', 'step', 'every', 'unit', 'width', 'up', 'value', 'density']; }
+    static get observedAttributes() { return ['min', 'max', 'step', 'every', 'unit', 'width', 'up', 'value', 'density', 'weight']; }
     draw(full) {
       let min = num(this, 'min', 0), max = num(this, 'max', 100);
       if (min > max) { warn(this, 'has min > max; drawn swapped'); [min, max] = [max, min]; }
@@ -524,6 +738,7 @@
       let every = Math.max(1, Math.round(num(this, 'every', 5)));
       const unit = str(this, 'unit'), w = num(this, 'width', 320), up = this.hasAttribute('up');
       const f = (v) => (v === 0 ? '0' : (Math.abs(v) >= 10000 ? fmt.k(v) : String(Math.round(v * 100) / 100)) + unit), marked = this.hasAttribute('value');
+      if (this.strong) return this.heavy(full, { min, max, step, every, w, up, f, marked });
       /* the marker (and its box) sit on the side away from the numbers; leave room for them and for the last number */
       const mk = marked ? 12 + (full ? 22 : 0) : 0, y = up ? 22 : 4 + mk, x0 = 6, x1 = w - Math.max(8, tw(f(max)) / 2 + 2);
       /* numbers never closer than the widest one and a gap: number every 2nd, 4th … major instead */
@@ -545,6 +760,35 @@
       }
       return { w, h: up ? y + 8 + mk : y + 22, markup: g, label };
     }
+    /* strong · a 3px scale whose ends close as one mitred bracket, heavy majors and light minors,
+       a 14px lamp pointer and the value on an inverted chip */
+    heavy(full, { min, max, step, every, w, up, f, marked }) {
+      const { W } = K, dir = up ? -1 : 1, mk = marked ? 15 + (full ? 24 : 0) : 0;
+      const y = up ? (full ? 30 : 18) : 4 + mk;
+      const x0 = 6, x1 = w - Math.max(8, tw(f(max)) / 2 + 2), X = K.scale(x0, x1, min, max);
+      const room = (x1 - x0) / (Math.max(tw(f(min)), tw(f(max))) + 14);
+      while ((max - min) / (step * every) > Math.max(1, room)) every *= 2;
+      let g = K.mitre([[x0, y + dir * 14], [x0, y], [x1, y], [x1, y + dir * 14]]);
+      const n = Math.floor((max - min) / step + 1e-9);
+      for (let i = 0; i <= n; i++) {
+        const v = min + i * step, x = X(v), M = i % every === 0;
+        if (i > 0 && x < x1 - 0.5) g += K.line(x, y + dir * 1.5, x, y + dir * (M ? 14 : 8), M ? 'fg' : 'fa', { w: M ? W.major : W.tick });
+        if (M && full) g += K.t(x, up ? y - 20 : y + 28, f(v), KY, 'middle', 0, { wt: W.wt });
+      }
+      let label = `Scale from ${f(min)} to ${f(max)}`;
+      if (marked) {
+        const raw = num(this, 'value', min), v = Math.min(max, Math.max(min, raw)), beyond = raw !== v;
+        const at = min + this.motion(v - min, max - min), mx = X(at), landed = at === v && !this.moving;
+        let m = `<path d="M${mx.toFixed(2)} ${up ? y + 3 : y - 3}l-7 ${up ? 12 : -12}h14z" style="fill:var(--live)"/>`;
+        if (full) {
+          const s = f(landed ? raw : at), cw = K.chipWidth(s, 12), bx = Math.min(Math.max(0, mx - cw / 2), w - cw - 1);
+          m += K.chip(bx, up ? y + 26 : y - 26, s, landed && beyond ? 'ft' : 'fg', 12);
+        }
+        g += `<g data-cal-reading>${m}</g>`;
+        label += `, marker at ${f(v)}` + (beyond ? `, the value ${f(raw)} is beyond the scale` : '');
+      }
+      return { w, h: up ? y + 5 + mk : y + (full ? 32 : 18), markup: g, label };
+    }
   }
 
   define('cal-meter', CalMeter);
@@ -556,12 +800,12 @@
   define('cal-ruler', CalRuler);
   }
 
-  /* redraw every instrument when any [data-density] changes */
+  /* redraw every instrument when any [data-density] or [data-weight] changes */
   const ALL = 'cal-meter,cal-position,cal-progress,cal-diff,cal-durations,cal-ruler';
   const redraw = (scope = document) => scope.querySelectorAll(ALL).forEach((el) => el.render && el.render());
   if (FIG) {
-    new MutationObserver((ms) => { if (ms.some((m) => m.attributeName === 'data-density')) redraw(); })
-      .observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ['data-density'] });
+    new MutationObserver(() => redraw())
+      .observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ['data-density', 'data-weight'] });
     /* redraw once fonts are in, so measured boxes fit */
     C.ready(() => redraw());
     /* print and PDF: every instrument shows its final value, seen or not */
@@ -570,12 +814,14 @@
 
   /* boxed counts: <span class="cal-count" data-n="3" data-noun="places">; add data-pad="2" to
      zero-pad a count that changes live, so the layout doesn't jump. Long counts are grouped
-     (1 234 567); an empty data-n leaves the markup as written. */
+     (1 234 567); an empty data-n leaves the markup as written. Each character is its own <i>,
+     so strong weight can cut a drum tick between digits (soft draws them as plain text). */
   function counts(scope = document) {
     scope.querySelectorAll('.cal-count[data-n]').forEach((el) => {
       const n = String(el.dataset.n).trim(); if (n === '') return;
       const pad = parseInt(el.dataset.pad || '1', 10), shown = /^\d{5,}$/.test(n) ? group(+n) : n.padStart(pad, '0');
-      el.innerHTML = `<b>${esc(shown)}</b>` + (el.dataset.noun ? `<span>${esc(el.dataset.noun)}</span>` : '');
+      const drums = [...shown].map((ch) => (ch === ' ' ? '<i class="sp"> </i>' : `<i>${esc(ch)}</i>`)).join('');
+      el.innerHTML = `<b>${drums}</b>` + (el.dataset.noun ? `<span>${esc(el.dataset.noun)}</span>` : '');
       el.setAttribute('role', 'img');   /* so the label is read, not "zero three" */
       el.setAttribute('aria-label', `${n} ${el.dataset.noun || ''}`.trim());
     });
@@ -680,13 +926,14 @@
   function range(w) {
     const r = w.querySelector('input[type="range"]'); if (!r) return;
     const min = +r.min || 0, max = r.max === '' ? 100 : +r.max, unit = w.dataset.unit ?? '', p = (r.value - min) / (max - min || 1);
+    const e = w.closest('[data-weight]')?.dataset.weight === 'strong' ? 7 : 6.5;   /* half the handle: 13px soft, the 14px strong cap */
     w.classList.add('js');
     w.style.setProperty('--p', p);
     const o = w.querySelector('output');
     if (o) {
       o.textContent = r.value + unit;
       /* keep the box inside the control; the leader stays on the handle */
-      const W = w.clientWidth, x = 6.5 + (W - 13) * p, half = o.offsetWidth / 2, ox = W ? Math.min(Math.max(x, half), W - half) : x;
+      const W = w.clientWidth, x = e + (W - 2 * e) * p, half = o.offsetWidth / 2, ox = W ? Math.min(Math.max(x, half), W - half) : x;
       w.style.setProperty('--ox', ox + 'px'); w.style.setProperty('--lx', x - ox + 'px');
     }
     r.setAttribute('aria-valuetext', r.value + unit);
@@ -932,13 +1179,20 @@
      rework shows the card's .note line. Every .cal-tally counts the signed cards into its
      [data-tally="n"] and its [data-tally="copy"] button copies one line per card, with the rework
      note; if the clipboard is blocked the lines appear in a selected text box under the tally.
-     signoff() repaints the tallies (call it after adding cards). A change fires `cal-signoff`. */
+     signoff() repaints the tallies (call it after adding cards). A change fires `cal-signoff`.
+     A tally counts the cards on the page, or only those in its nearest [data-signoff] ancestor. */
   const VERDICT = { ok: 'keep', live: 'rework', fault: 'drop' }, STATE = { keep: 'ok', rework: 'rework', drop: 'dropped' };
-  const signed = () => [...document.querySelectorAll('.cal-card')].filter((c) => c.querySelector('.cal-sign .cal-btn[aria-pressed]'));
+  const signed = (t) => [...(t?.closest('[data-signoff]') || document).querySelectorAll('.cal-card')].filter((c) => c.querySelector('.cal-sign .cal-btn[aria-pressed]'));
   const tallyPart = (t, k) => t.querySelector(`[data-tally="${k}"]`) || t.querySelector(`#tally-${k}`);
   function signoff() {
-    const cards = signed(), n = cards.filter((c) => c.dataset.verdict).length;
-    document.querySelectorAll('.cal-tally').forEach((t) => { const el = tallyPart(t, 'n'); if (el) el.textContent = `${n} of ${cards.length} signed`; });
+    document.querySelectorAll('.cal-tally').forEach((t) => {
+      const cards = signed(t), n = cards.filter((c) => c.dataset.verdict).length;
+      const el = tallyPart(t, 'n'); if (el) el.textContent = `${n} of ${cards.length} signed`;
+      /* one cell per card in its verdict (drawn at strong weight only; the words above say the same) */
+      let row = t.querySelector(':scope > .cal-tally-cells');
+      if (!row) { row = document.createElement('span'); row.className = 'cal-tally-cells'; row.setAttribute('aria-hidden', 'true'); t.prepend(row); }
+      row.innerHTML = cards.map((c) => (c.dataset.verdict ? `<i data-state="${esc(c.dataset.state || 'ok')}"></i>` : '<i></i>')).join('');
+    });
   }
   on('click', '.cal-card .cal-sign .cal-btn[aria-pressed]', (b) => {
     if (b.disabled || b.getAttribute('aria-disabled') === 'true') return;
@@ -953,7 +1207,7 @@
   });
   on('click', '.cal-tally :is([data-tally="copy"], #tally-copy)', async (b) => {
     const t = b.closest('.cal-tally'), msg = tallyPart(t, 'msg');
-    const text = signed().map((c) => {
+    const text = signed(t).map((c) => {
       const no = c.querySelector('.id .no')?.textContent.trim(), h = c.querySelector('h3')?.textContent.trim() || '';
       const note = c.dataset.state === 'rework' ? c.querySelector('.cal-sign .note input')?.value.trim() : '';
       return `${no ? no + ' ' : ''}${h}: ${c.dataset.verdict || 'not signed'}${note ? ' — ' + note : ''}`;
@@ -1048,6 +1302,9 @@
   }
 
   const boot = () => { counts(); sheets(); controls(); tabs(); signoff(); menus(); tips(); toastBox(); };
+  /* a weight change moves the detent's ends and the range's reading: measure them again */
+  new MutationObserver(() => { document.querySelectorAll('.cal-detent').forEach(detent); document.querySelectorAll('.cal-range').forEach(range); })
+    .observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ['data-weight'] });
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
 

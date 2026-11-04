@@ -35,6 +35,87 @@
   };
   /* brk · the break mark in fault ink where a run goes on past the end of its scale (as the instruments draw it) */
   const brk = (x, y) => K.line(x - 3, y + 5, x + 1, y - 7, 'ft') + K.line(x + 1, y + 5, x + 5, y - 7, 'ft');
+  /* hbrk · the break mark at strong weight */
+  const hbrk = (x, y) => K.line(x - 4, y + 7, x + 1, y - 8, 'ft', { w: 2 }) + K.line(x + 2, y + 7, x + 7, y - 8, 'ft', { w: 2 });
+  const LAMP = 'var(--live)';   /* a solid lamp fill: K.rect turns ink 'lv' into the faint tint */
+  const n2 = (v) => Math.round(v * 100) / 100;
+
+  /* pen(o) · the marks a recipe draws with, at the data's weight ('soft' or 'strong').
+     Strong keeps every position and swaps each mark for its heavy form, as the
+     instruments draw it: 3px scales with mitred ends, nameplates for boxes, chips
+     for numbers, 2px leaders and dimensions, larger nodes, 600-weight legends.
+     A box keeps its centre, so leaders still meet it. */
+  function pen(o) {
+    const S = o.weight === 'strong', W = K.W;
+    if (!S) {
+      return {
+        S, ruler: K.ruler, box: K.box, boxWidth: K.boxWidth, plate: K.plate, plateWidth: (a, b) => Math.max(94, tw(a) + 18, tw(b) + 18),
+        leader: K.leader, dim: K.dim, node: K.node, cmd: K.cmd, brk, L: K.t, rh: 0,
+      };
+    }
+    const ink = (c2, s) => (c2 === 'lv' || s === 'lv' ? 'lv' : c2 === 'ft' || s === 'ft' ? 'ft' : 'fg');
+    return {
+      S,
+      /* ruler · a 3px scale closed by mitred end posts; heavy majors, light minors */
+      ruler(x0, x1, y, max, step, every = 5, f = (v) => String(v), up = false, min = 0) {
+        const dir = up ? -1 : 1;
+        let g = K.mitre([[x0, y + dir * 9], [x0, y], [x1, y], [x1, y + dir * 9]], 'fg', W.base);
+        if (!(max > min) || !(step > 0) || !isFinite(max - min)) return g;
+        step *= Math.max(1, Math.ceil((max - min) / step / 200));
+        every = Math.max(1, Math.round(every) || 1);
+        const X = K.scale(x0, x1, min, max), n = Math.floor((max - min) / step + 1e-9);
+        for (let i = 0; i <= n; i++) {
+          const v = Math.round((min + i * step) * 1e9) / 1e9, x = X(v), M = i % every === 0;
+          if (i > 0 && x < x1 - 0.5) g += K.line(x, y + dir * 1.5, x, y + dir * (M ? 9 : 5), M ? 'fg' : 'fa', { w: M ? W.major : W.tick });
+          if (M) g += K.t(x, up ? y - 14 : y + 21, f(v), 'ky', i === 0 ? 'start' : 'middle', 0, { wt: W.wt });
+        }
+        return g;
+      },
+      /* box · a nameplate 40px tall on the box's centre; a one-line box is a chip */
+      box(x, y, w, l1, l2, c2 = 'fg', s = 'ed') {
+        return l2 ? K.nameplate(x, y - 4, l1, l2, ink(c2, s), w || 0) : K.chip(x, y + 9.5, l1, ink(c2, s), 11, w || 0);
+      },
+      boxWidth: (l1, l2 = '') => (l2 ? K.plateWidth(l1, l2) : K.chipWidth(l1)),
+      /* plate · the headline result keeps its double rule: a nameplate inside a second frame */
+      plate(x, y, w, l1, l2, c = 'fg') {
+        const pw = Math.max(w || 0, K.plateWidth(l1, l2));
+        return K.nameplate(x, y, l1, l2, c, pw) + K.rect(x - 3, y - 3, pw + 6, 46, 'none', c === 'lv' ? 'lv' : 'fg', { w: 1 });
+      },
+      plateWidth: (a, b) => Math.max(94, K.plateWidth(a, b)),
+      leader: (pts, dot = true) => K.mitre(pts, 'fa', 2) + (dot ? K.rect(pts[0][0] - 2.5, pts[0][1] - 2.5, 5, 5, 'fg', 'none') : ''),
+      /* dim · a 2px span with heavy end ticks and arrowheads, its length at 600 */
+      dim(x1, x2, y, label, c = 'mu') {
+        const m = (x1 + x2) / 2, lw = tw(label) + 10, wt = { wt: W.wt };
+        const ends = K.line(x1, y - 5, x1, y + 5, 'fg', { w: 2 }) + K.line(x2, y - 5, x2, y + 5, 'fg', { w: 2 });
+        if (lw + 16 > Math.abs(x2 - x1)) return ends + K.line(x1, y, x2, y, 'fa', { w: 2 }) + K.t(m, y - 8, label, c, 'middle', 0, wt);
+        const heads = `M${n2(x1 + 1)} ${y}l7 -3.5v7zM${n2(x2 - 1)} ${y}l-7 -3.5v7z`;
+        return ends + K.line(x1, y, m - lw / 2, y, 'fa', { w: 2 }) + K.line(m + lw / 2, y, x2, y, 'fa', { w: 2 })
+          + `<path d="${heads}" style="fill:var(--faint);stroke:none"/>` + K.t(m, y + 4, label, c, 'middle', 0, wt);
+      },
+      /* node · 2px larger: solid done and fault, a 2px open square to do, the star on a panel halo */
+      node(x, y, st = 'todo', size = 8) {
+        const s = size + 2, h = s / 2;
+        switch (st) {
+          case 'live': return K.star(x, y, s * 0.85 + 3, 'pn') + K.star(x, y, s * 0.85);
+          case 'done': return K.rect(x - h, y - h, s, s, 'fg', 'none');
+          case 'fault': return K.rect(x - h, y - h, s, s, 'ft', 'none');
+          case 'merge': return K.path(`M${x} ${y - 7}L${x + 7} ${y}L${x} ${y + 7}L${x - 7} ${y}Z`, 'fg', { w: 2.5, fill: 'pn' });
+          case 'started': return K.rect(x - h, y - h, s, s, 'pn', 'none') + K.outline(x - h, y - h, s, s, 'fg', 2) + K.rect(x - 2, y - 2, 4, 4, 'fg', 'none');
+          default: return K.rect(x - h, y - h, s, s, 'pn', 'none') + K.outline(x - h, y - h, s, s, 'fa', 2);
+        }
+      },
+      /* cmd · the step number on an inverted chip */
+      cmd(x, y, n, s, c = 'fg') {
+        return K.rect(x, y - 10, 14, 14, 'fg', 'none') + K.t(x + 7, y + 1, n, 'pn', 'middle', 0, { wt: 700 }) + K.t(x + 20, y + 1, '$ ' + s, c, 'start', 0, { wt: W.wt });
+      },
+      brk: hbrk,
+      /* L · a legend: names, keys and scale words at 600 */
+      L: (x, y, s, c, a, ls) => K.t(x, y, s, c, a, ls, { wt: W.wt }),
+      /* rh · how much further the strong ruler's numbers reach below it */
+      rh: 5,
+    };
+  }
+
   /* fit · text cut with … to fit room px */
   function fit(s, room) {
     s = String(s ?? '');
@@ -114,55 +195,60 @@
        and box latch (marked data-land) and a live lane's dashed tail appears
        (marked data-crawl). Without t, the lanes are drawn finished. */
     lanes(o) {
-      const warn = warner('lanes');
+      const warn = warner('lanes'), P = pen(o), S = P.S, W = K.W;
       const ls = Array.isArray(o.lanes) ? o.lanes : (warn('needs a lanes array'), []);
       const ends = ls.map((l) => Math.max(0, num(l.end)));
       let max = num(o.max);
       if (!(max > 0)) { max = Math.max(1, ...ends); warn('max should be above 0; using the longest lane'); }
       /* the name column fits the longest name, up to a third of the width (longer names are cut with …) */
       const w = o.w || 520, nameW = Math.min(Math.round(w / 3), Math.ceil(Math.max(0, ...ls.map((l) => tw(l.name ?? ''))) + 14));
-      const x0 = o.labelW || Math.max(70, nameW), boxW = 112, x1 = w - boxW - 30;
+      /* strong boxes are nameplates: the column widens to the widest */
+      const boxW = Math.max(112, ...(S ? ls.filter((l) => l.box).map((l) => P.boxWidth(l.box[0], l.box[1])) : []));
+      const x0 = o.labelW || Math.max(70, nameW), x1 = w - boxW - 30;
       const X = K.scale(x0, x1, 0, max), unit = o.unit ?? 'm', per = { s: 1, m: 60, h: 3600 }[unit];
       const T = o.t ?? Infinity, TT = o.tt ?? T;
       /* one lamp: the first live lane is lit, any other is drawn in ink */
       const lit = ls.findIndex((l) => l.live);
       if (ls.some((l, i) => l.live && i !== lit)) warn('more than one live lane; only the first is lit');
+      /* strong: a 10px bar from a 3px start post, an end tick on a finished run, and the lit run a solid lamp bar with the star at its tip */
+      const tick = (x, y) => K.line(x, y - 7, x, y + 7, 'fg', { w: W.major });
       let g = head(o);
       ls.forEach((l, i) => {
         const y = 58 + i * 46, live = i === lit, c = live ? 'lv' : 'fg', end = ends[i], land = T >= end;
         /* past max the line stops at the end of the ruler and breaks off in red; the label keeps the real value */
         const over = end > max;
         const xe = X(Math.min(T, end, max)), xt = X(Math.max(0, Math.min(TT, end, max)));
-        g += K.t(x0 - 10, y + 4, fit(l.name ?? '', x0 - 12), 'fg', 'end');
-        if (xt > x0) g += K.line(x0, y, xt, y, c, { w: 2 });
-        if (over && land) g += brk(x1 + 9, y);
-        if (live && land && xe < x1 - 1) g += K.line(xe, y, x1, y, 'fa', { dash: '2 4' }).replace('<line', '<line data-crawl');
+        g += P.L(x0 - 10, y + 4, fit(l.name ?? '', x0 - 12), 'fg', 'end');
+        if (S) g += K.line(x0, y - 9, x0, y + 9, 'fg', { w: W.major });
+        if (xt > x0) g += S ? K.rect(x0, y - 5, xt - x0, 10, live ? LAMP : 'fg', 'none') : K.line(x0, y, xt, y, c, { w: 2 });
+        if (over && land) g += P.brk(x1 + 9, y);
+        if (live && land && xe < x1 - 1) g += K.line(xe, y, x1, y, 'fa', S ? { w: 2, dash: '3 3' } : { dash: '2 4' }).replace('<line', '<line data-crawl');
         /* the moving node is drawn under the start node, so at 0 only the start shows */
-        if (!land) g += K.node(xe, y, live ? 'live' : 'todo');
-        g += K.node(x0, y, 'done');
+        if (!land) g += S && !live ? tick(xe, y) : P.node(xe, y, live ? 'live' : 'todo');
+        if (!S) g += K.node(x0, y, 'done');
         const lab = land || !per ? (l.label ?? (per ? fmt.dur(end * per) : end + unit)) : fmt.dur(Math.min(T, end) * per);
         let k = '';
-        if (land) k += K.node(xe, y, live ? 'live' : 'done');
-        if (xe - x0 > 1) k += K.dim(x0, xe, y - 14, lab, live ? 'fg' : 'mu');
+        if (land) k += S && !live ? tick(xe, y) : P.node(xe, y, live ? 'live' : 'done');
+        if (xe - x0 > 1) k += P.dim(x0, xe, y - (S ? 17 : 14), lab, live ? 'fg' : 'mu');
         if (l.box && land) {
-          k += K.box(w - boxW - 10, y - 16, boxW, l.box[0], l.box[1], live ? 'lv' : 'fg', live ? 'lv' : 'ed');
-          if (!live && !over) k += K.line(xe + 6, y, w - boxW - 10, y, 'e1', { dash: '1 3' });
+          k += P.box(w - boxW - 10, y - 16, boxW, l.box[0], l.box[1], live ? 'lv' : 'fg', live ? 'lv' : 'ed');
+          if (!live && !over) k += K.line(xe + (S ? 9 : 6), y, w - boxW - 10, y, S ? 'fa' : 'e1', { dash: '1 3' });
         }
         g += land ? `<g data-land="${i}">${k}</g>` : k;
       });
       const ry = 58 + ls.length * 46 - 16;
       const step = o.step || Math.max(1, Math.round(max / 10));
-      g += K.ruler(x0, x1, ry, max, step, o.every || 5, (v) => v + unit);
+      g += P.ruler(x0, x1, ry, max, step, o.every || 5, (v) => v + unit);
       const said1 = (l, i) => `${l.name} ${i === lit ? 'running at' : 'took'} ${l.label ?? (per ? fmt.dur(ends[i] * per) : ends[i] + unit)}${ends[i] > max ? `, past the ${max}${unit} scale` : ''}`;
       const label = o.label || `${o.title || 'Lanes'}: ` + (ls.length ? ls.map(said1).join('; ') : 'no lanes');
-      return warn.done({ w, h: ry + 26, markup: g, label });
+      return warn.done({ w, h: ry + 26 + P.rh, markup: g, label });
     },
 
     /* ── budget · a limit ruler with alerts, today's use and the pace to the end
        { n, title, max, used, at:'16:20', pace, alerts:[{ v, label }], unit:'k',
          usedLabel, paceLabel:[l1, l2], fmt } */
     budget(o) {
-      const warn = warner('budget');
+      const warn = warner('budget'), P = pen(o), S = P.S, W = K.W;
       const w = o.w || 520, x0 = 16, x1 = w - 20, y = 92, f = o.fmt || ((v) => v + (o.unit ?? ''));
       const used = Math.max(0, num(o.used));
       if (!Number.isFinite(+o.used) || o.used === null) warn('used is missing; drawn as 0');
@@ -180,51 +266,66 @@
       const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
       let g = head(o);
       const first = alerts.length ? Math.min(+alerts[0].v, max) : null;
+      /* strong: a 12px recessed track, hazard stripes past the first alert, the used fill in ink (red past the alert) and a 4px needle */
+      const bh = S ? 12 : 8;
+      if (S) g += K.rect(x0, y - 6, x1 - x0, 12, 'well', 'none');
       if (first != null && first < max) {
-        const H = K.hatch('ft', 4, 0.45);
-        g += H.def + `<rect x="${X(first)}" y="${y - 4}" width="${X(max) - X(first)}" height="8" fill="${H.url}"/>`;
+        const H = S ? K.hazard() : K.hatch('ft', 4, 0.45);
+        g += H.def + `<rect x="${X(first)}" y="${y - bh / 2}" width="${X(max) - X(first)}" height="${bh}" fill="${H.url}"/>`;
       }
       const xt = Xc(clamp(TT, 0, used));
-      if (xt > x0) g += K.rect(x0, y - 2, xt - x0, 4, 'fg', 'none');
-      if (pace != null && TT > used && used < max) g += K.line(Xc(used), y, Xc(clamp(TT, used, pace)), y, 'lv', { dash: '4 3' });
-      g += K.ruler(x0, x1, y + 6, max, o.step || niceStep(max), o.every || 5, (v) => (v ? f(v) : '0'));
+      if (xt > x0) {
+        if (!S) g += K.rect(x0, y - 2, xt - x0, 4, 'fg', 'none');
+        else {
+          const xa = first != null ? Math.min(xt, X(first)) : xt;
+          g += K.rect(x0, y - 6, xa - x0, 12, 'fg', 'none') + (xt > xa ? K.rect(xa, y - 6, xt - xa, 12, 'ft', 'none') : '');
+        }
+      }
+      if (pace != null && TT > used && used < max) g += K.line(Xc(used), y, Xc(clamp(TT, used, pace)), y, 'lv', S ? { w: 3, dash: '5 3' } : { dash: '4 3' });
+      if (S) g += K.outline(x0, y - 6, x1 - x0, 12, 'ed', W.rule);
+      g += P.ruler(x0, x1, y + (S ? 8 : 6), max, o.step || niceStep(max), o.every || 5, (v) => (v ? f(v) : '0'));
       alerts.forEach((a, i) => {
         const end = i === 0 && alerts.length > 1, ax = Xc(+a.v);
-        const m = K.line(ax, y - 36, ax, y + 4, 'ft', { opacity: 0.7 }) + K.t(ax + (end ? -4 : 4), y - 28, a.label ?? f(a.v), 'ft', end ? 'end' : 'start');
+        const m = K.line(ax, y - 36, ax, y + (S ? 6 : 4), 'ft', S ? { w: W.major } : { opacity: 0.7 }) + P.L(ax + (end ? -5 : 5), y - 28, a.label ?? f(a.v), 'ft', end ? 'end' : 'start');
         g += T >= a.v ? `<g data-land="alert${i}">${m}</g>` : m;
       });
+      const needle = (x, c = 'fg') => K.rect(x - 2, y - 10, 4, 20, c, 'none');
       /* a box sits left of its leader, or flips to the right when it would leave the frame */
       const boxAt = (x, bw, dx) => (x - dx - bw >= 2 ? [x - dx, x - dx - bw] : [x + dx, x + dx]);
-      if (T < used) g += K.node(Xc(clamp(T, 0, used)), y, 'todo');
+      if (T < used) g += S ? needle(Xc(clamp(T, 0, used))) : K.node(Xc(clamp(T, 0, used)), y, 'todo');
       else {
         const over = used > max, ux = Xc(used);
         const ul = [o.usedLabel || 'used' + (o.at ? ' · ' + o.at : ''), over ? `${f(used)} · over by ${f(used - max)}` : f(used)];
-        const uw = K.boxWidth(...ul), [lx, bx] = boxAt(ux, uw, 10);
-        g += `<g data-land="used">` + K.node(ux, y, 'done') + (over ? brk(x1 + 9, y) : '')
-          + K.leader([[ux, y - 6], [ux, y - 42], [lx, y - 42]], false) + K.box(bx, y - 60, uw, ul[0], ul[1], over ? 'ft' : 'fg', over ? 'ft' : 'ed') + '</g>';
+        const uw = P.boxWidth(...ul), [lx, bx] = boxAt(ux, uw, 10);
+        g += `<g data-land="used">` + (S ? needle(ux) : K.node(ux, y, 'done')) + (over ? P.brk(x1 + 9, y) : '')
+          + P.leader([[ux, y - (S ? 10 : 6)], [ux, y - 42], [lx, y - 42]], false) + P.box(bx, y - 60, uw, ul[0], ul[1], over ? 'ft' : 'fg', over ? 'ft' : 'ed') + '</g>';
       }
+      /* the pace mark: a hollow circle, or at strong weight a hollow needle */
+      const paceMark = (x) => (S ? K.rect(x - 3, y - 10, 6, 20, 'pn', 'none') + K.outline(x - 3, y - 10, 6, 20, 'fg', 2) : K.circle(x, y, 3, 'pn', 'fg'));
+      /* the strong ruler's numbers reach lower, so the pace box drops below them */
+      const py = S ? y + 38 : y + 30;
       if (pace != null && used < max) {
-        if (T > used && T < pace) g += K.circle(Xc(T), y, 3, 'pn', 'fg');
+        if (T > used && T < pace) g += paceMark(Xc(T));
         else if (T >= pace && pace > used) {
           const pl = o.paceLabel || ['at this pace', '≈ ' + f(pace)];
-          const pw = K.boxWidth(...pl), px = Xc(pace), [lx, bx] = boxAt(px, pw, 40);
-          g += `<g data-land="pace">` + K.circle(px, y, 3, 'pn', 'fg') + (pace > max ? brk(x1 + 9, y) : '')
-            + K.leader([[px, y + 4], [px, y + 44], [lx, y + 44]], false) + K.box(bx, y + 30, pw, pl[0], pl[1], 'lv', 'lv') + '</g>';
+          const pw = P.boxWidth(...pl), px = Xc(pace), [lx, bx] = boxAt(px, pw, 40);
+          g += `<g data-land="pace">` + paceMark(px) + (pace > max ? P.brk(x1 + 9, y) : '')
+            + P.leader([[px, y + (S ? 10 : 4)], [px, py + 14], [lx, py + 14]], false) + P.box(bx, py, pw, pl[0], pl[1], 'lv', 'lv') + '</g>';
         }
       }
       const label = o.label || `${o.title || 'Budget'}: limit ${f(max)}.`
         + (alerts.length ? ` Alerts at ${alerts.map((a) => f(+a.v) + (a.label ? ` (${a.label})` : '')).join(', ')}.` : '')
         + ` Used ${f(used)}${o.at ? ' by ' + o.at : ''}${used > max ? `, over by ${f(used - max)}` : ''}.`
         + (pace != null && used < max ? ` At this pace about ${f(pace)}${pace > max ? `, over by ${f(pace - max)}` : ''}.` : '');
-      return warn.done({ w, h: 170, markup: g, label });
+      return warn.done({ w, h: S ? 180 : 170, markup: g, label });
     },
 
     /* ── merge · a branch, its commits and the commands at each node (FIG.11)
        { n, title, base:'main', branch, commits:5, baseAhead:1, files:[l1,l2],
          verdict:[l1,l2], noun:'commits', steps:['git switch main', 'git merge --no-ff …', 'git worktree remove …'] } */
     merge(o) {
-      const warn = warner('merge');
-      const w = 520, h = 250, by = 170, fy = 70, steps = o.steps || [];
+      const warn = warner('merge'), P = pen(o), S = P.S, lw = S ? 3 : 1.3;
+      const h = 250, by = 170, fy = 70, steps = o.steps || [];
       const commits = Math.max(0, Math.round(num(o.commits)));
       if (!commits) warn('commits should be 1 or more');
       const branch = o.branch ?? (warn('branch is missing'), 'branch');
@@ -233,7 +334,10 @@
       const n = Math.max(1, commits), cx0 = 130, cx1 = 330, many = n > 12;
       const slots = many ? 11 : n, cs = slots > 1 ? (cx1 - cx0) / (slots - 1) : 0;
       const cxs = many ? [0, 1, 2, 3, 4, 6, 7, 8, 9, 10].map((s) => cx0 + s * cs) : Array.from({ length: n }, (_, i) => (n > 1 ? cx0 + i * cs : cx1));
-      const ff = !o.baseAhead, xe = w - 50;
+      const ff = !o.baseAhead;
+      const v = o.verdict || (ff ? ['fast-forward', 'no merge commit'] : ['merge commit', `${o.base || 'main'} moved on`]);
+      /* the verdict box keeps inside the frame however long its words are; a strong nameplate widens the frame instead, clear of the merge curve */
+      const vw = Math.max(102, P.boxWidth(v[0], v[1])), w = S ? Math.max(520, Math.ceil(411 + vw)) : 520, vx = Math.min(410, w - vw - 1), xe = w - 50;
       /* motion (see play): t is ms on the MERGE timeline. The straight main
          line and its nodes and text hold still. The branch draws as one stroke
          along its length: up out of main, along its commits (each appearing as
@@ -245,21 +349,22 @@
       const d = T >= M.draw ? Infinity : (L1 + L2 + L3) * Math.max(0, T) / M.draw;
       const curve = (p, q, c, o2) => { const [a, b2, e] = cubicPart(...p, q); return K.path(`M${p[0].join(' ')} C ${a.join(' ')}, ${b2.join(' ')}, ${e.join(' ')}`, c, o2); };
       let g = head(o);
-      g += K.line(20, by, xe, by, 'fg', { w: 1.3 }) + K.line(406, by, xe, by, 'fa', { dash: '2 3' });
-      if (d >= L1 + L2) g += K.path(`M60 ${by} C 60 ${fy}, 80 ${fy}, 110 ${fy} L ${cx1} ${fy}`, 'fg', { w: 1.3 });
-      else if (d > L1) g += K.path(`M60 ${by} C 60 ${fy}, 80 ${fy}, 110 ${fy} L ${(110 + d - L1).toFixed(2)} ${fy}`, 'fg', { w: 1.3 });
-      else if (d > 0) g += curve(fork, d / L1, 'fg', { w: 1.3 });
-      if (d > L1 + L2) g += curve(join, Math.min(1, (d - L1 - L2) / L3), 'lv', { dash: '4 3' });
+      g += K.line(20, by, xe, by, 'fg', { w: lw }) + K.line(406, by, xe, by, 'fa', S ? { w: 2, dash: '3 3' } : { dash: '2 3' });
+      if (d >= L1 + L2) g += K.path(`M60 ${by} C 60 ${fy}, 80 ${fy}, 110 ${fy} L ${cx1} ${fy}`, 'fg', { w: lw });
+      else if (d > L1) g += K.path(`M60 ${by} C 60 ${fy}, 80 ${fy}, 110 ${fy} L ${(110 + d - L1).toFixed(2)} ${fy}`, 'fg', { w: lw });
+      else if (d > 0) g += curve(fork, d / L1, 'fg', { w: lw });
+      if (d > L1 + L2) g += curve(join, Math.min(1, (d - L1 - L2) / L3), 'lv', S ? { w: 3, dash: '6 4' } : { dash: '4 3' });
       /* main's own marks hold still; the commits appear as the branch reaches them */
-      g += K.t(20, by - 8, o.base || 'main', 'fg') + K.node(60, by, 'done');
-      if (!ff) g += K.node(250, by, 'done') + K.t(250, by - 10, `+${o.baseAhead} since branch`, 'ky', 'middle');
+      g += P.L(20, by - (S ? 10 : 8), o.base || 'main', 'fg') + P.node(60, by, 'done');
+      if (!ff) g += P.node(250, by, 'done') + P.L(250, by - (S ? 12 : 10), `+${o.baseAhead} since branch`, 'ky', 'middle');
       /* one lamp, the merge to come: its dashed curve and the verdict box. The merge node and the commands are ink. */
-      g += ff ? K.rect(396, by - 4, 8, 8, 'pn', 'fg', { w: 1.3 }) : K.path(`M400 ${by - 6}L406 ${by}L400 ${by + 6}L394 ${by}Z`, 'fg', { w: 1.3, fill: 'pn' });
-      cxs.forEach((x) => { if (d >= L1 + x - 110) g += K.node(x, fy, 'done'); });
+      if (S) g += ff ? K.rect(395, by - 5, 10, 10, 'pn', 'none') + K.outline(395, by - 5, 10, 10, 'fg', 2.5) : P.node(400, by, 'merge');
+      else g += ff ? K.rect(396, by - 4, 8, 8, 'pn', 'fg', { w: 1.3 }) : K.path(`M400 ${by - 6}L406 ${by}L400 ${by + 6}L394 ${by}Z`, 'fg', { w: 1.3, fill: 'pn' });
+      cxs.forEach((x) => { if (d >= L1 + x - 110) g += P.node(x, fy, 'done'); });
       /* the break: the branch line cut by two strokes between the first and last commits */
       if (many && d >= L1 + cx0 + 5 * cs - 110) {
         const bx = cx0 + 5 * cs;
-        g += K.rect(bx - 6, fy - 3, 12, 6, 'pn', 'none') + K.line(bx - 5, fy + 5, bx - 1, fy - 5, 'fg') + K.line(bx + 1, fy + 5, bx + 5, fy - 5, 'fg');
+        g += K.rect(bx - 6, fy - 3, 12, 6, 'pn', 'none') + K.line(bx - 5, fy + 5, bx - 1, fy - 5, 'fg', { w: S ? 2 : 1 }) + K.line(bx + 1, fy + 5, bx + 5, fy - 5, 'fg', { w: S ? 2 : 1 });
       }
       const label = o.label || `Merge plan. ${branch} has ${commits} ${noun(commits)}. ${o.base || 'main'} ${ff ? 'has not moved, so this is a fast-forward' : `moved on by ${o.baseAhead}, so this is a merge commit`}.${steps.some(Boolean) ? ` Steps: ${steps.filter(Boolean).map((s, i) => `${i + 1} ${s}`).join(', ')}.` : ''}`;
       if (T < M.flash) return warn.done({ w, h, markup: g, label });
@@ -271,19 +376,16 @@
       const room = w - 4 - 20 - tw('$ ');
       const cmd = (s) => { const t = fit(s, room); if (t !== String(s)) warn('a command is too long for the frame; cut with …'); return t; };
       const place = (x, s) => Math.max(2, Math.min(x - 7, w - 2 - 20 - tw('$ ' + s)));
-      const lead = (x, y0, y1, bx, ye) => K.leader(bx + 7 === x ? [[x, y0], [x, ye]] : [[x, y0], [x, y1], [bx + 7, y1], [bx + 7, ye]], false);
+      const lead = (x, y0, y1, bx, ye) => P.leader(bx + 7 === x ? [[x, y0], [x, ye]] : [[x, y0], [x, y1], [bx + 7, y1], [bx + 7, ye]], false);
       let k = '';
-      if (n > 1) k += K.dim(cx0, cx1, fy + 22, `${commits} ${noun(commits)}`);
-      if (o.files) k += K.leader([[230, fy + 26], [230, 104]], false) + K.box(180, 104, 100, o.files[0], o.files[1], 'fg');
-      const v = o.verdict || (ff ? ['fast-forward', 'no merge commit'] : ['merge commit', `${o.base || 'main'} moved on`]);
-      /* the verdict box keeps inside the frame however long its words are */
-      const vw = Math.max(102, K.boxWidth(v[0], v[1])), vx = Math.min(410, w - vw - 1);
-      k += K.leader([[400, by - 7], [400, 140], [vx, 140]], false) + K.box(vx, 124, vw, v[0], v[1], 'lv', 'lv');
-      if (steps[0]) { const s = cmd(steps[0]), bx = place(250, s); k += lead(250, by + 6, 198, bx, 200) + K.cmd(bx, 212, no(0), s); }
-      if (steps[1]) { const s = cmd(steps[1]), bx = place(400, s); k += lead(400, by + 7, 221, bx, 226) + K.cmd(bx, 238, no(1), s); }
-      if (steps[2]) { const s = cmd(steps[2]), bx = place(cx1, s); k += lead(cx1, fy - 6, 50, bx, 46) + K.cmd(bx, 40, no(2), s); }
+      if (n > 1) k += P.dim(cx0, cx1, fy + 22, `${commits} ${noun(commits)}`);
+      if (o.files) k += P.leader([[230, fy + (S ? 28 : 26)], [230, S ? 100 : 104]], false) + P.box(180, 104, 100, o.files[0], o.files[1], 'fg');
+      k += P.leader([[400, by - 7], [400, S ? 134 : 140], [vx, S ? 134 : 140]], false) + P.box(vx, S ? 118 : 124, vw, v[0], v[1], 'lv', 'lv');
+      if (steps[0]) { const s = cmd(steps[0]), bx = place(250, s); k += lead(250, by + 6, 198, bx, 200) + P.cmd(bx, 212, no(0), s); }
+      if (steps[1]) { const s = cmd(steps[1]), bx = place(400, s); k += lead(400, by + 7, 221, bx, 226) + P.cmd(bx, 238, no(1), s); }
+      if (steps[2]) { const s = cmd(steps[2]), bx = place(cx1, s); k += lead(cx1, fy - 6, 50, bx, 46) + P.cmd(bx, 40, no(2), s); }
       /* the branch name goes over step 3's leader, on a panel-coloured ground, so a long name breaks the leader instead of being cut by it */
-      k += K.rect(108, fy - 22, tw(branch) + 4, 14, 'pn', 'none') + K.t(110, fy - 12, branch, 'fg');
+      k += K.rect(108, fy - 22, tw(branch) + 4, 14, 'pn', 'none') + P.L(110, fy - 12, branch, 'fg');
       g += `<g data-land="details">${k}</g>`;
       return warn.done({ w, h, markup: g, label });
     },
@@ -294,7 +396,7 @@
        means 'live', and a child with neither is done. One lamp: the first live
        child is the star; any other live child is drawn running, in ink. */
     fanout(o) {
-      const warn = warner('fanout');
+      const warn = warner('fanout'), P = pen(o), S = P.S, W = K.W;
       const w = o.w || 520, kids = Array.isArray(o.children) ? o.children : (warn('needs a children array'), []), gap = 52, top = 44;
       const rootL = Array.isArray(o.root) ? o.root : [o.root ?? 'parent'];
       const STATES = ['todo', 'done', 'live', 'fault'];
@@ -320,26 +422,33 @@
       const d = T >= M.draw ? Infinity : far * Math.max(0, T) / M.draw;
       const grow = (r) => polyPart(r.pts, d - r.from);
       let g = head(o);
-      g += K.rect(8, oy - 22, 96, 44, 'pn', 'fg') + K.t(16, oy - 6, fit(rootL[0], 84), 'fg') + K.t(16, oy + 8, fit(rootL[1] || '', 84), 'ky');
+      /* strong: the parent is a nameplate, its name on the inverted strip */
+      if (S) {
+        const nm = String(rootL[0]).toUpperCase();
+        g += K.rect(8, oy - 22, 96, 44, 'pn', 'none') + K.rect(8, oy - 22, 96, 16, 'fg', 'none') + K.outline(8, oy - 22, 96, 44, 'fg', W.plate)
+          + K.t(15, oy - 10.5, fit(nm, 82 - 0.6 * nm.length), 'pn', 'start', 0.6, { fs: 10, wt: W.wt }) + K.t(15, oy + 12, fit(rootL[1] || '', 82), 'fg', 'start', 0, { wt: 700 });
+      } else g += K.rect(8, oy - 22, 96, 44, 'pn', 'fg') + K.t(16, oy - 6, fit(rootL[0], 84), 'fg') + K.t(16, oy + 8, fit(rootL[1] || '', 84), 'ky');
       /* the parent is running (▣) while any child runs, done when all are, failed when one failed, else waiting (□) */
       const running = states.some((s) => s === 'live' || s === 'running');
-      g += K.node(ox, oy, running ? 'started' : states.every((s) => s === 'done') ? 'done' : states.includes('fault') ? 'fault' : 'todo');
+      g += P.node(ox, oy, running ? 'started' : states.every((s) => s === 'done') ? 'done' : states.includes('fault') ? 'fault' : 'todo');
       let k = '';
       kids.forEach((s, i) => {
         const y = top + i * gap, nx = 200, st = states[i], on = st === 'live' || st === 'running', r = routes[i], pts = grow(r);
         /* a running branch is ink, a queued one dashed (not reached yet), a finished one faint, a failed one red */
-        if (pts) g += K.path('M' + pts.map((p) => p.map((v) => +v.toFixed(2)).join(' ')).join(' L'), on ? 'fg' : st === 'fault' ? 'ft' : 'fa', st === 'todo' ? { dash: '2 3' } : {});
-        if (d >= polyLen(r.pts)) g += K.node(nx, y + 10, st === 'running' ? 'started' : st);
+        if (pts) g += K.path('M' + pts.map((p) => p.map((v) => +v.toFixed(2)).join(' ')).join(' L'), on ? 'fg' : st === 'fault' ? 'ft' : 'fa', S ? (st === 'todo' ? { w: 2, dash: '3 3' } : { w: on ? W.major : 2 }) : st === 'todo' ? { dash: '2 3' } : {});
+        if (d >= polyLen(r.pts)) g += P.node(nx, y + 10, st === 'running' ? 'started' : st);
         const time = String(s.time ?? ''), room = w - 18 - 220;
-        k += K.rect(212, y - 6, w - 222, 32, 'pn', on ? 'ed' : st === 'fault' ? 'ft' : 'e1');
-        k += K.t(220, y + 7, fit(s.task ?? '', room), on ? 'fg' : 'mu')
+        /* strong: a 2px outline, the lit child's in the lamp; task and time heavier */
+        if (S) k += K.rect(212, y - 6, w - 222, 32, 'pn', 'none') + K.outline(212, y - 6, w - 222, 32, st === 'live' ? 'lv' : on ? 'fg' : st === 'fault' ? 'ft' : 'ed', st === 'live' ? W.lamp : on || st === 'fault' ? 2 : W.rule);
+        else k += K.rect(212, y - 6, w - 222, 32, 'pn', on ? 'ed' : st === 'fault' ? 'ft' : 'e1');
+        k += K.t(220, y + 7, fit(s.task ?? '', room), on ? 'fg' : 'mu', 'start', 0, S ? { wt: on ? 700 : W.wt } : {})
           + K.t(220, y + 20, fit(s.meta || '', room - (time ? tw(time) + 10 : 0)), 'ky')
-          + K.t(w - 18, y + 20, time, st === 'live' ? 'lv' : st === 'fault' ? 'ft' : 'ky', 'end');
+          + K.t(w - 18, y + 20, time, st === 'live' ? 'lv' : st === 'fault' ? 'ft' : 'ky', 'end', 0, S ? { wt: 700 } : {});
       });
       if (o.folded) {
         const pts = grow(routes[kids.length]);
-        if (pts) g += K.path('M' + pts.map((p) => p.map((v) => +v.toFixed(2)).join(' ')).join(' L'), 'e1', { dash: '2 3' });
-        k += K.t(212, fy + 4, o.folded, 'ky');
+        if (pts) g += K.path('M' + pts.map((p) => p.map((v) => +v.toFixed(2)).join(' ')).join(' L'), S ? 'fa' : 'e1', S ? { w: 2, dash: '3 3' } : { dash: '2 3' });
+        k += P.L(212, fy + 4, o.folded, 'ky');
       }
       if (T >= M.flash) g += `<g data-land="children">${k}</g>`;
       const label = o.label || `${rootL[0]} with ${kids.length} ${kids.length === 1 ? 'child' : 'children'}: `
@@ -353,10 +462,10 @@
        lap and laps, and center as a function of the lap: (lap) => `train ${lap} of 9`.
        recipes.loop.step(data, ±1) returns the next data, to play() as a step. */
     loop(o) {
-      const warn = warner('loop');
+      const warn = warner('loop'), Pn = pen(o), S = Pn.S, W = K.W;
       const st = Array.isArray(o.stations) ? o.stations : (warn('needs a stations array'), []), N = st.length;
       /* the ring grows past 8 stations so their labels keep apart */
-      const R = N > 8 ? Math.round(70 * N / 8) : 70, cy = R + 68;
+      const r0 = S ? 78 : 70, R = N > 8 ? Math.round(r0 * N / 8) : r0, cy = R + (S ? 74 : 68);   /* at strong weight the centre chip needs a little more room */
       const statesAt = (at) => st.map((s, i) => (at == null ? s.state || 'todo' : i < at && !s.skip ? 'done' : i === at ? 'live' : 'todo'));
       if (o.at == null && st.filter((s) => s.state === 'live').length > 1) warn('more than one live station');
       /* labels sit outside the ring: widen the frame (and move the centre) until the widest fits */
@@ -365,20 +474,24 @@
       const textW = (s, i) => Math.max(tw(`✓ ${i + 1} · ` + String(s.name).toUpperCase()) + 0.5 * String(s.name).length + 3, s.cmd ? tw('$ ' + s.cmd) : 0);
       let left = 0, right = 0;
       st.forEach((s, i) => {
-        const a = ang(i), sd = sideOf(a), dx = R * Math.cos(a), tW = textW(s, i);
-        if (sd === 1) right = Math.max(right, dx + 16 + tW);
-        else if (sd === -1) left = Math.max(left, -dx + 16 + tW);
+        const a = ang(i), sd = sideOf(a), dx = R * Math.cos(a), tW = textW(s, i), gap = S ? 24 : 16;
+        if (sd === 1) right = Math.max(right, dx + gap + tW);
+        else if (sd === -1) left = Math.max(left, -dx + gap + tW);
         else { right = Math.max(right, dx + tW / 2); left = Math.max(left, -dx + tW / 2); }
       });
       const w0 = o.w || 420, half = Math.max(w0 / 2, R * 1.2 + 4);
       const padL = Math.max(0, left + 4 - half), padR = Math.max(0, right + 4 - half);
       const w = Math.ceil(w0 + padL + padR + Math.max(0, 2 * half - w0)), cx = half + padL;
-      const h = o.h || Math.max(250, cy + R + 42);
+      const h = o.h || Math.max(250, cy + R + (S ? 48 : 42));
       const P = st.map((_, i) => { const a = ang(i); return [cx + R * Math.cos(a), cy + R * Math.sin(a), a]; });
       const centre = (lap) => (typeof o.center === 'function' ? o.center(lap) : o.center);
+      /* strong is a schematic: 3px mitred lines (faint to come, ink once run), a solid drafting head arriving at each
+         station, the step number on a 20px chip at each station (lamp outline for the live one), the reading on a chip */
+      const EW = S ? W.base : 1.4, run = new Set();   /* run: the edges drawn whole, whose heads turn to ink */
       const edge = (i, f, c = 'fg') => {
         const q = P[(i + 1) % N];
-        return K.line(P[i][0], P[i][1], P[i][0] + (q[0] - P[i][0]) * f, P[i][1] + (q[1] - P[i][1]) * f, c, { w: 1.4 });
+        if (f >= 1) run.add(i);
+        return K.line(P[i][0], P[i][1], P[i][0] + (q[0] - P[i][0]) * f, P[i][1] + (q[1] - P[i][1]) * f, c, { w: EW });
       };
       /* motion (see play): t is ms. The frame holds still.
          Entry: the station nodes hold still; the done edges trace clockwise one
@@ -391,8 +504,9 @@
       const T = o.t ?? Infinity, stepping = o.from != null, moving = stepping && T < LOOP.step;
       let states = statesAt(o.at), tip = null, textStates = states, lap = o.lap;
       let g = head(o);
-      g += K.circle(cx, cy, R * 1.2, 'none', 'e1');
-      g += K.path(`M${P.map((p) => p[0].toFixed(2) + ' ' + p[1].toFixed(2)).join(' L')} Z`, 'ed');
+      const ring = `M${P.map((p) => p[0].toFixed(2) + ' ' + p[1].toFixed(2)).join(' L')} Z`;
+      g += S ? `<path d="${ring}" stroke-width="${EW}" stroke-linejoin="miter" style="fill:none;stroke:var(--faint)"/>`
+        : K.circle(cx, cy, R * 1.2, 'none', 'e1') + K.path(ring, 'ed');
       if (moving) {
         const fwd = o.dir > 0, wrap = fwd ? o.from === N - 1 : o.from === 0, e = fwd ? o.from : o.at;
         const q = Math.max(0, T) / LOOP.step, f = fwd ? 1 - Math.pow(1 - q, 3) : Math.pow(1 - q, 3);
@@ -413,33 +527,53 @@
           if (f > 0) g += edge(i, f);
         });
       }
-      /* the centre lines stop just past the ring, short of the station labels */
-      g += K.centre(cx - R * 1.05, cy, cx + R * 1.05, cy) + K.centre(cx, cy - R * 1.05, cx, cy + R * 1.05) + K.cross(cx, cy, 4);
-      /* direction: an arrowhead mid-edge, so the reader sees which way the cycle runs */
+      /* the centre lines stop just past the ring, short of the station labels; at strong weight, short of the station chips */
+      const cr = S ? R - 16 : R * 1.05;
+      g += K.centre(cx - cr, cy, cx + cr, cy, 'fa') + K.centre(cx, cy - cr, cx, cy + cr, 'fa') + (S ? '' : K.cross(cx, cy, 4, 'fa'));
+      /* direction: an open arrowhead mid-edge, so the reader sees which way the cycle runs; at strong weight a solid
+         drafting head (8px by 9px) arriving at the next station's chip, in its edge's ink */
       P.forEach((p, i) => {
-        const q = P[(i + 1) % N], mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2, an = Math.atan2(q[1] - p[1], q[0] - p[0]);
+        const q = P[(i + 1) % N], an = Math.atan2(q[1] - p[1], q[0] - p[0]);
+        if (S) {
+          const c = Math.cos(an), sn = Math.sin(an), tx = q[0] - c * 15, ty = q[1] - sn * 15;
+          const b = (o) => `${n2(tx - c * 8 - sn * o)} ${n2(ty - sn * 8 + c * o)}`;
+          g += `<path d="M${n2(tx)} ${n2(ty)}L${b(4.5)}L${b(-4.5)}Z" style="fill:var(${run.has(i) ? '--fg' : '--faint'});stroke:none"/>`;
+          return;
+        }
+        const mx = (p[0] + q[0]) / 2, my = (p[1] + q[1]) / 2;
         const wing = (d) => `${(mx + 5 * Math.cos(an + d)).toFixed(2)} ${(my + 5 * Math.sin(an + d)).toFixed(2)}`;
         g += K.path(`M${wing(Math.PI * 0.8)} L${mx.toFixed(2)} ${my.toFixed(2)} L${wing(-Math.PI * 0.8)}`, 'mu', { w: 1.2 });
       });
+      const ns = 9;
+      /* the strong station: its step number on a 20px chip, inverted once done, red on a fault, the lamp outline when live */
+      const chipAt = (x, y, n, sn) => {
+        const r = K.rect(x - 10, y - 10, 20, 20, sn === 'done' ? 'fg' : sn === 'fault' ? 'ft' : 'pn', 'none');
+        if (sn === 'done' || sn === 'fault') return r + K.t(x, y + 4, n, 'pn', 'middle', 0, { wt: 700 });
+        return r + K.outline(x - 10, y - 10, 20, 20, sn === 'live' ? 'lv' : 'fa', sn === 'live' ? W.lamp : W.plate) + K.t(x, y + 4, n, sn === 'live' ? 'lv' : 'mu', 'middle', 0, { wt: 700 });
+      };
       const changed = (i) => stepping && !moving && (i === o.from || i === o.at);
       const c0 = centre(lap);
-      /* the centre label sits on a panel-coloured ground, so the vertical centre line breaks behind it */
-      const ck = c0 ? K.rect(cx - tw(c0) / 2 - 3, cy + 14, tw(c0) + 6, 14, 'pn', 'none') + K.t(cx, cy + 24, c0, 'mu', 'middle') : '';
+      /* the centre label sits on a panel-coloured ground, so the vertical centre line breaks behind it; at strong weight it is a reading on an inverted chip */
+      const ck = !c0 ? '' : S ? K.chip(cx - K.chipWidth(c0) / 2, cy, c0, 'fg')
+        : K.rect(cx - tw(c0) / 2 - 3, cy + 14, tw(c0) + 6, 14, 'pn', 'none') + K.t(cx, cy + 24, c0, 'mu', 'middle');
       let k = stepping && !moving && o.lap !== o.lapFrom ? `<g data-land="centre">${ck}</g>` : ck;
       st.forEach((s, i) => {
         const [x, y, a] = P[i], cos = Math.cos(a), sin = Math.sin(a), sn = states[i];
         /* done: a solid square and a green ✓ name; todo: a hollow square and a muted name */
-        g += sn === 'live' && !tip ? K.node(x, y, 'live', 9) : K.node(x, y, sn === 'done' || sn === 'fault' ? sn : 'todo', 9);
+        if (S) g += chipAt(x, y, String(i + 1), sn === 'live' && tip ? 'todo' : sn);
+        else if (sn === 'live' && !tip) g += K.node(x, y, 'live', ns);
+        else g += K.node(x, y, sn === 'done' || sn === 'fault' ? sn : 'todo', ns);
         const side = Math.abs(cos) < 0.3 ? 0 : cos > 0 ? 1 : -1;
-        const tx = side === 1 ? x + 16 : side === -1 ? x - 16 : x;
-        const ty = side === 0 ? (sin < 0 ? y - 26 : y + 22) : y - 4;
+        const off = S ? 22 : 16;
+        const tx = side === 1 ? x + off : side === -1 ? x - off : x;
+        const ty = side === 0 ? (sin < 0 ? y - (S ? 30 : 26) : y + (S ? 29 : 22)) : y - 4;
         const an = side === 1 ? 'start' : side === -1 ? 'end' : 'middle';
         const ts = textStates[i], live = ts === 'live', done = ts === 'done', fault = ts === 'fault';
-        let m = K.t(tx, ty, (done ? '\u2713 ' : '') + `${i + 1} \u00b7 ` + String(s.name).toUpperCase(), live ? 'lv' : done ? 'ok' : fault ? 'ft' : 'mu', an, 0.5);
+        let m = Pn.L(tx, ty, (done ? '\u2713 ' : '') + (S ? '' : `${i + 1} \u00b7 `) + String(s.name).toUpperCase(), live ? 'lv' : done ? 'ok' : fault ? 'ft' : 'mu', an, 0.5);
         if (s.cmd) m += K.t(tx, ty + 13, (live ? '$ ' : '') + s.cmd, live ? 'fg' : 'ky', an);
         k += changed(i) ? `<g data-land="st${i}">${m}</g>` : m;
       });
-      if (tip) g += K.node(tip[0], tip[1], 'live', 9);
+      if (tip) g += S ? K.star(tip[0], tip[1], 13, 'pn') + K.star(tip[0], tip[1], 10) : K.node(tip[0], tip[1], 'live', ns);   /* strong: the star rides the tip, on a panel halo */
       if (stepping || T >= recipes.loop.duration(o)) g += stepping ? k : `<g data-land="text">${k}</g>`;
       const fin = statesAt(o.at), c1 = centre(o.lap);
       const WORD = { done: 'done', live: 'live', fault: 'halted', todo: 'to do' };
@@ -450,7 +584,7 @@
     /* ── measured · a long ruler, a magnified inset of the used part, boxed parts (FIG.06)
        { title, max, zoomMax, factor, parts:[{ label, value, ink }], plate:[l1, l2], fmt } */
     measured(o) {
-      const warn = warner('measured');
+      const warn = warner('measured'), P = pen(o), S = P.S, W = K.W;
       const f = o.fmt || C.fmt.k;
       const parts = (Array.isArray(o.parts) ? o.parts : (warn('needs a parts array'), [])).map((p) => ({ ...p, value: Math.max(0, num(p.value)) }));
       const used = parts.reduce((a, p) => a + p.value, 0);
@@ -458,9 +592,9 @@
       if (!(max > 0)) { max = Math.max(1, used); warn('max should be above 0; using the sum of the parts'); }
       if (!(zoomMax > 0)) { zoomMax = Math.max(used, max / 20); warn('zoomMax should be above 0'); }
       if (used > zoomMax) warn('the parts add up past zoomMax; the inset breaks off at its end');
-      const pw = o.plate ? Math.max(94, tw(o.plate[0]) + 18, tw(o.plate[1]) + 18) : 0;
+      const pw = o.plate ? P.plateWidth(o.plate[0], o.plate[1]) : 0;
       /* the frame widens when the row of boxes and the plate wouldn't fit beside each other */
-      const widest = parts.map((p, i) => Math.max(K.boxWidth(p.label, '≈ ' + f(p.value)), o.prev ? K.boxWidth(p.label, '≈ ' + f(o.prev[i] ?? 0)) : 0));
+      const widest = parts.map((p, i) => Math.max(P.boxWidth(p.label, '≈ ' + f(p.value)), o.prev ? P.boxWidth(p.label, '≈ ' + f(o.prev[i] ?? 0)) : 0));
       const row = widest.reduce((a, b) => a + b, 0) + 10 * Math.max(0, parts.length - 1);
       const w = Math.ceil(Math.max(o.w || 460, 18 + row + (o.plate ? pw + 18 : 4))), h = 176;
       const x0 = 18, x1 = w - 20, y = 46, X = K.scale(x0, x1, 0, max);
@@ -484,30 +618,38 @@
       const fill = changing ? now : used * ramp(M.proj, M.fill);
       /* numbered like every figure when n is given; otherwise the title alone */
       let g = o.n != null ? head(o) : o.title ? K.t(12, 18, String(o.title).toUpperCase(), 'mu', 'start', 0.5) : '';
-      g += K.ruler(x0, x1, y, max, max / 20, 4, (v) => (v ? f(v) : '0'), true);
-      if (qTop > 0) g += K.rect(x0, y - 1.5, (X(Math.min(now, max)) - x0) * qTop, 3, 'fg', 'none');
-      if (qTop >= 1 && now > max) g += brk(x1 + 8, y);
+      g += P.ruler(x0, x1, y, max, max / 20, 4, (v) => (v ? f(v) : '0'), true);
+      /* strong: the used bar hangs 7px under the 3px scale */
+      if (qTop > 0) g += K.rect(x0, y - 1.5, (X(Math.min(now, max)) - x0) * qTop, S ? 7 : 3, 'fg', 'none');
+      if (qTop >= 1 && now > max) g += P.brk(x1 + 8, y + (S ? 2 : 0));
       const ix0 = 18, ix1 = Math.round(w * 0.65), iy = 92, IX0 = K.scale(ix0, ix1, 0, zoomMax);
       /* past zoomMax the inset stops at its end and breaks off in red, clear of the detail label */
       const IX = (v) => IX0(Math.min(v, zoomMax)), past = now > zoomMax && fill > zoomMax;
       const factor = o.factor || Math.round(max / zoomMax);
       if (qProj > 0) {
-        const sy = y + 3, dy = iy - 13, lerp = (a, b) => a + (b - a) * qProj;
-        g += K.path(`M${X(0).toFixed(2)} ${sy}L${lerp(X(0), ix0).toFixed(2)} ${lerp(sy, dy).toFixed(2)}M${X(zoomMax).toFixed(2)} ${sy}L${lerp(X(zoomMax), ix1).toFixed(2)} ${lerp(sy, dy).toFixed(2)}`, 'fa', { dash: '2 3' });
+        const sy = y + (S ? 7 : 3), dy = iy - 13, lerp = (a, b) => a + (b - a) * qProj;
+        g += K.path(`M${X(0).toFixed(2)} ${sy}L${lerp(X(0), ix0).toFixed(2)} ${lerp(sy, dy).toFixed(2)}M${X(zoomMax).toFixed(2)} ${sy}L${lerp(X(zoomMax), ix1).toFixed(2)} ${lerp(sy, dy).toFixed(2)}`, 'fa', S ? { w: 2, dash: '3 3' } : { dash: '2 3' });
       }
-      g += K.rect(ix0, iy - 12, ix1 - ix0, 12, 'none', 'ed');
+      /* the inset: a hairline frame, or at strong weight a recessed 12px track filled edge to edge */
+      if (S) g += K.rect(ix0, iy - 12, ix1 - ix0, 12, 'well', 'none');
+      else g += K.rect(ix0, iy - 12, ix1 - ix0, 12, 'none', 'ed');
       let acc = 0; const mids = [];
       parts.forEach((p, i) => {
         const a = acc, b = Math.min(acc + vals[i], fill);
-        if (IX(b) > IX(a)) g += K.rect(IX(a), iy - 11, IX(b) - IX(a), 10, p.ink === 'lv' ? 'var(--live)' : p.ink || 'fg', 'none');
+        if (IX(b) > IX(a)) g += K.rect(IX(a), iy - (S ? 12 : 11), IX(b) - IX(a), S ? 12 : 10, p.ink === 'lv' ? 'var(--live)' : p.ink || 'fg', 'none');
         mids.push(IX(acc + vals[i] / 2)); acc += vals[i];
       });
-      if (past) g += brk(ix1 + 6, iy - 6);
-      for (let i = 0; i <= 10; i++) { const xx = IX(i * zoomMax / 10); g += K.line(xx, iy, xx, iy + (i % 5 ? 3 : 6), 'fa'); }
-      [0, 0.5, 1].forEach((r, i) => { g += K.t(IX(r * zoomMax), iy + 16, r ? f(r * zoomMax) : '0', 'ky', i ? 'middle' : 'start'); });
+      if (S) g += K.outline(ix0, iy - 12, ix1 - ix0, 12, 'ed', W.rule);
+      if (past) g += P.brk(ix1 + 6, iy - 6);
+      for (let i = 0; i <= 10; i++) {
+        const xx = IX(i * zoomMax / 10), M = i % 5 === 0;
+        g += S ? K.line(xx, iy, xx, iy + (M ? 7 : 4), M ? 'fg' : 'fa', { w: M ? W.major : W.tick }) : K.line(xx, iy, xx, iy + (M ? 6 : 3), 'fa');
+      }
+      [0, 0.5, 1].forEach((r, i) => { g += P.L(IX(r * zoomMax), iy + (S ? 18 : 16), r ? f(r * zoomMax) : '0', 'ky', i ? 'middle' : 'start'); });
       acc = 0;
-      parts.forEach((p, i) => { if (fill >= acc + vals[i] / 2) g += K.circle(mids[i], iy - 6, 1.8, 'pn', 'fa'); acc += vals[i]; });
-      let k = K.t(ix1 + (used > zoomMax ? 16 : 8), iy - 3, `${(o.detail ?? 'A') ? 'DETAIL ' + (o.detail ?? 'A') + '  ' : ''}${factor}:1`, 'mu');
+      /* each part's centre: a dot, or at strong weight a square cut out of the fill */
+      parts.forEach((p, i) => { if (fill >= acc + vals[i] / 2) g += S ? K.rect(mids[i] - 2, iy - 8, 4, 4, 'pn', 'none') : K.circle(mids[i], iy - 6, 1.8, 'pn', 'fa'); acc += vals[i]; });
+      let k = P.L(ix1 + (used > zoomMax ? 16 : 8), iy - 3, `${(o.detail ?? 'A') ? 'DETAIL ' + (o.detail ?? 'A') + '  ' : ''}${factor}:1`, 'mu');
       /* the row of boxes starts at 92, or further left (to the inset's edge)
          when the boxes and the plate wouldn't fit the width */
       let bx = Math.max(ix0, Math.min(92, (o.plate ? w - pw - 18 : w - 4) - row));
@@ -516,13 +658,13 @@
       parts.forEach((p, i) => {
         const reached = fill >= acc + vals[i] / 2; acc += vals[i];
         /* while gliding, a box is as wide as the wider of its old and new value, so the row holds still */
-        const val = '≈ ' + f(vals[i]), bw = changing && !landed ? Math.max(K.boxWidth(p.label, '≈ ' + f(o.prev[i] ?? 0)), K.boxWidth(p.label, '≈ ' + f(p.value))) : K.boxWidth(p.label, val);
-        const m = K.line(mids[i], iy, mids[i], 122, 'fa') + K.box(bx, 122, bw, p.label, val, p.ink === 'lv' ? 'lv' : 'fg');
+        const val = '≈ ' + f(vals[i]), bw = changing && !landed ? Math.max(P.boxWidth(p.label, '≈ ' + f(o.prev[i] ?? 0)), P.boxWidth(p.label, '≈ ' + f(p.value))) : P.boxWidth(p.label, val);
+        const m = (S ? K.line(mids[i], iy + 1, mids[i], 118, 'fa', { w: 2 }) : K.line(mids[i], iy, mids[i], 122, 'fa')) + P.box(bx, 122, bw, p.label, val, p.ink === 'lv' ? 'lv' : 'fg');
         if (changing) k += landed && (o.prev[i] ?? 0) !== p.value ? `<g data-land="part${i}">${m}</g>` : m;
         else if (reached) g += `<g data-land="part${i}">${m}</g>`;   /* entry: each box flashes in as the fill passes its part */
         bx += bw + 10;
       });
-      if (o.plate) k += K.plate(Math.max(bx + 4, w - pw - 14), 118, 94, o.plate[0], o.plate[1]);
+      if (o.plate) k += P.plate(Math.max(bx + 4, w - pw - 14), 118, 94, o.plate[0], o.plate[1]);
       if (changing) g += k;
       else if (T >= M.flash) g += `<g data-land="parts">${k}</g>`;
       const label = o.label || `${o.title || 'Measure'}: ${f(used)} of ${f(max)}.` + (parts.length ? ' ' + parts.map((p) => `${p.label} ${f(p.value)}`).join(', ') + '.' : ' Nothing measured.')
@@ -538,7 +680,7 @@
        reads in minutes, a 28-hour one in hours.
        Step numbers that would touch their neighbour are skipped; the last always shows. */
     timeline(o) {
-      const warn = warner('timeline');
+      const warn = warner('timeline'), P = pen(o), S = P.S, W = K.W;
       const w = o.w || 470, x0 = 14, x1 = w - 14, y = 70, noun = o.noun || 'step';
       const raw = Array.isArray(o.steps) ? o.steps : (warn('needs a steps array'), []);
       if (raw.some((d) => !(num(d, -1) >= 0))) warn('steps should be seconds, 0 or more; others drawn as 0');
@@ -546,8 +688,8 @@
       const total = steps.reduce((a, b) => a + b, 0);
       if (!steps.length) {
         /* nothing ran yet: the ruler and a quiet note, no NaN */
-        const g0 = head(o) + K.t(x0, y + 4, `no ${noun}s yet`, 'ky') + K.ruler(x0, x1, 128, 5, 1, 5, tickLabel);
-        return warn.done({ w, h: 150, markup: g0, label: o.label || `${o.title || 'Timeline'}: no ${noun}s yet.` });
+        const g0 = head(o) + P.L(x0, y + 4, `no ${noun}s yet`, 'ky') + P.ruler(x0, x1, 128, 5, 1, 5, tickLabel);
+        return warn.done({ w, h: 150 + P.rh, markup: g0, label: o.label || `${o.title || 'Timeline'}: no ${noun}s yet.` });
       }
       /* a live step is still running: what comes after it is still to do */
       const live = Number.isInteger(o.live) && o.live >= 0 && o.live < steps.length ? o.live : -1;
@@ -577,41 +719,46 @@
       const c = cur(T), ct = cur(TT);
       let g = head(o), k = '';
       t = 0;
-      g += K.node(x0, y, 'done');
+      g += P.node(x0, y, 'done');
       steps.forEach((d, i) => {
         const a = X(t), b = X(t + d), s = i === slow && o.slowest !== false, lit = i === live, todo = live >= 0 && i > live;
         const lineTo = X(Math.min(t + d, ct));
         /* a step still to do is a dashed faint line ending in an open node */
-        if (ct > t && lineTo - a > 8) g += K.line(a + 4, y, Math.min(b - 4, lineTo), y, todo ? 'fa' : s ? 'fg' : 'mu', todo ? { dash: '2 3' } : { w: s ? 2 : 1.3 });
+        /* strong: each step a solid bar between its nodes, the slowest thicker and in ink */
+        if (ct > t && lineTo - a > (S ? 10 : 8)) {
+          const xa = a + (S ? 5 : 4), xb = Math.min(b - (S ? 5 : 4), lineTo), bh = s ? 8 : 5;
+          if (!S || todo) g += K.line(xa, y, xb, y, todo ? 'fa' : s ? 'fg' : 'mu', todo ? (S ? { w: 2, dash: '3 3' } : { dash: '2 3' }) : { w: s ? 2 : 1.3 });
+          else g += K.rect(xa, y - bh / 2, xb - xa, bh, s ? 'fg' : 'mu', 'none');
+        }
         if (c >= t + d) {
-          g += K.node(b, y, lit ? 'live' : todo ? 'todo' : 'done');
-          if (shown.has(i)) g += K.t(mids[i], y - 8, name(i), s ? 'fg' : 'ky', 'middle');
-        } else if (c > t && lit) g += K.node(X(c), y, 'live');
+          g += P.node(b, y, lit ? 'live' : todo ? 'todo' : 'done');
+          if (shown.has(i)) g += P.L(mids[i], y - (S ? 10 : 8), name(i), s ? 'fg' : 'ky', 'middle');
+        } else if (c > t && lit) g += P.node(X(c), y, 'live');
         if (s) {
-          const m = (a + b) / 2, l = [o.slowLabel || 'slowest', `${noun} ${name(i)} · ${fmt.dur(d)}`], bw = K.boxWidth(...l);
+          const m = (a + b) / 2, l = [o.slowLabel || 'slowest', `${noun} ${name(i)} · ${fmt.dur(d)}`], bw = P.boxWidth(...l);
           const right = m + 14 + bw < w;
-          k += K.leader([[m, y + 6], [m, y + 28], [right ? m + 14 : m - 14, y + 28]], false) + K.box(right ? m + 14 : m - 14 - bw, y + 14, bw, l[0], l[1], 'fg');
+          k += P.leader([[m, y + (S ? 8 : 6)], [m, y + 28], [right ? m + 14 : m - 14, y + 28]], false) + P.box(right ? m + 14 : m - 14 - bw, y + 14, bw, l[0], l[1], 'fg');
         }
         t += d;
       });
       /* the dimension spans what has run: the whole run, or up to the live step */
-      k += K.dim(x0, X(through), 36, `${o.totalLabel || (live < 0 ? 'complete' : 'running')} · ${fmt.dur(through)}`, 'fg');
+      k += P.dim(x0, X(through), 36, `${o.totalLabel || (live < 0 ? 'complete' : 'running')} · ${fmt.dur(through)}`, 'fg');
       if (T >= M.flash) g += T >= Infinity ? k : `<g data-land="details">${k}</g>`;
-      g += K.ruler(x0, x1, 128, max, tick, 5, tickLabel);
+      g += P.ruler(x0, x1, 128, max, tick, 5, tickLabel);
       /* the end of the ruler is numbered too, when it isn't a numbered tick and there is room */
       const nt = Math.round(max / tick), lastMajor = X(Math.floor(nt / 5) * 5 * tick), endLab = tickLabel(max);
-      if (nt % 5 && lastMajor + tw(tickLabel(Math.floor(nt / 5) * 5 * tick)) / 2 + 8 < x1 - tw(endLab) / 2) g += K.t(x1, 145, endLab, 'ky', 'middle');
+      if (nt % 5 && lastMajor + tw(tickLabel(Math.floor(nt / 5) * 5 * tick)) / 2 + 8 < x1 - tw(endLab) / 2) g += P.L(x1, 145 + (S ? 4 : 0), endLab, 'ky', 'middle');
       const slowSaid = slow >= 0 ? ` slowest${live >= 0 ? ' so far' : ''} is ${noun} ${name(slow)} at ${fmt.dur(steps[slow])}.` : '';
       const label = o.label || (live < 0
         ? `${o.title || 'Timeline'}: ${steps.length} ${noun}s, ${fmt.dur(total)} in total;${slowSaid}`
         : `${o.title || 'Timeline'}: ${steps.length} ${noun}s; ${noun} ${name(live)} running, ${fmt.dur(through)} so far; ${steps.length - live - 1} to go.${slowSaid}`);
-      return warn.done({ w, h: 150, markup: g, label });
+      return warn.done({ w, h: 150 + P.rh, markup: g, label });
     },
 
     /* ── matrix · which rows touch which columns; one column called out (FIG.22)
        { n, title, cols:[...], rows:[...], hits:[[colIdx…] per row], callout:{ col, l1, l2 } } */
     matrix(o) {
-      const warn = warner('matrix');
+      const warn = warner('matrix'), P = pen(o), S = P.S, W = K.W;
       const rows = Array.isArray(o.rows) ? o.rows : (warn('needs a rows array'), []);
       const cols = Array.isArray(o.cols) ? o.cols : (warn('needs a cols array'), []);
       const R = rows.length, Cn = cols.length, cw = 42, rh = 14;
@@ -628,21 +775,22 @@
       const reach = Math.max(0, ...cols.map((c, j) => cx0 + j * cw + cw / 2 + 3 + tw(c) * cos + 4));
       const call = o.callout && Number.isInteger(o.callout.col) && o.callout.col >= 0 && o.callout.col < Cn ? o.callout : null;
       if (o.callout && !call) warn('callout.col is not a column; no callout drawn');
-      const w = Math.ceil(Math.max(470, cx0 + Cn * cw + 20, reach)), h = ry0 + R * rh + (call ? 50 : 16);
+      const w = Math.ceil(Math.max(470, cx0 + Cn * cw + 20, reach)), h = ry0 + R * rh + (call ? (S ? 58 : 50) : 16);
       let g = head(o);
-      cols.forEach((c, j) => { const x = cx0 + j * cw + cw / 2; g += `<text transform="translate(${x + 3} ${ry0 - 10}) rotate(-50)" style="fill:var(--muted)">${C.esc(c)}</text>`; });
+      cols.forEach((c, j) => { const x = cx0 + j * cw + cw / 2; g += `<text transform="translate(${x + 3} ${ry0 - 10}) rotate(-50)" style="fill:var(--muted)${S ? `;font-weight:${W.wt}` : ''}">${C.esc(c)}</text>`; });
       rows.forEach((r, i) => {
         const y = ry0 + i * rh;
-        g += K.t(cx0 - 12, y + 4, r, 'ky', 'end') + K.line(cx0, y, cx0 + Cn * cw, y, 'e1');
-        hits[i].forEach((j) => { g += K.rect(cx0 + j * cw + cw / 2 - 4, y - 4, 8, 8, 'fg', 'none'); });
+        g += P.L(cx0 - 12, y + 4, r, 'ky', 'end') + K.line(cx0, y, cx0 + Cn * cw, y, 'e1');
+        hits[i].forEach((j) => { const q = S ? 10 : 8; g += K.rect(cx0 + j * cw + cw / 2 - q / 2, y - q / 2, q, q, 'fg', 'none'); });
       });
       for (let j = 0; j <= Cn; j++) g += K.line(cx0 + j * cw, ry0 - 7, cx0 + j * cw, ry0 + (R - 1) * rh + 7, 'e1');
       if (call) {
         const j = call.col, x = cx0 + j * cw + cw / 2, yb = ry0 + (R - 1) * rh + 7;
-        const bw = K.boxWidth(call.l1, call.l2);
+        const bw = P.boxWidth(call.l1, call.l2);
         const bx = Math.min(x + 2 * cw - cw / 2, w - bw - 4);
-        g = K.rect(cx0 + j * cw + 1, ry0 - 7, cw - 2, (R - 1) * rh + 14, 'well', 'fg', { w: 1.6 }) + g;   /* under the hits */
-        g += K.leader([[x, yb], [x, yb + 11], [bx, yb + 11]], false) + K.box(bx, yb - 1, bw, call.l1, call.l2, 'fg', 'fg');
+        g = (S ? K.rect(cx0 + j * cw + 1, ry0 - 7, cw - 2, (R - 1) * rh + 14, 'well', 'none') + K.outline(cx0 + j * cw + 1, ry0 - 7, cw - 2, (R - 1) * rh + 14, 'fg', W.major)
+          : K.rect(cx0 + j * cw + 1, ry0 - 7, cw - 2, (R - 1) * rh + 14, 'well', 'fg', { w: 1.6 })) + g;   /* under the hits */
+        g += P.leader([[x, yb], [x, yb + (S ? 19 : 11)], [bx, yb + (S ? 19 : 11)]], false) + P.box(bx, yb + (S ? 7 : -1), bw, call.l1, call.l2, 'fg', 'fg');
       }
       /* the label lists the cells, row by row, so the grid can be read without seeing it */
       const label = o.label || `${o.title || 'Matrix'}: ${R} rows by ${Cn} columns.`
@@ -658,12 +806,14 @@
        A callout leads to a point (at) or to a region's right edge (region, its
        index). Regions are kept inside the boundary, clear of the callouts. */
     section(o) {
-      const warn = warner('section');
+      const warn = warner('section'), P = pen(o), S = P.S, W = K.W;
       const calls = o.callouts || [];
-      const w = o.w || 520, h = Math.max(o.h || 266, 40 + calls.length * 54 + 4);
-      const boxW = Math.max(112, ...calls.map((c) => K.boxWidth(c.l1, c.l2))), colX = w - boxW - 2;
+      /* the callout column starts where the soft one does: strong nameplates widen the frame, so region coordinates hold */
+      const soft = Math.max(112, ...calls.map((c) => K.boxWidth(c.l1, c.l2))), boxW = Math.max(soft, ...calls.map((c) => P.boxWidth(c.l1, c.l2)));
+      const w = (o.w || 520) + boxW - soft, h = Math.max(o.h || 266, 40 + calls.length * 54 + 4), colX = w - boxW - 2;
       /* closed is hatched in faint ink (a mark that carries meaning holds 3:1); locked islands in a finer faint hatch */
-      const H1 = K.hatch('fa', 6), H2 = K.hatch('fa', 4);
+      /* strong: the same hatch in 2px stripes, wider apart */
+      const H1 = S ? K.hatch('fa', 7, 1, 2) : K.hatch('fa', 6), H2 = S ? K.hatch('fa', 5, 1, 1.5) : K.hatch('fa', 4);
       const edge = o.boundary ? colX - 16 : colX - 8;
       const regions = (o.regions || []).map((r) => {
         const iw = r.kind === 'island' ? r.w || tw(r.label) + 10 : r.w;
@@ -676,19 +826,19 @@
       });
       let g = H1.def + H2.def + head(o);
       if (o.boundary) {
-        g += K.rect(8, 26, colX - 20, h - 52, 'none', 'fa', { dash: '5 4' });
-        if (o.boundary.label) g += K.path(`M16 ${h - 17}l6 6M22 ${h - 17}l-6 6`, 'fg', { w: 1.4 }) + K.t(30, h - 10, o.boundary.label, 'mu');
+        g += K.rect(8, 26, colX - 20, h - 52, 'none', 'fa', S ? { w: 2, dash: '6 4' } : { dash: '5 4' });
+        if (o.boundary.label) g += K.path(`M16 ${h - 17}l6 6M22 ${h - 17}l-6 6`, 'fg', { w: S ? 2.5 : 1.4 }) + P.L(30, h - 10, o.boundary.label, 'mu');
       }
       regions.forEach((r) => {
-        const L = r.label ? K.t(r.x + 8, r.y + 16, r.label, 'fg') : '', S = r.sub ? K.t(r.x + 8, r.y + 32, r.sub, 'ky') : '';
+        const L = r.label ? P.L(r.x + 8, r.y + 16, r.label, 'fg') : '', S = r.sub ? K.t(r.x + 8, r.y + 32, r.sub, 'ky') : '';
         if (r.kind === 'hatch') {
-          g += `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${H1.url}" style="stroke:var(--edge-strong)"/>`;
-          if (r.label) g += K.rect(r.x + 4, r.y + 4, tw(r.label) + 8, 16, 'pn', 'none') + K.t(r.x + 8, r.y + 16, r.label, 'fg');
+          g += `<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${H1.url}" style="stroke:var(--edge-strong)${S ? ';stroke-width:1.5' : ''}"/>`;
+          if (r.label) g += K.rect(r.x + 4, r.y + 4, tw(r.label) + 8, 16, 'pn', 'none') + P.L(r.x + 8, r.y + 16, r.label, 'fg');
         } else if (r.kind === 'island') {
           const iw = r.w || tw(r.label) + 10;
-          g += `<rect x="${r.x}" y="${r.y}" width="${iw}" height="17" fill="${H2.url}" style="stroke:var(--edge-strong)"/>` + K.rect(r.x + 2, r.y + 3, iw - 4, 11, 'pn', 'none') + K.t(r.x + 5, r.y + 12.5, r.label, 'mu');
+          g += `<rect x="${r.x}" y="${r.y}" width="${iw}" height="17" fill="${H2.url}" style="stroke:var(--edge-strong)${S ? ';stroke-width:1.5' : ''}"/>` + K.rect(r.x + 2, r.y + 3, iw - 4, 11, 'pn', 'none') + P.L(r.x + 5, r.y + 12.5, r.label, 'mu');
         } else {
-          const opt = r.kind === 'strong' ? { w: 1.6 } : r.kind === 'dotted' ? { dash: '1 2' } : {};
+          const opt = r.kind === 'strong' ? { w: S ? W.major : 1.6 } : r.kind === 'dotted' ? (S ? { w: 2, dash: '2 3' } : { dash: '1 2' }) : S ? { w: W.rule } : {};
           g += K.rect(r.x, r.y, r.w, r.h, r.kind === 'strong' ? 'none' : 'pn', 'fg', opt) + L + S;
         }
       });
@@ -701,8 +851,8 @@
           else at = [r.x + (r.kind === 'island' ? r.w || tw(r.label) + 10 : r.w), r.y + (r.kind === 'island' ? 8.5 : 12)];
         }
         if (at) c = { ...c, at };
-        if (c.at) g += K.leader([c.at, [c.at[0], y + 16], [colX, y + 16]].filter((p, k) => k !== 1 || p[0] !== c.at[0] || p[1] !== c.at[1]));
-        g += K.box(colX, y, boxW, c.l1, c.l2, c.live ? 'lv' : 'fg', c.live ? 'lv' : 'ed');
+        if (c.at) g += P.leader([c.at, [c.at[0], y + 16], [colX, y + 16]].filter((p, k) => k !== 1 || p[0] !== c.at[0] || p[1] !== c.at[1]));
+        g += P.box(colX, y, boxW, c.l1, c.l2, c.live ? 'lv' : 'fg', c.live ? 'lv' : 'ed');
       });
       const label = o.label || `${o.title || 'Section'}: ` + (calls.length ? calls.map((c) => `${c.l1}: ${c.l2}`).join('; ')
         : regions.map((r) => r.label).filter(Boolean).join(', ') || 'empty');
@@ -710,10 +860,15 @@
     },
   };
 
-  /* mount a recipe result into an <svg> */
-  function mount(svg, r) {
+  /* weighed · the data at the svg's weight (the nearest [data-weight]), unless the data names its own */
+  const weighed = (svg, d) => (d && d.weight ? d : { ...d, weight: C.weight(svg) });
+
+  /* mount a recipe result into an <svg>: mount(svg, result), or mount(svg, recipe, data),
+     which draws at the svg's weight and redraws when a [data-weight] around it changes */
+  function mount(svg, r, data) {
     if (typeof svg === 'string') svg = document.querySelector(svg);
     if (!svg) return null;
+    if (typeof r === 'function') { svg._calFig = { recipe: r, data }; r = r(weighed(svg, data)); }
     C.attr(svg, 'width', r.w); C.attr(svg, 'height', r.h);
     C.attr(svg, 'viewBox', `0 0 ${r.w} ${r.h}`);
     return C.draw(svg, r.markup, r.label);
@@ -789,7 +944,7 @@
     if (svg._calStop) svg._calStop();
     const ext0 = recipe.extent ? recipe.extent(data) : 0;
     if (opts.still || !ext0 || !svg.animate || !root.IntersectionObserver || reduced()) {
-      mount(svg, recipe(data));
+      mount(svg, recipe, data);
       crawl(svg);
       return svg;
     }
@@ -810,14 +965,14 @@
     };
     svg._calStop = stop;
     svg._calRetarget = (r, d) => {
-      draw = r; cur = d;
-      if (!clock) mount(svg, draw({ ...cur, t: 0, tt: 0 }));   /* still waiting to be seen */
+      draw = r; cur = d; svg._calFig = { recipe: r, data: d };
+      if (!clock) mount(svg, draw(weighed(svg, { ...cur, t: 0, tt: 0 })));   /* still waiting to be seen */
     };
     const frame = () => {
       if (!clock) return;
       if (!svg.isConnected) return stop();
       const e = clock.currentTime || 0;
-      mount(svg, draw({ ...cur, t: at(e), tt: at(e - TRAIL) }));
+      mount(svg, draw(weighed(svg, { ...cur, t: at(e), tt: at(e - TRAIL) })));
       let busy = e < ms + TRAIL;
       svg.querySelectorAll('[data-land]').forEach((g) => {
         const k = g.getAttribute('data-land');
@@ -830,10 +985,11 @@
       });
       if (busy) return requestAnimationFrame(frame);
       clock.cancel(); clock = null; svg._calRetarget = null;
-      mount(svg, draw(cur));
+      mount(svg, draw, cur);
       crawl(svg);
     };
-    mount(svg, draw({ ...cur, t: 0, tt: 0 }));
+    svg._calFig = { recipe, data };
+    mount(svg, draw(weighed(svg, { ...cur, t: 0, tt: 0 })));
     io = new IntersectionObserver((es) => {
       if (!es.some((x) => x.isIntersecting)) return;
       io.disconnect(); io = null;
@@ -853,9 +1009,20 @@
     if (typeof svg === 'string') svg = document.querySelector(svg);
     if (!svg) return null;
     if (svg._calRetarget) { svg._calRetarget(recipe, data); return svg; }
-    mount(svg, recipe(data));
+    mount(svg, recipe, data);
     crawl(svg);
     return svg;
+  }
+
+  /* a [data-weight] change redraws every figure mounted from a recipe, at its new weight;
+     a replay in flight picks the weight up on its next frame */
+  if (typeof document !== 'undefined' && root.MutationObserver) {
+    new MutationObserver(() => document.querySelectorAll('svg').forEach((svg) => {
+      const f = svg._calFig;
+      if (!f) return;
+      if (svg._calRetarget) svg._calRetarget(f.recipe, f.data);
+      else { mount(svg, f.recipe, f.data); crawl(svg); }
+    })).observe(document.documentElement, { attributes: true, subtree: true, attributeFilter: ['data-weight'] });
   }
 
   root.Calibrated = Object.assign(C, { recipes, mount, render, play, update });

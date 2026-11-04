@@ -97,6 +97,9 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
 .ex-code { margin: 0; padding: 18px 20px; background: var(--d-code); max-height: 460px; overflow: auto; }
 .ex-code code { font: 400 13px/1.65 var(--d-mono); color: var(--d-fg); white-space: pre; display: block; tab-size: 2; }
 .ex-code[hidden], .ex-prev[hidden] { display: none; }
+/* soft and strong, one above the other */
+.ex-w + .ex-w { margin-top: 26px; padding-top: 22px; border-top: 1px dashed var(--edge-strong); }
+.ex-wl { display: block; margin-bottom: 14px; font: 500 12.5px/1 var(--d-sans); color: var(--d-muted); letter-spacing: 0; text-transform: none; }
 .h-t { color: var(--hl-t); } .h-a { color: var(--hl-a); } .h-s { color: var(--hl-s); } .h-k { color: var(--hl-k); } .h-n { color: var(--hl-n); } .h-c { color: var(--hl-c); font-style: italic; }
 pre.block { border: 1px solid var(--d-line-2); border-radius: 10px; margin: 0 0 16px; position: relative; padding-top: 46px; }
 pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-code); }
@@ -178,7 +181,7 @@ pre.block .copy { position: absolute; top: 8px; right: 8px; background: var(--d-
 <header class="top">
   <button class="icon-btn menu-btn" id="menu" aria-label="Open navigation" aria-expanded="false" aria-controls="side"><svg viewBox="0 0 18 18"><path d="M3 5h12M3 9h12M3 13h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button>
   <a class="brand" href="#intro" aria-label="Calibrated, back to top"><svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg><span class="word">Calibrated</span></a>
-  <span class="ver" id="ver">Rev Q</span>
+  <span class="ver" id="ver">Rev T</span>
   <span class="sp"></span>
   <a class="top-link" href="index.html">Catalog</a>
   <a class="top-link" href="#install">Install</a>
@@ -278,7 +281,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
     <!-- ── Instruments -->
     <section class="group" id="instruments">
       <h2>Instruments</h2>
-      <p>Custom elements. Each draws an SVG with a title and an <code>aria-label</code> that states its facts in words. All accept <code>density="full|compact"</code>, or follow the nearest <code>[data-density]</code>.</p>
+      <p>Custom elements. Each draws an SVG with a title and an <code>aria-label</code> that states its facts in words. All accept <code>density="full|compact"</code> and <code>weight="soft|strong"</code>, or follow the nearest <code>[data-density]</code> and <code>[data-weight]</code>. Each example shows both weights: soft, the default, in hairlines; strong, for operations screens and anything read from a distance, the same geometry drawn heavy.</p>
 
       <div class="item" id="meter">
         <h3>Meter <a class="anchor" href="#meter" aria-label="Link to Meter">#</a></h3>
@@ -382,7 +385,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
     <!-- ── Figures -->
     <section class="group" id="figures">
       <h2>Figures</h2>
-      <p>Recipes take data and return a whole figure as an SVG string. Mount it into an empty <code>&lt;svg&gt;</code> with <code>Calibrated.mount()</code>, or use <code>Calibrated.play(svg, recipe, data)</code> to replay it when it comes into view, as every figure here does (lanes, budget, merge, fan-out, loop, measured and timeline move; matrix and section just draw). Needs <code>calibrated-figures.js</code> and <code>calibrated-recipes.js</code>. Example data on this page is illustrative.</p>
+      <p>Recipes take data and return a whole figure as an SVG string. Mount it into an empty <code>&lt;svg&gt;</code> with <code>Calibrated.mount()</code>, or use <code>Calibrated.play(svg, recipe, data)</code> to replay it when it comes into view, as every figure here does (lanes, budget, merge, fan-out, loop, measured and timeline move; matrix and section just draw). Each example shows both weights: strong draws the same figure with 3px rulers, nameplates, chips and solid bars, and <code>play</code>, <code>update</code> and <code>mount(svg, recipe, data)</code> pick it up from the nearest <code>[data-weight]</code>. Needs <code>calibrated-figures.js</code> and <code>calibrated-recipes.js</code>. Example data on this page is illustrative.</p>
       <div class="item" id="lanes"><h3>Lanes <a class="anchor" href="#lanes" aria-label="Link to Lanes">#</a></h3><p>Runs on one time ruler; the live one is lit by the lamp.</p><div class="ex" data-recipe="lanes"><div class="ex-prev cal-theme"><svg id="r-lanes"></svg></div></div></div>
       <div class="item" id="budget"><h3>Budget <a class="anchor" href="#budget" aria-label="Link to Budget">#</a></h3><p>A limit, its alerts, and today's pace to the end of the period.</p><div class="ex" data-recipe="budget"><div class="ex-prev cal-theme"><svg id="r-budget"></svg></div></div></div>
       <div class="item" id="merge"><h3>Merge <a class="anchor" href="#merge" aria-label="Link to Merge">#</a></h3><p>A branch with the exact command at each node.</p><div class="ex" data-recipe="merge"><div class="ex-prev cal-theme"><svg id="r-merge"></svg></div></div></div>
@@ -397,7 +400,7 @@ cp -r calibrated/skills/* ~/.claude/skills/</code></pre>
     <!-- ── Components -->
     <section class="group" id="components">
       <h2>Components</h2>
-      <p>Pure CSS classes, plus a little JS for counts and sign-off. They carry the kit's drawing-sheet look into your own pages.</p>
+      <p>Pure CSS classes, plus a little JS for counts and sign-off. They carry the kit's drawing-sheet look into your own pages. Parts that carry state or values come in two weights, and their examples show both: soft by default, strong under <code>data-weight="strong"</code> on any ancestor (the page or a panel). Markup and behaviour are the same; panels, gaps and hairlines stay soft.</p>
 
       <div class="item" id="card">
         <h3>Card and sign-off <a class="anchor" href="#card" aria-label="Link to Card and sign-off">#</a></h3>
@@ -874,6 +877,9 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
     <section class="group" id="changelog">
       <h2>Changelog</h2>
       <ol class="log">
+        <li><b>Rev T</b><time datetime="2026-11-04">2026-11-04</time><p>Strong weight for the figures. All nine recipes now draw a strong form under <code>data-weight="strong"</code>, in the instruments' language: 3px rulers closed by mitred end posts, nameplates for boxes, chips for readings and step numbers, 2px leaders and dimensions, larger nodes. Lanes become solid bars (the running lane a lamp bar), budget the strong meter's recessed track with hazard stripes and a needle, timeline steps solid bars, the measured inset a recessed track, and the loop a schematic of 3px mitred lines with a drafting head into each station, step numbers on chips and its reading on a chip. Layout, facts, motion and labels don't change. <code>play</code> and <code>update</code> read the weight from the page and redraw when it changes; <code>mount(svg, recipe, data)</code> does the same, or pass <code>weight</code> in the data. Every figure example now shows soft and strong. See <a href="#figures">Figures</a>.</p></li>
+        <li><b>Rev S</b><time datetime="2026-11-04">2026-11-04</time><p>Strong weight for the components. <code>data-weight="strong"</code> now also draws the parts that carry state or values, each as one physical part rather than a thicker line. Buttons are panel keys (an ink plate while held) and the primary an ink plate with an engraved line; pressed keep and drop latch as green and red plates, and rework latches lit in the lamp. The open tab is an index-tab plate, a count a counter window, a badge a pilot-light plate with a lens, and a status dot a pilot light. Tables get a nameplate head band, pilot-light statuses and an inset index plate on a failed or running row. Stamps are struck with a double frame, section heads run between end stops, block heads take an index bar, and the tally gets a 3px rail with one verdict cell per card. Inputs are write-in slots (a hazard band in error), checkboxes and radios fill around an engraved mark, the switch slot fills with ink, and the range and the detent become fader caps in a slotted rail. Focus is a 2.5px lamp ring. Panels, gaps and hairlines stay soft. Every component example now shows soft and strong side by side. See <a href="#components">Components</a>.</p></li>
+        <li><b>Rev R</b><time datetime="2026-11-04">2026-11-04</time><p>Strong weight. Every instrument now comes in two weights: soft (the default, hairlines) and strong, a bolder, industrial drawing of the same geometry for operations screens. Set <code>data-weight="strong"</code> on the page or a panel, or <code>weight="strong"</code> on one instrument. Strong draws 3px scales with mitred ends, solid 10–12px bars, readings on nameplates and inverted chips, hazard stripes past an alert and 600-weight legends; position becomes a fader cap in a slot, progress a bar of segmented cells, and a running span a solid lamp bar. Motion, attributes and the spoken sentence don't change. New in the figure kit: <code>Calibrated.weight()</code>, <code>K.W</code>, <code>K.hazard</code>, <code>K.mitre</code>, <code>K.outline</code>, <code>K.nameplate</code> and <code>K.chip</code>. Weight is the sixth look setting. See <a href="#instruments">Instruments</a>.</p></li>
         <li><b>Rev Q</b><time datetime="2026-11-02">2026-11-02</time><p>Defaults, not a uniform. The grammar stays fixed (the eight marks, one scale, one lamp, red and green meanings, monospace labels), and the look is now chosen per page from five settings: a palette taken from the subject, a headline face, a frame, a layout and a spacing. Headings may use one grotesk or condensed sans (<code>--font-display</code>, <code>--display-case</code>, <code>--display-weight</code>). New: <code>data-frame="paper"</code> drops the desk, <code>data-space="open"</code> opens up the gaps, and <code>.cal-grid</code> sets figures side by side. The lamp tint may mark the one live region of a figure. See <a href="#looks">Looks</a> and <code>looks.md</code>. On this site, the six examples each take their own look (with a switch to compare against the default), and the catalog's Finishes became Looks.</p></li>
         <li><b>Rev P</b><time datetime="2026-11-02">2026-11-02</time><p>Terminal spinners. They step in whole frames, like a terminal redraw, with the lamp dot as the head. <code>&lt;cal-spin&gt;</code> is now a 3×3 braille dot ring, and <code>.cal-wait</code> is a braille row, four dots by two, with the same four-<code>&lt;i&gt;</code> markup as before. New: <code>.cal-readout</code>, a waiting line with a dotted leader and a <code>&lt;cal-elapsed&gt;</code> clock that resolves in place to a green or red result. <code>.cal-scan</code> still renders but is no longer shown.</p></li>
         <li><b>Rev O</b><time datetime="2026-11-02">2026-11-02</time><p>A review of every component on this page. A theme is now three colours: title, muted, green, red and the desk derive from <code>--bg</code>, <code>--fg</code> and <code>--live</code>, so a re-seeded region stays readable, and every mark holds up in forced-colours mode. Small text reads at 4.5:1 and state marks at 3:1, and the film lamp is darker. Sign-off and tabs are wired by the kit (<code>Calibrated.signoff()</code>, <code>Calibrated.tabs()</code>). The lamp lights only what is live: a meter needle is ink unless set <code>live</code>, a wizard step is an ink star. Values past the end of a scale break off in red and state the real number, the ruler writes its value, and recipes report bad data in <code>r.warnings</code>. Toasts with an action stay until dismissed, tooltips close on Esc, the menu finishes its keyboard pattern, the pager can draw links, the empty state drops its hatch, and drawings shrink before they scroll on phones.</p></li>
@@ -955,6 +961,26 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
 
   /* ── example frames: Preview / Code tabs and a copy button */
   let uid = 0;
+  /* the parts that change at strong weight */
+  const STRONG = /\bcal-(btn|tabs|count|cnt|badge|dot|table|stamp|sec-h|block-h|tally|input|check|radio|switch|detent|range|pager)\b|<cal-(meter|position|progress|diff|durations|ruler)\b/;
+  const weightPane = (frag, w) => {
+    const d = document.createElement('div');
+    d.className = 'ex-w'; d.dataset.weight = w; d.dataset.signoff = '';   /* each copy's tally counts its own cards */
+    d.innerHTML = `<span class="ex-wl">${w === 'soft' ? 'Soft' : 'Strong'}</span>`;
+    d.append(frag);
+    return d;
+  };
+  /* a second copy needs its own ids, and every reference to them follows (labels, tabs, menus, dialogs, radio groups) */
+  const suffixIds = (frag, sfx) => {
+    const ids = new Set([...frag.querySelectorAll('[id]')].map((e) => e.id));
+    const refs = ['id', 'for', 'aria-controls', 'aria-labelledby', 'aria-describedby', 'popovertarget', 'data-dialog', 'data-list'];
+    frag.querySelectorAll('*').forEach((el) => {
+      refs.forEach((a) => { const v = el.getAttribute(a); if (v) el.setAttribute(a, v.split(/\s+/).map((x) => (ids.has(x) ? x + sfx : x)).join(' ')); });
+      if (el.matches('input[type="radio"][name]')) el.name += sfx;
+      if (el.tagName === 'SCRIPT') ids.forEach((id) => { el.textContent = el.textContent.split(`'${id}'`).join(`'${id}${sfx}'`); });
+    });
+    return frag;
+  };
   function frame(ex, code, lang) {
     const n = ++uid;
     let prev = $('.ex-prev', ex);
@@ -966,6 +992,11 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
       /* docs-only helper class shows up in the snippet as the kit's own inline column count */
       code = code || dedent(tpl.innerHTML).replace('cal-titleblock tb6"', 'cal-titleblock" style="--tb-cols: 6"');
       lang = lang || 'html';
+      /* a part with a strong form shows both weights: the same markup, the second copy under data-weight="strong" */
+      if (STRONG.test(tpl.innerHTML)) {
+        prev.replaceChildren(weightPane(tpl.content.cloneNode(true), 'soft'), weightPane(suffixIds(tpl.content.cloneNode(true), '-s'), 'strong'));
+        code += '\n\n<!-- strong: the same markup under data-weight="strong" on any ancestor -->';
+      }
       tpl.replaceWith(prev);
     }
     prev.id = `p${n}`; prev.setAttribute('role', 'tabpanel'); prev.setAttribute('aria-labelledby', `tp${n}`);
@@ -1062,7 +1093,9 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
   const liveStart = Date.now() - 125000;
   $$('.ex').forEach((ex) => {
     const r = ex.dataset.recipe, c = ex.dataset.code;
-    if (r) frame(ex, `<script src="calibrated-figures.js"><\/script>\n<script src="calibrated-recipes.js"><\/script>\n\n<svg id="${r}"></svg>\n\n<script>\n  Calibrated.play('#${r}', Calibrated.recipes.${r}, ${ser(D[r], 1)});\n<\/script>`, 'html');
+    /* a figure shows both weights: the same recipe, the second svg under data-weight="strong" */
+    if (r) { const pv = $('.ex-prev', ex), a = $('svg', pv), b = a.cloneNode(); b.id += '-s'; pv.replaceChildren(weightPane(a, 'soft'), weightPane(b, 'strong')); }
+    if (r) frame(ex, `<script src="calibrated-figures.js"><\/script>\n<script src="calibrated-recipes.js"><\/script>\n\n<svg id="${r}"></svg>\n\n<script>\n  Calibrated.play('#${r}', Calibrated.recipes.${r}, ${ser(D[r], 1)});\n<\/script>\n\n<!-- strong: the same call, with the svg under data-weight="strong" -->`, 'html');
     else if (c === 'marks') frame(ex, marksCode, 'js');
     else if (c === 'seeds') frame(ex, ":root {\n  --bg: #f4f2ec;   /* panel */\n  --fg: #262b2e;   /* ink, 11:1 or more on the panel */\n  --live: #8a5d05; /* lamp, 4.5:1 or more on the panel */\n}\n/* or scope a theme to one region: everything else derives again inside it */\n.cal-theme { --bg: #1b2225; --fg: #e5e0d3; --live: #dcb662; }", 'css');
     else if (c === 'density') frame(ex, '<div data-density="compact">\n  <cal-meter value="46000" max="1000000" warn="800000" label="requests today"></cal-meter>\n  <cal-progress done="6" total="15" fault="7"></cal-progress>\n  <cal-diff added="184" removed="20" label="release"></cal-diff>\n</div>\n\n<!-- or per element -->\n<cal-diff added="184" removed="20" density="compact"></cal-diff>', 'html');
@@ -1079,8 +1112,9 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
 
   function drawAll() {
     $('#specimens').innerHTML = specs.map(([h, p, f]) => `<div class="cal-spec">${Calibrated.svg(156, 70, f())}<h4>${h}</h4><p>${p}</p></div>`).join('');
-    Object.keys(D).forEach((k) => Calibrated.play('#r-' + k, R[k], D[k]));
-    mount('#r-lanes-2', R.lanes(D.lanes));
+    Object.keys(D).forEach((k) => { Calibrated.play('#r-' + k, R[k], D[k]); Calibrated.play('#r-' + k + '-s', R[k], D[k]); });
+    mount('#r-lanes-2', R.lanes, D.lanes);
+    if ($('#r-lanes-2-s')) mount('#r-lanes-2-s', R.lanes, D.lanes);
     if (Calibrated.counts) Calibrated.counts();
   }
   Calibrated.ready(drawAll);
@@ -1151,7 +1185,6 @@ Lockouts now clear after 15 minutes instead of an hour.</textarea>
     $('#dens').dataset.density = b.dataset.densitySet;
     $$('[data-density-set]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
   }));
-
   /* ── code block copy: the kit draws the button, the page decides what it copies */
   document.addEventListener('click', async (e) => {
     const b = e.target.closest('.cal-code > .cal-btn'); if (!b) return;

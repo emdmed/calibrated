@@ -1,7 +1,21 @@
 # Recipes
 
 Each recipe takes plain data and returns `{ w, h, markup, label }`.
-`Calibrated.mount(svg, result)` sizes the svg and draws into it. `Calibrated.render(result)` returns an `<svg>` string. If you don't pass a `label`, the recipe writes one from the data. Pass one yourself when you can say it better.
+`Calibrated.mount(svg, result)` sizes the svg and draws into it; `Calibrated.mount(svg, recipe, data)` does the same at the svg's weight. `Calibrated.render(result)` returns an `<svg>` string. If you don't pass a `label`, the recipe writes one from the data. Pass one yourself when you can say it better.
+
+**Weight.** Every recipe takes `weight: 'soft' | 'strong'`. `Calibrated.mount(svg, recipe, data)`, `play` and `update` fill it from the nearest `[data-weight]` when the data doesn't set it, and redraw when that attribute changes (`mount(svg, result)` draws the result as it is). Strong keeps every position, fact, motion and label, and swaps each mark for its heavy form, as the instruments do: 3px rulers closed by mitred end posts, nameplates for boxes, inverted chips for one-line readings and step numbers, 2px leaders and dimension lines, larger nodes with the star on a panel halo, 600-weight legends. Per recipe:
+
+| recipe | strong |
+|---|---|
+| `lanes` | 10px bars from a 3px start post, an end tick on finished runs; the running lane is a solid lamp bar with the star at its tip |
+| `budget` | the strong meter: a 12px recessed track, hazard stripes past the first alert, the fill red past it, a 4px needle; pace a hollow needle |
+| `merge` | 3px main and branch lines, the merge a 3px dashed lamp curve; the frame widens for the verdict plate |
+| `fanout` | the parent a nameplate; 2–3px branches; 2px child outlines, the lit child's in the lamp |
+| `loop` | a schematic: 3px mitred lines (faint to come, ink once run), a solid drafting head arriving at each station in its edge's ink, the step number on a 20px chip at each station (inverted once done, red on a fault, a lamp outline when live; the names drop their number), the same centre lines, the reading on a chip at the centre |
+| `measured` | a 7px bar under the 3px scale; the inset a recessed 12px track; the headline plate a nameplate in a second frame |
+| `timeline` | each step a solid bar between its nodes, the slowest 8px in ink |
+| `matrix` | 10px hits, a 3px callout column |
+| `section` | 2px hatch, heavier region lines; the frame widens for the callout plates, so region coordinates hold |
 
 Data a recipe can't draw faithfully is drawn the safe way and reported: a missing field, a value past the end of its scale, a second live item (only the first is lit), text too long for its slot (cut with …). Each message goes to `console.warn` once, and the result lists them as `warnings`, so check `r.warnings` before publishing. A value past the end of its scale stops at the end and breaks off in a red break mark, as the instruments do; its box or label keeps the real value.
 

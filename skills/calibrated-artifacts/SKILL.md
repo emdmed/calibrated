@@ -23,7 +23,7 @@ This skill is self-contained. `assets/template.html` already holds the tokens, t
 - `assets/blocks.md`: copy-paste HTML for every block: mast, intro, section, figure card, revisions, specimen grid, instruments, table, tiers, sign-off, and the optional sheet and title block.
 - `assets/calibrated-inline.css`, `assets/calibrated-inline.js`: the same kit without a page, for inlining into a page you write from scratch.
 - `references/page-patterns.md`: the page types and which blocks each one uses. **Read it first.**
-- `references/looks.md`: the five settings that change from page to page (palette, headline face, frame, layout, space) and how to choose them from the subject. **Read it before step 5.**
+- `references/looks.md`: the six settings that change from page to page (palette, headline face, frame, layout, space, weight) and how to choose them from the subject. **Read it before step 5.**
 - `references/ux-rules.md`: when to draw and when not to, actions, forms, words, colour meaning, and the six-question check before delivering. **Read it second.**
 - `references/drawing-quality.md`: the quality bar for every drawing, and the checklist for the screenshot. **Read it third.**
 - `references/artifact-limits.md`: what an artifact page can and can't do, fonts, themes, and publishing.

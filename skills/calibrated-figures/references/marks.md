@@ -86,7 +86,21 @@ Place boxes in a column at the right edge, or under the drawing. Leaders should 
 - `Calibrated.svg(w, h, markup, label)` returns a complete `<svg>` string.
 - `Calibrated.ready(fn)`: runs after fonts load, and again whenever a font loads later.
 - `Calibrated.density(el)` returns `'full'` or `'compact'` from the nearest `[data-density]`.
+- `Calibrated.weight(el)` returns `'soft'` or `'strong'` from the nearest `[data-weight]`.
 - `Calibrated.fmt.k(46000)` → `46k`, `.pct(.046,1)` → `4.6%`, `.dur(252)` → `4m 12s`, `.pad(3)` → `03`.
+
+## Strong weight
+The instruments draw these at `data-weight="strong"`; hand-drawn figures can use them too.
+- `K.W`: the strong sizes (`rule` 1.5, `tick` 2, `major` 3, `base` 3, `needle` 4, `plate` 2, `lamp` 2.5, `hatch` 2.5 at `pitch` 7, legend weight `wt` 600).
+- `K.t(x, y, s, ink, anchor, ls, { fs, wt })`: text at a size and weight.
+- `K.hazard(ink = 'ft')`: heavy alert stripes, `K.hatch(ink, 7, 1, 2.5)`. `K.hatch` takes a stroke width as its fourth argument.
+- `K.mitre(points, ink, w)`: a polyline with mitred corners and square ends, for heavy scales and leaders that must close without a notch.
+- `K.outline(x, y, w, h, ink, sw)`: a rectangle stroked inside its bounds.
+- `K.nameplate(x, y, name, value, ink, minW)` / `K.plateWidth(name, value)`: the strong reading box, 40px tall, with an inverted name strip. Ink `fg` or `ft` fills the strip; `lv` only outlines it.
+- `K.chip(x, y, s, ink, fs, minW)` / `K.chipWidth(s, fs)`: the strong count, an inverted value centred on `y`; `lv` only outlines it.
+- `K.line(…, { cap })` sets a line cap.
+
+The recipes draw their strong forms from the same marks (see `recipes.md`, *Weight*).
 
 ## Layout habits
 - Natural widths are 420–520 units. Let CSS scale the svg down (`max-width:100%`).

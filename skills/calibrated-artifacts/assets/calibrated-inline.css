@@ -536,6 +536,7 @@ svg[data-cal] {
 /* ── count · a boxed, zero-padded number with its noun beside it */
 .cal-count { display: inline-flex; align-items: center; gap: 6px; font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); font-variant-numeric: tabular-nums; color: var(--muted); text-transform: uppercase; }
 .cal-count > b, .cal-cnt { font-weight: 400; display: inline-block; border: var(--line-thin) solid var(--edge-strong); padding: 0 4px; line-height: 14px; color: var(--fg); letter-spacing: 0; }
+.cal-count > b > i { font-style: normal; }   /* one per character (counts()), cut apart only at strong weight */
 .cal-count[data-ink="live"] > b { color: var(--live); border-color: color-mix(in srgb, var(--live) 60%, var(--edge-strong)); }
 .cal-count[data-ink="ok"] > b { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 60%, var(--edge-strong)); }
 .cal-count[data-ink="fault"] > b { color: var(--fault); border-color: color-mix(in srgb, var(--fault) 60%, var(--edge-strong)); }
@@ -1248,3 +1249,275 @@ cal-span { display: none; }
 [data-mode="app"] .cal-dialog header { text-transform: none; letter-spacing: .01em; }
 [data-mode="app"] .cal-zone-h, [data-mode="app"] .cal-bracket-h, [data-mode="app"] .cal-rule:not(:empty) { text-transform: none; letter-spacing: .01em; font-size: var(--fs-control); }
 [data-mode="app"] .cal-zone-h > .end { text-transform: none; letter-spacing: .01em; }
+
+/* ════ strong weight · data-weight="strong" on any ancestor ════
+   The parts that carry state or values, drawn heavy for operations and wall screens, in the
+   instruments' language: inverted plates and chips, solid fills, 3px strokes where the part is the
+   subject, hazard stripes for errors, 600 legends. Panels, desk, gaps and hairline separators stay
+   as they are. The instruments read the same attribute (calibrated-components.js).
+   Widths mirror K.W in the figure kit: rule 1.5 · plate 2 · major 3 · lamp 2.5 · hazard 2.5 @ 7 · legends 600. */
+[data-weight="strong"] {
+  --w-rule: 1.5px; --w-plate: 2px; --w-major: 3px; --w-lamp: 2.5px; --wt: 600;
+  /* the lamp node: a cell outlined in the lamp with the star inside (as <cal-progress> draws the live step) */
+  --node-live: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Crect x='1' y='1' width='10' height='10' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M6 2.4 6.75 5.25 9.6 6 6.75 6.75 6 9.6 5.25 6.75 2.4 6 5.25 5.25Z'/%3E%3C/svg%3E");
+}
+
+/* ── button · a panel key: 2px rim, 600 legend; held down it sinks into an ink plate */
+/* inline [words] and quiet underlined words stay words: they only take the 600 legend and the lamp ring */
+[data-weight="strong"] .cal-btn { font-weight: var(--wt); }
+[data-weight="strong"] .cal-btn:focus-visible { outline: var(--w-lamp) solid var(--live); outline-offset: 2px; }
+[data-weight="strong"] .cal-btn:not(.inline, .quiet, .cal-toast *, .cal-affixed *, .cal-code > *) { border: var(--w-plate) solid var(--muted); padding: 5px 11px; }
+[data-weight="strong"] .cal-btn:not(.inline, .quiet, .cal-toast *, .cal-affixed *, .cal-code > *):not(:disabled, [aria-disabled="true"]):hover { border-color: var(--fg); }
+[data-weight="strong"] .cal-btn:not(.inline, .quiet, .cal-toast *, .cal-affixed *, .cal-code > *):not(:disabled, [aria-disabled="true"]):active { background: var(--fg); border-color: var(--fg); color: var(--panel); }
+[data-weight="strong"] .cal-btn:not(.inline, .quiet, .cal-toast *, .cal-affixed *, .cal-code > *):is(:disabled, [aria-disabled="true"]) { color: var(--faint); border-style: dashed; border-color: var(--faint); }
+
+/* ── primary · the start button: an ink plate with an engraved line 2px in; pressing seats the plate */
+[data-weight="strong"] .cal-btn.primary { --pl: var(--fg); background: var(--pl); border-color: var(--pl); color: var(--panel); box-shadow: inset 0 0 0 2px var(--pl), inset 0 0 0 3px var(--panel); }
+[data-weight="strong"] .cal-btn[data-ink="fault"].primary { --pl: var(--fault); }
+[data-weight="strong"] .cal-btn.primary:not(:disabled, [aria-disabled="true"]):hover { --pl: var(--title); background: var(--pl); border-color: var(--pl); opacity: 1; }
+[data-weight="strong"] .cal-btn[data-ink="fault"].primary:not(:disabled, [aria-disabled="true"]):hover { --pl: var(--fault); }
+[data-weight="strong"] .cal-btn.primary:not(:disabled, [aria-disabled="true"]):active { background: var(--pl); border-color: var(--pl); box-shadow: none; }
+[data-weight="strong"] .cal-btn.primary:is(:disabled, [aria-disabled="true"]) { background: none; box-shadow: none; border-style: dashed; border-color: var(--faint); color: var(--muted); }
+
+/* ── pressed · latching keys: the pressed one latches as a plate in its meaning's ink; the lamp key latches lit */
+[data-weight="strong"] .cal-btn[aria-pressed="false"] { color: var(--muted); }
+[data-weight="strong"] .cal-btn[aria-pressed="false"]:not(:disabled):hover { color: var(--fg); }
+[data-weight="strong"] .cal-btn[aria-pressed="true"] { background: var(--fg); border-color: var(--fg); color: var(--panel); }
+[data-weight="strong"] .cal-btn[data-ink="ok"][aria-pressed="true"] { background: var(--ok); border-color: var(--ok); }
+[data-weight="strong"] .cal-btn[data-ink="fault"][aria-pressed="true"] { background: var(--fault); border-color: var(--fault); }
+[data-weight="strong"] .cal-btn[data-ink="fault"][aria-pressed="true"]::before { width: 14px; background: repeating-linear-gradient(-45deg, var(--panel) 0 2px, transparent 2px 4.5px); border-block-color: var(--panel); }
+[data-weight="strong"] .cal-btn[data-ink="live"][aria-pressed="true"] { background: var(--panel); border-color: var(--live); color: var(--live); }
+[data-weight="strong"] .cal-btn[data-ink="live"][aria-pressed="true"]::before { content: ""; width: 9px; height: 9px; flex: none; margin-left: -2px; background: var(--live); clip-path: var(--star); }
+
+/* ── tabs · index tabs: the open one is an ink plate standing on the strip's hairline */
+[data-weight="strong"] .cal-tabs { gap: 4px; font-weight: var(--wt); }
+[data-weight="strong"] .cal-tabs > * { padding: 5px 10px 6px; }
+[data-weight="strong"] .cal-tabs > :not(:disabled, .on, [aria-selected="true"]):hover { color: var(--fg); box-shadow: inset 0 -3px var(--faint); }
+[data-weight="strong"] .cal-tabs > :is(.on, [aria-selected="true"]) { background: var(--fg); color: var(--panel); box-shadow: none; }
+[data-weight="strong"] .cal-tabs > :focus-visible { outline: var(--w-lamp) solid var(--live); outline-offset: -2.5px; box-shadow: inset 0 0 0 4px var(--panel); }
+[data-weight="strong"] .cal-tabs .cal-cnt { font-weight: 700; border: var(--w-rule) solid var(--muted); }
+[data-weight="strong"] .cal-tabs > :is(.on, [aria-selected="true"]) .cal-cnt { background: var(--panel); color: var(--fg); border-color: var(--panel); }
+[data-weight="strong"] .cal-tabs > :disabled .cal-cnt { border-color: var(--faint); }
+
+/* ── count · a counter window: one solid window so the number reads as one figure; the drums
+   show only as ticks cut into the rims above and below the digits */
+[data-weight="strong"] .cal-count { font-weight: var(--wt); gap: 7px; }
+[data-weight="strong"] .cal-count > b {
+  --ink: var(--fg); --cut: var(--panel);
+  display: inline-flex; padding: 0; line-height: 14px; font-weight: 700; color: var(--panel);
+  border: var(--w-plate) solid var(--ink); background-color: var(--ink);
+  background-image: linear-gradient(var(--cut), var(--cut)), linear-gradient(var(--cut), var(--cut));
+  background-size: 100% 1px; background-position: 0 2px, 0 calc(100% - 2px); background-repeat: no-repeat;
+}
+[data-weight="strong"] .cal-count > b:not(:has(> i)) { padding: 3px 4px; }
+[data-weight="strong"] .cal-count > b > i { font-style: normal; padding: 3px 3.5px; }
+[data-weight="strong"] .cal-count > b > i:first-child { padding-left: 4px; }
+[data-weight="strong"] .cal-count > b > i:last-child { padding-right: 4px; }
+[data-weight="strong"] .cal-count > b > i + i:not(.sp) { background: linear-gradient(var(--cut), var(--cut)) left top / 1px 3px no-repeat, linear-gradient(var(--cut), var(--cut)) left bottom / 1px 3px no-repeat; }
+[data-weight="strong"] .cal-count > b > i.sp { width: 4px; padding: 0; }
+[data-weight="strong"] .cal-count[data-ink="ok"] > b { --ink: var(--ok); border-color: var(--ink); color: var(--panel); }
+[data-weight="strong"] .cal-count[data-ink="fault"] > b { --ink: var(--fault); border-color: var(--ink); color: var(--panel); }
+[data-weight="strong"] .cal-count[data-ink="live"] > b { --ink: var(--live); --cut: color-mix(in srgb, var(--live) 55%, var(--panel)); color: var(--live); background-color: var(--panel); border-color: var(--live); }
+
+/* ── dot · a pilot light: a lens inside a 2px bezel. Done ink, passed green, failed red,
+   next an empty bezel, live the lamp bezel with the star for a lens */
+[data-weight="strong"] .cal-dot {
+  --b: var(--faint); --lens: transparent;
+  width: 12px; height: 12px; box-sizing: border-box; vertical-align: -2px;
+  border: var(--w-plate) solid var(--b); background: linear-gradient(var(--lens), var(--lens)) center / 4px 4px no-repeat, var(--panel);
+}
+[data-weight="strong"] .cal-dot.done { --b: var(--fg); --lens: var(--fg); }
+[data-weight="strong"] .cal-dot.ok { --b: var(--ok); --lens: var(--ok); }
+[data-weight="strong"] .cal-dot.fault { --b: var(--fault); --lens: var(--fault); }
+[data-weight="strong"] .cal-dot.on { width: 12px; height: 12px; clip-path: none; border: 0; background: var(--live); -webkit-mask: var(--node-live) center / 100% 100% no-repeat; mask: var(--node-live) center / 100% 100% no-repeat; }
+
+/* ── badge · a pilot-light plate: [lens | word] in one 2px frame. The lens is a square cell
+   (16px inside, a 2px divider) with its mark centred on whole pixels; a badge with a .cal-dot puts the
+   dot's pilot light in the same cell. A state is outlined with an empty lens; a result fills the plate
+   and lights its lens (a failed one striped); the running one is a lamp frame with the star for a lens */
+[data-weight="strong"] .cal-badge { --ink: var(--muted); position: relative; align-items: stretch; gap: 8px; padding: 0 8px 0 0; line-height: 16px; font-weight: var(--wt); color: var(--fg); border: var(--w-plate) solid var(--ink); }
+[data-weight="strong"] .cal-badge::before, [data-weight="strong"] .cal-badge > .cal-dot:first-child {
+  content: ""; flex: none; box-sizing: border-box; width: 18px; height: auto; margin: 0; align-self: stretch; border: 0; border-right: var(--w-plate) solid var(--ink);
+  background: linear-gradient(var(--panel), var(--panel)) center / 4px 4px no-repeat, linear-gradient(var(--faint), var(--faint)) center / 8px 8px no-repeat;
+}
+[data-weight="strong"] .cal-badge:has(> .cal-dot:first-child)::before { display: none; }
+[data-weight="strong"] .cal-badge > .cal-dot:first-child { --b: var(--faint); --lens: transparent; background: linear-gradient(var(--lens), var(--lens)) center / 4px 4px no-repeat, linear-gradient(var(--panel), var(--panel)) center / 8px 8px no-repeat, linear-gradient(var(--b), var(--b)) center / 12px 12px no-repeat; }
+[data-weight="strong"] .cal-badge > .cal-dot.done:first-child { --b: var(--fg); --lens: var(--fg); }
+[data-weight="strong"] .cal-badge > .cal-dot.ok:first-child { --b: var(--ok); --lens: var(--ok); }
+[data-weight="strong"] .cal-badge > .cal-dot.fault:first-child { --b: var(--fault); --lens: var(--fault); }
+[data-weight="strong"] .cal-badge[data-ink="ok"] { --ink: var(--ok); }
+[data-weight="strong"] .cal-badge[data-ink="fault"] { --ink: var(--fault); }
+[data-weight="strong"] .cal-badge:is([data-ink="ok"], [data-ink="fault"]) { background: var(--ink); border-color: var(--ink); color: var(--panel); }
+[data-weight="strong"] .cal-badge[data-ink="ok"]::before { border-right-color: var(--panel); background: linear-gradient(var(--panel), var(--panel)) center / 6px 6px no-repeat; }
+[data-weight="strong"] .cal-badge[data-ink="fault"]::before { border-right-color: var(--panel); background: repeating-linear-gradient(-45deg, var(--panel) 0 2px, transparent 2px 4.5px); }
+[data-weight="strong"] .cal-badge[data-ink="live"] { --ink: var(--live); border-color: var(--live); color: var(--live); }
+[data-weight="strong"] .cal-badge[data-ink="live"]::before { background: none; }
+[data-weight="strong"] .cal-badge[data-ink="live"]::after { content: ""; position: absolute; left: 3px; top: 50%; width: 10px; height: 10px; translate: 0 -50%; background: var(--live); clip-path: var(--star); }
+
+/* ── table · a plant parts list: heads on an inverted nameplate band (no rule to collide with),
+   pilot lights before statuses, and an inset index plate on the row that needs you */
+[data-weight="strong"] .cal-table th { background: var(--fg); color: var(--panel); font-weight: var(--wt); border-bottom: 0; padding: 7px 14px 6px; }
+[data-weight="strong"] .cal-table td:first-child { font-weight: 700; color: var(--fg); text-align: center; padding-inline: 12px; }
+[data-weight="strong"] .cal-table .num { font-weight: var(--wt); }
+[data-weight="strong"] .cal-table .st { font-weight: var(--wt); }
+[data-weight="strong"] .cal-table .st::before {
+  --b: var(--faint); --lens: transparent;
+  content: ""; display: inline-block; box-sizing: border-box; width: 12px; height: 12px; margin-right: 8px; vertical-align: -2px;
+  border: var(--w-plate) solid var(--b); background: linear-gradient(var(--lens), var(--lens)) center / 4px 4px no-repeat, var(--panel);
+}
+[data-weight="strong"] .cal-table .st[data-ink="ok"]::before { content: ""; --b: var(--ok); --lens: var(--ok); }
+[data-weight="strong"] .cal-table .st[data-ink="fault"]::before { --b: var(--fault); --lens: var(--fault); }
+[data-weight="strong"] .cal-table .st[data-ink="live"]::before { width: 12px; height: 12px; margin-right: 8px; vertical-align: -2px; border: 0; clip-path: none; background: var(--live); -webkit-mask: var(--node-live) center / 100% 100% no-repeat; mask: var(--node-live) center / 100% 100% no-repeat; }
+[data-weight="strong"] .cal-table tr:has(.st[data-ink="fault"]) > td:first-child { background: var(--fault); color: var(--panel); box-shadow: inset 0 0 0 4px var(--panel); }
+[data-weight="strong"] .cal-table tr:has(.st[data-ink="live"]) > td:first-child { color: var(--live); box-shadow: inset 0 0 0 4px var(--panel), inset 0 0 0 6px var(--live); }
+[data-weight="strong"] .cal-table tbody tr:hover > td:first-child { box-shadow: inset 0 0 0 4px var(--hover); }
+
+/* ── stamp · struck hard: a 2px frame with a 1px inner rule, 700 caps */
+[data-weight="strong"] .cal-stamp { font-weight: 700; letter-spacing: .18em; border-width: var(--w-plate); outline: 1px solid currentColor; outline-offset: -5px; padding: 8px 12px 7px; }
+
+/* ── section head · a rail between two 3px end stops; the sheet number in a ruled chip */
+[data-weight="strong"] .cal-sec-h { font-weight: var(--wt); }
+[data-weight="strong"] .cal-sec-h::before { width: var(--w-major); height: 16px; border: 0; background: var(--fg); flex: none; }
+[data-weight="strong"] .cal-sec-h::after { border: 0; height: 16px; background: linear-gradient(var(--fg), var(--fg)) right center / var(--w-major) 100% no-repeat, linear-gradient(var(--edge-strong), var(--edge-strong)) left center / 100% var(--w-rule) no-repeat; }
+[data-weight="strong"] .cal-sec-h > span ~ span:last-child { color: var(--fg); border: var(--w-rule) solid var(--muted); padding: 1px 6px; }
+
+/* ── block head · a channel label: a 3px index bar before a 600 name */
+[data-weight="strong"] .cal-block-h { font-weight: var(--wt); align-items: center; }
+[data-weight="strong"] .cal-block-h::before { content: ""; flex: none; width: var(--w-major); height: 12px; background: var(--fg); margin-right: -1px; }
+
+/* ── tally · an annunciator strip: a 3px rail and one cell per card, lit in its verdict */
+.cal-tally-cells { display: none; }
+[data-weight="strong"] .cal-tally { border-top: var(--w-major) solid var(--fg); font-weight: var(--wt); color: var(--fg); }
+[data-weight="strong"] .cal-tally-cells { display: inline-flex; gap: 3px; }
+[data-weight="strong"] .cal-tally-cells > i { box-sizing: border-box; width: 12px; height: 12px; border: var(--w-plate) solid var(--faint); }
+[data-weight="strong"] .cal-tally-cells > [data-state="ok"] { background: var(--ok); border-color: var(--ok); }
+[data-weight="strong"] .cal-tally-cells > [data-state="dropped"] { background: var(--fault); border-color: var(--fault); }
+[data-weight="strong"] .cal-tally-cells > [data-state="rework"] { border: 0; background: var(--live); -webkit-mask: var(--node-live) center / 100% 100% no-repeat; mask: var(--node-live) center / 100% 100% no-repeat; }
+
+/* ── input · a write-in slot: a 2px bracket (baseline and mitred end ticks) over a recessed well */
+[data-weight="strong"] .cal-field > :is(label, .lbl) { font-weight: var(--wt); }
+[data-weight="strong"] .cal-field .err { font-weight: var(--wt); }
+[data-weight="strong"] .cal-input {
+  --fl: var(--muted); --fw: var(--w-plate);
+  border: 0; box-shadow: none; padding: 6px 9px 9px; font-weight: var(--wt);
+  background: linear-gradient(var(--fl), var(--fl)) left bottom / var(--fw) 9px no-repeat, linear-gradient(var(--fl), var(--fl)) right bottom / var(--fw) 9px no-repeat,
+    linear-gradient(var(--fl), var(--fl)) left bottom / 100% var(--fw) no-repeat, var(--well);
+}
+[data-weight="strong"] .cal-input:not(:disabled, :focus):hover { --fl: var(--fg); }
+[data-weight="strong"] .cal-input:focus { --fl: var(--live); --fw: var(--w-lamp); box-shadow: none; outline: none; }
+[data-weight="strong"] .cal-input[aria-invalid="true"] {
+  --fl: var(--fault); --fw: var(--w-major);
+  background: linear-gradient(var(--fl), var(--fl)) left bottom / var(--fw) 9px no-repeat, linear-gradient(var(--fl), var(--fl)) right bottom / var(--fw) 9px no-repeat,
+    linear-gradient(var(--fl), var(--fl)) left bottom / 100% var(--fw) no-repeat,
+    repeating-linear-gradient(-45deg, var(--fault) 0 2.5px, transparent 2.5px 7px) left calc(100% - var(--fw)) / 100% 5px no-repeat, var(--well);
+}
+[data-weight="strong"] .cal-input[aria-invalid="true"]:focus-visible { --fl: var(--fault); --fw: var(--w-major); box-shadow: none; outline: var(--w-lamp) solid var(--live); outline-offset: 2px; }
+[data-weight="strong"] .cal-input:disabled {
+  color: var(--muted);
+  background: linear-gradient(var(--faint), var(--faint)) left bottom / 2px 9px no-repeat, linear-gradient(var(--faint), var(--faint)) right bottom / 2px 9px no-repeat,
+    repeating-linear-gradient(90deg, var(--faint) 0 5px, transparent 5px 8px) left bottom / 100% 2px no-repeat;
+}
+
+/* ── checkbox · struck through: 16px, 2px wall; checked fills with ink around an engraved inner line */
+[data-weight="strong"] .cal-check input { width: 16px; height: 16px; margin-top: calc((1lh - 16px) / 2); border: var(--w-plate) solid var(--muted); }
+[data-weight="strong"] .cal-check:hover input:not(:disabled) { border-color: var(--fg); }
+[data-weight="strong"] .cal-check input:checked { background: var(--fg); border-color: var(--fg); }
+[data-weight="strong"] .cal-check input:checked::after { width: 6px; height: 6px; background: var(--fg); outline: 1px solid var(--panel); }
+[data-weight="strong"] .cal-check input:indeterminate { border-color: var(--fg); }
+[data-weight="strong"] .cal-check input:indeterminate::after { width: 8px; height: 3px; }
+[data-weight="strong"] :is(.cal-check, .cal-radio) input:focus-visible { outline: var(--w-lamp) solid var(--live); outline-offset: 2px; }
+[data-weight="strong"] :is(.cal-check, .cal-radio):has(input:disabled) { opacity: 1; color: var(--muted); }
+[data-weight="strong"] :is(.cal-check, .cal-radio) input:disabled { opacity: 1; border-style: dashed; border-color: var(--faint); background: none; }
+[data-weight="strong"] :is(.cal-check, .cal-radio) input:disabled::after { background: var(--faint); outline: 0; }
+
+/* ── radio · a balloon at strong weight: chosen fills with ink around an engraved centre */
+[data-weight="strong"] .cal-radio input { width: 16px; height: 16px; margin-top: calc((1lh - 16px) / 2); border: var(--w-plate) solid var(--muted); }
+[data-weight="strong"] .cal-radio:hover input:not(:disabled) { border-color: var(--fg); }
+[data-weight="strong"] .cal-radio input:checked { background: var(--fg); border-color: var(--fg); }
+[data-weight="strong"] .cal-radio input:checked::after { width: 6px; height: 6px; background: var(--fg); outline: 1px solid var(--panel); }
+
+/* ── switch · a slide toggle with a gripped knob: on, the slot fills with ink and the knob turns panel */
+[data-weight="strong"] .cal-switch { --sw-w: 34px; --sw-h: 18px; --sw-knob: 12px; }
+[data-weight="strong"] .cal-switch .o { font-weight: var(--wt); }
+[data-weight="strong"] .cal-switch input { border: var(--w-plate) solid var(--muted); }
+[data-weight="strong"] .cal-switch input::after { left: 1px; background: linear-gradient(var(--panel), var(--panel)) center / 2px 6px no-repeat, var(--muted); }
+[data-weight="strong"] .cal-switch input:checked { background: var(--fg); border-color: var(--fg); }
+[data-weight="strong"] .cal-switch input:checked::after { translate: calc(var(--sw-w) - var(--sw-knob) - 6px) -50%; background: linear-gradient(var(--fg), var(--fg)) center / 2px 6px no-repeat, var(--panel); }
+[data-weight="strong"] .cal-switch:hover input:not(:disabled) { border-color: var(--fg); }
+[data-weight="strong"] .cal-switch:hover input:not(:checked, :disabled)::after { background: linear-gradient(var(--panel), var(--panel)) center / 2px 6px no-repeat, var(--fg); }
+[data-weight="strong"] .cal-switch input:focus-visible { outline: var(--w-lamp) solid var(--live); outline-offset: 3px; }
+[data-weight="strong"] .cal-switch:has(input:disabled) { opacity: 1; color: var(--muted); }
+[data-weight="strong"] .cal-switch input:disabled { border-style: dashed; border-color: var(--faint); background: none; }
+[data-weight="strong"] .cal-switch input:disabled::after { background: var(--faint); }
+
+/* ── detent · a stepped selector: the range's slotted rail with a detent mark per value and
+   the same ink cap, which glides from mark to mark; the lamp rings the cap while it's in hand */
+[data-weight="strong"] .cal-detent { padding-top: 27px; }
+[data-weight="strong"] .cal-detent::before {
+  top: 7px; height: 9px; box-sizing: border-box; background: var(--well); border: var(--w-rule) solid var(--edge-strong);
+  left: calc(var(--r0, calc(var(--col) / 2)) - 11px); right: calc(var(--r1, calc(var(--col) / 2)) - 11px);
+}
+[data-weight="strong"] .cal-detent label { padding-top: 8px; font-weight: var(--wt); }
+[data-weight="strong"] .cal-detent label::before { top: -9px; width: 2px; height: 6px; translate: -1px 0; background: var(--muted); transition: none; }
+[data-weight="strong"] .cal-detent label:not(:has(:disabled)):hover { color: var(--fg); }
+[data-weight="strong"] .cal-detent label:not(:has(:disabled)):hover::before { background: var(--fg); }
+[data-weight="strong"] .cal-detent label:has(:checked) { color: var(--title); font-weight: 700; }
+[data-weight="strong"] .cal-detent label:has(:checked)::before { top: -4px; width: var(--w-major); height: 4px; translate: -1.5px 0; background: var(--fg); }
+[data-weight="strong"] .cal-detent label:has(:disabled)::before { background: var(--edge-strong); }
+[data-weight="strong"] .cal-detent .mk, [data-weight="strong"] .cal-detent:not(.js) label:has(:checked)::after {
+  top: 0; width: 14px; height: 23px; clip-path: none;
+  background: linear-gradient(var(--panel), var(--panel)) center / 1.5px 13px no-repeat, var(--fg);
+}
+[data-weight="strong"] .cal-detent:not(.js) label:has(:checked)::after { top: -27px; }
+[data-weight="strong"] .cal-detent:is(:has(:focus-visible), .moving) .mk { background: linear-gradient(var(--panel), var(--panel)) center / 1.5px 13px no-repeat, var(--fg); outline: var(--w-lamp) solid var(--live); outline-offset: 2px; }
+[data-weight="strong"] .cal-detent label:has(:focus-visible) span { outline: none; }
+
+/* ── range · the fader: an ink cap with grip lines in a slotted rail, the run filled inside the slot */
+[data-weight="strong"] .cal-range { --run: calc(7px + var(--p) * (100% - 14px)); padding-top: 34px; }
+[data-weight="strong"] .cal-range:not(.js) { --run: 0px; }
+[data-weight="strong"] .cal-range input { height: 28px; }
+[data-weight="strong"] .cal-range input::-webkit-slider-runnable-track { height: 20px;
+  background:
+    linear-gradient(var(--fg), var(--fg)) 1.5px 50% / max(0px, calc(var(--run) - 1.5px)) 6px no-repeat,
+    linear-gradient(var(--well), var(--well)) 1.5px 50% / calc(100% - 3px) 6px no-repeat,
+    linear-gradient(var(--edge-strong), var(--edge-strong)) 0 50% / 100% 9px no-repeat,
+    linear-gradient(var(--fg), var(--fg)) 5.5px 50% / 3px 20px no-repeat,
+    linear-gradient(var(--fg), var(--fg)) 50% 50% / 3px 20px no-repeat,
+    linear-gradient(var(--fg), var(--fg)) calc(100% - 5.5px) 50% / 3px 20px no-repeat,
+    repeating-linear-gradient(to right, var(--faint) 0 2px, transparent 2px 10%) 6px 50% / calc(100% - 14px) 15px no-repeat; }
+[data-weight="strong"] .cal-range input::-moz-range-track { height: 20px;
+  background:
+    linear-gradient(var(--fg), var(--fg)) 1.5px 50% / max(0px, calc(var(--run) - 1.5px)) 6px no-repeat,
+    linear-gradient(var(--well), var(--well)) 1.5px 50% / calc(100% - 3px) 6px no-repeat,
+    linear-gradient(var(--edge-strong), var(--edge-strong)) 0 50% / 100% 9px no-repeat,
+    linear-gradient(var(--fg), var(--fg)) 5.5px 50% / 3px 20px no-repeat,
+    linear-gradient(var(--fg), var(--fg)) 50% 50% / 3px 20px no-repeat,
+    linear-gradient(var(--fg), var(--fg)) calc(100% - 5.5px) 50% / 3px 20px no-repeat,
+    repeating-linear-gradient(to right, var(--faint) 0 2px, transparent 2px 10%) 6px 50% / calc(100% - 14px) 15px no-repeat; }
+[data-weight="strong"] .cal-range input::-webkit-slider-thumb { width: 14px; height: 26px; margin-top: -3px; border: 0;
+  background: linear-gradient(var(--panel), var(--panel)) 50% calc(50% - 4px) / 8px 1.5px no-repeat, linear-gradient(var(--panel), var(--panel)) 50% 50% / 8px 1.5px no-repeat,
+    linear-gradient(var(--panel), var(--panel)) 50% calc(50% + 4px) / 8px 1.5px no-repeat, var(--fg); }
+[data-weight="strong"] .cal-range input::-moz-range-thumb { width: 14px; height: 26px; border: 0;
+  background: linear-gradient(var(--panel), var(--panel)) 50% calc(50% - 4px) / 8px 1.5px no-repeat, linear-gradient(var(--panel), var(--panel)) 50% 50% / 8px 1.5px no-repeat,
+    linear-gradient(var(--panel), var(--panel)) 50% calc(50% + 4px) / 8px 1.5px no-repeat, var(--fg); }
+[data-weight="strong"] .cal-range:has(input:not(:disabled):hover) input::-webkit-slider-thumb { box-shadow: 0 0 0 2px var(--panel), 0 0 0 3.5px var(--fg); }
+[data-weight="strong"] .cal-range:has(input:active, input:focus-visible) input::-webkit-slider-thumb { box-shadow: 0 0 0 2px var(--panel), 0 0 0 4.5px var(--live); }
+[data-weight="strong"] .cal-range:has(input:not(:disabled):hover) input::-moz-range-thumb { box-shadow: 0 0 0 2px var(--panel), 0 0 0 3.5px var(--fg); }
+[data-weight="strong"] .cal-range:has(input:active, input:focus-visible) input::-moz-range-thumb { box-shadow: 0 0 0 2px var(--panel), 0 0 0 4.5px var(--live); }
+[data-weight="strong"] .cal-range output { background: var(--fg); color: var(--panel); border: var(--w-plate) solid var(--fg); font-weight: 700; padding: 0 6px; }
+[data-weight="strong"] .cal-range output::after { width: 2px; height: 14px; translate: -1px 0; }
+[data-weight="strong"] .cal-range:has(input:active, input:focus-visible) output { background: var(--panel); border-color: var(--live); color: var(--live); }
+[data-weight="strong"] .cal-range .nums { font-weight: var(--wt); margin: 4px 7px 0; }
+
+/* ── forced colours · the inks are already system colours; strong marks drawn as fills opt out of
+   forcing so they stay drawn, and latched or open states take Highlight */
+@media (forced-colors: active) {
+  [data-weight="strong"] :is(.cal-btn, .cal-tabs > *, .cal-cnt, .cal-count > b, .cal-count > b > i, .cal-badge, .cal-dot, .cal-stamp, .cal-tally, .cal-tally-cells > i, .cal-input, .cal-detent, .cal-range output) { forced-color-adjust: none; }
+  [data-weight="strong"] .cal-badge::before, [data-weight="strong"] .cal-badge::after, [data-weight="strong"] .cal-table .st::before, [data-weight="strong"] .cal-table :is(th, td), [data-weight="strong"] .cal-sec-h::before, [data-weight="strong"] .cal-sec-h::after,
+  [data-weight="strong"] .cal-block-h::before, [data-weight="strong"] .cal-btn::before { forced-color-adjust: none; }
+  [data-weight="strong"] .cal-btn[aria-pressed="true"], [data-weight="strong"] .cal-tabs > :is(.on, [aria-selected="true"]) { background: Highlight; border-color: Highlight; color: HighlightText; outline: 0; }
+  [data-weight="strong"] .cal-tabs > :is(.on, [aria-selected="true"]) .cal-cnt { background: HighlightText; color: Highlight; border-color: HighlightText; }
+  [data-weight="strong"] .cal-check input:checked, [data-weight="strong"] .cal-radio input:checked, [data-weight="strong"] .cal-switch input:checked { background: Highlight; border-color: Highlight; }
+  [data-weight="strong"] .cal-check input:checked::after, [data-weight="strong"] .cal-radio input:checked::after { background: Highlight; outline-color: HighlightText; }
+  [data-weight="strong"] .cal-switch input:checked::after { background: linear-gradient(Highlight, Highlight) center / 2px 6px no-repeat, HighlightText; }
+}
