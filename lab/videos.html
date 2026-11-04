@@ -6,7 +6,7 @@
 <title>Calibrated · Video lab</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&family=Inter:wght@400;500;600;700&family=Barlow+Condensed:wght@600&family=Archivo:wdth,wght@125,700&family=Space+Grotesk:wght@700&display=swap">
 <!-- The kit, loaded live: edits to these files show up on reload. -->
 <link rel="stylesheet" href="../skills/calibrated-tokens/assets/calibrated.css">
 <link rel="stylesheet" href="../skills/calibrated-components/assets/calibrated-components.css">
@@ -18,7 +18,9 @@
     node video/render.mjs --page "lab/videos.html?film=loop-agent"      → video/out/calibrated-loop-agent-4x5.mp4
     node video/render.mjs --page "lab/videos.html?film=loop-agent" --still 4
 
-  ?film=<id> shows one film at full size; add &theme=film for the light theme.
+  ?film=<id> shows one film at full size; add &theme=<id> for another theme:
+  night and film are the kit's own; neon, blueprint, thermal and riso are video-only
+  cuts, each a set of seeds plus a film treatment driven by render(t).
 -->
 <style>
 /* ── lab chrome only. The kit's look lives inside .stage. */
@@ -35,10 +37,16 @@ body.lab { font: 400 14px/1.5 var(--l-sans); color: var(--l-fg); }
 .bar h1 { font: 600 15px/1 var(--l-sans); margin: 0 8px 0 0; }
 .bar .mut { color: var(--l-muted); font-size: 13px; }
 .bar .sp { flex: 1; }
-.bar select { font: inherit; color: inherit; background: var(--l-soft); border: 1px solid var(--l-line); border-radius: 6px; padding: 3px 8px; }
+.themes { display: flex; flex-wrap: wrap; gap: 6px; }
+.lab .themes button { display: inline-flex; align-items: center; gap: 7px; padding: 4px 10px 4px 6px; color: var(--l-muted); }
+.lab .themes button[aria-pressed="true"] { color: var(--l-fg); border-color: var(--l-fg); }
+.themes i { display: inline-flex; border-radius: 3px; overflow: hidden; outline: 1px solid rgb(255 255 255 / .12); }
+.themes i b { width: 7px; height: 14px; }
+.lab button:focus-visible { outline: 2px solid var(--l-fg); outline-offset: 2px; }
+#theme-note { min-width: 0; }
 main { padding: 24px 28px 80px; }
 main h2 { font: 600 13px/1 var(--l-sans); color: var(--l-muted); text-transform: uppercase; letter-spacing: .05em; margin: 0 0 14px; }
-.reel { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 28px; }
+.reel { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(380px, 100%), 1fr)); gap: 28px; }
 .card { border: 1px solid var(--l-line); border-radius: 10px; overflow: hidden; background: var(--l-soft); }
 .card header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--l-line); }
 .card header h3 { font: 600 14px/1 var(--l-sans); margin: 0; }
@@ -115,13 +123,84 @@ html[data-theme="neon"] {
 .neon .ask .cur { display: inline-block; width: .55em; height: 1.05em; margin-left: 2px; vertical-align: -.16em; background: var(--live); box-shadow: 0 0 10px var(--live); }
 /* the screen: scanlines, a slow refresh bar, the tube's vignette, glitch slices and the power-on line */
 .stage .fx { position: absolute; inset: 0; pointer-events: none; display: none; }
-.neon .fx { display: block; }
+.neon :is(.scan, .roll, .vig, .tint, .slice, .boot) { display: block; }
 .neon .scan { background: repeating-linear-gradient(180deg, rgba(0, 0, 0, .2) 0 1px, transparent 1px 4px); z-index: 20; }
 .neon .roll { height: 220px; inset: auto 0 auto 0; z-index: 21; background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--live) 5%, transparent) 50%, transparent); }
 .neon .vig { z-index: 22; background: radial-gradient(ellipse 75% 65% at 50% 48%, transparent 55%, rgba(0, 0, 0, .55)); }
 .neon .tint { z-index: 19; background: var(--fault); mix-blend-mode: screen; opacity: 0; }
 .neon .slice { inset: auto 0 auto 0; z-index: 18; mix-blend-mode: screen; opacity: 0; }
 .neon .boot { inset: auto 0 auto 0; top: 674px; height: 2px; z-index: 30; background: #fff; box-shadow: 0 0 24px 6px var(--live); opacity: 0; }
+
+/* ── blueprint · the cyanotype cut. Pale ink on Prussian blue, a drafting-yellow
+   lamp, Barlow Condensed lettering. The desk is drafting film with a 30/150 grid,
+   panel edges overshoot their corners like construction lines, a plotter carriage
+   draws each panel in, and each landing throws two construction lines across. */
+html[data-theme="blueprint"] {
+  --bg: #0e3160; --fg: #e6f0fb; --live: #ffd84a;
+  --desk-depth: 55%;
+  --font-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  color-scheme: dark;
+}
+.stage.blueprint { --g1: color-mix(in srgb, var(--fg) 12%, transparent); --g2: color-mix(in srgb, var(--fg) 5%, transparent);
+  background:
+    linear-gradient(var(--g1) 1px, transparent 1px) -1px -1px / 150px 150px,
+    linear-gradient(90deg, var(--g1) 1px, transparent 1px) -1px -1px / 150px 150px,
+    linear-gradient(var(--g2) 1px, transparent 1px) -1px -1px / 30px 30px,
+    linear-gradient(90deg, var(--g2) 1px, transparent 1px) -1px -1px / 30px 30px,
+    var(--gutter); }
+.blueprint .head { font-weight: 600; font-size: 104px; line-height: .92; letter-spacing: .015em; margin-top: 18px; }
+.blueprint .panel::before, .blueprint .panel::after { content: ""; position: absolute; pointer-events: none; --m: color-mix(in srgb, var(--fg) 42%, transparent); }
+.blueprint .panel::before { inset: 0 -20px; background: linear-gradient(var(--m), var(--m)) top / 100% 1px no-repeat, linear-gradient(var(--m), var(--m)) bottom / 100% 1px no-repeat; }
+.blueprint .panel::after { inset: -6px 0; background: linear-gradient(var(--m), var(--m)) left / 1px 100% no-repeat, linear-gradient(var(--m), var(--m)) right / 1px 100% no-repeat; }
+.blueprint .ask { border-top: 1px solid var(--edge-strong); padding-top: 18px; }
+.blueprint .gantry { display: block; inset: auto; width: 1px; z-index: 15; opacity: 0; background: var(--live); }
+.blueprint .gantry::after { content: ""; position: absolute; left: -10px; top: var(--py, 50%); width: 21px; height: 21px; margin-top: -10px; box-sizing: border-box; border: 1.5px solid var(--live); border-radius: 50%;
+  background: linear-gradient(var(--live), var(--live)) center / 100% 1px no-repeat, linear-gradient(var(--live), var(--live)) center / 1px 100% no-repeat; }
+.blueprint .cx { display: block; inset: 851px 0 auto 0; height: 1px; z-index: 14; opacity: 0; transform-origin: 0 50%;
+  background: repeating-linear-gradient(90deg, var(--live) 0 14px, transparent 14px 20px); }
+.blueprint .cy { display: block; inset: 0 auto 0 186px; width: 1px; z-index: 14; opacity: 0; transform-origin: 50% 851px;
+  background: repeating-linear-gradient(180deg, var(--live) 0 14px, transparent 14px 20px); }
+
+/* ── thermal · the receipt cut. Thermal paper, near-black print and a carbon-copy
+   blue lamp; Archivo Expanded for the header. No desk: perforations split the
+   panels, the top edge is torn, and the print head feeds the whole film out line
+   by line, then re-prints the readout on every landing. */
+html[data-theme="thermal"] {
+  --bg: #f6f5f0; --fg: #171717; --live: #2b3fcf;
+  --desk-depth: 0%;
+  --font-display: "Archivo", "Arial", sans-serif;
+  color-scheme: light;
+}
+.stage.thermal { background: repeating-linear-gradient(90deg, rgb(0 0 0 / .022) 0 1px, transparent 1px 5px), var(--gutter); }
+.thermal .head { font-weight: 700; font-stretch: 125%; font-size: 74px; letter-spacing: -.01em; text-align: center; margin-top: 30px; }
+.thermal .panel { background: transparent; }
+.thermal .panel::before { content: ""; position: absolute; left: -40px; right: -40px; top: -8px; border-top: 2px dashed var(--edge-strong); }
+.thermal .ask { text-align: center; }
+.thermal .ask .lg { justify-content: center; gap: 36px; }
+.thermal .blank { display: block; inset: auto 0 auto 0; z-index: 25; background: inherit; }
+.thermal .ph { display: block; inset: auto 0 auto 0; height: 14px; z-index: 26; opacity: 0;
+  background: linear-gradient(var(--fg), var(--fg)) bottom / 100% 2px no-repeat, linear-gradient(transparent, color-mix(in srgb, var(--fg) 9%, transparent)); }
+.thermal .tear { display: block; inset: 0 0 auto 0; height: 14px; z-index: 27; background: #0d0d0e;
+  mask: linear-gradient(-45deg, #0000 50%, #000 50%) 0 0 / 18px 14px repeat-x, linear-gradient(45deg, #0000 50%, #000 50%) 0 0 / 18px 14px repeat-x; }
+
+/* ── riso · the two-plate cut. Federal blue and fluorescent pink on newsprint,
+   Space Grotesk in a rough ink. The pink plate prints second: it lands out of
+   register and settles, and slips again on each landing. Inks multiply, the desk
+   is a halftone and the paper has grain. */
+html[data-theme="riso"] {
+  --bg: #eeede7; --fg: #172468; --live: #c8006a; --fault: #b8400a;
+  --desk-depth: 20%;
+  --font-display: "Space Grotesk", sans-serif;
+  color-scheme: light;
+}
+.stage.riso { --mx: 2.5px; --my: -1.5px; --pk: 1;
+  background: radial-gradient(circle, color-mix(in srgb, var(--fg) 12%, transparent) 1.1px, transparent 1.8px) 0 0 / 7px 7px, var(--gutter); }
+.riso .head { font-weight: 700; font-size: 100px; line-height: .9; letter-spacing: -.035em; text-transform: none; margin-top: 20px; mix-blend-mode: multiply; filter: url(#riso-ink); }
+.riso .head em, .riso .meta b, .riso .now .s { display: inline-block; translate: var(--mx) var(--my); opacity: var(--pk); }
+.riso .panel svg, .riso .now { mix-blend-mode: multiply; }
+.riso svg [style*="var(--live)"] { translate: calc(var(--mx) * .5) calc(var(--my) * .5); opacity: var(--pk); }
+.riso .grain { display: block; z-index: 20; opacity: .38; mix-blend-mode: multiply;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='320' height='320'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .09 0 0 0 0 .14 0 0 0 0 .41 1.1 0 0 0 -.45'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") 0 0 / 320px 320px; }
 </style>
 </head>
 <body class="lab">
@@ -130,9 +209,11 @@ html[data-theme="neon"] {
   <h1>Video lab</h1>
   <span class="mut">4:5 films for social · 1080×1350 · each one renders with video/render.mjs</span>
   <span class="sp"></span>
-  <label class="mut">theme <select id="theme"><option value="night">night</option><option value="film">film</option><option value="neon">neon</option></select></label>
+  <div class="themes" id="themes" role="group" aria-label="Theme"></div>
+  <span class="mut" id="theme-note"></span>
   <button type="button" id="play-all">play all</button>
 </div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="riso-ink"><feTurbulence type="fractalNoise" baseFrequency="1.1" numOctaves="1" seed="4"/><feDisplacementMap in="SourceGraphic" scale="2.6"/></filter></svg>
 <main><h2>Loop · real use cases</h2><div class="reel" id="reel"></div></main>
 
 <script src="../skills/calibrated-figures/assets/calibrated-figures.js"></script>
@@ -356,7 +437,9 @@ html[data-theme="neon"] {
       <div class="panel ro"><div class="now"></div><svg></svg></div>
       <div class="ask"><div class="lg"><span>ask claude</span><span>github.com/emdmed/calibrated</span></div><q>${esc(def.ask)}</q></div>
       <div class="fx slice"></div><div class="fx slice"></div><div class="fx tint"></div>
-      <div class="fx scan"></div><div class="fx roll"></div><div class="fx vig"></div><div class="fx boot"></div>`;
+      <div class="fx scan"></div><div class="fx roll"></div><div class="fx vig"></div><div class="fx boot"></div>
+      <div class="fx gantry"></div><div class="fx cx"></div><div class="fx cy"></div>
+      <div class="fx blank"></div><div class="fx ph"></div><div class="fx tear"></div><div class="fx grain"></div>`;
     mountEl.appendChild(el);
     /* the loop as large as its panel allows (1000×566, less a margin) */
     el.querySelector('.loop').style.setProperty('--zoom', Math.min(2.25, 940 / (def.data.w || 420), 536 / 250).toFixed(3));
@@ -364,8 +447,10 @@ html[data-theme="neon"] {
     const band = el.querySelector('.band'), panels = [...el.querySelectorAll('.panel')], ask = el.querySelector('.ask');
     const q$ = el.querySelector('.ask q'), em = el.querySelector('.head em');
     const fx = { slices: [...el.querySelectorAll('.slice')], tint: el.querySelector('.tint'), roll: el.querySelector('.roll'), boot: el.querySelector('.boot') };
-    const neon = document.documentElement.dataset.theme === 'neon';
-    if (neon) el.classList.add('neon');
+    const theme = document.documentElement.dataset.theme, neon = theme === 'neon';
+    const flavor = { neon: screen, blueprint: plot, thermal: print, riso: press }[theme];
+    if (flavor) el.classList.add(theme);
+    Object.assign(fx, { gantry: el.querySelector('.gantry'), cx: el.querySelector('.cx'), cy: el.querySelector('.cy'), blank: el.querySelector('.blank'), ph: el.querySelector('.ph') });
 
     function render(t) {
       /* the band, the panels and the ask rise in, one after another */
@@ -396,7 +481,62 @@ html[data-theme="neon"] {
       now.style.opacity = line ? blinkAt(t - b.land) : 0;
       const dec = (str, d) => (neon ? scramble(str, t - b.land - d, t) : str);
       now.innerHTML = line ? `<span class="at">${esc(dec(line.at, 0))}</span><span class="s">${esc(dec(line.st, 0.04))}</span><span>${esc(dec(line.msg, 0.08))}</span>` : '';
-      if (neon) { now.style.opacity = line ? 1 : 0; screen(t, seq[j], landed); }
+      if (neon || theme === 'thermal' || theme === 'riso') now.style.opacity = line ? 1 : 0;
+      if (flavor) flavor(t, seq[j], landed);
+    }
+
+    /* ── blueprint: a plotter carriage draws each panel in, left to right, its pen
+       zigzagging; each landing throws construction lines through the readout line */
+    function plot(t, b, landed) {
+      const io = (x) => (x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
+      let pen = null;
+      panels.forEach((p, i) => {
+        const x = io(prog(t, 0.1 + i * 0.34, 0.62));
+        p.style.opacity = x > 0 ? 1 : 0; p.style.translate = '';
+        p.style.clipPath = x < 1 ? `inset(-8px ${((1 - x) * 100).toFixed(2)}% -8px -24px)` : '';
+        if (x > 0 && x < 1) pen = { p, x };
+      });
+      fx.gantry.style.opacity = pen ? 1 : 0;
+      if (pen) {
+        fx.gantry.style.left = (pen.p.offsetLeft + pen.x * pen.p.offsetWidth).toFixed(1) + 'px';
+        fx.gantry.style.top = pen.p.offsetTop - 8 + 'px';
+        fx.gantry.style.height = pen.p.offsetHeight + 16 + 'px';
+        fx.gantry.style.setProperty('--py', (50 + 40 * Math.sin(pen.x * 41)).toFixed(1) + '%');
+      }
+      const g = landed ? t - b.land : 1;
+      const draw = quintOut(prog(g, 0, 0.24)), fade = g < 0 ? 0 : 1 - prog(g, 0.4, 0.4);
+      fx.cx.style.opacity = fx.cy.style.opacity = (fade * 0.85).toFixed(3);
+      fx.cx.style.transform = `scaleX(${draw.toFixed(3)})`;
+      fx.cy.style.transform = `scaleY(${draw.toFixed(3)})`;
+    }
+
+    /* ── thermal: the print head feeds the film out top to bottom in whole lines,
+       then re-prints the readout panel each time a beat lands */
+    function print(t, b, landed) {
+      [band, ...panels, ask].forEach((n) => { n.style.opacity = 1; n.style.translate = ''; });
+      const H = 1350, LINES = 56, feed = prog(t, 0.12, 1.3);
+      let top = null, bottom = H;
+      if (feed < 1) top = (Math.floor(feed * LINES) / LINES) * H;
+      else if (landed) {
+        const g = t - b.land, ro = panels[1];
+        if (g >= 0 && g < 0.4) { top = ro.offsetTop + (Math.floor((g / 0.4) * 18) / 18) * ro.offsetHeight; bottom = ro.offsetTop + ro.offsetHeight; }
+      }
+      if (top === null) { fx.blank.style.top = H + 'px'; fx.blank.style.height = 0; fx.ph.style.opacity = 0; return; }
+      fx.blank.style.top = top.toFixed(0) + 'px'; fx.blank.style.height = (bottom - top).toFixed(0) + 'px';
+      fx.ph.style.opacity = 1; fx.ph.style.top = (top - 12).toFixed(0) + 'px';
+    }
+
+    /* ── riso: the pink plate prints second, landing out of register and settling;
+       each landing slips it again (a fixed slip per beat, not a per-frame jitter) */
+    function press(t, b, landed) {
+      const drop = quintOut(prog(t, 0.72, 0.6));
+      let mx = 2.5 + (1 - drop) * 30, my = -1.5 - (1 - drop) * 18;
+      const g = landed ? t - b.land : 1, hard = b.log.ink === 'fault' ? 2 : 1;
+      const k = g >= 0 && g < 0.45 ? Math.pow(1 - g / 0.45, 2) : 0;
+      mx += (hash(b.t0, 1) - 0.5) * 16 * hard * k; my += (hash(b.t0, 2) - 0.5) * 9 * hard * k;
+      el.style.setProperty('--mx', mx.toFixed(2) + 'px');
+      el.style.setProperty('--my', my.toFixed(2) + 'px');
+      el.style.setProperty('--pk', prog(t, 0.72, 0.12).toFixed(3));
     }
 
     /* ── the neon screen: everything here is a function of t */
@@ -447,8 +587,26 @@ html[data-theme="neon"] {
   const solo = q.get('film'), rendering = q.get('render') === '1';
   const theme = q.get('theme') || 'night';
   document.documentElement.dataset.theme = theme;
-  document.getElementById('theme').value = theme;
-  document.getElementById('theme').onchange = (e) => { q.set('theme', e.target.value); location.search = q; };
+  /* the theme picker: the seeds as swatches (lab chrome only), and what each cut does */
+  const THEMES = [
+    { id: 'night', sw: ['#1b2225', '#e5e0d3', '#dcb662'], note: 'the kit’s dark default' },
+    { id: 'film', sw: ['#f4f2ec', '#262b2e', '#8a5d05'], note: 'the kit’s light default' },
+    { id: 'neon', sw: ['#120a1c', '#ece4ff', '#19f0ff'], note: 'tube light, scanlines, a glitch on each landing' },
+    { id: 'blueprint', sw: ['#0e3160', '#e6f0fb', '#ffd84a'], note: 'drafting grid; a plotter draws the panels in' },
+    { id: 'thermal', sw: ['#f6f5f0', '#171717', '#2b3fcf'], note: 'a receipt roll, printed line by line' },
+    { id: 'riso', sw: ['#eeede7', '#172468', '#c8006a'], note: 'two-plate riso; the pink plate lands off register' },
+  ];
+  const picker = document.getElementById('themes');
+  THEMES.forEach((x) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.setAttribute('aria-pressed', x.id === theme);
+    btn.title = x.note;
+    btn.innerHTML = `<i>${x.sw.map((c) => `<b style="background:${c}"></b>`).join('')}</i>${x.id}`;
+    btn.onclick = () => { q.set('theme', x.id); if (x.id === 'night') q.delete('theme'); location.search = q; };
+    picker.appendChild(btn);
+  });
+  document.getElementById('theme-note').textContent = (THEMES.find((x) => x.id === theme) || {}).note || '';
   if (solo) document.documentElement.classList.add('solo');
   if (rendering) document.documentElement.classList.add('render');
 
@@ -475,7 +633,7 @@ html[data-theme="neon"] {
     };
     new ResizeObserver(fit).observe(view);
 
-    let t = solo ? +(q.get('t') ?? 0) : f.duration - OUTRO, playing = false, prev = 0;
+    let t = solo ? +(q.get('t') ?? 0) : f.duration - 0.4, playing = false, prev = 0;
     const show = () => { f.render(t); scrub.value = t; out.textContent = `${t.toFixed(2)} / ${f.duration.toFixed(1)}`; btn.textContent = playing ? 'pause' : 'play'; };
     const tick = (now) => {
       if (!playing) return;

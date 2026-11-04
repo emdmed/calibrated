@@ -50,6 +50,39 @@
         ],
         "createdAt": "2026-11-02T09:59:10.211Z",
         "reason": "model triage: detent tick is a 6px absolutely-positioned pseudo (no sibling reflow); details uses the interpolate-size open pattern behind prefers-reduced-motion"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "space grotesk",
+        "createdAt": "2026-11-03T08:25:18.982Z",
+        "reason": "DESIGN.md + looks.md list Space Grotesk as an optional headline face (model, from repo docs)"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "video/promo.html"
+        ],
+        "createdAt": "2026-11-03T08:25:19.040Z",
+        "reason": "lamp sweep glow reused from video/before-after.html; DESIGN.md allows the lamp glow (model, from repo docs)"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "video/promo.html"
+        ],
+        "createdAt": "2026-11-03T08:27:31.742Z",
+        "reason": "intentional: the 'before' page imitates a typical generated artifact (model)"
+      },
+      {
+        "rule": "overused-font",
+        "value": "*",
+        "files": [
+          "video/promo.html"
+        ],
+        "createdAt": "2026-11-03T08:27:31.801Z",
+        "reason": "Inter is the deliberate 'before'/chat mock; Space Grotesk is a looks.md headline face (model)"
       }
     ]
   }
