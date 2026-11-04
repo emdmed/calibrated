@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="night">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calibrated · Strong examples</title>
+<meta name="description" content="Three finished pages at strong weight: a data centre wall screen, a freight dispatch board and a solar farm site view. Every number is example data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&family=Chakra+Petch:wght@600&family=Big+Shoulders+Text:wght@700;800&family=Saira+Condensed:wght@600&display=swap">
+<link rel="stylesheet" href="../skills/calibrated-tokens/assets/calibrated.css">
+<link rel="stylesheet" href="../skills/calibrated-components/assets/calibrated-components.css">
+<style>
+/* Same chrome as demo/examples.html. Everything inside .page is a finished page, kit parts only,
+   all at strong weight. Each page takes its look from its subject. */
+html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+html, body { background: var(--gutter); }
+.top { position: sticky; top: 0; z-index: 20; background: var(--gutter); }
+.top .cal-mast { padding: 12px 0 10px; }
+.top .word.ruled { font-size: 20px; }
+.top a.word { text-decoration: none; }
+.nav { display: inline-flex; gap: 16px; }
+.nav a { text-decoration: none; }
+.cal-intro { align-items: start; }
+.cal-intro .lead p { margin-top: 18px; max-width: 58ch; }
+.toc { width: 100%; }
+.toc a { text-decoration: none; }
+.toc a:hover { color: var(--live); }
+.toc td:nth-child(3) { color: var(--muted); font-size: 12px; }
+
+.brief { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px 48px; margin-bottom: 26px; align-items: start; }
+.brief .ask { display: flex; gap: 10px 12px; align-items: baseline; flex-wrap: wrap; color: var(--legend); }
+.brief .ask q { quotes: "“" "”"; flex: 1 1 30ch; }
+.brief .data { margin-top: 10px; font-size: 12.5px; color: var(--muted); max-width: 70ch; }
+.brief .data b { font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--key); font-weight: 400; margin-right: 6px; }
+.brief .cal-kv { border-top: 0; padding-top: 0; }
+.brief .cal-kv code { white-space: nowrap; }
+
+.page.cal-theme { --gutter: color-mix(in srgb, var(--bg), var(--shade) calc(var(--desk-depth, 24%) + 9%)); background: var(--gutter); border: var(--line-thin) solid var(--edge-strong); padding: clamp(6px, 2vw, 22px) clamp(12px, 2.6vw, 34px) 4px; overflow: hidden; }
+.page .cal-intro { padding-top: clamp(20px, 2.6vw, 32px); }
+.page .cal-intro h1 { font-size: clamp(24px, 2.8vw, 36px); }
+.page .cal-sec { margin-top: clamp(28px, 3vw, 40px); }
+.page .cal-foot { padding: 26px 0 22px; }
+.page .cal-figure > svg { max-width: calc(100% - 36px); }
+main > .cal-sec { margin-top: clamp(72px, 9vw, 128px); }
+main > .cal-sec > .cal-sec-h { margin-bottom: 26px; }
+
+/* layout helpers inside the pages */
+.now { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 26px 24px; padding: 18px 10px 20px; }
+.now > div { min-width: 0; overflow-x: auto; padding: 0 10px; }
+.now.two { grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr)); }
+.now p { font-size: 12.5px; color: var(--muted); margin-top: 8px; }
+.figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 480px), 1fr)); gap: var(--gap); }
+.figs > * { min-width: 0; }
+.row2 { display: flex; flex-wrap: wrap; gap: var(--gap); align-items: stretch; }
+.row2 > * { flex: 1 1 360px; min-width: 0; }
+.counts { display: flex; gap: 10px 16px; flex-wrap: wrap; align-items: center; }
+.bar { display: flex; gap: 12px 16px; align-items: center; flex-wrap: wrap; padding: 14px 20px; border-top: var(--line-thin) solid var(--edge); }
+.bar .sp { flex: 1; }
+.bar .cal-readout { flex: 1 1 320px; }
+.mast-tools { display: flex; gap: 10px 14px; align-items: center; flex-wrap: wrap; }
+.page .cal-table { background: var(--panel); }
+.page .cal-table td.num { font-variant-numeric: tabular-nums; }
+
+/* dispatch: docks side by side */
+.docks { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); gap: var(--gap); }
+.docks .cal-panel { padding: 16px 20px 18px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-content: start; min-width: 0; }
+.docks .cal-block { min-width: 0; overflow-x: auto; }
+.docks .hd { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.docks .hd .sp { flex: 1; }
+.cal-dialog .bd { display: grid; gap: 16px; }
+
+/* work order form */
+.wo { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: var(--gap); align-items: start; }
+.wo .cal-panel { padding: 18px 22px 20px; min-width: 0; }
+.wo .form { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 18px 30px; align-items: start; }
+.wo .form .wide { grid-column: 1 / -1; }
+.wo .btns { display: flex; gap: 10px; align-items: center; justify-content: flex-end; margin-top: 22px; padding-top: 14px; border-top: var(--line-thin) solid var(--edge); flex-wrap: wrap; }
+.wo aside .cal-panel { padding: 14px 16px 16px; display: grid; gap: 12px; }
+@media (max-width: 900px) { .wo { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 1100px) { .brief { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .top .cal-caption { display: none; } .toc th:nth-child(3), .toc td:nth-child(3) { display: none; } }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+html.film { scroll-behavior: auto; }
+html.film .top { position: static; }
+html.film *, html.film *::before, html.film *::after { transition: none !important; }
+
+/* ── looks, from each subject and where it is read: the wall screen in a dark hall (night),
+   the dispatch board and the field tablet in daylight (film). Each page sets its own theme. */
+.page[data-look="dc"] { --bg: #10171a; --fg: #d7e4e6; --live: #5fd0e0; --desk-depth: 62%;
+  --font-display: "Chakra Petch", "Arial Narrow", sans-serif; --display-weight: 600; --track-title: .04em; }
+
+.page[data-look="freight"] { --bg: #ecebe6; --fg: #22252a; --live: #9a5b00; --desk-depth: 22%;
+  --font-display: "Big Shoulders Text", "Arial Narrow", sans-serif; --display-weight: 800; --track-title: .03em; }
+.page[data-look="freight"] .cal-intro h1 { font-size: clamp(30px, 3.6vw, 46px); }
+
+.page[data-look="solar"] { --bg: #f1f3ec; --fg: #1d2a21; --live: #a85d00; --desk-depth: 20%; --gap: 18px;
+  --font-display: "Saira Condensed", "Arial Narrow", sans-serif; --display-case: none; --display-weight: 600; --track-title: 0; }
+.page[data-look="solar"] .cal-intro h1 { font-size: clamp(30px, 3.4vw, 44px); }
+</style>
+<script>
+  (() => { const q = new URLSearchParams(location.search), t = q.get('theme');
+    if (t) document.documentElement.dataset.theme = t;
+    /* ?film: video/strong.html drives this page frame by frame and owns the clock */
+    if (q.has('film')) { document.documentElement.classList.add('film'); window.__now = 1.8e12; Date.now = () => window.__now; } })();
+</script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="cal-mark" viewBox="4 8 40 32">
+    <path d="M4 38 H44" stroke="currentColor" stroke-width="2.4"/>
+    <path d="M5.2 38 V10 M24 38 V10 M42.8 38 V10 M11.5 38 V27 M17.75 38 V27 M36.5 38 V27" stroke="currentColor" stroke-width="2"/>
+    <path d="M30 38 V8" stroke="var(--live, #dcb662)" stroke-width="3"/>
+  </symbol>
+</svg>
+
+<div class="top"><div class="wrap">
+  <header class="cal-mast">
+    <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
+    <a class="word ruled" href="../demo/index.html">Calibrated</a>
+    <span class="cal-caption lg">lab · strong weight · finished pages</span>
+    <span class="sp"></span>
+    <nav class="nav" aria-label="Site"><a class="cal-btn quiet" href="../demo/index.html">catalog</a><a class="cal-btn quiet" href="../demo/examples.html">examples</a></nav>
+  </header>
+</div></div>
+
+<main class="wrap">
+  <section class="cal-intro">
+    <div class="lead">
+      <h1>Three pages read from across the room</h1>
+      <p>Strong weight draws the same geometry heavier: 3px scales, nameplates, counter windows, pilot lights and hazard stripes. It is made for screens people glance at while doing something else. These three pages use it from end to end, each in a palette taken from where it is read.</p>
+    </div>
+    <table class="cal-table toc">
+      <thead><tr><th>no</th><th>page</th><th>type</th></tr></thead>
+      <tbody>
+        <tr><td>01</td><td><a href="#dc">FRA-2 · Hall B</a></td><td>wall screen</td></tr>
+        <tr><td>02</td><td><a href="#freight">Northgate · dispatch</a></td><td>operations board</td></tr>
+        <tr><td>03</td><td><a href="#solar">Kestrel Flats · site</a></td><td>field view and work order</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ════ 1 · data centre wall screen ════ -->
+  <section class="cal-sec" id="dc">
+    <div class="cal-sec-h"><b>1 · FRA-2 · Hall B</b><span>wall screen · instruments, section, rack table, incident</span><span>example 1/3</span></div>
+    <div class="brief">
+      <div>
+        <p class="ask"><span class="cal-legend">ask claude</span><q>Make the wall screen for Hall B in the Calibrated style, strong weight. The night shift reads it from the desk across the room.</q></p>
+        <p class="data"><b>pasted with it</b>BMS export · rack power per PDU · hall floor plan · the open incident ticket</p>
+      </div>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-components</code> · <code>calibrated-figures</code></dd><dt>figures</dt><dd><code>section</code> · <code>timeline</code> · <code>fanout</code></dd><dt>instruments</dt><dd><code>&lt;cal-meter&gt;</code> · <code>&lt;cal-ruler&gt;</code></dd><dt>parts</dt><dd>counts · badges · table with compact meters · readout · buttons</dd><dt>look</dt><dd>dark hall · cold cyan lamp · Chakra Petch</dd></dl>
+    </div>
+    <div class="page cal-theme" data-theme="night" data-look="dc" data-weight="strong" data-density="full" data-mode="app">
+      <header class="cal-mast">
+        <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
+        <span class="word">FRA-2 · Hall B</span>
+        <span class="cal-caption lg">wall screen · 03:42 cet</span>
+        <span class="sp"></span>
+        <div class="mast-tools">
+          <span class="cal-count" data-n="214" data-noun="racks"></span>
+          <span class="cal-count" data-n="1" data-noun="incident" data-ink="fault"></span>
+          <span class="cal-badge" data-ink="ok"><span class="cal-dot"></span>utility feed</span>
+        </div>
+      </header>
+      <section class="cal-intro">
+        <h1>1.62 MW on the floor. CRAH B3 is down, B4 carries it.</h1>
+        <div><p>Inlet temperatures are inside limits everywhere except rack C07. Facilities is on site and swapping the B3 fan.</p></div>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>Now</b><span>power and cooling</span></div>
+        <div class="cal-panel now two">
+          <div><div class="cal-block-h">it load<span>of 2.0 MW</span></div><cal-meter value="1.62" max="2" warn="1.8" label="it load" format="raw" unit=" MW" width="380"></cal-meter><p>Alert at 1.8 MW, the hall's redundant capacity.</p></div>
+          <div><div class="cal-block-h">pue<span>last hour</span></div><cal-ruler min="1" max="2" step="0.05" every="4" value="1.31" width="380" up></cal-ruler><p>Target 1.35. Free cooling covers 40% tonight.</p></div>
+          <div><div class="cal-block-h">supply air<span>hall average</span></div><cal-ruler min="15" max="30" step="0.5" every="10" unit=" °C" value="22.4" width="380" up></cal-ruler><p>Recommended up to 27 °C at the rack inlet.</p></div>
+          <div><div class="cal-block-h">ups b<span>load</span></div><cal-meter value="58" max="100" warn="80" label="ups load" format="raw" unit="%" width="380"></cal-meter><p>Batteries 100%, runtime 11 min at this load.</p></div>
+        </div>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>Hall</b><span>containment · hatched is closed to visitors</span></div>
+        <figure class="cal-figure"><svg id="f-dc-section"></svg><figcaption><b>Section</b>Who can walk where in Hall B, and what sits outside it.</figcaption></figure>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>Racks to watch</b><span>highest power and inlet temperature</span></div>
+        <table class="cal-table" data-density="compact">
+          <thead><tr><th>no</th><th>rack</th><th>customer</th><th>power · kW</th><th class="num">inlet</th><th>status</th></tr></thead>
+          <tbody>
+            <tr><td>01</td><td>C07</td><td>northwind</td><td><cal-meter value="10.8" max="12" warn="10" label="C07 power" format="raw"></cal-meter></td><td class="num">29.8 °C</td><td class="st" data-ink="fault">inlet over 27 °C</td></tr>
+            <tr><td>02</td><td>C08</td><td>northwind</td><td><cal-meter value="9.4" max="12" warn="10" label="C08 power" format="raw"></cal-meter></td><td class="num">26.1 °C</td><td class="st" data-ink="live">watching</td></tr>
+            <tr><td>03</td><td>D02</td><td>bank cage 12</td><td><cal-meter value="8.2" max="12" warn="10" label="D02 power" format="raw"></cal-meter></td><td class="num">23.0 °C</td><td class="st" data-ink="ok">normal</td></tr>
+            <tr><td>04</td><td>A14</td><td>acme</td><td><cal-meter value="6.9" max="12" warn="10" label="A14 power" format="raw"></cal-meter></td><td class="num">22.2 °C</td><td class="st" data-ink="ok">normal</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>Incident 3318</b><span>CRAH B3 · fan 2 stopped</span></div>
+        <div class="figs">
+          <figure class="cal-figure"><svg id="f-dc-time"></svg><figcaption><b>Response</b>From the alarm to the fan swap now under way.</figcaption></figure>
+          <figure class="cal-figure"><svg id="f-dc-fan"></svg><figcaption><b>Cooling</b>Four units on row B. B4 is carrying B3's share.</figcaption></figure>
+        </div>
+        <div class="cal-panel bar">
+          <div class="cal-readout" role="status"><span class="cal-wait" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="lb">fan swap · CRAH B3 · M. Weber on site</span><span class="ld"></span><cal-elapsed id="dc-clock"></cal-elapsed></div>
+          <button class="cal-btn" type="button">page facilities</button>
+          <button class="cal-btn primary" type="button" id="dc-ack">acknowledge</button>
+        </div>
+      </section>
+      <footer class="cal-foot"><span>fra-2 · hall b · bms every 10 s</span><span>example data</span></footer>
+    </div>
+  </section>
+
+  <!-- ════ 2 · freight dispatch ════ -->
+  <section class="cal-sec" id="freight">
+    <div class="cal-sec-h"><b>2 · Northgate · dispatch</b><span>operations board · lanes, docks, driver hours, route, dialog</span><span>example 2/3</span></div>
+    <div class="brief">
+      <div>
+        <p class="ask"><span class="cal-legend">ask claude</span><q>Build our dispatch board as a Calibrated page at strong weight: docks, trailers, driver hours and the loads going out today. Dispatchers use it on the big screen in the yard office.</q></p>
+        <p class="data"><b>pasted with it</b>today's load plan · dock scanner counts · tachograph hours · route sheet for R-12</p>
+      </div>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-components</code> · <code>calibrated-figures</code></dd><dt>figures</dt><dd><code>lanes</code> · <code>budget</code> · <code>fanout</code></dd><dt>instruments</dt><dd><code>&lt;cal-progress&gt;</code> · <code>&lt;cal-meter&gt;</code></dd><dt>parts</dt><dd>tabs with counts · dock panels · loads table · dialog with radio, time and number · toast</dd><dt>look</dt><dd>concrete grey · safety ochre lamp · Big Shoulders</dd></dl>
+    </div>
+    <div class="page cal-theme" data-theme="film" data-look="freight" data-weight="strong" data-density="full" data-mode="app">
+      <header class="cal-mast">
+        <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
+        <span class="word">Northgate DC</span>
+        <span class="cal-caption lg">dispatch · tue 4 nov · shift 2</span>
+        <span class="sp"></span>
+        <span class="cal-count" data-n="14" data-noun="loads today"></span>
+        <span class="cal-count" data-n="1" data-noun="late" data-ink="fault"></span>
+      </header>
+      <div class="cal-tabs" role="tablist" aria-label="Dispatch" style="margin-top:16px">
+        <button role="tab" aria-selected="true">board<span class="cal-cnt">14</span></button>
+        <button role="tab" aria-selected="false">docks<span class="cal-cnt">6</span></button>
+        <button role="tab" aria-selected="false">drivers<span class="cal-cnt">9</span></button>
+        <button role="tab" aria-selected="false">exceptions<span class="cal-cnt">2</span></button>
+      </div>
+      <section class="cal-intro">
+        <h1>Eight loads out. Dock 6 runs 40 minutes late.</h1>
+        <div><p>TR-208 for Leeds is two-thirds loaded. Its driver has 2h 48m of driving left today, enough for the run if it leaves by 14:30.</p></div>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>Docks</b><span>hours loading since the doors opened</span></div>
+        <figure class="cal-figure"><svg id="f-fr-lanes"></svg><figcaption><b>Lanes</b>One lane per dock on a single clock. Dock 6 is still loading.</figcaption></figure>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>On the docks now</b><span>trailers loading</span></div>
+        <div class="docks">
+          <div class="cal-panel">
+            <div class="hd"><b class="cal-legend" style="color:var(--fg)">dock 6 · TR-208</b><span class="sp"></span><span class="cal-badge" data-ink="fault"><span class="cal-dot"></span>late · 40 min</span></div>
+            <div class="cal-block"><div class="cal-block-h">pallets<span>leeds · 26</span></div><cal-progress done="18" total="26" live="19" live-label="pallet 19 · scanning" done-label="18 loaded · 2h 10m"></cal-progress></div>
+            <div class="cal-block"><div class="cal-block-h">payload</div><cal-meter value="16.2" max="24" warn="22" label="payload" format="raw" unit=" t" width="280"></cal-meter></div>
+            <button class="cal-btn primary" type="button" data-dialog="dispatch">dispatch TR-208</button>
+          </div>
+          <div class="cal-panel">
+            <div class="hd"><b class="cal-legend" style="color:var(--fg)">dock 3 · TR-211</b><span class="sp"></span><span class="cal-badge" data-ink="live">loading</span></div>
+            <div class="cal-block"><div class="cal-block-h">pallets<span>york · 20</span></div><cal-progress done="6" total="20" done-label="6 loaded · 35m"></cal-progress></div>
+            <div class="cal-block"><div class="cal-block-h">payload</div><cal-meter value="5.1" max="24" warn="22" label="payload" format="raw" unit=" t" width="280"></cal-meter></div>
+            <button class="cal-btn" type="button" disabled>dispatch TR-211</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>Driver and route</b><span>J. Kowalski · TR-204 is out on R-12</span></div>
+        <div class="figs">
+          <figure class="cal-figure"><svg id="f-fr-hours"></svg><figcaption><b>Driving time</b>Hours driven today against the 9 h limit, and where the plan lands.</figcaption></figure>
+          <figure class="cal-figure"><svg id="f-fr-route"></svg><figcaption><b>Route R-12</b>Three drops. York is next.</figcaption></figure>
+        </div>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>Loads today</b><span>leaving after 12:00</span></div>
+        <table class="cal-table">
+          <thead><tr><th>no</th><th>load</th><th>trailer</th><th>to</th><th class="num">pallets</th><th class="num">leaves</th><th>status</th></tr></thead>
+          <tbody>
+            <tr><td>09</td><td>L-4471</td><td>TR-208</td><td>Leeds · Kirkgate</td><td class="num">26</td><td class="num">13:50</td><td class="st" data-ink="fault">late · 40 min</td></tr>
+            <tr><td>10</td><td>L-4472</td><td>TR-211</td><td>York · Clifton</td><td class="num">20</td><td class="num">15:10</td><td class="st" data-ink="live">loading</td></tr>
+            <tr><td>11</td><td>L-4475</td><td>TR-198</td><td>Hull · docks</td><td class="num">12</td><td class="num">16:00</td><td class="st">queued</td></tr>
+            <tr><td>08</td><td>L-4468</td><td>TR-204</td><td>R-12 · 3 drops</td><td class="num">22</td><td class="num">07:30</td><td class="st" data-ink="ok">out</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <dialog class="cal-dialog" id="dispatch" aria-labelledby="dispatch-t"><form method="dialog">
+        <header><b id="dispatch-t">dispatch TR-208 to Leeds</b><span class="sp"></span><kbd class="cal-kbd">esc</kbd></header>
+        <div class="bd">
+          <dl class="cal-kv"><dt>load</dt><dd>L-4471 · 26 pallets · 16.2 t</dd><dt>dock</dt><dd>6</dd></dl>
+          <div class="cal-field"><span class="lbl" id="drv-l">driver</span>
+            <div role="radiogroup" aria-labelledby="drv-l" style="display:grid;gap:9px">
+              <label class="cal-radio"><input type="radio" name="drv" checked><span>A. Okoro</span><span class="meta">6h 10m left today</span></label>
+              <label class="cal-radio"><input type="radio" name="drv"><span>P. Lindqvist</span><span class="meta">2h 05m left · too short for Leeds</span></label>
+            </div></div>
+          <div class="cal-field"><label for="dep">leaves at</label><input type="time" class="cal-input cal-date" id="dep" value="14:30"></div>
+          <div class="cal-field"><label for="seal">seal number</label><input class="cal-input" id="seal" value="NG 0448 213"></div>
+        </div>
+        <footer><button class="cal-btn" value="cancel">cancel</button><button class="cal-btn primary" value="go" id="dispatch-go">dispatch</button></footer>
+      </form></dialog>
+      <footer class="cal-foot"><span>northgate dc · dispatch board · scanners every 30 s</span><span>example data</span></footer>
+    </div>
+  </section>
+
+  <!-- ════ 3 · solar farm ════ -->
+  <section class="cal-sec" id="solar">
+    <div class="cal-sec-h"><b>3 · Kestrel Flats · site</b><span>field view · instruments, matrix, loop, work order form</span><span>example 3/3</span></div>
+    <div class="brief">
+      <div>
+        <p class="ask"><span class="cal-legend">ask claude</span><q>Make the site view for Kestrel Flats as a Calibrated page at strong weight, with a work order form at the end. Technicians read it on a tablet out in the field.</q></p>
+        <p class="data"><b>pasted with it</b>SCADA snapshot · string yields per block · battery schedule · the paper work order</p>
+      </div>
+      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-components</code> · <code>calibrated-figures</code></dd><dt>figures</dt><dd><code>matrix</code> · <code>loop</code></dd><dt>instruments</dt><dd><code>&lt;cal-meter&gt;</code> · <code>&lt;cal-ruler&gt;</code></dd><dt>parts</dt><dd>select · radio · detent · date and time · tag input · file drop · editor pane · switch · callout · toast</dd><dt>look</dt><dd>daylight · field green ink · Saira Condensed</dd></dl>
+    </div>
+    <div class="page cal-theme" data-theme="film" data-look="solar" data-weight="strong" data-density="full" data-mode="app">
+      <header class="cal-mast">
+        <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
+        <span class="word">Kestrel Flats</span>
+        <span class="cal-caption lg">solar · 48 MW · site view</span>
+        <span class="sp"></span>
+        <span class="cal-count" data-n="24" data-noun="inverters"></span>
+        <span class="cal-badge" data-ink="fault"><span class="cal-dot"></span>string B-S6 down</span>
+      </header>
+      <section class="cal-intro">
+        <h1>38.6 MW to the grid. One string is out in block B.</h1>
+        <div><p>Clear sky, 842 W/m². Row 4 is losing yield to dust in four blocks. The battery starts its evening discharge at 17:00.</p></div>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>Output</b><span>12:20 · live from SCADA</span></div>
+        <div class="cal-panel now two">
+          <div><div class="cal-block-h">export<span>of 48 MW</span></div><cal-meter value="38.6" max="48" warn="45" label="export" format="raw" unit=" MW" width="380" live></cal-meter><p>The grid connection caps export at 45 MW.</p></div>
+          <div><div class="cal-block-h">irradiance<span>plane of array</span></div><cal-ruler min="0" max="1200" step="50" every="4" unit=" W/m²" value="842" width="380" up></cal-ruler><p>Expected 860 for this hour.</p></div>
+          <div><div class="cal-block-h">battery<span>bess-1 · 20 MWh</span></div><cal-meter value="71" max="100" warn="95" label="charge" format="raw" unit="%" width="380"></cal-meter><p>Charging from surplus until 15:00.</p></div>
+        </div>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>Field</b><span>strings below 95% of expected yield</span></div>
+        <div class="figs">
+          <figure class="cal-figure"><svg id="f-so-matrix"></svg><figcaption><b>Yield</b>Each mark is a string under 95%. Row S4 is low across the field.</figcaption></figure>
+          <figure class="cal-figure"><svg id="f-so-loop"></svg><figcaption><b>Battery</b>Today's cycle. The evening discharge is next.</figcaption></figure>
+        </div>
+      </section>
+
+      <section class="cal-sec">
+        <div class="cal-sec-h"><b>Work order</b><span>for the field crew</span></div>
+        <div class="wo">
+          <div class="cal-panel">
+            <form class="form" id="wo" novalidate>
+              <div class="cal-field"><label for="wo-str">string</label>
+                <select class="cal-select" id="wo-str"><option>B-S4 · block B</option><option selected>B-S6 · block B</option><option>C-S4 · block C</option></select></div>
+              <div class="cal-field"><label for="wo-date">crew on site</label>
+                <div style="display:flex;flex-wrap:wrap;gap:10px 14px"><input type="date" class="cal-input cal-date" id="wo-date" value="2026-11-05"><input type="time" class="cal-input cal-date" aria-label="time on site" value="07:30"></div></div>
+              <div class="cal-field wide"><span class="lbl" id="wo-k">fault</span>
+                <div role="radiogroup" aria-labelledby="wo-k" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:9px 24px">
+                  <label class="cal-radio"><input type="radio" name="wo-k" checked><span>No current</span><span class="meta">0 A since 09:14</span></label>
+                  <label class="cal-radio"><input type="radio" name="wo-k"><span>Low yield</span><span class="meta">under 95%</span></label>
+                  <label class="cal-radio"><input type="radio" name="wo-k"><span>Hot spot</span><span class="meta">from a thermal image</span></label>
+                </div></div>
+              <div class="cal-field"><span class="lbl" id="wo-p">priority</span>
+                <div class="cal-detent" role="radiogroup" aria-labelledby="wo-p"><i class="mk" aria-hidden="true"></i>
+                  <label><input type="radio" name="wo-p" value="low"><span>low</span></label>
+                  <label><input type="radio" name="wo-p" value="normal"><span>normal</span></label>
+                  <label><input type="radio" name="wo-p" value="urgent" checked><span>urgent</span></label>
+                </div></div>
+              <div class="cal-field wide"><span class="lbl" id="wo-c">crew</span>
+                <div class="cal-chips" aria-labelledby="wo-c"><span class="chip">R. Haddad<button type="button" aria-label="Remove R. Haddad">×</button></span><span class="chip">T. Ng<button type="button" aria-label="Remove T. Ng">×</button></span><input aria-label="Add a technician" placeholder="add a technician"></div></div>
+              <div class="cal-field wide"><span class="lbl">thermal image</span>
+                <label class="cal-drop" data-list="wo-files" data-max="20000000"><input type="file" accept=".jpg,.png"><span class="lead">drop the image here · or <u>browse</u></span><span class="hint">jpg or png · up to 20 MB</span></label>
+                <div class="cal-rows" id="wo-files"></div></div>
+              <div class="cal-field wide"><label for="wo-note">note for the crew</label>
+                <div class="cal-term" data-max="240"><textarea class="cal-textarea" id="wo-note" spellcheck="false" aria-describedby="wo-note-h">Combiner box B-6, fuse F3 looks blown. Bring two 15 A fuses.</textarea><div class="bar" aria-hidden="true"><span class="sp"></span><span class="cal-count"><b>0</b><span>/ 240</span></span></div></div>
+                <span class="hint" id="wo-note-h">Up to 240 characters.</span></div>
+              <label class="cal-switch wide"><span class="txt">Isolate the string before work starts</span><input type="checkbox" role="switch" checked></label>
+            </form>
+            <div class="btns"><button class="cal-btn quiet" type="button">save draft</button><button class="cal-btn primary" type="submit" form="wo">issue work order</button></div>
+          </div>
+          <aside>
+            <div class="cal-panel">
+              <div class="cal-block-h">B-S6 today</div>
+              <dl class="cal-kv"><dt>current</dt><dd>0 A since 09:14</dd><dt>lost</dt><dd>≈ 410 kWh so far</dd><dt>panels</dt><dd>28 × 550 W</dd></dl>
+              <div class="cal-callout" data-ink="fault"><div class="cal-gl">before work</div><ol><li>Open the string disconnect at the combiner.</li><li>Test for zero volts before touching the fuse.</li></ol></div>
+            </div>
+          </aside>
+        </div>
+      </section>
+      <footer class="cal-foot"><span>kestrel flats · site view · scada every 15 s</span><span>example data</span></footer>
+    </div>
+  </section>
+
+  <footer class="cal-foot"><span>calibrated · lab · every number on this page is example data</span><span><a href="../demo/examples.html">all examples</a></span></footer>
+</main>
+<script>if (document.documentElement.classList.contains('film')) document.querySelectorAll('cal-meter, cal-ruler, cal-progress, cal-durations, cal-position, cal-diff').forEach((e) => e.setAttribute('still', ''));</script>
+<script src="../skills/calibrated-figures/assets/calibrated-figures.js"></script>
+<script src="../skills/calibrated-figures/assets/calibrated-recipes.js"></script>
+<script src="../skills/calibrated-components/assets/calibrated-components.js"></script>
+<script>
+(() => {
+  const { recipes: R, play, mount } = Calibrated;
+  const FILM = document.documentElement.classList.contains('film');
+  const $ = (s, r = document) => r.querySelector(s);
+  const hm = (h) => `${Math.floor(h)}h ${String(Math.round((h % 1) * 60)).padStart(2, '0')}m`;
+
+  /* figures: [recipe, data] per svg id (example data) */
+  const D = {
+    'dc-section': ['section', { n: 1, title: 'fra-2 · hall b · containment', boundary: { label: 'badge + pin at the hall door' },
+      regions: [
+        { x: 20, y: 38, w: 360, h: 190, kind: 'hatch', label: 'hot aisles' },
+        { x: 40, y: 70, w: 230, h: 146, kind: 'clear', label: 'cold aisle' },
+        { x: 170, y: 76, kind: 'island', label: 'cage 12' },
+        { x: 56, y: 132, w: 196, h: 68, kind: 'strong', label: 'row c', sub: '52 racks · up to 12 kW' },
+        { x: 290, y: 132, w: 76, h: 52, kind: 'dotted', label: 'row e', sub: 'empty' },
+      ],
+      callouts: [
+        { at: [350, 56], l1: 'closed', l2: 'hot aisles' },
+        { at: [262, 110], l1: 'open', l2: 'cold aisle, escorted' },
+        { region: 2, l1: 'locked', l2: 'cage 12 · bank key' },
+        { l1: 'outside', l2: 'generators · 38 h fuel', live: true },
+      ] }],
+    'dc-time': ['timeline', { n: 2, title: 'incident 3318 · crah b3', steps: [42, 168, 540, 720], live: 3,
+      names: ['alarm', 'paged', 'on site', 'fan swap'], noun: 'step', slowest: false }],
+    'dc-fan': ['fanout', { n: 3, title: 'cooling · row b · 4 units', root: ['row b', '4 units'], children: [
+      { task: 'crah b1', meta: 'fan 78% · 21.6 °C', time: 'ok', state: 'done' },
+      { task: 'crah b3', meta: 'fan 2 stopped', time: '03:21', state: 'fault' },
+      { task: 'crah b4', meta: 'carrying b3 · fan 94%', time: '21 min', state: 'live' },
+    ], folded: '+1 more unit normal' }],
+    'fr-lanes': ['lanes', { n: 1, title: 'docks · hours loading · from 06:00', max: 10, unit: 'h', step: 0.5, every: 4, w: 640, labelW: 70, lanes: [
+      { name: 'dock 1', end: 2.5, label: '2h 30m', box: ['TR-201 · out', '24 pallets'] },
+      { name: 'dock 2', end: 3.25, label: '3h 15m', box: ['TR-204 · out', '22 pallets'] },
+      { name: 'dock 4', end: 4.1, label: '4h 06m', box: ['TR-199 · out', '30 pallets'] },
+      { name: 'dock 6', end: 6.8, label: '6h 48m', live: true, box: ['TR-208 · loading', '18 of 26'] },
+    ] }],
+    'fr-hours': ['budget', { n: 2, title: 'driving time · j. kowalski · today', max: 10, step: 0.5, every: 4, used: 6.2, at: '12:40', pace: 8.6,
+      fmt: (v) => (Number.isInteger(v) ? v + 'h' : hm(v)), alerts: [{ v: 9, label: 'limit 9h' }], paceLabel: ['after the last drop', '≈ 8h 36m · 24m to spare'] }],
+    'fr-route': ['fanout', { n: 3, title: 'route r-12 · tr-204 · 3 drops', root: ['TR-204', '22 pallets'], children: [
+      { task: 'leeds · kirkgate', meta: 'signed · 8 pallets', time: '09:40', state: 'done' },
+      { task: 'york · clifton', meta: 'en route · 41 km', time: 'eta 13:25', state: 'live' },
+      { task: 'hull · docks', meta: '6 pallets', time: 'eta 15:40', state: 'todo' },
+    ] }],
+    'so-matrix': ['matrix', { n: 1, title: 'strings under 95% · by block', cols: ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8'],
+      rows: ['block a', 'block b', 'block c', 'block d', 'block e', 'block f'], hits: [[3], [3, 5], [3], [], [1], [3]],
+      callout: { col: 3, l1: 's4 low in 4 blocks', l2: 'dust · wash row 4 first' } }],
+    'so-loop': ['loop', { n: 2, w: 460, title: 'bess-1 · daily cycle', center: '20 MWh · 71%', stations: [
+      { name: 'charge', cmd: '10:00 – 15:00', state: 'done' },
+      { name: 'hold', cmd: '15:00 – 17:00', state: 'live' },
+      { name: 'discharge', cmd: '17:00 – 21:00' },
+      { name: 'rest', cmd: 'overnight' },
+    ] }],
+  };
+  window.__figs = D;
+  Calibrated.ready(() => Object.entries(D).forEach(([id, [r, d]]) => (FILM ? mount : play)('#f-' + id, R[r], d)));
+
+  /* the incident clock started 12 minutes ago */
+  $('#dc-clock').setAttribute('since', Date.now() - 12 * 60e3);
+  $('#dc-ack').addEventListener('click', (e) => { e.currentTarget.disabled = true; e.currentTarget.textContent = 'acknowledged'; Calibrated.toast('Incident 3318 acknowledged · night shift', { ink: 'ok' }); });
+  $('#dispatch').addEventListener('close', (e) => { if (e.target.returnValue === 'go') Calibrated.toast('TR-208 dispatched to Leeds · leaves 14:30', { ink: 'ok', action: 'undo', onAction: () => {} }); });
+  $('#wo').addEventListener('submit', (e) => { e.preventDefault(); Calibrated.toast('Work order WO-2291 issued · crew on site 5 nov 07:30', { ink: 'ok' }); });
+})();
+</script>
+</body>
+</html>

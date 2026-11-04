@@ -83,6 +83,24 @@
         ],
         "createdAt": "2026-11-03T08:27:31.801Z",
         "reason": "Inter is the deliberate 'before'/chat mock; Space Grotesk is a looks.md headline face (model)"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "chakra petch",
+        "createdAt": "2026-11-04T16:54:28.933Z",
+        "reason": "DESIGN.md looks: headings may take one grotesk or condensed face chosen per page (lab/strong-examples.html)"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "big shoulders text",
+        "createdAt": "2026-11-04T16:54:29.014Z",
+        "reason": "DESIGN.md looks: headings may take one grotesk or condensed face chosen per page (lab/strong-examples.html)"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "saira condensed",
+        "createdAt": "2026-11-04T16:54:29.104Z",
+        "reason": "DESIGN.md looks: headings may take one grotesk or condensed face chosen per page (lab/strong-examples.html)"
       }
     ]
   }
