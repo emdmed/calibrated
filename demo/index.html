@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Calibrated · Catalog No. 1</title>
+<title>Calibrated</title>
 <meta name="description" content="Calibrated makes the reports, reviews, explainers and screens Claude builds look like precision technical documentation. Numbers become gauges, rulers and dimension lines.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&family=Chivo:wght@700&family=Space+Grotesk:wght@500;600&family=Barlow+Condensed:wght@500;600&family=Archivo:wdth,wght@112..125,600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;1,400&family=Chivo+Mono:wght@300..700&display=swap">
 <link rel="stylesheet" href="../skills/calibrated-tokens/assets/calibrated.css">
 <link rel="stylesheet" href="../skills/calibrated-components/assets/calibrated-components.css">
 <style>
@@ -220,55 +220,6 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
 .art .head-row .cal-crumbs { margin: 0; }
 .art .note-field { margin-top: 18px; max-width: 640px; }
 
-/* the form plate: the steps follow the fieldset being filled */
-.art .cal-steps { max-width: 640px; }
-.art .rf { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 30px 56px; align-items: start; }
-.art .rf .cal-group > .cal-stack { gap: 18px; }
-.art .rf .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 18px 32px; align-items: start; }
-.art .rf .cal-rows:empty { display: none; }
-.art .rf .cal-rows { margin-top: -10px; }
-
-/* parts and finishes */
-#marks .cal-spec svg { max-width: 180px; }
-/* parts and marks are plates: the kit's ruled cells on the desk */
-.parts { --cols: 3; }
-#marks { --cols: 4; }
-.parts .cal-spec, #marks .cal-spec { padding: 18px 20px 20px; }
-.marks-h { margin: 64px 0 22px; }
-@media (max-width: 1100px) { .parts, #marks { --cols: 2; } }
-@media (max-width: 520px) { .parts, #marks { --cols: 1; } }
-.get.cal-tiers { border: 0; gap: 48px; }
-.get.cal-tiers > div { padding: 0; background: none; }
-.get.cal-tiers > div + div { border-left: 0; border-top: 0; }
-.parts .cal-spec { min-height: 0; }
-.parts .cal-spec > :first-child { min-height: 110px; display: grid; place-items: center start; overflow-x: auto; }
-.finish-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-.finish-row { gap: 6px 14px; }
-.finish-row .cal-btn { display: inline-flex; align-items: center; }
-.finish-row .chip { margin: 0 7px 0 3px; }
-.finish-row .chip { width: 22px; height: 12px; border: var(--line-thin) solid currentColor; display: inline-grid; grid-template-columns: 1fr 1fr 1fr; }
-.get .cal-code { margin: 8px 0 12px; }
-/* the controls: each specimen holds one working control, full width */
-#controls { --cols: 4; }
-#controls .cal-spec { padding: 18px 20px 20px; min-height: 0; }
-#controls .cal-spec > :first-child { min-height: 96px; display: grid; align-content: center; gap: 10px; min-width: 0; }
-#controls .row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
-@media (max-width: 1100px) { #controls { --cols: 2; } }
-@media (max-width: 520px) { #controls { --cols: 1; } }
-.get ul { list-style: none; }
-.get li { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 6px 0; border-bottom: var(--line-thin) solid var(--edge); font-size: 14px; color: var(--legend); }
-.get .acts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
-
-/* motion: instruments in an open grid, each value under its legend */
-.art .motion-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 30px 56px; }
-.art .motion-grid > div { min-width: 0; overflow-x: auto; }
-.art .motion-figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 30px 56px; align-items: start; }
-.art .motion-figs > div { min-width: 0; }
-.art .ctl { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
-.art .ctl .sp { flex: 1; }
-.art .btns.left { justify-content: flex-start; margin-top: 22px; }
-.art .btns .cal-btn, .art .ctl .cal-btn { white-space: nowrap; }
-
 @media (max-width: 1100px) { .art .cal-card { grid-template-columns: 1fr; } .art .cal-card > .info { border-right: 0; border-bottom: var(--line-thin) solid var(--edge); } }
 @media (max-width: 640px) {
   .top .cal-caption, .top .btn-pair, .top .gh span { display: none; }
@@ -277,6 +228,29 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
 }
 @media (max-width: 520px) { .cal-steps li { font-size: 10px; letter-spacing: .02em; padding-right: 4px; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .ba { transition: none; } }
+/* ── minimal shell: a quiet bar, one column, wide gaps between chapters */
+.top .cal-mast { border-bottom: 0; }
+.top.scrolled .cal-mast { border-bottom: var(--line-thin) solid var(--edge); }
+.nav { display: inline-flex; gap: 4px; }
+.nav a { text-decoration: none; }
+.hero { padding: clamp(72px, 12vw, 168px) 0 clamp(56px, 8vw, 112px); max-width: 860px; }
+.hero h1 { font-family: var(--font-display); font-weight: var(--display-weight); text-transform: var(--display-case); color: var(--title);
+  font-size: clamp(32px, 5vw, 58px); line-height: 1.08; letter-spacing: .01em; text-wrap: balance; }
+.hero .lede { margin-top: 28px; max-width: 54ch; font-size: 16px; line-height: 1.65; color: var(--legend); }
+.hero .order { margin-top: 48px; max-width: 520px; }
+.view-row { display: flex; gap: 12px 20px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+.view-row .mut { font-size: 13px; }
+.status-h { margin-bottom: 32px; border-bottom: 0; }
+.status-h b { font-size: 18px; }
+main > .cal-sec { margin-top: clamp(120px, 16vw, 220px); }
+main > .cal-sec > .cal-sec-h { margin-bottom: 32px; border-bottom: 0; }
+.more { margin-top: clamp(120px, 16vw, 220px); display: grid; gap: 20px; max-width: 640px; }
+.more h2, .get h2 { font-family: var(--font-display); font-weight: var(--display-weight); text-transform: var(--display-case); color: var(--title); font-size: clamp(22px, 2.6vw, 30px); line-height: 1.2; text-wrap: balance; }
+.more p, .get p { color: var(--legend); max-width: 56ch; }
+.more .acts, .get .acts { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+.get { margin-top: clamp(120px, 16vw, 220px); display: grid; gap: 20px; max-width: 640px; }
+.get .cal-code { margin-top: 4px; }
+main > .cal-foot { margin-top: clamp(96px, 12vw, 160px); }
 </style>
 <script>
   (() => { const q = new URLSearchParams(location.search); let t = q.get('theme');
@@ -304,33 +278,26 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
   <header class="cal-mast">
     <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
     <span class="word ruled">Calibrated</span>
-    <span class="cal-caption lg">technical drawings for claude's pages</span>
     <span class="sp"></span>
-    <span class="btn-pair" role="group" aria-label="Show examples as"><button class="cal-btn" type="button" data-view="plain" aria-pressed="false">plain</button><button class="cal-btn" type="button" data-view="cal" aria-pressed="true">calibrated</button></span>
-    <span class="btn-pair" role="group" aria-label="Weight"><button class="cal-btn" type="button" data-weight-set="soft" aria-pressed="true">soft</button><button class="cal-btn" type="button" data-weight-set="strong" aria-pressed="false">strong</button></span>
-    <a class="cal-btn quiet" href="examples.html">examples</a>
-    <a class="cal-btn primary" href="#get" style="text-decoration:none">install</a>
+    <nav class="nav" aria-label="Site"><a class="cal-btn quiet" href="examples.html">examples</a><a class="cal-btn quiet" href="reference.html">reference</a></nav>
     <a class="gh" href="https://github.com/emdmed/calibrated" aria-label="Calibrated on GitHub"><svg aria-hidden="true"><use href="#i-gh"/></svg><span>github</span></a>
     <button class="cal-btn inline" type="button" id="theme" aria-label="Switch to dark theme"><svg class="i-sun" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="3.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 1.5v2M9 14.5v2M1.5 9h2M14.5 9h2M3.7 3.7l1.4 1.4M12.9 12.9l1.4 1.4M3.7 14.3l1.4-1.4M12.9 5.1l1.4-1.4" stroke="currentColor" stroke-width="1.5"/></svg><svg class="i-moon" viewBox="0 0 18 18" aria-hidden="true"><path d="M14.8 11.2A6.3 6.3 0 0 1 6.8 3.2a6.3 6.3 0 1 0 8 8z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
   </header>
 </div></div>
 
 <main class="wrap">
-  <section class="cal-intro">
-    <div class="lead">
-      <h1>Technical drawings for everything Claude makes</h1>
-      <p>Ask Claude for a report, a review or a dashboard in the Calibrated style. Numbers come back as gauges, rulers and dimension lines, and the <span class="live">one thing that needs you</span> is lit by the lamp.</p>
-    </div>
-    <div>
-      <div class="order" id="order">
-        <div class="order-h"><span class="cal-legend">install · paste into claude code</span><span class="sp"></span><button class="cal-btn" type="button" data-copy-from="#cmd-hero">copy</button></div>
-        <div class="cal-code" data-lang="claude code"><pre><code id="cmd-hero">/plugin marketplace add emdmed/calibrated
+  <section class="hero">
+    <h1>Technical drawings for everything Claude makes</h1>
+    <p class="lede">Ask Claude for a report, a review or a dashboard in the Calibrated style. Numbers come back as gauges, rulers and dimension lines, and the <span class="live">one thing that needs you</span> is lit by the lamp.</p>
+    <div class="order" id="order">
+      <div class="order-h"><span class="cal-legend">install · paste into claude code</span><span class="sp"></span><button class="cal-btn" type="button" data-copy-from="#cmd-hero">copy</button></div>
+      <div class="cal-code" data-lang="claude code"><pre><code id="cmd-hero">/plugin marketplace add emdmed/calibrated
 /plugin install calibrated@calibrated</code></pre></div>
-        <p class="alt"><a class="gh" href="https://github.com/emdmed/calibrated"><svg aria-hidden="true"><use href="#i-gh"/></svg><span>emdmed/calibrated</span></a><a href="#get">other ways to install</a><a href="examples.html">see six finished pages</a></p>
-      </div>
-      <div class="switch"><span class="btn-pair" role="group" aria-label="Show examples as"><button class="cal-btn" type="button" data-view="plain" aria-pressed="false">plain</button><button class="cal-btn" type="button" data-view="cal" aria-pressed="true">calibrated</button></span><span class="btn-pair" role="group" aria-label="Weight"><button class="cal-btn" type="button" data-weight-set="soft" aria-pressed="true">soft</button><button class="cal-btn" type="button" data-weight-set="strong" aria-pressed="false">strong</button></span><span class="mut" style="font-size:14px">Flip to plain, then click any example to calibrate it.</span></div>
     </div>
   </section>
+
+  <div class="view-row"><span class="btn-pair" role="group" aria-label="Show examples as"><button class="cal-btn" type="button" data-view="plain" aria-pressed="false">plain</button><button class="cal-btn" type="button" data-view="cal" aria-pressed="true">calibrated</button></span><span class="btn-pair" role="group" aria-label="Weight"><button class="cal-btn" type="button" data-weight-set="soft" aria-pressed="true">soft</button><button class="cal-btn" type="button" data-weight-set="strong" aria-pressed="false">strong</button></span><span class="mut">Flip to plain, then click an example to calibrate it.</span></div>
+  <div class="cal-sec-h status-h"><b>Status page</b><span>progress, budget and the one thing still running</span></div>
 
   <div class="ba">
         <div class="layer plain" aria-label="The same page without Calibrated">
@@ -368,43 +335,8 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
       </div>
   <p class="ask"><span class="cal-legend">ask claude</span><q>Make a status page for our website relaunch in the Calibrated style.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
 
-  <section class="cal-sec" id="report">
-    <div class="cal-sec-h"><b>1 · Status report</b><span>limits, budgets, what is running</span><span>sheet 1/9</span></div>
-    <div class="ba">
-        <div class="layer plain" aria-label="The same page without Calibrated">
-          <div class="p-top"><div><div class="p-eye">Spring campaign</div><div class="p-title">Monthly report</div><div class="p-sub">Day 19 of 30 · 3 channels</div></div><span class="p-badge warn">Pacing over plan</span></div>
-          <div class="p-grid">
-            <div class="p-card p-kpi"><small>Ad spend</small><strong>€612k</strong><small>of €1M budget · 61%</small><div class="p-bar"><i style="width:61%"></i><b style="left:80%"></b><b style="left:95%"></b></div></div>
-            <div class="p-card p-kpi"><small>Projected by day 30</small><strong>€900k</strong><small>at the current daily pace</small></div>
-            <div class="p-card p-kpi"><small>Days remaining</small><strong>11</strong><small>of a 30-day flight</small></div>
-          </div>
-          <div class="p-callout"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8 15 14H1z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8 6.2v3.6M8 11.4v.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><div><b>Heads up:</b> at this pace spend crosses the 80% alert (€800k) on day 25.</div></div>
-          <table class="p-table"><thead><tr><th>Channel</th><th class="n">Spend</th><th class="n">Days ran</th><th>Status</th></tr></thead><tbody>
-            <tr><td>Search</td><td class="n">€214k</td><td class="n">12</td><td><span class="p-badge ok">Done</span></td></tr>
-            <tr><td>Social</td><td class="n">€268k</td><td class="n">16</td><td><span class="p-badge ok">Done</span></td></tr>
-            <tr><td>Email</td><td class="n">€130k</td><td class="n">19</td><td><span class="p-badge acc">Running</span></td></tr></tbody></table>
-        </div>
-        <div class="layer art cal-theme">
-          <div class="head-row"><nav class="cal-crumbs" aria-label="Breadcrumb"><ol><li><a href="#report">marketing</a></li><li><a href="#report">campaigns</a></li><li aria-current="page">spring · day 19</li></ol></nav><span class="cal-badge" data-ink="fault"><span class="cal-dot fault"></span>pacing over plan</span></div>
-          <h2 class="hd">€612k spent. At this pace we cross the <span class="live">80% alert</span> on day 25.</h2>
-          <ul class="cal-meta"><li>day 19 of 30</li><li>3 channels</li><li>€1M budget</li></ul>
-          <figure class="cal-figure"><svg id="f-budget"></svg><figcaption><b>Budget</b>Spend so far, the alert lines and where today's pace lands.</figcaption></figure>
-          <figure class="cal-figure mt"><svg id="f-lanes"></svg><figcaption><b>Channels</b>Days each channel ran, on one ruler.</figcaption></figure>
-          <table class="cal-table mt"><thead><tr><th>no</th><th>channel</th><th class="num">spend</th><th>status</th></tr></thead><tbody>
-            <tr><td>01</td><td>Search</td><td class="num">€214k</td><td class="st" data-ink="ok">done</td></tr>
-            <tr><td>02</td><td>Social</td><td class="num">€268k</td><td class="st" data-ink="ok">done</td></tr>
-            <tr><td>03</td><td>Email</td><td class="num">€130k</td><td class="st" data-ink="live"><span>running</span></td></tr></tbody></table>
-          <div class="dets mt">
-            <details class="cal-details"><summary><span class="bl">A</span><b>how the pace is projected</b><span class="ld"></span><span class="tg"></span></summary><div class="bd"><div class="inset"><div class="cal-gl">detail A</div>The average daily spend of the last 7 days, carried to day 30.</div></div></details>
-            <details class="cal-details"><summary><span class="bl">B</span><b>what the alerts do</b><span class="ld"></span><span class="tg"></span></summary><div class="bd"><div class="inset"><div class="cal-gl">detail B</div>At 80% each channel owner gets an email. At 95% new ads pause.</div></div></details>
-          </div>
-        </div>
-      </div>
-    <p class="ask"><span class="cal-legend">ask claude</span><q>Make a monthly report for our spring campaign in the Calibrated style. Here are the numbers: …</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
-  </section>
-
   <section class="cal-sec" id="review">
-    <div class="cal-sec-h"><b>2 · Review board</b><span>keep, rework or drop, with a tally · the buttons work</span><span>sheet 2/9</span></div>
+    <div class="cal-sec-h"><b>Review board</b><span>keep, rework or drop · the buttons work</span></div>
     <div class="ba">
         <div class="layer plain" aria-label="The same page without Calibrated">
           <div class="p-top"><div><div class="p-eye">Homepage redesign</div><div class="p-title">Proposals for review</div><div class="p-sub">2 changes · requested by the web team</div></div><span class="p-badge">0 of 2 reviewed</span></div>
@@ -441,306 +373,20 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
     <p class="ask"><span class="cal-legend">ask claude</span><q>Make a Calibrated review board for these homepage changes, with keep / rework / drop sign-off.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
   </section>
 
-  <section class="cal-sec" id="explainer">
-    <div class="cal-sec-h"><b>3 · Explainer</b><span>a process as a cycle, a team as a tree</span><span>sheet 3/9</span></div>
-    <div class="ba">
-        <div class="layer plain" aria-label="The same page without Calibrated">
-          <div class="p-top"><div><div class="p-eye">Support handbook</div><div class="p-title">How support tickets work</div><div class="p-sub">Every ticket moves through four stages · 14 open right now</div></div></div>
-          <div class="p-steps"><div class="done"><b>Received</b><span>Auto-reply sent</span></div><div class="done"><b>Triaged</b><span>Tagged and assigned</span></div><div class="on"><b>Working</b><span>An agent replies</span></div><div><b>Resolved</b><span>Customer confirms</span></div></div>
-          <div class="p-card"><div class="p-h">Who's on it now <span class="p-mute">· 9 more resolved today</span></div>
-            <div class="p-people">
-              <div><span class="p-av">AN</span><span class="who"><b>Ana</b> · Refund request, order 4471</span><span class="p-badge acc">Working · 12 min</span></div>
-              <div><span class="p-av">RA</span><span class="who"><b>Ravi</b> · Login problem</span><span class="p-badge">Next</span></div>
-              <div><span class="p-av">ME</span><span class="who"><b>Mei</b> · Shipping question</span><span class="p-badge ok">Resolved · 8 min</span></div>
-            </div></div>
-          <div class="p-faq"><div class="open"><b>When does a ticket count as resolved?</b><p>When the customer confirms, or after 3 days with no reply.</p></div><div><b>What if a ticket is reopened?</b></div></div>
-        </div>
-        <div class="layer art cal-theme">
-          <h2 class="hd">Every ticket goes round the same four stations.</h2>
-          <div class="row2">
-            <figure class="cal-figure"><svg id="f-loop"></svg><figcaption><b>Cycle</b>The live station is lit.</figcaption></figure>
-            <figure class="cal-figure"><svg id="f-fan"></svg><figcaption><b>Team</b>Who is working on what.</figcaption></figure>
-          </div>
-          <div class="cal-rule" role="separator" data-align="start" style="margin-top:26px">questions<span>2</span></div>
-          <div class="dets">
-            <details class="cal-details" open><summary><span class="bl">A</span><b>when a ticket counts as resolved</b><span class="ld"></span><span class="tg"></span></summary><div class="bd"><div class="inset"><div class="cal-gl">detail A</div>When the customer confirms, or after 3 days with no reply.</div></div></details>
-            <details class="cal-details"><summary><span class="bl">B</span><b>what happens when one is reopened</b><span class="ld"></span><span class="tg"></span></summary><div class="bd"><div class="inset"><div class="cal-gl">detail B</div>It goes back to <b>working</b> with the same agent, and its clock keeps running.</div></div></details>
-          </div>
-        </div>
-      </div>
-    <p class="ask"><span class="cal-legend">ask claude</span><q>Explain how our support tickets move, as a Calibrated explainer page.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+  <section class="more">
+    <h2>Six whole pages, and the parts they are made of</h2>
+    <p>An ops report, a go / no-go board, an explainer, a spec sheet, an app screen and a form in steps, each with the request that made it. Plus the instruments in motion and every mark and control.</p>
+    <div class="acts"><a class="cal-btn primary" href="examples.html" style="text-decoration:none">see the examples</a><a class="cal-btn quiet" href="reference.html">reference</a></div>
   </section>
 
-  <section class="cal-sec" id="spec">
-    <div class="cal-sec-h"><b>4 · Spec sheet</b><span>rules and boundaries · hatched means closed</span><span>sheet 4/9</span></div>
-    <div class="ba">
-        <div class="layer plain" aria-label="The same page without Calibrated">
-          <div class="p-top"><div><div class="p-eye">Policy POL-012</div><div class="p-title">Customer data access policy</div><div class="p-sub">Version B · 31 Oct 2026 · owner: security team</div></div><span class="p-badge ok">Approved</span></div>
-          <table class="p-table"><thead><tr><th>Area</th><th>Who</th><th>Access</th></tr></thead><tbody>
-            <tr><td>Restricted area</td><td>Approved staff only</td><td><span class="p-badge bad">Closed</span></td></tr>
-            <tr><td>Customer records</td><td>Staff tools</td><td><span class="p-badge ok">Read &amp; write</span></td></tr>
-            <tr><td>Payments, passwords</td><td>No one, including staff</td><td><span class="p-badge bad">Locked</span></td></tr>
-            <tr><td>Exports</td><td>Staff tools</td><td><span class="p-badge warn">Temporary · 7 days</span></td></tr></tbody></table>
-          <div class="p-callout info"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.2v4M8 4.6v.9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><div><b>Not covered:</b> batch jobs are outside this policy and need their own review.</div></div>
-          <div class="p-log"><div class="p-h">Changelog</div><div><code>B</code>Exports made temporary<time>31 Oct</time></div><div><code>A</code>First version<time>12 Oct</time></div></div>
-        </div>
-        <div class="layer art cal-theme">
-          <h2 class="hd">Who can see what. Hatched means closed.</h2>
-          <ul class="cal-meta"><li>POL-012</li><li>version B</li><li>31 oct 2026</li><li>owner: security team</li></ul>
-          <figure class="cal-figure"><svg id="f-section"></svg><figcaption><b>Section</b>Regions inside the policy, closed or open.</figcaption></figure>
-          <div class="row2 mt">
-            <dl class="cal-titleblock">
-              <div class="name"><dt>title</dt><dd>Customer data · access</dd></div>
-              <div><dt>doc no.</dt><dd>POL-012</dd></div><div><dt>sheet</dt><dd>1 / 2</dd></div>
-              <div><dt>rev</dt><dd>B</dd></div><div><dt>date</dt><dd>31 oct</dd></div>
-            </dl>
-            <table class="cal-revs"><thead><tr><th>rev</th><th>change</th></tr></thead><tbody>
-              <tr><td><span class="cal-rev" data-rev="A"></span></td><td>First version.</td></tr>
-              <tr><td><span class="cal-rev" data-rev="B"></span></td><td>Exports made temporary.</td></tr></tbody></table>
-          </div>
-          <div class="stamp-row mt">
-            <div class="cal-callout" style="flex:1 1 320px"><div class="cal-gl">notes</div><ol><li>Exports expire after 7 days. <span class="cal-rev" data-rev="B"></span></li><li>Batch jobs are outside this policy and need their own review.</li></ol></div>
-            <span class="cal-stamp" data-ink="ok">approved for use</span>
-          </div>
-        </div>
-      </div>
-    <p class="ask"><span class="cal-legend">ask claude</span><q>Turn our customer data access policy into a Calibrated spec sheet.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+  <section class="get" id="get">
+    <h2>Get it</h2>
+    <p>Free and open source, MIT. Paste the two lines above into Claude Code, or copy the skills into <code>~/.claude/skills/</code> for every project, <code>.claude/skills/</code> for one.</p>
+    <div class="cal-code" data-lang="shell"><pre><code id="cmd-hand"><span class="ln">git clone https://github.com/emdmed/calibrated</span><span class="ln">cp -r calibrated/skills/* ~/.claude/skills/</span></code></pre></div>
+    <div class="acts"><button class="cal-btn" type="button" data-copy-from="#cmd-hand">copy</button><button class="cal-btn quiet" type="button" id="share">share this page</button><span class="mut" id="share-msg" role="status" style="font-size:13px"></span></div>
   </section>
 
-  <section class="cal-sec" id="screen">
-    <div class="cal-sec-h"><b>5 · App screen</b><span>the same look for the screens of a tool · every control works</span><span>sheet 5/9</span></div>
-    <div class="ba">
-        <div class="layer plain" aria-label="The same page without Calibrated">
-          <div class="p-top"><div><div class="p-eye">Settings</div><div class="p-title">Plan &amp; usage</div><div class="p-sub">Team plan · resets on the 1st</div></div><span class="p-btn ghost">Actions ▾</span></div>
-          <div class="p-tabs"><span class="on">Usage</span><span>Members <em>12</em></span><span>Billing</span></div>
-          <div class="p-grid">
-            <div class="p-card p-kpi"><small>Messages this month</small><strong>46,000</strong><small>of 100,000 · 46%</small><div class="p-bar"><i style="width:46%"></i><b style="left:80%"></b></div></div>
-            <div class="p-card p-kpi"><small>Storage</small><strong>128 <em>GB</em></strong><small>of 150 GB · 85%, over the alert</small><div class="p-bar"><i class="bad" style="width:85%"></i><b style="left:80%"></b></div></div>
-          </div>
-          <div class="p-card"><div class="p-h">Limits <span class="p-mute">· applies to every region</span></div>
-            <div class="p-form">
-              <div class="p-field"><small>Monthly limit</small><div class="p-input">150,000<em>messages</em></div></div>
-              <div class="p-field"><small>Alert at · 80%</small><div class="p-slider"><i style="width:80%"></i><b style="left:80%"></b></div><span class="p-hint">Email the owner at this level</span></div>
-              <div class="p-field"><small>Region</small><div class="p-input">EU West<em>▾</em></div></div>
-              <div class="p-field"><small>Reset every</small><div class="p-seg"><span>Day</span><span>Week</span><span class="on">Month</span></div></div>
-            </div>
-            <div class="p-toggle" style="margin-top:16px">Pause new messages at the limit<i></i></div>
-          </div>
-          <div class="p-foot"><span class="p-btn danger">Reset usage</span><div class="p-btns"><span class="p-btn ghost">Cancel</span><span class="p-btn">Save changes</span></div></div>
-        </div>
-        <div class="layer art cal-theme" data-mode="app">
-          <nav class="cal-crumbs" aria-label="Breadcrumb"><ol><li><a href="#screen">settings</a></li><li><a href="#screen">team</a></li><li aria-current="page">plan &amp; usage</li></ol></nav>
-          <div class="cal-tabs mt" role="tablist" aria-label="Settings"><button role="tab" aria-selected="true">usage<span class="cal-cnt">2</span></button><button role="tab" aria-selected="false">members<span class="cal-cnt">12</span></button><button role="tab" aria-selected="false">billing</button></div>
-          <div class="cal-blocks">
-            <div class="cal-block"><div class="cal-block-h">messages this month</div><cal-meter value="46000" max="100000" warn="80000" label="messages" width="300"></cal-meter></div>
-            <div class="cal-block"><div class="cal-block-h">storage</div><cal-meter value="128" max="150" warn="120" label="storage" format="raw" unit=" GB" width="300"></cal-meter></div>
-          </div>
-          <fieldset class="cal-group mt"><legend><b>1 · Limits</b><span>applies to every region</span></legend>
-            <div class="limits">
-              <div class="cal-field"><label for="lim">monthly limit</label>
-                <div class="cal-affixed cal-num"><input class="cal-input" id="lim" inputmode="numeric" value="150 000" data-step="10000" aria-describedby="lim-h"><span class="cal-affix">msg / month</span></div>
-                <span class="hint focus-only" id="lim-h">↑ ↓ step 10 000 · shift ×10</span></div>
-              <div class="cal-field"><label for="region">region</label>
-                <select class="cal-select" id="region"><option><span class="v">us-east</span></option><option selected><span class="v">eu-west</span></option><option><span class="v">ap-south</span></option></select></div>
-              <div class="cal-field"><span class="lbl" id="rs-l">reset every</span>
-                <div class="cal-detent" role="radiogroup" aria-labelledby="rs-l"><i class="mk" aria-hidden="true"></i>
-                  <label><input type="radio" name="rs" value="day"><span>day</span></label>
-                  <label><input type="radio" name="rs" value="week"><span>week</span></label>
-                  <label><input type="radio" name="rs" value="month" checked><span>month</span></label></div></div>
-            </div>
-            <div class="limits">
-              <div class="cal-field"><label for="alert">alert at</label>
-                <div class="cal-range" data-unit="%"><output for="alert"></output><input type="range" id="alert" min="0" max="100" step="5" value="80">
-                  <div class="nums"><span>0</span><span>50%</span><span>100%</span></div></div></div>
-              <label class="cal-switch"><span class="txt">Pause new messages at the limit</span><span class="o off">off</span><input type="checkbox" role="switch" checked><span class="o on">on</span></label>
-            </div>
-          </fieldset>
-          <section class="cal-zone" data-ink="fault" style="margin-top:26px"><div class="cal-zone-h">Danger zone<span>can't be undone</span></div>
-            <div class="danger"><p>Set this month's counters back to zero. Billing doesn't change.</p><button class="cal-btn" type="button" data-dialog="reset-usage">reset usage</button></div>
-          </section>
-          <div class="btns">
-            <button class="cal-btn" type="button" popovertarget="usage-menu">actions ▼</button>
-            <div popover id="usage-menu" class="cal-menu" role="menu" aria-label="Usage actions">
-              <button class="it" role="menuitem" type="button" data-toast="Usage exported · usage-oct.csv"><span class="n">01</span><span class="v">export usage</span><kbd class="cal-kbd">e</kbd></button>
-              <button class="it" role="menuitem" type="button" data-toast="Invite link copied"><span class="n">02</span><span class="v">invite member</span><kbd class="cal-kbd">i</kbd></button>
-            </div>
-            <span class="sp" style="flex:1"></span>
-            <button class="cal-btn quiet" type="button">cancel</button><button class="cal-btn primary" type="button" id="save-limits">save changes</button>
-          </div>
-        </div>
-      </div>
-    <p class="ask"><span class="cal-legend">ask claude</span><q>Build a plan and usage screen for our app in the Calibrated style.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
-    <dialog class="cal-dialog" id="reset-usage" aria-labelledby="reset-usage-t"><form method="dialog">
-      <header><b id="reset-usage-t">reset usage</b><span class="sp"></span><kbd class="cal-kbd">esc</kbd></header>
-      <div class="bd"><p>This month’s counters go back to zero. Billing is not changed.</p><dl class="cal-kv"><dt>messages</dt><dd>46 000 → 0</dd><dt>storage</dt><dd>kept · 128 GB</dd></dl></div>
-      <footer><button class="cal-btn" value="cancel" autofocus>cancel</button><button class="cal-btn primary" data-ink="fault" value="reset">reset usage</button></footer>
-    </form></dialog>
-  </section>
-
-  <section class="cal-sec" id="form">
-    <div class="cal-sec-h"><b>6 · Form</b><span>choices, dates, files and notes · fill it in</span><span>sheet 6/9</span></div>
-    <div class="ba">
-        <div class="layer plain" aria-label="The same page without Calibrated">
-          <div class="p-top"><div><div class="p-eye">Support · refunds</div><div class="p-title">Refund request</div><div class="p-sub">Order 4471 · Ana Ruiz · €64.00 · placed 22 Oct</div></div><span class="p-badge">Draft</span></div>
-          <div class="p-dots"><i class="done"></i><i class="on"></i><i></i><i></i><span>&nbsp;Step 2 of 4 · What went wrong</span></div>
-          <div class="p-card"><div class="p-h">What went wrong</div>
-            <div class="p-opts"><span class="on">Damaged on arrival</span><span>Wrong item</span><span>Arrived late</span><span>Something else</span></div>
-            <div class="p-form" style="margin-top:16px">
-              <div class="p-field"><small>Received on</small><div class="p-input">27/10/2026<em>▾</em></div></div>
-              <div class="p-field"><small>Photos</small><div class="p-drop">Drag photos here or <b>browse</b></div><div class="p-file">box-corner.jpg<em>2.1 MB</em></div></div>
-            </div>
-            <div class="p-field" style="margin-top:16px"><small>What happened</small><div class="p-area">The box arrived crushed on one corner and the left speaker rattles.</div></div>
-          </div>
-          <div class="p-card"><div class="p-h">Refund <span class="p-mute">· over €50 goes to a lead for approval</span></div>
-            <div class="p-form">
-              <div class="p-field"><small>Refund to</small><div class="p-input">Original card · Visa 4242<em>▾</em></div></div>
-              <div class="p-field"><small>Amount</small><div class="p-input">€64.00<em>EUR</em></div><span class="p-hint">Up to the order total</span></div>
-              <div class="p-field"><small>Notify</small><div class="p-chips"><span>support-eu</span><span>warehouse</span></div></div>
-            </div>
-          </div>
-          <div class="p-foot"><span class="p-btn ghost">Back</span><span class="p-btn">Send for approval</span></div>
-        </div>
-        <div class="layer art cal-theme" data-mode="app">
-          <div class="head-row"><nav class="cal-crumbs" aria-label="Breadcrumb"><ol><li><a href="#form">support</a></li><li><a href="#form">refunds</a></li><li aria-current="page">order 4471</li></ol></nav><span class="cal-badge" id="rf-badge"><span class="cal-dot"></span>draft</span></div>
-          <h2 class="hd">Refund for order 4471: what went wrong, and how much goes back.</h2>
-          <ul class="cal-meta"><li>Ana Ruiz</li><li>€64.00</li><li>placed 22 Oct</li></ul>
-          <ol class="cal-steps" id="rf-steps" aria-label="Refund steps">
-            <li class="done"><span class="s">01</span>order</li>
-            <li aria-current="step"><span class="s">02</span>problem</li>
-            <li><span class="s">03</span>refund</li>
-            <li><span class="s">04</span>send</li>
-          </ol>
-          <form class="rf mt" id="rf" novalidate>
-            <fieldset class="cal-group" data-step="2"><legend><b>2 · Problem</b><span>pick the closest</span></legend>
-              <div class="cal-stack">
-                <div role="radiogroup" aria-label="What went wrong" class="cal-stack" style="gap:9px">
-                  <label class="cal-radio"><input type="radio" name="rf-why" value="damaged" checked><span>Damaged on arrival</span><span class="meta">photos needed</span></label>
-                  <label class="cal-radio"><input type="radio" name="rf-why" value="wrong"><span>Wrong item</span><span class="meta">swap or refund</span></label>
-                  <label class="cal-radio"><input type="radio" name="rf-why" value="late"><span>Arrived late</span><span class="meta">over 7 days</span></label>
-                  <label class="cal-radio"><input type="radio" name="rf-why" value="other"><span>Something else</span></label>
-                </div>
-                <div class="pair">
-                  <div class="cal-field"><label for="rf-date">received on</label><input type="date" class="cal-input cal-date" id="rf-date" value="2026-10-27" min="2026-10-22" max="2026-11-01"></div>
-                  <div class="cal-field"><span class="lbl">photos</span>
-                    <label class="cal-drop" data-list="rf-files" data-max="10000000"><input type="file" accept="image/*" multiple><span class="lead">drop photos · or <u>browse</u></span><span class="hint">jpg or png · up to 10 MB each</span></label></div>
-                </div>
-                <div class="cal-rows" id="rf-files"><div class="file"><span>box-corner.jpg</span><span class="lg mut">2.1 MB</span></div></div>
-                <div class="cal-field"><label for="rf-note">what happened</label>
-                  <div class="cal-term" data-max="400">
-                    <textarea class="cal-textarea" id="rf-note" spellcheck="false">The box arrived crushed on one corner and the left speaker rattles.</textarea>
-                    <div class="bar" aria-hidden="true"><span class="sp"></span><span class="cal-count"><b>0</b><span>/ 400</span></span></div>
-                  </div></div>
-              </div>
-            </fieldset>
-            <fieldset class="cal-group" data-step="3"><legend><b>3 · Refund</b><span>over €50 goes to a lead</span></legend>
-              <div class="cal-stack">
-                <div class="cal-field"><label for="rf-to">refund to</label>
-                  <select class="cal-select" id="rf-to"><option selected><span class="v">original card · visa 4242</span></option><option><span class="v">store credit · +10%</span></option></select></div>
-                <div class="cal-field"><label for="rf-amt">amount</label>
-                  <div class="cal-affixed cal-num"><input class="cal-input" id="rf-amt" inputmode="numeric" value="64" data-step="1" data-max="64" aria-describedby="rf-amt-h"><span class="cal-affix">€</span></div>
-                  <span class="hint" id="rf-amt-h">Up to €64, the order total.</span></div>
-                <div class="cal-field"><span class="lbl" id="rf-who-l">notify</span>
-                  <div class="cal-chips" aria-labelledby="rf-who-l"><span class="chip">support-eu<button type="button" aria-label="Remove support-eu">×</button></span><span class="chip">warehouse<button type="button" aria-label="Remove warehouse">×</button></span><input aria-label="Add a team" placeholder="add a team, then enter"></div></div>
-              </div>
-            </fieldset>
-          </form>
-          <div class="btns"><span class="mut" style="font-size:13px;margin-right:auto">A lead approves refunds over €50.</span><button class="cal-btn quiet" type="button" id="rf-reset">start over</button><button class="cal-btn primary" type="button" id="rf-send">send for approval</button></div>
-        </div>
-      </div>
-    <p class="ask"><span class="cal-legend">ask claude</span><q>Make a refund request form for our support team in the Calibrated style: reason, date, photos, a note, and the refund.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
-  </section>
-
-  <section class="cal-sec" id="parts">
-    <div class="cal-sec-h"><b>7 · Parts</b><span>what every page above is built from</span><span>sheet 7/9</span></div>
-    <div class="cal-specimens parts">
-      <div class="cal-spec"><div><cal-meter value="46000" max="1000000" warn="800000" label="requests today" width="280"></cal-meter></div><h4>Meter</h4><p>How full something is, against its limit.</p></div>
-      <div class="cal-spec"><div><cal-progress done="6" total="10" live="7" live-label="7 · review" step="24"></cal-progress></div><h4>Progress</h4><p>How far along a list of steps, and which one is live.</p></div>
-      <div class="cal-spec"><div><cal-position index="3" count="7" label="markets"></cal-position></div><h4>Position</h4><p>Which one of a set you are looking at.</p></div>
-      <div class="cal-spec"><div><cal-durations max="15" unit="m" width="300"><cal-span name="design" value="252"></cal-span><cal-span name="build" value="400"></cal-span><cal-span name="launch" live data-live></cal-span></cal-durations></div><h4>Durations</h4><p>How long things took. The live one keeps ticking.</p></div>
-      <div class="cal-spec"><div><cal-ruler min="0" max="150" step="10" every="5" unit="k" value="94" width="280" up></cal-ruler></div><h4>Ruler</h4><p>Where one value sits on a scale.</p></div>
-      <div class="cal-spec"><div><cal-diff added="184" removed="20" label="edits"></cal-diff></div><h4>Change</h4><p>What was added and what was removed.</p></div>
-    </div>
-    <div class="cal-gl marks-h">the eight marks</div>
-    <div class="cal-specimens" id="marks"></div>
-    <div class="cal-gl marks-h">the controls</div>
-    <div class="cal-specimens" id="controls">
-      <div class="cal-spec"><div><div class="cal-field"><label for="pt-lim">daily limit</label><div class="cal-affixed cal-num"><input class="cal-input" id="pt-lim" inputmode="numeric" value="150 000" data-step="10000"><span class="cal-affix">req / day</span></div></div></div><h4>Number with units</h4><p>Arrow keys step it. Shift steps by ten.</p></div>
-      <div class="cal-spec"><div><div class="cal-field"><label for="pt-reg">region</label><select class="cal-select" id="pt-reg"><option><span class="v">us-east</span></option><option selected><span class="v">eu-west</span></option><option><span class="v">ap-south</span></option></select></div></div><h4>Select</h4><p>A write-in line that opens a ruled list.</p></div>
-      <div class="cal-spec"><div><div class="cal-field"><span class="lbl" id="pt-rg-l">time range</span><div class="cal-detent" role="radiogroup" aria-labelledby="pt-rg-l"><i class="mk" aria-hidden="true"></i><label><input type="radio" name="pt-rg" value="1h"><span>1h</span></label><label><input type="radio" name="pt-rg" value="24h" checked><span>24h</span></label><label><input type="radio" name="pt-rg" value="7d"><span>7d</span></label></div></div></div><h4>Detent</h4><p>A few ordered choices, as ticks on a ruler.</p></div>
-      <div class="cal-spec"><div><div class="cal-field"><label for="pt-at">alert at</label><div class="cal-range" data-unit="%"><output for="pt-at"></output><input type="range" id="pt-at" min="0" max="100" step="5" value="60"><div class="nums"><span>0</span><span>50%</span><span>100%</span></div></div></div></div><h4>Range</h4><p>A slider set on its own scale.</p></div>
-      <div class="cal-spec"><div><label class="cal-switch"><span class="txt">Pause at limit</span><span class="o off">off</span><input type="checkbox" role="switch" checked><span class="o on">on</span></label><label class="cal-check"><input type="checkbox" checked> <span>Email the owner</span></label><label class="cal-radio"><input type="radio" name="pt-ro" checked><span>Canary</span><span class="meta">5% → 100%</span></label></div><h4>Switch, check, radio</h4><p>Square for a box, round for one of many.</p></div>
-      <div class="cal-spec"><div><div class="cal-chips"><span class="chip">payments<button type="button" aria-label="Remove payments">×</button></span><span class="chip">search<button type="button" aria-label="Remove search">×</button></span><input aria-label="Add a team" placeholder="add a team"></div></div><h4>Tags</h4><p>Enter adds one. A repeat lights the one already there.</p></div>
-      <div class="cal-spec"><div><ol class="cal-steps"><li class="done"><span class="s">01</span>source</li><li aria-current="step"><span class="s">02</span>limits</li><li><span class="s">03</span>review</li></ol></div><h4>Steps</h4><p>Where you are in a form of several parts.</p></div>
-      <div class="cal-spec"><div><div class="row"><span class="cal-badge" data-ink="ok">✓ shipped</span><span class="cal-badge" data-ink="fault"><span class="cal-dot fault"></span>failed</span><span class="cal-badge"><span class="cal-dot"></span>queued</span></div><div class="row"><cal-spin size="sm" label="Loading"></cal-spin><span class="cal-scan" role="status" aria-label="Loading"><i></i></span><span class="cal-wait" role="status" aria-label="Loading"><i></i><i></i><i></i><i></i></span></div></div><h4>Status and waiting</h4><p>Boxed words for state. Drawn spinners for the wait.</p></div>
-    </div>
-    <div class="cal-gl marks-h">the separators</div>
-    <div class="cal-specimens" id="separators">
-      <div class="cal-spec"><div class="seps"><hr class="cal-rule" data-space="tight"><hr class="cal-rule" data-line="dashed" data-space="tight"><hr class="cal-rule" data-line="centre" data-space="tight"></div><h4>Rules</h4><p>Solid for the next topic, dashed for an aside, the centre line for two halves.</p></div>
-      <div class="cal-spec"><div class="seps"><div class="cal-rule" role="separator" data-space="tight">or</div><hr class="cal-rule" data-line="break" data-space="tight" aria-label="lines skipped"><div class="cal-rule" role="separator" data-ink="live" data-space="tight">new since 09:00</div></div><h4>Named breaks</h4><p>A word in the line, a jag where lines were left out, the lamp on what's new.</p></div>
-      <div class="cal-spec"><div><section class="cal-zone"><div class="cal-zone-h">billing<span>owner only</span></div><p>Invoices go out on the 1st.</p></section></div><h4>Zone</h4><p>A named group with an edge. Dashed when it isn't decided yet.</p></div>
-      <div class="cal-spec"><div><div class="cal-bracket"><div class="cal-bracket-h">before you ship</div><p>Tests pass.</p><p>Someone is on call.</p></div><ul class="cal-meta" style="margin-top:12px"><li>v2.14.0</li><li>3 regions</li><li>31 oct</li></ul></div><h4>Bracket and facts</h4><p>Lines that belong together. Facts on one line.</p></div>
-    </div>
-    <p class="ask"><span class="cal-legend">ask claude</span><q>Add a Calibrated meter for our API quota: 46 000 of 1 000 000 requests, alert at 80%.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
-  </section>
-
-  <section class="cal-sec" id="motion">
-    <div class="cal-sec-h"><b>8 · Motion</b><span>numbers glide to their new value · figures replay · try the buttons</span><span>sheet 8/9</span></div>
-    <div class="ba">
-        <div class="layer art cal-theme">
-          <h2 class="hd">When a number changes, the drawing <span class="live">moves</span> to it.</h2>
-          <div class="motion-grid" id="instruments">
-            <div><div class="cal-block-h">requests today</div><cal-meter value="46000" max="1000000" warn="800000" label="requests" width="300"></cal-meter></div>
-            <div><div class="cal-block-h">deploy steps</div><cal-progress done="6" total="10" live="7" live-label="7 · migrate db" done-label="6 done" step="24"></cal-progress></div>
-            <div><div class="cal-block-h">p99 latency</div><cal-ruler min="0" max="500" step="25" every="4" unit="ms" value="212" width="300" up></cal-ruler></div>
-            <div><div class="cal-block-h">canary host</div><cal-position index="3" count="12" label="hosts"></cal-position></div>
-            <div><div class="cal-block-h">release</div><cal-diff added="184" removed="20" label="lines"></cal-diff></div>
-          </div>
-          <div class="btns left"><button class="cal-btn primary" type="button" id="shuffle">new values</button><span class="mut" style="font-size:13px">Each instrument glides from where it is and blinks when it settles.</span></div>
-          <div class="motion-figs mt">
-            <div><figure class="cal-figure"><svg id="f-train"></svg><figcaption><b>Loop</b>Step through the train.</figcaption></figure>
-              <div class="ctl"><button class="cal-btn" type="button" id="loop-back">back</button><button class="cal-btn primary" type="button" id="loop-next">next station</button></div></div>
-            <div><figure class="cal-figure"><svg id="f-measured"></svg><figcaption><b>Measured</b>A long scale and its 20:1 detail.</figcaption></figure>
-              <div class="ctl"><button class="cal-btn primary" type="button" id="measure">new sizes</button></div></div>
-          </div>
-        </div>
-      </div>
-    <p class="ask"><span class="cal-legend">ask claude</span><q>Build our deploy dashboard in the Calibrated style, and let the numbers move when they change.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
-  </section>
-
-  <section class="cal-sec" id="finishes">
-    <div class="cal-sec-h"><b>9 · Looks</b><span>same drawings, a look for each subject · every example changes</span><span>sheet 9/9</span></div>
-    <p class="cal-lede">Claude picks the palette and the headline face from what the page is about. The marks, the scales and the one lamp stay the same.</p>
-    <div class="finish-row" role="group" aria-label="Look" id="finishes-row"></div>
-    <div class="ba">
-        <div class="layer art cal-theme">
-          <header class="cal-mast"><svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg><span class="word">Launch</span><span class="cal-caption lg">today</span><span class="sp"></span><span class="cal-count" data-n="1" data-noun="running" data-ink="live"></span></header>
-          <h2 class="hd">Launch day: <span class="live">checkout</span> is rolling out now.</h2>
-          <div class="cal-blocks">
-            <div class="cal-block"><div class="cal-block-h">rollout</div><cal-progress done="4" total="6" live="5" live-label="5 · checkout" done-label="4 done · 38 min"></cal-progress></div>
-            <div class="cal-block"><div class="cal-block-h">traffic</div><cal-meter value="61000" max="100000" warn="80000" label="visitors" width="280"></cal-meter></div>
-          </div>
-          <div class="mt"><cal-durations max="15" unit="m"><cal-span name="homepage" value="312"></cal-span><cal-span name="search" value="505"></cal-span><cal-span name="checkout" live data-live></cal-span></cal-durations></div>
-        </div>
-      </div>
-    <p class="ask"><span class="cal-legend">ask claude</span><q>Make the launch page in a look that fits a network team, or in our brand: navy page, white ink, cyan lamp.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
-  </section>
-
-  <section class="cal-sec" id="get">
-    <div class="cal-sec-h"><b>Get it</b><span>free and open source · mit</span><span>emdmed/calibrated</span></div>
-    <div class="cal-tiers get">
-      <div><div class="tt">1 · Claude Code plugin</div><p>Paste both lines into Claude Code. The skills show up as <code>calibrated:…</code></p>
-        <div class="cal-code" data-lang="claude code"><pre><code id="cmd-plugin">/plugin marketplace add emdmed/calibrated
-/plugin install calibrated@calibrated</code></pre></div>
-        <div class="acts"><button class="cal-btn primary" type="button" data-copy-from="#cmd-plugin">copy</button></div></div>
-      <div><div class="tt">2 · Or copy the skills</div><p>Into <code>~/.claude/skills/</code> for every project, or <code>.claude/skills/</code> for one.</p>
-        <div class="cal-code" data-lang="shell"><pre><code id="cmd-hand"><span class="ln">git clone https://github.com/emdmed/calibrated</span><span class="ln">cp -r calibrated/skills/* ~/.claude/skills/</span></code></pre></div>
-        <div class="acts"><button class="cal-btn" type="button" data-copy-from="#cmd-hand">copy</button></div></div>
-      <div><div class="tt">3 · Ask for any page</div><p>Say “in the Calibrated style”. Claude picks the right drawing for each number. The examples show six whole pages and the requests that made them. Building by hand? The reference has every part and its code.</p>
-        <div class="acts"><a class="gh" href="https://github.com/emdmed/calibrated"><svg aria-hidden="true"><use href="#i-gh"/></svg><span>github</span></a><a class="cal-btn quiet" href="examples.html">examples</a><a class="cal-btn" href="reference.html" style="text-decoration:none">reference</a><button class="cal-btn" type="button" id="share">share this page</button><span class="mut" id="share-msg" role="status" style="font-size:13px"></span></div></div>
-    </div>
-  </section>
-
-  <footer class="cal-foot"><span>calibrated · catalog 2026 · every number on this page is example data</span><span>in use on <a href="https://lirah.dev">lirah.dev</a></span><span><a href="https://github.com/emdmed/calibrated">github</a> · made by <a href="https://mylatestwork.dev">emdmed</a></span></footer>
+  <footer class="cal-foot"><span>calibrated · 2026 · every number on this page is example data</span><span>in use on <a href="https://lirah.dev">lirah.dev</a></span><span><a href="https://github.com/emdmed/calibrated">github</a> · made by <a href="https://mylatestwork.dev">emdmed</a></span></footer>
 </main>
 <script src="../skills/calibrated-figures/assets/calibrated-figures.js"></script>
 <script src="../skills/calibrated-figures/assets/calibrated-recipes.js"></script>
@@ -758,69 +404,12 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
       { name: 'build', end: 5, label: '5 wk' },
       { name: 'content', end: 6.5, label: '6.5 wk', live: true, box: ['running', 'task 12 of 15'] },
     ] }],
-    budget: ['budget', { n: 2, title: 'ad spend · spring campaign · 30 days', max: 1000, step: 50, every: 4, used: 612, at: 'day 19', pace: 900,
-      fmt: (v) => '€' + Math.round(v) + 'k', alerts: [{ v: 800, label: 'alert 80%' }, { v: 950, label: '95%' }], paceLabel: ['at this pace by day 30', '≈ €900k · 80% on day 25'] }],
-    lanes: ['lanes', { n: 3, title: 'channels · days running', max: 20, unit: 'd', step: 1, every: 5, w: 520, labelW: 64, lanes: [
-      { name: 'search', end: 12, label: '12 days', box: ['€214k', 'done'] },
-      { name: 'social', end: 16, label: '16 days', box: ['€268k', 'done'] },
-      { name: 'email', end: 19, label: '19 days', live: true, box: ['running', '€130k so far'] },
-    ] }],
-    loop: ['loop', { n: 4, w: 460, title: 'support · ticket cycle', center: '14 open', stations: [
-      { name: 'received', cmd: 'auto-reply', state: 'done' },
-      { name: 'triaged', cmd: 'tag + assign', state: 'done' },
-      { name: 'working', cmd: 'agent replies', state: 'live' },
-      { name: 'resolved', cmd: 'customer confirms' },
-    ] }],
-    fan: ['fanout', { n: 5, title: 'support · team · now', root: ['support lead', '14 open'], folded: '+9 resolved today', children: [
-      { task: 'refund request', meta: 'Ana · order 4471', time: '12 min', live: true },
-      { task: 'login problem', meta: 'Ravi · queued', time: 'next' },
-      { task: 'shipping question', meta: 'Mei · resolved', time: '8 min' },
-    ] }],
-    section: ['section', { n: 6, title: 'customer data · access', boundary: { label: 'inside this policy' },
-      regions: [
-        { x: 20, y: 38, w: 360, h: 190, kind: 'hatch', label: 'restricted' },
-        { x: 40, y: 70, w: 230, h: 146, kind: 'clear', label: 'staff tools' },
-        { x: 132, y: 76, kind: 'island', label: 'payments' }, { x: 204, y: 76, kind: 'island', label: 'passwords' },
-        { x: 56, y: 132, w: 196, h: 68, kind: 'strong', label: 'customer records', sub: 'read and write' },
-        { x: 290, y: 132, w: 76, h: 52, kind: 'dotted', label: 'exports', sub: 'temporary' },
-      ],
-      callouts: [
-        { at: [350, 56], l1: 'closed', l2: 'restricted area' },
-        { at: [262, 110], l1: 'open', l2: 'staff tools, records' },
-        { l1: 'locked', l2: 'payments, passwords' },
-        { l1: 'outside', l2: 'batch jobs', live: true },
-      ] }],
   };
-
-  /* ── the eight marks */
-  const marks = [
-    ['Leader + value', () => K.leader([[16, 52], [16, 26], [40, 26]]) + K.box(40, 10, null, 'cached', '≈ 41.4k')],
-    ['Ruler', () => K.ruler(6, 146, 40, 50, 5, 5, (v) => (v ? v + 'k' : '0'))],
-    ['Dimension line', () => K.dim(8, 146, 34, '4m 12s')],
-    ['Detail inset', () => K.rect(8, 10, 10, 4, 'fg', 'none') + K.line(8, 12, 146, 12, 'ed') + K.inset(8, 22, 15, 8, 104, 42, 20) + K.rect(8, 42, 96, 10, 'none', 'ed') + K.rect(9, 43, 66, 8, 'fg', 'none')],
-    ['Hatch', () => K.hatchRect(8, 10, 64, 38) + K.rect(82, 10, 64, 38, 'none', 'fg') + K.t(40, 62, 'closed', 'mu', 'middle') + K.t(114, 62, 'open', 'mu', 'middle')],
-    ['Nodes', () => K.node(16, 30, 'done') + K.node(52, 30, 'todo') + K.node(88, 30, 'merge') + K.node(126, 30, 'live') + K.t(16, 56, 'done', 'fa', 'middle') + K.t(52, 56, 'next', 'fa', 'middle') + K.t(88, 56, 'merge', 'fa', 'middle') + K.t(126, 56, 'live', 'lv', 'middle')],
-    ['Numbered step', () => K.node(12, 30, 'todo') + K.cmd(26, 34, '1', 'send invoice')],
-    ['FIG. label', () => `<g transform="translate(6 24)">${K.fig(7, 'network')}</g>` + K.centre(6, 46, 150, 46)],
-  ];
-
-  /* ── motion sheet: a release train to step through, and storage that changes size */
-  let train = { n: 7, w: 470, title: 'release train · v2.4', center: (lap) => `train ${lap} of 9`, at: 1, lap: 4, laps: 9, stations: [
-    { name: 'build', cmd: 'make release' },
-    { name: 'test', cmd: 'make test-e2e' },
-    { name: 'stage', cmd: 'deploy staging' },
-    { name: 'ship', cmd: 'deploy prod --canary' },
-  ] };
-  let sizes = { n: 8, title: 'storage · bucket assets', max: 1e12, zoomMax: 5e10, factor: 20,
-    fmt: (v) => (v >= 1e12 ? v / 1e12 + ' TB' : Math.round(v / 1e9 * 10) / 10 + ' GB'),
-    parts: [{ label: 'originals', value: 41.4e9, ink: 'fg' }, { label: 'thumbnails', value: 3.1e9, ink: 'mu' }, { label: 'uploads', value: 1.5e9, ink: 'lv' }],
-    plate: ['DEDUP SAVED', '18% · 9.1 GB'] };
 
   /* a figure replays when it comes into view (or at once if it already is) */
   const show = (id) => { const [r, d] = D[id]; play('#f-' + id, R[r], d); };
   function drawAll() {
     Object.keys(D).forEach(show);
-    play('#f-train', R.loop, train); play('#f-measured', R.measured, sizes);
     /* pricing: every plan keeps its name and price on the ruler; the one most people pick is lit */
     const px = (v) => 12 + v / 80 * 276, plans = [['basic', 9], ['team', 29, true], ['business', 79]];
     Calibrated.draw('#f-plans', K.ruler(12, 288, 62, 80, 5, 4, (v) => '€' + v) + plans.map(([n, v, live], i) => {
@@ -828,11 +417,8 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
       return K.leader([[x, 62], [x, 46]], true) + K.box(bx, 14, null, n, '€' + v + ' / mo', live ? 'lv' : 'fg', live ? 'lv' : 'ed')
         + (live ? K.t(bx, 8, 'most picked', 'lv') : '');
     }).join(''), 'Plans on one price ruler: Basic €9, Team €29 (most picked), Business €79 a month.');
-    $('#marks').innerHTML = marks.map(([h, f]) => `<div class="cal-spec">${Calibrated.svg(156, 70, f(), h)}<h4>${h}</h4></div>`).join('');
     if (Calibrated.counts) Calibrated.counts();
   }
-  const t0 = Date.now();
-  $$('cal-span[data-live]').forEach((s, i) => s.setAttribute('start', t0 - (i ? 431000 : 278000)));
   Calibrated.ready(drawAll);
 
   /* ── Plain / Calibrated: the switch flips every example; clicking a plain example calibrates just that one */
@@ -884,36 +470,12 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
     $$('button[data-view]').forEach((b) => b.addEventListener('click', () => { io.disconnect(); plates.forEach((ba) => clearTimeout(ba._auto)); }));
   }
 
-  /* ── looks: re-seed every example and swap its headline face */
-  const FIN = [
-    ['film', 'Film', 'Ink on paper panels, amber lamp', { '--bg': '#f4f2ec', '--fg': '#262b2e', '--muted': '#646b68', '--title': '#15191b', '--live': '#9c6a06', '--ok': '#3b7449', '--fault': '#b5402e', '--shade': '#6f746a', '--desk-depth': '9%', 'color-scheme': 'light' }],
-    ['night', 'Night', 'Warm ink on slate, amber lamp', { '--bg': '#1b2225', '--fg': '#e5e0d3', '--muted': '#949c97', '--title': '#eef0ec', '--live': '#dcb662', '--ok': '#b2d49c', '--fault': '#e3735f', '--shade': '#000', '--desk-depth': '24%', 'color-scheme': 'dark' }],
-    ['blueprint', 'Blueprint', 'Deep blue, pale ink, yellow lamp · Barlow Condensed', { '--bg': '#0f2a44', '--fg': '#dbeaf5', '--muted': '#9db4c8', '--title': '#ffffff', '--live': '#f2c14e', '--ok': '#6fd39a', '--fault': '#ff8070', '--shade': '#000', '--desk-depth': '24%', 'color-scheme': 'dark', '--font-display': '"Barlow Condensed", "Arial Narrow", sans-serif', '--display-case': 'none', '--display-weight': '600', '--track-title': '0' }],
-    ['forest', 'Forest', 'Pine ink, olive lamp · Space Grotesk', { '--font-display': '"Space Grotesk", "Helvetica Neue", sans-serif', '--display-case': 'none', '--display-weight': '600', '--track-title': '-.01em', '--bg': '#f2f5ef', '--fg': '#1d3326', '--muted': '#55685a', '--title': '#12241a', '--live': '#5a7414', '--ok': '#2b7a46', '--fault': '#b8432f', '--shade': '#4d5a4f', '--desk-depth': '9%', 'color-scheme': 'light' }],
-    ['steel', 'Steel', 'Cool grey, orange lamp · Archivo wide caps', { '--font-display': '"Archivo", "Helvetica Neue", sans-serif', '--display-weight': '600', '--track-title': '.04em', '--bg': '#f1f2f4', '--fg': '#1b1d22', '--muted': '#5a5f69', '--title': '#0d0e11', '--live': '#b5530c', '--ok': '#2c7a4b', '--fault': '#c22f6b', '--shade': '#5c616b', '--desk-depth': '9%', 'color-scheme': 'light' }],
-    ['plum', 'Plum', 'Dark plum, pink lamp · Chivo bold caps', { '--font-display': '"Chivo", "Helvetica Neue", sans-serif', '--display-weight': '700', '--track-title': '.05em', '--bg': '#1d1522', '--fg': '#f0e7f3', '--muted': '#b3a2ba', '--title': '#ffffff', '--live': '#f5a3d6', '--ok': '#86d4a2', '--fault': '#ff7f6e', '--shade': '#000', '--desk-depth': '24%', 'color-scheme': 'dark' }],
-  ];
-  FIN.forEach((f) => { if (!f[4]) f[4] = [f[3]['--bg'], f[3]['--fg'], f[3]['--live']]; });
-  const row = $('#finishes-row');
-  row.innerHTML = FIN.map(([id, name, sub, , c]) => `<button class="cal-btn" type="button" data-fin="${id}" aria-pressed="false" title="${sub}"><span class="chip" aria-hidden="true"><i style="background:${c[0]}"></i><i style="background:${c[1]}"></i><i style="background:${c[2]}"></i></span>${name}</button>`).join('');
-  let finish = null;
-  const KEYS = ['--bg', '--fg', '--muted', '--title', '--live', '--ok', '--fault', '--shade', '--desk-depth', 'color-scheme', '--font-display', '--display-case', '--display-weight', '--track-title'];
-  function applyFinish(id) {
-    finish = id;
-    const f = FIN.find((x) => x[0] === id), vars = f && f[3];
-    $$('.ba .art.cal-theme').forEach((el) => { KEYS.forEach((k) => el.style.removeProperty(k)); if (vars) Object.entries(vars).forEach(([k, v]) => el.style.setProperty(k, v)); });
-    $$('[data-fin]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.fin === id)));
-    Calibrated.redraw && Calibrated.redraw();
-  }
-  row.addEventListener('click', (e) => { const b = e.target.closest('[data-fin]'); if (b) applyFinish(b.dataset.fin); });
-
-  /* ── theme: page and the default finish switch together */
+  /* ── theme */
   const themeBtn = $('#theme');
   const setTheme = (t) => {
     html.dataset.theme = t;
     themeBtn.setAttribute('aria-label', t === 'night' ? 'Switch to light theme' : 'Switch to dark theme');
     try { localStorage.setItem('cal-cat-theme', t); } catch {}
-    if (!finish || finish === 'film' || finish === 'night') applyFinish(t === 'night' ? 'night' : 'film');
   };
   setTheme(html.dataset.theme);
   themeBtn.addEventListener('click', () => setTheme(html.dataset.theme === 'night' ? 'film' : 'night'));
@@ -932,11 +494,6 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
     tally();
   }));
 
-  /* ── app screen: save reports with a toast; menu items toast; the reset dialog reports its choice */
-  $('#save-limits').addEventListener('click', () => Calibrated.toast(`Limits saved · ${$('#lim').value} a month`, { ink: 'ok', action: 'undo', onAction: () => Calibrated.toast('Limits restored') }));
-  $$('#usage-menu [data-toast]').forEach((b) => b.addEventListener('click', () => Calibrated.toast(b.dataset.toast, { ink: 'ok' })));
-  $('#reset-usage').addEventListener('close', (e) => { if (e.target.returnValue === 'reset') Calibrated.toast('Usage reset · messages at 0', { ink: 'ok' }); });
-
   /* ── a note pane past its limit swaps its hint for an error that says how much to cut */
   $$('.cal-term[data-max]').forEach((t) => {
     const hint = t.parentElement.querySelector('.hint'); if (!hint) return;
@@ -948,65 +505,10 @@ html[data-theme="night"] .plain { --p-bg: #1c1917; --p-card: #262321; --p-line: 
     });
   });
 
-  /* ── form: the steps follow the fieldset being filled; send lights step 04 */
-  const rf = $('#rf'), rfChips = $('#rf .cal-chips'), rfChipsWas = rfChips.innerHTML, rfSteps = $$('#rf-steps li'), rfBadge = $('#rf-badge'), rfSend = $('#rf-send');
-  const markStep = (n) => rfSteps.forEach((li, i) => {
-    li.classList.toggle('done', i + 1 < n);
-    if (i + 1 === n) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current');
-  });
-  rf.addEventListener('focusin', (e) => { const fs = e.target.closest('fieldset[data-step]'); if (fs && !rf.inert) markStep(+fs.dataset.step); });
-  const setBadge = (ink, mark, word) => { rfBadge.dataset.ink = ink; rfBadge.innerHTML = mark + word; if (!ink) delete rfBadge.dataset.ink; };
-  rfSend.addEventListener('click', () => {
-    const amt = $('#rf-amt');
-    if (!(parseInt(amt.value.replace(/\D/g, ''), 10) > 0)) { amt.setAttribute('aria-invalid', 'true'); amt.focus(); return; }
-    amt.removeAttribute('aria-invalid');
-    markStep(4);
-    rfSend.disabled = true;
-    rfSend.innerHTML = 'sending <span class="cal-wait" aria-hidden="true"><i></i><i></i><i></i><i></i></span>';
-    setTimeout(() => {
-      rfSend.textContent = 'sent';
-      rfSteps.forEach((li) => { li.classList.add('done'); li.removeAttribute('aria-current'); });
-      setBadge('ok', '', '✓ sent to a lead');
-      Calibrated.toast(`Refund of €${amt.value} sent for approval · order 4471`, { ink: 'ok' });
-    }, 1400);
-  });
-  $('#rf-reset').addEventListener('click', () => {
-    rf.reset(); rfChips.innerHTML = rfChipsWas; $('#rf-files').innerHTML = '<div class="file"><span>box-corner.jpg</span><span class="lg mut">2.1 MB</span></div>';
-    markStep(2); setBadge('', '<span class="cal-dot"></span>', 'draft');
-    rfSend.disabled = false; rfSend.textContent = 'send for approval';
-    Calibrated.controls(rf);
-  });
-
-  /* ── motion: new values for every instrument; step the train; resize the bucket */
-  const rnd = (a, b) => Math.round(a + Math.random() * (b - a));
-  const STEPS = ['build', 'lint', 'unit tests', 'e2e', 'stage', 'smoke', 'migrate db', 'canary', 'ship', 'verify'];
-  const NEXT = {
-    'cal-meter': (el) => el.setAttribute('value', rnd(40000, 960000)),
-    'cal-progress': (el) => { const d = rnd(1, 9); el.setAttribute('done', d); el.setAttribute('live', d + 1); el.setAttribute('live-label', `${d + 1} · ${STEPS[d]}`); el.setAttribute('done-label', `${d} done`); },
-    'cal-ruler': (el) => el.setAttribute('value', rnd(60, 480)),
-    'cal-position': (el) => el.setAttribute('index', rnd(1, 12)),
-    'cal-diff': (el) => { el.setAttribute('added', rnd(12, 3200)); el.setAttribute('removed', rnd(0, 900)); },
-  };
-  $('#shuffle').addEventListener('click', () => $$('#instruments > div > *:last-child').forEach((el) => NEXT[el.localName] && NEXT[el.localName](el)));
-  const backBtn = $('#loop-back'), nextBtn = $('#loop-next');
-  const syncTrain = () => { backBtn.disabled = !R.loop.step(train, -1); nextBtn.disabled = !R.loop.step(train, 1); };
-  const stepTrain = (dir) => {
-    const next = R.loop.step(train, dir);
-    if (!next) return;
-    train = { ...next, from: undefined, lapFrom: undefined, dir: undefined };
-    play('#f-train', R.loop, next); syncTrain();
-  };
-  backBtn.addEventListener('click', () => stepTrain(-1));
-  nextBtn.addEventListener('click', () => stepTrain(1));
-  syncTrain();
-  const RANGE = [[8, 44], [1, 4], [0.3, 2]];   /* GB ×10, per part */
-  $('#measure').addEventListener('click', () => {
-    const old = sizes;
-    sizes = { ...old, parts: old.parts.map((p, i) => ({ ...p, value: rnd(RANGE[i][0] * 10, RANGE[i][1] * 10) * 1e8 })) };
-    const saved = Math.round(sizes.parts.reduce((a, p) => a + p.value, 0) * 0.2 / 1e8) / 10;
-    sizes.plate = ['DEDUP SAVED', `≈ 20% · ${saved} GB`];
-    play('#f-measured', R.measured, { ...sizes, prev: old.parts.map((p) => p.value) });
-  });
+  /* ── the bar takes a hairline once the page scrolls under it */
+  const top = $('.top');
+  const onScroll = () => top.classList.toggle('scrolled', scrollY > 8);
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
 
   /* ── copy and share */
   const copy = async (btn, text) => {

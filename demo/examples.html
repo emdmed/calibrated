@@ -11,13 +11,13 @@
 <link rel="stylesheet" href="../skills/calibrated-tokens/assets/calibrated.css">
 <link rel="stylesheet" href="../skills/calibrated-components/assets/calibrated-components.css">
 <style>
-/* The site chrome matches the catalog (index.html). Everything inside .page is a
+/* The site chrome matches the home page (index.html). Everything inside .page is a
    finished page as Claude would hand it back: panels on the desk, kit parts only. */
 html { scroll-behavior: smooth; scroll-padding-top: 76px; }
 html, body { background: var(--gutter); }
 .top { position: sticky; top: 0; z-index: 20; background: var(--gutter); }
 @media (max-width: 640px) { html { scroll-padding-top: 104px; } }
-.top .cal-mast { padding: 12px 0 10px; }
+.top .cal-mast { padding: 12px 0 10px; border-bottom: 0; }
 .top .word.ruled { font-size: 20px; }
 .top a.word { text-decoration: none; }
 .cal-btn svg { width: 13px; height: 13px; vertical-align: -2px; }
@@ -33,23 +33,17 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
 
 /* the index of examples in the intro */
 .cal-intro { align-items: start; }
-.cal-intro .lead p { margin-top: 18px; max-width: 58ch; }
-.toc { width: 100%; }
-.toc a { text-decoration: none; }
-.toc a:hover { color: var(--live); }
-.toc td:nth-child(3) { color: var(--muted); font-size: 12px; }
 
-/* the brief: what was asked, what was pasted, what it is built from */
-.brief { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px 48px; margin-bottom: 18px; align-items: start; }
+
 .brief .ask { display: flex; gap: 10px 12px; align-items: baseline; flex-wrap: wrap; color: var(--legend); }
 .brief .ask q { quotes: "“" "”"; flex: 1 1 30ch; }
-.brief .data { margin-top: 10px; font-size: 12.5px; color: var(--muted); max-width: 70ch; }
+.brief .data { margin-top: 0; font-size: 12.5px; color: var(--muted); max-width: 70ch; }
 .brief .data b { font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--key); font-weight: 400; margin-right: 6px; }
 .brief .cal-kv { border-top: 0; padding-top: 0; }
 .brief .cal-kv code { white-space: nowrap; }
 
 /* a finished page: the desk, and the page's own wrap inside it */
-/* the site sits on the desk like the catalog; each finished page is a sheet set into it:
+/* the site sits on the desk like the home page; each finished page is a sheet set into it:
    a deeper desk tone inside a hairline frame, so it reads as one whole page */
 .page.cal-theme { --gutter: color-mix(in srgb, var(--bg), var(--shade) calc(var(--desk-depth, 24%) + 9%)); background: var(--gutter); border: var(--line-thin) solid var(--edge-strong); padding: clamp(6px, 2vw, 22px) clamp(12px, 2.6vw, 34px) 4px; overflow: hidden; }
 .page .cal-intro { padding-top: clamp(20px, 2.6vw, 32px); }
@@ -60,7 +54,7 @@ html[data-theme="night"] .i-sun, html:not([data-theme="night"]) .i-moon { displa
 .page .cal-card + .cal-card { margin-top: var(--gap); }
 
 /* examples: a chapter break well over twice the gap between a page's own sections */
-main > .cal-sec { margin-top: clamp(72px, 9vw, 128px); }
+main > .cal-sec { margin-top: clamp(120px, 14vw, 200px); }
 main > .cal-sec > .cal-sec-h { margin-bottom: 26px; }
 @media (min-width: 641px) { main > .cal-sec > .cal-sec-h b { font-size: 13px; } }
 main > .cal-sec > .brief { margin-bottom: 26px; }
@@ -137,12 +131,67 @@ html:not(.looks-off) .page[data-look="supplier"] { --bg: #f6f4ef; --fg: #2a2722;
 html:not(.looks-off)[data-theme="night"] .page[data-look="supplier"] { --bg: #1e1d1a; --fg: #e9e5dc; --live: #8fb8e0; }
 html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3, .word) { font-stretch: 118%; }
 
-@media (max-width: 1100px) { .brief { grid-template-columns: 1fr; } }
+/* extras: motion and parts */
+.motion { padding: clamp(20px, 2.6vw, 36px); }
+.motion h2.hd { font-family: var(--font-display); font-weight: var(--display-weight); letter-spacing: var(--track-title); text-transform: var(--display-case); color: var(--title); font-size: clamp(20px, 2vw, 26px); line-height: 1.2; margin: 0 0 24px; max-width: 32ch; }
+.motion h2.hd .live { color: var(--live); }
+.motion .motion-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 30px 56px; }
+.motion .motion-grid > div { min-width: 0; overflow-x: auto; }
+.motion .motion-figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 30px 56px; align-items: start; }
+.motion .motion-figs > div { min-width: 0; }
+.motion .mt { margin-top: 26px; padding-top: 24px; border-top: var(--line-thin) solid var(--edge); }
+.motion .cal-figure { border: 0; background: none; display: block; overflow-x: auto; }
+.motion .cal-figure > figcaption { display: none; }
+.motion .btns, .motion .ctl { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 22px; }
+.motion .ctl { margin-top: 8px; }
+.motion .cal-btn { white-space: nowrap; }
+main > .cal-sec > .ask { margin-top: 18px; display: flex; gap: 10px 12px; align-items: baseline; flex-wrap: wrap; color: var(--legend); }
+main > .cal-sec > .ask q { quotes: "“" "”"; }
+.parts { --cols: 3; }
+#marks, #controls { --cols: 4; }
+.parts .cal-spec, #marks .cal-spec, #controls .cal-spec { padding: 18px 20px 20px; min-height: 0; }
+#marks .cal-spec svg { max-width: 180px; }
+.parts .cal-spec > :first-child { min-height: 110px; display: grid; place-items: center start; overflow-x: auto; }
+#controls .cal-spec > :first-child { min-height: 96px; display: grid; align-content: center; gap: 10px; min-width: 0; }
+#controls .row { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+#separators .seps { display: grid; align-content: center; min-height: 64px; }
+.marks-h { margin: 64px 0 22px; }
+@media (max-width: 1100px) { .parts, #marks, #controls { --cols: 2; } }
+@media (max-width: 520px) { .parts, #marks, #controls { --cols: 1; } }
+
+/* ── minimal shell, as on the home page */
+.top.scrolled .cal-mast { border-bottom: var(--line-thin) solid var(--edge); }
+.hero { padding: clamp(72px, 12vw, 168px) 0 0; max-width: 860px; }
+.hero h1 { font-family: var(--font-display); font-weight: var(--display-weight); text-transform: var(--display-case); color: var(--title);
+  font-size: clamp(32px, 5vw, 58px); line-height: 1.08; letter-spacing: .01em; text-wrap: balance; }
+.hero .lede { margin-top: 28px; max-width: 56ch; font-size: 16px; line-height: 1.65; color: var(--legend); }
+.view-row { display: flex; gap: 12px 20px; align-items: center; flex-wrap: wrap; margin-top: 32px; }
+.view-row .mut { font-size: 13px; }
+.looks-sw { margin-left: 0; }
+.index { list-style: none; margin-top: 56px; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px 48px; max-width: 760px; }
+.index li { display: flex; flex-direction: column; gap: 2px; }
+.index a { color: var(--fg); text-decoration: none; }
+.index a:hover { color: var(--live); }
+.index span { font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--key); }
+main > .cal-sec > .cal-sec-h { border-bottom: 0; }
+.brief { display: grid; gap: 10px; margin-bottom: 32px; max-width: 900px; }
+.made > summary { cursor: pointer; width: max-content; font: var(--fs-legend) var(--font-legend); letter-spacing: var(--track-legend); text-transform: uppercase; color: var(--key); list-style: none; }
+.made > summary::-webkit-details-marker { display: none; }
+.made > summary::before { content: "+ "; }
+.made[open] > summary::before { content: "− "; }
+.made > summary:hover, .made > summary:focus-visible { color: var(--fg); }
+.made > :not(summary) { margin-top: 14px; }
+.made .cal-kv { margin: 0; }
+.get { margin-top: clamp(120px, 16vw, 220px); display: grid; gap: 20px; max-width: 640px; }
+.get h2 { font-family: var(--font-display); font-weight: var(--display-weight); text-transform: var(--display-case); color: var(--title); font-size: clamp(22px, 2.6vw, 30px); line-height: 1.2; }
+.get p { color: var(--legend); max-width: 56ch; }
+.get .acts { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+main > .cal-foot { margin-top: clamp(96px, 12vw, 160px); }
+
 @media (max-width: 820px) { .app { grid-template-columns: 1fr; } }
 @media (max-width: 640px) {
   .top .cal-caption, .top .gh span { display: none; }
   .top .cal-mast { gap: 10px; }
-  .toc th:nth-child(3), .toc td:nth-child(3) { display: none; }
 }
 @media (max-width: 520px) { .cal-steps li { font-size: 10px; letter-spacing: .02em; padding-right: 4px; } }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
@@ -168,46 +217,40 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
   <header class="cal-mast">
     <svg class="cal-mark" aria-hidden="true"><use href="#cal-mark"/></svg>
     <a class="word ruled" href="index.html">Calibrated</a>
-    <span class="cal-caption lg">examples · finished pages</span>
     <span class="sp"></span>
     <span class="btn-pair" role="group" aria-label="Weight"><button class="cal-btn" type="button" data-weight-set="soft" aria-pressed="true">soft</button><button class="cal-btn" type="button" data-weight-set="strong" aria-pressed="false">strong</button></span>
-    <nav class="nav" aria-label="Site"><a class="cal-btn quiet" href="index.html">catalog</a><a class="cal-btn quiet" href="examples.html" aria-current="page">examples</a><a class="cal-btn quiet" href="reference.html">reference</a></nav>
-    <a class="cal-btn primary" href="index.html#get" style="text-decoration:none">install</a>
+    <nav class="nav" aria-label="Site"><a class="cal-btn quiet" href="index.html">home</a><a class="cal-btn quiet" href="examples.html" aria-current="page">examples</a><a class="cal-btn quiet" href="reference.html">reference</a></nav>
     <a class="gh" href="https://github.com/emdmed/calibrated" aria-label="Calibrated on GitHub"><svg aria-hidden="true"><use href="#i-gh"/></svg><span>github</span></a>
     <button class="cal-btn inline" type="button" id="theme" aria-label="Switch to dark theme"><svg class="i-sun" viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="3.4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9 1.5v2M9 14.5v2M1.5 9h2M14.5 9h2M3.7 3.7l1.4 1.4M12.9 12.9l1.4 1.4M3.7 14.3l1.4-1.4M12.9 5.1l1.4-1.4" stroke="currentColor" stroke-width="1.5"/></svg><svg class="i-moon" viewBox="0 0 18 18" aria-hidden="true"><path d="M14.8 11.2A6.3 6.3 0 0 1 6.8 3.2a6.3 6.3 0 1 0 8 8z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>
   </header>
 </div></div>
 
 <main class="wrap">
-  <section class="cal-intro">
-    <div class="lead">
-      <h1>Six finished pages, start to end</h1>
-      <p>The catalog shows one drawing per page type. These are whole pages: the kind of report, review board, explainer, spec sheet, app screen and form a team would share. Each starts with the request that made it and the numbers pasted with it, and lists the skill and parts it is built from.</p>
-      <p>Each page also chooses its own look from its subject: the palette, the headline face, the frame and the spacing. The drawings follow the same rules on every page. <span class="btn-pair looks-sw" role="group" aria-label="Looks"><button class="cal-btn" type="button" data-looks="on" aria-pressed="true">chosen looks</button><button class="cal-btn" type="button" data-looks="off" aria-pressed="false">all default</button></span></p>
-      <p class="mut">All figures and instruments are live. Buttons and forms work. Every number is example data. Switch <b>soft</b> / <b>strong</b> at the top to see every page in either weight.</p>
-    </div>
-    <table class="cal-table toc">
-      <thead><tr><th>no</th><th>page</th><th>type</th></tr></thead>
-      <tbody>
-        <tr><td>01</td><td><a href="#ops">Platform · weekly ops report</a></td><td>status report</td></tr>
-        <tr><td>02</td><td><a href="#release">Release 2.4 · go / no-go</a></td><td>review board</td></tr>
-        <tr><td>03</td><td><a href="#upload">How a photo upload works</a></td><td>explainer</td></tr>
-        <tr><td>04</td><td><a href="#api">Orders API · v3</a></td><td>spec sheet</td></tr>
-        <tr><td>05</td><td><a href="#app">Workspace settings, in your brand</a></td><td>app screen</td></tr>
-        <tr><td>06</td><td><a href="#supplier">New supplier sign-up</a></td><td>form in steps</td></tr>
-      </tbody>
-    </table>
+  <section class="hero">
+    <h1>Six finished pages, start to end</h1>
+    <p class="lede">A report, a review board, an explainer, a spec sheet, an app screen and a form, each with the request that made it. Every page takes its look from its subject. The drawings follow the same rules everywhere.</p>
+    <div class="view-row"><span class="btn-pair looks-sw" role="group" aria-label="Looks"><button class="cal-btn" type="button" data-looks="on" aria-pressed="true">chosen looks</button><button class="cal-btn" type="button" data-looks="off" aria-pressed="false">all default</button></span><span class="mut">Everything is live. Every number is example data.</span></div>
+    <ol class="index">
+      <li><a href="#ops">Platform · weekly ops report</a><span>status report</span></li>
+      <li><a href="#release">Release 2.4 · go / no-go</a><span>review board</span></li>
+      <li><a href="#upload">How a photo upload works</a><span>explainer</span></li>
+      <li><a href="#api">Orders API · v3</a><span>spec sheet</span></li>
+      <li><a href="#app">Workspace settings, in your brand</a><span>app screen</span></li>
+      <li><a href="#supplier">New supplier sign-up</a><span>form in steps</span></li>
+      <li><a href="#motion">Motion</a><span>instruments moving</span></li>
+      <li><a href="#parts">Parts</a><span>marks, controls, rules</span></li>
+    </ol>
   </section>
 
   <!-- ════ 1 · status report ════ -->
   <section class="cal-sec" id="ops">
-    <div class="cal-sec-h"><b>1 · Weekly ops report</b><span>status report · instruments, budget, lanes, roll-up</span><span>example 1/6</span></div>
+    <div class="cal-sec-h"><b>Weekly ops report</b><span>status report · instruments, budget, lanes, roll-up</span></div>
     <div class="brief">
-      <div>
-        <p class="ask"><span class="cal-legend">ask claude</span><q>Make this week's platform ops report as a Calibrated artifact. Lead with what needs attention.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+      <p class="ask"><span class="cal-legend">ask claude</span><q>Make this week's platform ops report as a Calibrated artifact. Lead with what needs attention.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+      <details class="made"><summary>how it's made</summary>
         <p class="data"><b>pasted with it</b>error budget 612 of 1000 min on day 19 · CI 41.2k of 50k min · release 2.14 canary: 4 of 6 regions, ap-south rolling · this week's 4 deploys with diffs</p>
-      </div>
-      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>budget</code> · <code>lanes</code></dd><dt>instruments</dt><dd><code>&lt;cal-meter&gt;</code> · <code>&lt;cal-progress&gt;</code> · <code>&lt;cal-durations&gt;</code> · <code>&lt;cal-diff&gt;</code></dd><dt>parts</dt><dd>mast · intro · sections · counts · table · foot</dd><dt>look</dt><dd>control room: cool grey, orange lamp · Chivo bold caps</dd></dl>
+        <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>budget</code> · <code>lanes</code></dd><dt>instruments</dt><dd><code>&lt;cal-meter&gt;</code> · <code>&lt;cal-progress&gt;</code> · <code>&lt;cal-durations&gt;</code> · <code>&lt;cal-diff&gt;</code></dd><dt>parts</dt><dd>mast · intro · sections · counts · table · foot</dd><dt>look</dt><dd>control room: cool grey, orange lamp · Chivo bold caps</dd></dl>
+      </details>
     </div>
     <div class="page cal-theme" data-look="ops" data-density="full">
       <header class="cal-mast">
@@ -223,7 +266,7 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
       </section>
 
       <section class="cal-sec">
-        <div class="cal-sec-h"><b>1 · Now</b><span>limits and what is running</span><span>sheet 1/3</span></div>
+        <div class="cal-sec-h"><b>Now</b><span>limits and what is running</span><span>sheet 1/3</span></div>
         <div class="cal-panel now">
           <div><div class="cal-block-h">error budget · 30 days</div><cal-meter value="612" max="1000" warn="800" label="budget used" format="raw" unit=" min" width="320"></cal-meter></div>
           <div><div class="cal-block-h">ci minutes · cycle to 10 nov</div><cal-meter value="41200" max="50000" warn="40000" label="ci minutes" width="320"></cal-meter></div>
@@ -236,7 +279,7 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
       </section>
 
       <section class="cal-sec">
-        <div class="cal-sec-h"><b>2 · Detail</b><span>where the pace lands · the canary per region</span><span>sheet 2/3</span></div>
+        <div class="cal-sec-h"><b>Detail</b><span>where the pace lands · the canary per region</span><span>sheet 2/3</span></div>
         <div class="figs">
           <figure class="cal-figure"><svg id="f-ops-budget"></svg><figcaption><b>Budget</b>Minutes used, both alerts, and where this week's pace lands on day 30.</figcaption></figure>
           <figure class="cal-figure"><svg id="f-ops-lanes"></svg><figcaption><b>Canary</b>Minutes per region on one ruler. ap-south is still going.</figcaption></figure>
@@ -244,7 +287,7 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
       </section>
 
       <section class="cal-sec">
-        <div class="cal-sec-h"><b>3 · Roll-up</b><span>every deploy, a week per page</span><span>sheet 3/3</span></div>
+        <div class="cal-sec-h"><b>Roll-up</b><span>every deploy, a week per page</span><span>sheet 3/3</span></div>
         <table class="cal-table" id="ops-roll">
           <thead><tr><th>no</th><th>service</th><th>change</th><th>diff</th><th class="num">ci min</th><th>status</th></tr></thead>
           <tbody>
@@ -262,13 +305,13 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
 
   <!-- ════ 2 · review board ════ -->
   <section class="cal-sec" id="release">
-    <div class="cal-sec-h"><b>2 · Release go / no-go</b><span>review board · cards, sign-off, revisions</span><span>example 2/6</span></div>
+    <div class="cal-sec-h"><b>Release go / no-go</b><span>review board · cards, sign-off, revisions</span></div>
     <div class="brief">
-      <div>
-        <p class="ask"><span class="cal-legend">ask claude</span><q>Turn the release 2.4 checklist into a Calibrated go / no-go board. One card per gate, with go / hold, and a sign-off I can paste into Slack.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+      <p class="ask"><span class="cal-legend">ask claude</span><q>Turn the release 2.4 checklist into a Calibrated go / no-go board. One card per gate, with go / hold, and a sign-off I can paste into Slack.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+      <details class="made"><summary>how it's made</summary>
         <p class="data"><b>pasted with it</b><code>git log</code> of release/2.4 (5 commits, main 1 ahead) · migration log, 10 steps · the 6 PRs and the services each one touches</p>
-      </div>
-      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>merge</code> · <code>timeline</code> · <code>matrix</code></dd><dt>parts</dt><dd>cards with today / drawn · keep-drop sign-off · revision triangles · note pane · sticky tally</dd><dt>look</dt><dd>the defaults: film / night · Plex Mono caps · desk · cards</dd></dl>
+        <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>merge</code> · <code>timeline</code> · <code>matrix</code></dd><dt>parts</dt><dd>cards with today / drawn · keep-drop sign-off · revision triangles · note pane · sticky tally</dd><dt>look</dt><dd>the defaults: film / night · Plex Mono caps · desk · cards</dd></dl>
+      </details>
     </div>
     <div class="page cal-theme" data-look="release" data-density="full">
       <header class="cal-mast">
@@ -284,7 +327,7 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
       </section>
 
       <section class="cal-sec">
-        <div class="cal-sec-h"><b>1 · Gates</b><span>today · drawn</span><span>sheet 1/3</span></div>
+        <div class="cal-sec-h"><b>Gates</b><span>today · drawn</span><span>sheet 1/3</span></div>
         <article class="cal-card">
           <div class="info">
             <div class="id"><span class="no">01</span>merge plan<span class="end">rev A</span></div>
@@ -327,7 +370,7 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
       </section>
 
       <section class="cal-sec">
-        <div class="cal-sec-h"><b>2 · Revisions</b><span>what changed since the first round</span><span>sheet 2/3</span></div>
+        <div class="cal-sec-h"><b>Revisions</b><span>what changed since the first round</span><span>sheet 2/3</span></div>
         <table class="cal-revs" style="width:100%">
           <thead><tr><th>rev</th><th>change</th><th>date</th></tr></thead>
           <tbody>
@@ -338,7 +381,7 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
       </section>
 
       <section class="cal-sec">
-        <div class="cal-sec-h"><b>3 · Note</b><span>goes out with the sign-off</span><span>sheet 3/3</span></div>
+        <div class="cal-sec-h"><b>Note</b><span>goes out with the sign-off</span><span>sheet 3/3</span></div>
         <div class="cal-field" style="max-width:720px"><label for="rel-note">note for #release</label>
           <div class="cal-term" data-max="280">
             <textarea class="cal-textarea" id="rel-note" spellcheck="false" aria-describedby="rel-note-h">Backfill runs mon 02:00. Tomás is on call until 03:00; ping him before touching orders.</textarea>
@@ -354,13 +397,13 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
 
   <!-- ════ 3 · explainer ════ -->
   <section class="cal-sec" id="upload">
-    <div class="cal-sec-h"><b>3 · How a photo upload works</b><span>explainer · one worked example, measured</span><span>example 3/6</span></div>
+    <div class="cal-sec-h"><b>How a photo upload works</b><span>explainer · one worked example, measured</span></div>
     <div class="brief">
-      <div>
-        <p class="ask"><span class="cal-legend">ask claude</span><q>Explain what happens after a customer taps upload, for the support team, as a Calibrated explainer. Use one real photo as the example.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+      <p class="ask"><span class="cal-legend">ask claude</span><q>Explain what happens after a customer taps upload, for the support team, as a Calibrated explainer. Use one real photo as the example.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+      <details class="made"><summary>how it's made</summary>
         <p class="data"><b>pasted with it</b>trace of one 12 MB photo through the pipeline · the resizer's job list · the account's storage breakdown</p>
-      </div>
-      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>timeline</code> · <code>fanout</code> · <code>measured</code></dd><dt>parts</dt><dd>cards without compare · key/value facts · tiers</dd><dt>look</dt><dd>darkroom: graphite, violet lamp · Space Grotesk · paper · open</dd></dl>
+        <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>timeline</code> · <code>fanout</code> · <code>measured</code></dd><dt>parts</dt><dd>cards without compare · key/value facts · tiers</dd><dt>look</dt><dd>darkroom: graphite, violet lamp · Space Grotesk · paper · open</dd></dl>
+      </details>
     </div>
     <div class="page cal-theme" data-look="upload" data-density="full">
       <header class="cal-mast">
@@ -376,7 +419,7 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
       </section>
 
       <section class="cal-sec">
-        <div class="cal-sec-h"><b>1 · The trip</b><span>how long each step takes</span><span>sheet 1/3</span></div>
+        <div class="cal-sec-h"><b>The trip</b><span>how long each step takes</span><span>sheet 1/3</span></div>
         <article class="cal-card">
           <div class="info">
             <div class="id"><span class="no">01</span>upload pipeline</div>
@@ -389,7 +432,7 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
       </section>
 
       <section class="cal-sec">
-        <div class="cal-sec-h"><b>2 · The work</b><span>one job per size, in parallel</span><span>sheet 2/3</span></div>
+        <div class="cal-sec-h"><b>The work</b><span>one job per size, in parallel</span><span>sheet 2/3</span></div>
         <article class="cal-card">
           <div class="info">
             <div class="id"><span class="no">02</span>resizer</div>
@@ -402,7 +445,7 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
       </section>
 
       <section class="cal-sec">
-        <div class="cal-sec-h"><b>3 · Where it lands</b><span>the customer's storage, and this photo in it</span><span>sheet 3/3</span></div>
+        <div class="cal-sec-h"><b>Where it lands</b><span>the customer's storage, and this photo in it</span><span>sheet 3/3</span></div>
         <article class="cal-card">
           <div class="info">
             <div class="id"><span class="no">03</span>storage</div>
@@ -423,13 +466,13 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
 
   <!-- ════ 4 · spec sheet ════ -->
   <section class="cal-sec" id="api">
-    <div class="cal-sec-h"><b>4 · Orders API · v3</b><span>spec sheet · drawing frame, title block, stamp</span><span>example 4/6</span></div>
+    <div class="cal-sec-h"><b>Orders API · v3</b><span>spec sheet · drawing frame, title block, stamp</span></div>
     <div class="brief">
-      <div>
-        <p class="ask"><span class="cal-legend">ask claude</span><q>Write the spec sheet for Orders API v3 in the Calibrated style, as an engineering drawing with a title block. Partners read this.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+      <p class="ask"><span class="cal-legend">ask claude</span><q>Write the spec sheet for Orders API v3 in the Calibrated style, as an engineering drawing with a title block. Partners read this.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+      <details class="made"><summary>how it's made</summary>
         <p class="data"><b>pasted with it</b>the OpenAPI file · network diagram notes · rate limits and timeouts · key rotation runbook · change log</p>
-      </div>
-      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>section</code> · <code>loop</code></dd><dt>instruments</dt><dd><code>&lt;cal-ruler&gt;</code> · <code>&lt;cal-meter&gt;</code></dd><dt>parts</dt><dd>sheet with zones · title block · stamp · code block · revision table · parameters table</dd><dt>look</dt><dd>blueprint · Barlow Condensed · drawing sheet</dd></dl>
+        <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-artifacts</code></dd><dt>figures</dt><dd><code>section</code> · <code>loop</code></dd><dt>instruments</dt><dd><code>&lt;cal-ruler&gt;</code> · <code>&lt;cal-meter&gt;</code></dd><dt>parts</dt><dd>sheet with zones · title block · stamp · code block · revision table · parameters table</dd><dt>look</dt><dd>blueprint · Barlow Condensed · drawing sheet</dd></dl>
+      </details>
     </div>
     <div class="page cal-theme" data-look="api" data-density="full">
       <div class="cal-sheet" data-zones="8x6">
@@ -446,12 +489,12 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
         </section>
 
         <section class="cal-sec">
-          <div class="cal-sec-h"><b>1 · Boundary</b><span>what a partner can reach · hatched means closed</span><span>sheet 1/4</span></div>
+          <div class="cal-sec-h"><b>Boundary</b><span>what a partner can reach · hatched means closed</span><span>sheet 1/4</span></div>
           <figure class="cal-figure"><svg id="f-api-section"></svg><figcaption><b>Section</b>Inside the API boundary, open and closed.</figcaption></figure>
         </section>
 
         <section class="cal-sec">
-          <div class="cal-sec-h"><b>2 · Limits</b><span>per partner key</span><span>sheet 2/4</span></div>
+          <div class="cal-sec-h"><b>Limits</b><span>per partner key</span><span>sheet 2/4</span></div>
           <div class="cal-panel limits">
             <div><div class="cal-block-h">request timeout</div><cal-ruler min="0" max="30" step="1" every="5" unit="s" value="10" width="300" up></cal-ruler><p>Requests are cut at 10 s. Refunds can take up to 8 s.</p></div>
             <div><div class="cal-block-h">payload</div><cal-ruler min="0" max="10" step="0.5" every="4" unit=" MB" value="2" width="300" up></cal-ruler><p>2 MB per request. Batch creates take up to 100 orders.</p></div>
@@ -460,7 +503,7 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
         </section>
 
         <section class="cal-sec">
-          <div class="cal-sec-h"><b>3 · Key rotation</b><span>every 90 days · the step in progress is lit</span><span>sheet 3/4</span></div>
+          <div class="cal-sec-h"><b>Key rotation</b><span>every 90 days · the step in progress is lit</span><span>sheet 3/4</span></div>
           <div class="row2">
             <figure class="cal-figure"><svg id="f-api-loop"></svg><figcaption><b>Cycle</b>Old keys work for 14 days after a new one is issued.</figcaption></figure>
             <div class="cal-panel" style="padding:16px 18px">
@@ -471,7 +514,7 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
         </section>
 
         <section class="cal-sec">
-          <div class="cal-sec-h"><b>4 · Endpoints</b><span>parameters and status</span><span>sheet 4/4</span></div>
+          <div class="cal-sec-h"><b>Endpoints</b><span>parameters and status</span><span>sheet 4/4</span></div>
           <table class="cal-table">
             <thead><tr><th>no</th><th>method</th><th>path</th><th class="num">limit / min</th><th class="num">timeout</th><th>status</th></tr></thead>
             <tbody>
@@ -505,13 +548,13 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
 
   <!-- ════ 5 · app screen in a brand finish ════ -->
   <section class="cal-sec" id="app">
-    <div class="cal-sec-h"><b>5 · Workspace settings</b><span>app screen · your colours · the form works</span><span>example 5/6</span></div>
+    <div class="cal-sec-h"><b>Workspace settings</b><span>app screen · your colours · the form works</span></div>
     <div class="brief">
-      <div>
-        <p class="ask"><span class="cal-legend">ask claude</span><q>Build the usage and limits screen for our app with the Calibrated components, in our brand: navy page, white ink, cyan lamp.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+      <p class="ask"><span class="cal-legend">ask claude</span><q>Build the usage and limits screen for our app with the Calibrated components, in our brand: navy page, white ink, cyan lamp.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+      <details class="made"><summary>how it's made</summary>
         <p class="data"><b>pasted with it</b>brand colours · the current settings page · the usage API response</p>
-      </div>
-      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-tokens</code> · <code>calibrated-components</code></dd><dt>instruments</dt><dd><code>&lt;cal-meter&gt;</code> · <code>&lt;cal-position&gt;</code> · <code>&lt;cal-durations&gt;</code></dd><dt>parts</dt><dd>tabs with counts · rows · number with units · range · tag input · a field with an error · checkbox · search with an empty state · dialog with radio and date · toasts</dd><dt>theme</dt><dd>three seed colours: <code>--bg</code> <code>--fg</code> <code>--live</code></dd><dt>look</dt><dd>the brand’s colours (pick below) · IBM Plex Sans Condensed</dd></dl>
+        <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-tokens</code> · <code>calibrated-components</code></dd><dt>instruments</dt><dd><code>&lt;cal-meter&gt;</code> · <code>&lt;cal-position&gt;</code> · <code>&lt;cal-durations&gt;</code></dd><dt>parts</dt><dd>tabs with counts · rows · number with units · range · tag input · a field with an error · checkbox · search with an empty state · dialog with radio and date · toasts</dd><dt>theme</dt><dd>three seed colours: <code>--bg</code> <code>--fg</code> <code>--live</code></dd><dt>look</dt><dd>the brand’s colours (pick below) · IBM Plex Sans Condensed</dd></dl>
+      </details>
     </div>
     <div class="finish-row" role="group" aria-label="Brand finish" id="app-fin"></div>
     <div class="page cal-theme" data-look="app" id="app-page" data-density="full" data-mode="app">
@@ -615,13 +658,13 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
 
   <!-- ════ 6 · a form in steps ════ -->
   <section class="cal-sec" id="supplier">
-    <div class="cal-sec-h"><b>6 · New supplier sign-up</b><span>form in steps · every field works</span><span>example 6/6</span></div>
+    <div class="cal-sec-h"><b>New supplier sign-up</b><span>form in steps · every field works</span></div>
     <div class="brief">
-      <div>
-        <p class="ask"><span class="cal-legend">ask claude</span><q>Make the sign-up form for new suppliers as a Calibrated page, in steps: company, documents, terms, then a review before they send it.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+      <p class="ask"><span class="cal-legend">ask claude</span><q>Make the sign-up form for new suppliers as a Calibrated page, in steps: company, documents, terms, then a review before they send it.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+      <details class="made"><summary>how it's made</summary>
         <p class="data"><b>pasted with it</b>the paper form suppliers fill in today · the payment terms we offer · the documents food safety asks for</p>
-      </div>
-      <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-components</code></dd><dt>parts</dt><dd>steps · fields with an error · select · tag input · file drop · radio · date and time · note pane · key/value review · checkbox · stamp · status badge · node row while sending</dd><dt>look</dt><dd>ledger: warm paper, ink-blue lamp · Archivo wide caps</dd></dl>
+        <dl class="cal-kv"><dt>skill</dt><dd><code>calibrated-components</code></dd><dt>parts</dt><dd>steps · fields with an error · select · tag input · file drop · radio · date and time · note pane · key/value review · checkbox · stamp · status badge · node row while sending</dd><dt>look</dt><dd>ledger: warm paper, ink-blue lamp · Archivo wide caps</dd></dl>
+      </details>
     </div>
     <div class="page cal-theme" data-look="supplier" data-density="full" data-mode="app">
       <header class="cal-mast">
@@ -695,14 +738,67 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
     </div>
   </section>
 
-  <section class="cal-sec" id="next">
-    <div class="cal-sec-h"><b>Make your own</b><span>install once, then ask in plain words</span><span>emdmed/calibrated</span></div>
-    <div class="cal-tiers" style="border:0">
-      <div style="padding:0;background:none"><div class="tt">1 · Install</div><p>Paste both lines into Claude Code.</p><div class="cal-code" data-lang="claude code" style="margin:8px 0 10px"><pre><code id="cmd">/plugin marketplace add emdmed/calibrated
-/plugin install calibrated@calibrated</code></pre></div><button class="cal-btn primary" type="button" data-copy-from="#cmd">copy</button></div>
-      <div style="padding:0;background:none"><div class="tt">2 · Ask</div><p>Copy any request above, paste your own numbers after it, and say “in the Calibrated style”.</p></div>
-      <div style="padding:0;background:none"><div class="tt">3 · Look closer</div><p>The catalog flips every page type between plain and calibrated. The reference has every part and its code.</p><p style="margin-top:10px"><a class="cal-btn" href="index.html" style="text-decoration:none">catalog</a> <a class="cal-btn" href="reference.html" style="text-decoration:none">reference</a></p></div>
+  <section class="cal-sec" id="motion">
+    <div class="cal-sec-h"><b>Motion</b><span>numbers glide to their new value · try the buttons</span></div>
+    <div class="page cal-theme motion" data-density="full">
+          <h2 class="hd">When a number changes, the drawing <span class="live">moves</span> to it.</h2>
+          <div class="motion-grid" id="instruments">
+            <div><div class="cal-block-h">requests today</div><cal-meter value="46000" max="1000000" warn="800000" label="requests" width="300"></cal-meter></div>
+            <div><div class="cal-block-h">deploy steps</div><cal-progress done="6" total="10" live="7" live-label="7 · migrate db" done-label="6 done" step="24"></cal-progress></div>
+            <div><div class="cal-block-h">p99 latency</div><cal-ruler min="0" max="500" step="25" every="4" unit="ms" value="212" width="300" up></cal-ruler></div>
+            <div><div class="cal-block-h">canary host</div><cal-position index="3" count="12" label="hosts"></cal-position></div>
+            <div><div class="cal-block-h">release</div><cal-diff added="184" removed="20" label="lines"></cal-diff></div>
+          </div>
+          <div class="btns left"><button class="cal-btn primary" type="button" id="shuffle">new values</button><span class="mut" style="font-size:13px">Each instrument glides from where it is and blinks when it settles.</span></div>
+          <div class="motion-figs mt">
+            <div><figure class="cal-figure"><svg id="f-train"></svg><figcaption><b>Loop</b>Step through the train.</figcaption></figure>
+              <div class="ctl"><button class="cal-btn" type="button" id="loop-back">back</button><button class="cal-btn primary" type="button" id="loop-next">next station</button></div></div>
+            <div><figure class="cal-figure"><svg id="f-measured"></svg><figcaption><b>Measured</b>A long scale and its 20:1 detail.</figcaption></figure>
+              <div class="ctl"><button class="cal-btn primary" type="button" id="measure">new sizes</button></div></div>
+          </div>
     </div>
+    <p class="ask"><span class="cal-legend">ask claude</span><q>Build our deploy dashboard in the Calibrated style, and let the numbers move when they change.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+  </section>
+
+  <section class="cal-sec" id="parts">
+    <div class="cal-sec-h"><b>Parts</b><span>what every page above is built from</span></div>
+    <div class="cal-specimens parts">
+      <div class="cal-spec"><div><cal-meter value="46000" max="1000000" warn="800000" label="requests today" width="280"></cal-meter></div><h4>Meter</h4><p>How full something is, against its limit.</p></div>
+      <div class="cal-spec"><div><cal-progress done="6" total="10" live="7" live-label="7 · review" step="24"></cal-progress></div><h4>Progress</h4><p>How far along a list of steps, and which one is live.</p></div>
+      <div class="cal-spec"><div><cal-position index="3" count="7" label="markets"></cal-position></div><h4>Position</h4><p>Which one of a set you are looking at.</p></div>
+      <div class="cal-spec"><div><cal-durations max="15" unit="m" width="300"><cal-span name="design" value="252"></cal-span><cal-span name="build" value="400"></cal-span><cal-span name="launch" live data-live="278"></cal-span></cal-durations></div><h4>Durations</h4><p>How long things took. The live one keeps ticking.</p></div>
+      <div class="cal-spec"><div><cal-ruler min="0" max="150" step="10" every="5" unit="k" value="94" width="280" up></cal-ruler></div><h4>Ruler</h4><p>Where one value sits on a scale.</p></div>
+      <div class="cal-spec"><div><cal-diff added="184" removed="20" label="edits"></cal-diff></div><h4>Change</h4><p>What was added and what was removed.</p></div>
+    </div>
+    <div class="cal-gl marks-h">the eight marks</div>
+    <div class="cal-specimens" id="marks"></div>
+    <div class="cal-gl marks-h">the controls</div>
+    <div class="cal-specimens" id="controls">
+      <div class="cal-spec"><div><div class="cal-field"><label for="pt-lim">daily limit</label><div class="cal-affixed cal-num"><input class="cal-input" id="pt-lim" inputmode="numeric" value="150 000" data-step="10000"><span class="cal-affix">req / day</span></div></div></div><h4>Number with units</h4><p>Arrow keys step it. Shift steps by ten.</p></div>
+      <div class="cal-spec"><div><div class="cal-field"><label for="pt-reg">region</label><select class="cal-select" id="pt-reg"><option><span class="v">us-east</span></option><option selected><span class="v">eu-west</span></option><option><span class="v">ap-south</span></option></select></div></div><h4>Select</h4><p>A write-in line that opens a ruled list.</p></div>
+      <div class="cal-spec"><div><div class="cal-field"><span class="lbl" id="pt-rg-l">time range</span><div class="cal-detent" role="radiogroup" aria-labelledby="pt-rg-l"><i class="mk" aria-hidden="true"></i><label><input type="radio" name="pt-rg" value="1h"><span>1h</span></label><label><input type="radio" name="pt-rg" value="24h" checked><span>24h</span></label><label><input type="radio" name="pt-rg" value="7d"><span>7d</span></label></div></div></div><h4>Detent</h4><p>A few ordered choices, as ticks on a ruler.</p></div>
+      <div class="cal-spec"><div><div class="cal-field"><label for="pt-at">alert at</label><div class="cal-range" data-unit="%"><output for="pt-at"></output><input type="range" id="pt-at" min="0" max="100" step="5" value="60"><div class="nums"><span>0</span><span>50%</span><span>100%</span></div></div></div></div><h4>Range</h4><p>A slider set on its own scale.</p></div>
+      <div class="cal-spec"><div><label class="cal-switch"><span class="txt">Pause at limit</span><span class="o off">off</span><input type="checkbox" role="switch" checked><span class="o on">on</span></label><label class="cal-check"><input type="checkbox" checked> <span>Email the owner</span></label><label class="cal-radio"><input type="radio" name="pt-ro" checked><span>Canary</span><span class="meta">5% → 100%</span></label></div><h4>Switch, check, radio</h4><p>Square for a box, round for one of many.</p></div>
+      <div class="cal-spec"><div><div class="cal-chips"><span class="chip">payments<button type="button" aria-label="Remove payments">×</button></span><span class="chip">search<button type="button" aria-label="Remove search">×</button></span><input aria-label="Add a team" placeholder="add a team"></div></div><h4>Tags</h4><p>Enter adds one. A repeat lights the one already there.</p></div>
+      <div class="cal-spec"><div><ol class="cal-steps"><li class="done"><span class="s">01</span>source</li><li aria-current="step"><span class="s">02</span>limits</li><li><span class="s">03</span>review</li></ol></div><h4>Steps</h4><p>Where you are in a form of several parts.</p></div>
+      <div class="cal-spec"><div><div class="row"><span class="cal-badge" data-ink="ok">✓ shipped</span><span class="cal-badge" data-ink="fault"><span class="cal-dot fault"></span>failed</span><span class="cal-badge"><span class="cal-dot"></span>queued</span></div><div class="row"><cal-spin size="sm" label="Loading"></cal-spin><span class="cal-scan" role="status" aria-label="Loading"><i></i></span><span class="cal-wait" role="status" aria-label="Loading"><i></i><i></i><i></i><i></i></span></div></div><h4>Status and waiting</h4><p>Boxed words for state. Drawn spinners for the wait.</p></div>
+    </div>
+    <div class="cal-gl marks-h">the separators</div>
+    <div class="cal-specimens" id="separators">
+      <div class="cal-spec"><div class="seps"><hr class="cal-rule" data-space="tight"><hr class="cal-rule" data-line="dashed" data-space="tight"><hr class="cal-rule" data-line="centre" data-space="tight"></div><h4>Rules</h4><p>Solid for the next topic, dashed for an aside, the centre line for two halves.</p></div>
+      <div class="cal-spec"><div class="seps"><div class="cal-rule" role="separator" data-space="tight">or</div><hr class="cal-rule" data-line="break" data-space="tight" aria-label="lines skipped"><div class="cal-rule" role="separator" data-ink="live" data-space="tight">new since 09:00</div></div><h4>Named breaks</h4><p>A word in the line, a jag where lines were left out, the lamp on what's new.</p></div>
+      <div class="cal-spec"><div><section class="cal-zone"><div class="cal-zone-h">billing<span>owner only</span></div><p>Invoices go out on the 1st.</p></section></div><h4>Zone</h4><p>A named group with an edge. Dashed when it isn't decided yet.</p></div>
+      <div class="cal-spec"><div><div class="cal-bracket"><div class="cal-bracket-h">before you ship</div><p>Tests pass.</p><p>Someone is on call.</p></div><ul class="cal-meta" style="margin-top:12px"><li>v2.14.0</li><li>3 regions</li><li>31 oct</li></ul></div><h4>Bracket and facts</h4><p>Lines that belong together. Facts on one line.</p></div>
+    </div>
+    <p class="ask"><span class="cal-legend">ask claude</span><q>Add a Calibrated meter for our API quota: 46 000 of 1 000 000 requests, alert at 80%.</q><button class="cal-btn quiet" type="button" data-copy>copy</button></p>
+  </section>
+
+  <section class="get" id="next">
+    <h2>Make your own</h2>
+    <p>Paste both lines into Claude Code, then copy any request above, add your own numbers and say “in the Calibrated style”.</p>
+    <div class="cal-code" data-lang="claude code"><pre><code id="cmd">/plugin marketplace add emdmed/calibrated
+/plugin install calibrated@calibrated</code></pre></div>
+    <div class="acts"><button class="cal-btn primary" type="button" data-copy-from="#cmd">copy</button><a class="cal-btn quiet" href="index.html">home</a><a class="cal-btn quiet" href="reference.html">reference</a></div>
   </section>
 
   <footer class="cal-foot"><span>calibrated · examples · every number on this page is example data</span><span><a href="https://github.com/emdmed/calibrated">github</a> · made by <a href="https://mylatestwork.dev">emdmed</a></span></footer>
@@ -966,6 +1062,65 @@ html:not(.looks-off) .page[data-look="supplier"] :is(.cal-intro h1, .cal-card h3
     }, 1500);
   });
   spGo(1, false);
+
+  /* ── extras · motion: new values for every instrument; step the train; resize the bucket (example data) */
+  const { K } = Calibrated;
+  const rnd = (a, b) => Math.round(a + Math.random() * (b - a));
+  let train = { n: 7, w: 470, title: 'release train · v2.4', center: (lap) => `train ${lap} of 9`, at: 1, lap: 4, laps: 9, stations: [
+    { name: 'build', cmd: 'make release' }, { name: 'test', cmd: 'make test-e2e' },
+    { name: 'stage', cmd: 'deploy staging' }, { name: 'ship', cmd: 'deploy prod --canary' },
+  ] };
+  let sizes = { n: 8, title: 'storage · bucket assets', max: 1e12, zoomMax: 5e10, factor: 20,
+    fmt: (v) => (v >= 1e12 ? v / 1e12 + ' TB' : Math.round(v / 1e9 * 10) / 10 + ' GB'),
+    parts: [{ label: 'originals', value: 41.4e9, ink: 'fg' }, { label: 'thumbnails', value: 3.1e9, ink: 'mu' }, { label: 'uploads', value: 1.5e9, ink: 'lv' }],
+    plate: ['DEDUP SAVED', '18% · 9.1 GB'] };
+  const marks = [
+    ['Leader + value', () => K.leader([[16, 52], [16, 26], [40, 26]]) + K.box(40, 10, null, 'cached', '≈ 41.4k')],
+    ['Ruler', () => K.ruler(6, 146, 40, 50, 5, 5, (v) => (v ? v + 'k' : '0'))],
+    ['Dimension line', () => K.dim(8, 146, 34, '4m 12s')],
+    ['Detail inset', () => K.rect(8, 10, 10, 4, 'fg', 'none') + K.line(8, 12, 146, 12, 'ed') + K.inset(8, 22, 15, 8, 104, 42, 20) + K.rect(8, 42, 96, 10, 'none', 'ed') + K.rect(9, 43, 66, 8, 'fg', 'none')],
+    ['Hatch', () => K.hatchRect(8, 10, 64, 38) + K.rect(82, 10, 64, 38, 'none', 'fg') + K.t(40, 62, 'closed', 'mu', 'middle') + K.t(114, 62, 'open', 'mu', 'middle')],
+    ['Nodes', () => K.node(16, 30, 'done') + K.node(52, 30, 'todo') + K.node(88, 30, 'merge') + K.node(126, 30, 'live') + K.t(16, 56, 'done', 'fa', 'middle') + K.t(52, 56, 'next', 'fa', 'middle') + K.t(88, 56, 'merge', 'fa', 'middle') + K.t(126, 56, 'live', 'lv', 'middle')],
+    ['Numbered step', () => K.node(12, 30, 'todo') + K.cmd(26, 34, '1', 'send invoice')],
+    ['FIG. label', () => `<g transform="translate(6 24)">${K.fig(7, 'network')}</g>` + K.centre(6, 46, 150, 46)],
+  ];
+  Calibrated.ready(() => {
+    play('#f-train', R.loop, train); play('#f-measured', R.measured, sizes);
+    $('#marks').innerHTML = marks.map(([h, f]) => `<div class="cal-spec">${Calibrated.svg(156, 70, f(), h)}<h4>${h}</h4></div>`).join('');
+  });
+  const STEPS = ['build', 'lint', 'unit tests', 'e2e', 'stage', 'smoke', 'migrate db', 'canary', 'ship', 'verify'];
+  const NEW = {
+    'cal-meter': (el) => el.setAttribute('value', rnd(40000, 960000)),
+    'cal-progress': (el) => { const d = rnd(1, 9); el.setAttribute('done', d); el.setAttribute('live', d + 1); el.setAttribute('live-label', `${d + 1} · ${STEPS[d]}`); el.setAttribute('done-label', `${d} done`); },
+    'cal-ruler': (el) => el.setAttribute('value', rnd(60, 480)),
+    'cal-position': (el) => el.setAttribute('index', rnd(1, 12)),
+    'cal-diff': (el) => { el.setAttribute('added', rnd(12, 3200)); el.setAttribute('removed', rnd(0, 900)); },
+  };
+  $('#shuffle').addEventListener('click', () => $$('#instruments > div > *:last-child').forEach((el) => NEW[el.localName] && NEW[el.localName](el)));
+  const backBtn = $('#loop-back'), nextBtn = $('#loop-next');
+  const syncTrain = () => { backBtn.disabled = !R.loop.step(train, -1); nextBtn.disabled = !R.loop.step(train, 1); };
+  const stepTrain = (dir) => {
+    const next = R.loop.step(train, dir);
+    if (!next) return;
+    train = { ...next, from: undefined, lapFrom: undefined, dir: undefined };
+    play('#f-train', R.loop, next); syncTrain();
+  };
+  backBtn.addEventListener('click', () => stepTrain(-1));
+  nextBtn.addEventListener('click', () => stepTrain(1));
+  syncTrain();
+  const RANGE = [[8, 44], [1, 4], [0.3, 2]];   /* GB ×10, per part */
+  $('#measure').addEventListener('click', () => {
+    const old = sizes;
+    sizes = { ...old, parts: old.parts.map((p, i) => ({ ...p, value: rnd(RANGE[i][0] * 10, RANGE[i][1] * 10) * 1e8 })) };
+    const saved = Math.round(sizes.parts.reduce((a, p) => a + p.value, 0) * 0.2 / 1e8) / 10;
+    sizes.plate = ['DEDUP SAVED', `≈ 20% · ${saved} GB`];
+    play('#f-measured', R.measured, { ...sizes, prev: old.parts.map((p) => p.value) });
+  });
+
+  /* ── the bar takes a hairline once the page scrolls under it */
+  const top = $('.top');
+  const onScroll = () => top.classList.toggle('scrolled', scrollY > 8);
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
 
   /* ── copy */
   const copy = async (btn, text) => {
